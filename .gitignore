@@ -1,0 +1,5 @@
+[global]
+.idea
+bower_components
+backoffice/components
+node_modules
