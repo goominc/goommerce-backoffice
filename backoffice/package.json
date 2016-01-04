@@ -1,0 +1,14 @@
+{
+  "name": "goommerce-backoffice",
+  "version": "0.0.1",
+  "description": "",
+  "author": "Heekyu Kim <heekyu83@gmail.com>",
+  "private": true,
+  "devDependencies": {
+    "del": "^1.2.0",
+    "duo": "^0.15.2",
+    "duo-babel": "w4-sjcho/duo-babel",
+    "gulp": "^3.9.0",
+    "gulp-shell": "^0.4.2"
+  }
+}

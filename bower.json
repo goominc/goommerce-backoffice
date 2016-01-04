@@ -1,0 +1,21 @@
+{
+  "name": "gommerce-backoffice",
+  "authors": [
+    "heekyu <heekyu83@gmail.com>"
+  ],
+  "description": "goommerce-backoffice",
+  "main": "backoffice/main/index.js",
+  "ignore": ["backoffice"],
+  "moduleType": [],
+  "keywords": [
+    "goommerce",
+    "backoffice"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "dependencies": {
+    "angular": "~1.4.8",
+    "angular-ui-router": "~0.2.15"
+  }
+}

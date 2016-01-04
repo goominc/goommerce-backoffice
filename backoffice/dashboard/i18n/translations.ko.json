@@ -1,0 +1,9 @@
+{
+  "dashboard": {
+    "home": "홈",
+    "main": {
+      "title": "대시보드",
+      "subTitle": "판매 현황"
+    }
+  }
+}
