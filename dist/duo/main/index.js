@@ -304,14 +304,12 @@ require('./controllers.js');
 
 var utilModule = angular.module('backoffice.utils', []);
 
-utilModule.provider('boHelper', function () {
-  this.$get = function () {
-    return {
-      getTemplateRoot: function getTemplateRoot() {
-        // TODO configure on build
-        return 'templates/metronic';
-      }
-    };
+utilModule.factory('boDirectives', function () {
+  return {
+    getTemplateRoot: function getTemplateRoot() {
+      // TODO configure on build
+      return 'templates/metronic';
+    }
   };
 });
 
