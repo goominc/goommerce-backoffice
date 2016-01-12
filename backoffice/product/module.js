@@ -27,8 +27,25 @@ productModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/product/main.html',
       controller: 'ProductMainController',
     })
+    .state('product.add', {
+      url: '/add',
+      templateUrl: templateRoot + '/product/edit.html',
+      controller: 'ProductEditController',
+      resolve: {
+        product: () => { return { name: {}, price: {} }; },
+      },
+    })
     .state('product.edit', {
-
+      url: '/edit/:productId',
+      templateUrl: templateRoot + '/product/edit.html',
+      controller: 'ProductEditController',
+      resolve: {
+        product: ($http, $state) => {
+          return $http.get('/api/v1/products/' + $state.params.productId).then((res) => {
+            return res.data;
+          });
+        },
+      },
     });
 });
 

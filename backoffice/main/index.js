@@ -14,10 +14,30 @@ const mainModule = angular.module('backoffice.main', [
   })
   .determinePreferredLanguage();
 
+  $translateProvider
+    .translations('en', require('./i18n/translations.en.json'))
+    .translations('ko', require('./i18n/translations.ko.json'));
+
   // TODO sanitize or escape translation strings for security
   // $translateProvider.useSanitizeValueStrategy('sanitize');
 });
 module.exports = mainModule.name;
+
+// 2015. 01. 05. [heekyu] Use this on seperated server
+/*
+mainModule.config(($httpProvider) => {
+  $httpProvider.interceptors.push(($q) => {
+    return {
+      'request': function(config) {
+        if (config.url && config.url[0] === '/') {
+          config.url = 'http://localhost:8080' + config.url;
+        }
+        return config || $q.when(config);
+      }
+    }
+  });
+});
+*/
 
 mainModule.controller('MainController', ($scope, $rootScope, $compile, $translate) => {
   $rootScope.menus = [
@@ -100,4 +120,32 @@ mainModule.controller('MainController', ($scope, $rootScope, $compile, $translat
     initBreadcrumb(scope);
     handleMenus(stateName);
   };
+
+  // $http.get('http://localhost:8080/api/')
+});
+
+mainModule.controller('LoginModalController', ($scope, $http, $state) => {
+  $scope.credential = {};
+
+  $scope.doLogin = () => {
+    const data = {email: $scope.credential.email, password: $scope.credential.password};
+    $http.post('/api/v1/login', data).then((res) => {
+      $state.reload(true);
+    });
+  };
+
+  $scope.doSignup = () => {
+
+  };
+  // $http.post('http://localhost:8080/api/v1/users', {email: '', password: '', data: {singup: 'backoffice'} })
+
+  $http.get('/api/v1/login').then(() => { /* skip success callback */ }, () => {
+    // fail callback
+    $('.modal').modal({
+      backdrop: 'static',
+      keyboard: false,
+    });
+  });
+
+  $scope.modalBox = 'login';
 });

@@ -1,10 +1,21 @@
 {
   "product": {
+    "save": "저장",
     "main": {
       "title": "상품"
     },
     "edit": {
-
+      "createTitle": "상품 생성",
+      "updateTitle": "상품 변경",
+      "labelName": {
+        "KO": "상품명(한국어)",
+        "EN": "상품명(영어)",
+        "ZH_CN": "상품명(중국어)",
+        "ZH_TW": "상품명(대만어)"
+      },
+      "labelPrice": {
+        "KRW": "가격(원)"
+      }
     }
   }
 }

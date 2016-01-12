@@ -13,7 +13,7 @@ gulp.task('clean', function(cb) {
 });
 
 gulp.task('scripts', ['clean'], function(cb) {
-  gulp.src(['main/index.js'])
+  gulp.src(['main/index.js', 'main/bo.css'])
     .pipe(shell([
       'node_modules/duo/bin/duo <%= file.path %> ' +
       '--use duo-babel --output <%= buildDir %>',

@@ -30,6 +30,7 @@
   <link href="./vendor/metronic/theme/assets/layouts/layout3/css/layout.min.css" rel="stylesheet" type="text/css" />
   <link href="./vendor/metronic/theme/assets/layouts/layout3/css/themes/default.min.css" rel="stylesheet" type="text/css" id="style_color" />
   <link href="./vendor/metronic/theme/assets/layouts/layout3/css/custom.min.css" rel="stylesheet" type="text/css" />
+  <link href="./duo/main/bo.css" rel="stylesheet" type="text/css" />
   <!-- END THEME LAYOUT STYLES -->
   <!--link rel="shortcut icon" href="favicon.ico" /-->
 
@@ -123,6 +124,50 @@
 <div class="page-container">
   <div class="page-content-wrapper">
     <div ui-view></div>
+    <!-- BEGIN LOGIN MODAL-->
+    <div data-ng-controller="LoginModalController" class="modal fade" id="login_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog"><div class="modal-content" modal-transclude=""><div class="modal-body login ng-scope">
+        <div class="content">
+          <!-- BEGIN LOGIN FORM -->
+          <form class="login-form ng-pristine ng-valid" ng-class="{'hide': modalBox !== 'login'}" ng-submit="doLogin(credential);">
+            <h3 class="form-title">{{'main.login.title' | translate}}</h3>
+            <div class="form-group">
+              <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+              <label class="control-label visible-ie8 visible-ie9">ID</label>
+              <input class="form-control form-control-solid placeholder-no-fix ng-pristine ng-untouched ng-valid" type="text" autocomplete="off" placeholder="ID" ng-model="credential.email">
+            </div>
+            <div class="form-group">
+              <label class="control-label visible-ie8 visible-ie9">Password</label>
+              <input class="form-control form-control-solid placeholder-no-fix ng-pristine ng-untouched ng-valid" type="password" autocomplete="off" placeholder="Password" ng-model="credential.password">
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-success uppercase">{{'main.login.title' | translate}}</button>
+              <a id="forget-password" class="forget-password" ng-click="modalBox = 'resetPassword';">Forgot Password?</a>
+            </div>
+          </form>
+          <!-- END LOGIN FORM -->
+
+          <!-- BEGIN PASSWORD RESET FORM -->
+          <form class="password-reset-form ng-pristine ng-valid" ng-class="{'hide': modalBox !== 'resetPassword'}" ng-submit="resetPassword(credential);">
+            <h3 class="form-title">{{'main.login.resetPasswordTitle' | translate}}</h3>
+            <div class="form-group">
+              <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+              <label class="control-label visible-ie8 visible-ie9">Email</label>
+              <input class="form-control form-control-solid placeholder-no-fix ng-pristine ng-untouched ng-valid" type="text" autocomplete="off" placeholder="Email" ng-model="credential.email">
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-default" ng-click="modalBox = 'login';">{{'main.login.backBtn' | translate}}</button>
+              <button type="submit" class="btn btn-success uppercase">{{'main.login.resetPasswordBtn' | translate}}</button>
+            </div>
+          </form>
+          <!-- END LOGIN FORM -->
+        </div>
+      </div>
+      </div></div>
+      <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+    <!-- END LOGIN MODAL-->
   </div>
 </div>
 
