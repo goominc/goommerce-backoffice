@@ -25,7 +25,7 @@ const mainModule = angular.module('backoffice.main', [
 module.exports = mainModule.name;
 
 // 2015. 01. 05. [heekyu] Use this on seperated server
-/*
+
 mainModule.config(($httpProvider) => {
   $httpProvider.interceptors.push(($q) => {
     return {
@@ -38,10 +38,10 @@ mainModule.config(($httpProvider) => {
     }
   });
 });
-*/
+
 const ACCESS_TOKEN_KEY = 'GOOMMERCE-BO-TOKEN';
 
-mainModule.controller('MainController', ($scope, $rootScope, $compile, $translate, $cookies) => {
+mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $translate, $cookies) => {
   $rootScope.menus = [
     {
       key: 'product', // TODO get key from router
@@ -138,6 +138,8 @@ mainModule.controller('MainController', ($scope, $rootScope, $compile, $translat
         backdrop: 'static',
         keyboard: false,
       });
+    } else {
+      $http.defaults.headers.common.Authorization = token;
     }
   };
   checkLogin();
@@ -165,5 +167,5 @@ mainModule.controller('LoginModalController', ($scope, $http, $cookies) => {
     });
   };
 
-  // $http.post('http://localhost:8080/api/v1/users', {email: 'heekyu', password: '1111', data: {singup: 'backoffice'} })
+  $http.post('http://localhost:8080/api/v1/users', {email: 'heekyu', password: '1111', data: {singup: 'backoffice'} })
 });

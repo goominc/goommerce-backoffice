@@ -123,7 +123,7 @@ mainModule.config(function ($httpProvider) {
 
 var ACCESS_TOKEN_KEY = 'GOOMMERCE-BO-TOKEN';
 
-mainModule.controller('MainController', function ($scope, $rootScope, $compile, $translate, $cookies) {
+mainModule.controller('MainController', function ($scope, $http, $rootScope, $compile, $translate, $cookies) {
   $rootScope.menus = [{
     key: 'product', // TODO get key from router
     name: $translate.instant('product.main.title'),
@@ -226,6 +226,8 @@ mainModule.controller('MainController', function ($scope, $rootScope, $compile, 
         backdrop: 'static',
         keyboard: false
       });
+    } else {
+      $http.defaults.headers.common.Authorization = token;
     }
   };
   checkLogin();
@@ -253,7 +255,7 @@ mainModule.controller('LoginModalController', function ($scope, $http, $cookies)
     });
   };
 
-  // $http.post('http://localhost:8080/api/v1/users', {email: 'heekyu', password: '1111', data: {singup: 'backoffice'} })
+  $http.post('http://localhost:8080/api/v1/users', { email: 'heekyu', password: '1111', data: { singup: 'backoffice' } });
 });
 }, {"../dashboard/module":2,"../product/module":3,"../third_party/angular-translate":4,"./i18n/translations.en.json":5,"./i18n/translations.ko.json":6}],
 2: [function(require, module, exports) {
