@@ -34,10 +34,30 @@
   <!-- END THEME LAYOUT STYLES -->
   <!--link rel="shortcut icon" href="favicon.ico" /-->
 
+  <!-- BEGIN JAVASCRIPTS(Load javascripts at bottom, this will reduce page load time) -->
+  <!-- BEGIN CORE PLUGINS -->
+  <!--[if lt IE 9]>
+  <script src="./vendor/metronic/theme/assets/global/plugins/respond.min.js"></script>
+  <script src="./vendor/metronic/theme/assets/global/plugins/excanvas.min.js"></script>
+  <![endif]-->
+  <script src="./vendor/metronic/theme/assets/global/plugins/jquery-1.11.0.min.js" type="text/javascript"></script>
+  <script src="./vendor/metronic/theme/assets/global/plugins/jquery-migrate.min.js" type="text/javascript"></script>
+  <!-- IMPORTANT! Load jquery-ui-1.10.3.custom.min.js before bootstrap.min.js to fix bootstrap tooltip conflict with jquery ui tooltip -->
+  <script src="./vendor/metronic/theme/assets/global/plugins/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+  <script src="./vendor/metronic/theme/assets/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+  <script src="./vendor/metronic/theme/assets/global/plugins/bootstrap-hover-dropdown/bootstrap-hover-dropdown.min.js" type="text/javascript"></script>
+  <script src="./vendor/metronic/theme/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+  <script src="./vendor/metronic/theme/assets/global/plugins/jquery.blockui.min.js" type="text/javascript"></script>
+  <script src="./vendor/metronic/theme/assets/global/plugins/jquery.cokie.min.js" type="text/javascript"></script>
+  <script src="./vendor/metronic/theme/assets/global/plugins/uniform/jquery.uniform.min.js" type="text/javascript"></script>
+  <script src="./vendor/metronic/theme/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script>
+  <!-- END CORE PLUGINS -->
   <!-- BEGIN Javascripts before page load -->
-  <script type="text/javascript" src="/bower_components/angular/angular.min.js"></script>
-  <script type="text/javascript" src="/bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
-  <script type="text/javascript" src="./duo/main/index.js"></script>
+  <script src="/bower_components/angular/angular.min.js" type="text/javascript"></script>
+  <script src="/bower_components/angular-ui-router/release/angular-ui-router.min.js" type="text/javascript"></script>
+  <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.js" type="text/javascript"></script>
+  <script src="/bower_components/angular-cookies/angular-cookies.min.js" type="text/javascript"></script>
+  <script src="./duo/main/index.js" type="text/javascript"></script>
   <!-- END Javascripts before page load -->
 </head>
 <!-- END HEAD -->
@@ -77,7 +97,7 @@
           <!-- BEGIN QUICK SIDEBAR TOGGLER -->
           <li class="dropdown dropdown-extended quick-sidebar-toggler">
             <span class="sr-only">Toggle Quick Sidebar</span>
-            <i class="icon-logout"></i>
+            <i class="icon-logout" data-ng-click="doLogout()"></i>
           </li>
           <!-- END QUICK SIDEBAR TOGGLER -->
         </ul>
@@ -133,8 +153,8 @@
             <h3 class="form-title">{{'main.login.title' | translate}}</h3>
             <div class="form-group">
               <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
-              <label class="control-label visible-ie8 visible-ie9">ID</label>
-              <input class="form-control form-control-solid placeholder-no-fix ng-pristine ng-untouched ng-valid" type="text" autocomplete="off" placeholder="ID" ng-model="credential.email">
+              <label class="control-label visible-ie8 visible-ie9">Email</label>
+              <input class="form-control form-control-solid placeholder-no-fix ng-pristine ng-untouched ng-valid" type="text" autocomplete="off" placeholder="Email" ng-model="credential.email">
             </div>
             <div class="form-group">
               <label class="control-label visible-ie8 visible-ie9">Password</label>
@@ -142,7 +162,7 @@
             </div>
             <div class="form-actions">
               <button type="submit" class="btn btn-success uppercase">{{'main.login.title' | translate}}</button>
-              <a id="forget-password" class="forget-password" ng-click="modalBox = 'resetPassword';">Forgot Password?</a>
+              <a id="forget-password" class="forget-password" ng-click="modalBox = 'resetPassword';">{{'main.login.forgetPasswordBtn' | translate}}</a>
             </div>
           </form>
           <!-- END LOGIN FORM -->
@@ -182,24 +202,5 @@
 <!-- END FOOTER -->
 </body>
 </html>
-
-<!-- BEGIN JAVASCRIPTS(Load javascripts at bottom, this will reduce page load time) -->
-<!-- BEGIN CORE PLUGINS -->
-<!--[if lt IE 9]>
-<script src="./vendor/metronic/theme/assets/global/plugins/respond.min.js"></script>
-<script src="./vendor/metronic/theme/assets/global/plugins/excanvas.min.js"></script>
-<![endif]-->
-<script src="./vendor/metronic/theme/assets/global/plugins/jquery-1.11.0.min.js" type="text/javascript"></script>
-<script src="./vendor/metronic/theme/assets/global/plugins/jquery-migrate.min.js" type="text/javascript"></script>
-<!-- IMPORTANT! Load jquery-ui-1.10.3.custom.min.js before bootstrap.min.js to fix bootstrap tooltip conflict with jquery ui tooltip -->
-<script src="./vendor/metronic/theme/assets/global/plugins/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
-<script src="./vendor/metronic/theme/assets/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
-<script src="./vendor/metronic/theme/assets/global/plugins/bootstrap-hover-dropdown/bootstrap-hover-dropdown.min.js" type="text/javascript"></script>
-<script src="./vendor/metronic/theme/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script>
-<script src="./vendor/metronic/theme/assets/global/plugins/jquery.blockui.min.js" type="text/javascript"></script>
-<script src="./vendor/metronic/theme/assets/global/plugins/jquery.cokie.min.js" type="text/javascript"></script>
-<script src="./vendor/metronic/theme/assets/global/plugins/uniform/jquery.uniform.min.js" type="text/javascript"></script>
-<script src="./vendor/metronic/theme/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script>
-<!-- END CORE PLUGINS -->
 
 <!-- END JAVASCRIPTS -->

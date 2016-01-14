@@ -3,6 +3,7 @@
     "login": {
       "title": "로그인",
       "backBtn": "뒤로",
+      "forgetPasswordBtn": "비밀번호를 잊으셨나요?",
       "resetPasswordTitle": "비밀번호 재설정",
       "resetPasswordBtn": "비밀번호 재설정 이메일 발송"
     }

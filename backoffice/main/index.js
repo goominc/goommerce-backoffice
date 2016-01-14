@@ -1,6 +1,7 @@
 
 const mainModule = angular.module('backoffice.main', [
   'ui.router',
+  'ngCookies',
   require('../dashboard/module').name,
   require('../product/module').name,
   require('../third_party/angular-translate'),
@@ -38,8 +39,9 @@ mainModule.config(($httpProvider) => {
   });
 });
 */
+const ACCESS_TOKEN_KEY = 'GOOMMERCE-BO-TOKEN';
 
-mainModule.controller('MainController', ($scope, $rootScope, $compile, $translate) => {
+mainModule.controller('MainController', ($scope, $rootScope, $compile, $translate, $cookies) => {
   $rootScope.menus = [
     {
       key: 'product', // TODO get key from router
@@ -121,31 +123,47 @@ mainModule.controller('MainController', ($scope, $rootScope, $compile, $translat
     handleMenus(stateName);
   };
 
+  $rootScope.doLogout = () => {
+    // TODO server logout
+    $cookies.remove(ACCESS_TOKEN_KEY);
+    checkLogin();
+  };
+
+  const checkLogin = () => {
+    const token = $cookies.get(ACCESS_TOKEN_KEY);
+    // TODO check if token is valid
+    if (!token) {
+      $rootScope.modalBox = 'login';
+      $('.modal').modal({
+        backdrop: 'static',
+        keyboard: false,
+      });
+    }
+  };
+  checkLogin();
+
   // $http.get('http://localhost:8080/api/')
 });
 
-mainModule.controller('LoginModalController', ($scope, $http, $state) => {
+mainModule.controller('LoginModalController', ($scope, $http, $cookies) => {
   $scope.credential = {};
 
   $scope.doLogin = () => {
     const data = {email: $scope.credential.email, password: $scope.credential.password};
     $http.post('/api/v1/login', data).then((res) => {
-      $state.reload(true);
+      // TODO better way
+      $('.modal').modal('hide');
+
+      const token = 'Bearer ' + res.data.bearer;
+      $http.defaults.headers.common.Authorization = token;
+      $cookies.put(ACCESS_TOKEN_KEY, token);
+
+      $http.get('/api/v1/login');
+    }, (err) => {
+      // TODO
+      window.alert(err.data);
     });
   };
 
-  $scope.doSignup = () => {
-
-  };
-  // $http.post('http://localhost:8080/api/v1/users', {email: '', password: '', data: {singup: 'backoffice'} })
-
-  $http.get('/api/v1/login').then(() => { /* skip success callback */ }, () => {
-    // fail callback
-    $('.modal').modal({
-      backdrop: 'static',
-      keyboard: false,
-    });
-  });
-
-  $scope.modalBox = 'login';
+  // $http.post('http://localhost:8080/api/v1/users', {email: 'heekyu', password: '1111', data: {singup: 'backoffice'} })
 });

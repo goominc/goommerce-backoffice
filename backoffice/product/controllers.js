@@ -50,15 +50,87 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     {title: $translate.instant('product.edit.labelName.ZH_CN'), key: 'zh_cn'},
     {title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh_tw'},
   ];
-  $scope.prices = [
-    {title: $translate.instant('product.edit.labelPrice.KRW'), key: 'krw'},
-  ];
 
   $scope.inputFields = [
   ];
 
+  // BEGIN Manipulate Variant Kinds
+  $scope.variantKinds = [
+    {name: '색상', kinds: ['blue', 'red']},
+    {name: '사이즈', kinds: ['S', 'M', 'Free']},
+  ];
+
+  $scope.newObjects = {
+    variantKind: '',
+    variantKindItem: '',
+  };
+
+  $scope.addVariantKind = (name) => {
+    if (name && name.trim() !== '') {
+      $scope.newObjects.variantKind = '';
+      for (const kind of $scope.variantKinds) {
+        if (kind.name === name) {
+          $scope.hideAddItemBox();
+          window.alert('duplicate name');
+          return false;
+        }
+      }
+      $scope.variantKinds.push({name: name, kinds: []});
+      // TODO enhance hiding add item box
+      $scope.hideAddItemBox();
+    }
+  };
+  $scope.addVariantKindItem = (index, name) => {
+    if (name && name.trim() !== '') {
+      $scope.newObjects.variantKindItem = '';
+      for (const kindItem of $scope.variantKinds[index].kinds) {
+        if (kindItem === name) {
+          $scope.hideAddItemBox();
+          window.alert('duplicate name');
+          return false;
+        }
+      }
+      $scope.variantKinds[index].kinds.push(name);
+      // TODO enhance hiding add item box
+      $('.add-item-box').css('display', 'none');
+    }
+  };
+
+  $scope.removeVariantKind = (kindIndex) => {
+    const kind = $scope.variantKinds[kindIndex];
+    if (window.confirm('Really Delete [' + kind.name + '] ?')) {
+      $scope.variantKinds.splice(kindIndex, 1);
+    }
+  };
+
+  $scope.removeVariantKindItem = (kindIndex, itemIndex) => {
+    $scope.variantKinds[kindIndex].kinds.splice(itemIndex, 1);
+  };
+
+  $scope.clickAddVariantOrItem = (event) => {
+    $scope.hideAddItemBox();
+    $(event.target).prev().css('display', 'inline-block');
+    $(event.target).prev().find('input').focus();
+  };
+
+  $scope.onInputKeypress = (event) => {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      $(event.target).blur();
+      return false;
+    }
+    return true;
+  };
+
+  $scope.hideAddItemBox = () => {
+    $('.add-item-box').css('display', 'none');
+  };
+  // END Manipulate Variant Kinds
+
+  // BEGIN Manipulate Variants
+  // END Manipulate Variants
+
   $scope.save = () => {
-    console.log($scope.product);
     let method = "POST";
     let url = '/api/v1/products';
     if ($scope.product.id) {

@@ -15,28 +15,66 @@
                 <div class="portlet">
                   <div class="portlet-title">
                     <div class="actions btn-set">
-                      <button class="btn green" ng-click="save()"><i class="fa fa-check"></i> {{'product.save' | translate}}</button>
+                      <button class="btn blue" ng-click="save()"><i class="fa fa-check"></i> {{'product.save' | translate}}</button>
                     </div>
                   </div>
                 </div>
               </div>
+
               <div class="col-md-12">
-                <div class="form-group" ng-repeat="field in names">
-                  <div class="col-md-2" style="text-align: right;">
-                    <label class="control-label">{{field.title}}</label>
-                  </div>
-                  <div class="col-md-10">
-                    <input type="text" class="form-control ng-pristine ng-untouched ng-invalid ng-invalid-required" placeholder="{{field.placeholder}}" ng-model="product.name[field.key]">
-                  </div>
-                </div>
-                <div class="form-group" ng-repeat="field in prices">
-                  <div class="col-md-2" style="text-align: right;">
-                    <label class="control-label">{{field.title}}</label>
-                  </div>
-                  <div class="col-md-10">
-                    <input type="text" class="form-control ng-pristine ng-untouched ng-invalid ng-invalid-required" placeholder="{{field.placeholder}}" ng-model="product.price[field.key]">
-                  </div>
-                </div>
+                <uib-tabset class="tabbable-bordered">
+                  <uib-tab heading="General">
+                    <div class="form-group" ng-repeat="field in names">
+                      <label class="col-md-2 control-label">{{field.title}} <span class="required"> * </span> </label>
+                      <div class="col-md-10">
+                        <input type="text" class="form-control ng-pristine ng-untouched ng-invalid ng-invalid-required" placeholder="{{field.placeholder}}" ng-model="product.name[field.key]">
+                      </div>
+                    </div>
+                    <div class="form-group" ng-repeat="field in prices">
+                      <label class="col-md-2 control-label">{{field.title}} <span class="required"> * </span> </label>
+                      <div class="col-md-10">
+                        <input type="text" class="form-control ng-pristine ng-untouched ng-invalid ng-invalid-required" placeholder="{{field.placeholder}}" ng-model="product.price[field.key]">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-md-2 control-label">{{'product.edit.labelCombination' | translate}}</label>
+                      <div class="col-md-10">
+                        <div class="col-md-12" style="margin-bottom: 20px;" data-ng-repeat="kind in variantKinds">
+                          <div class="col-md-1 control-label">{{kind.name}}</div>
+                          <div class="col-md-11">
+                            <button class="btn btn-circle default" style="margin-right: 20px;" data-ng-repeat="k in kind.kinds">
+                              {{k}} <i data-ng-click="removeVariantKindItem($parent.$index, $index)" class="fa fa-remove"></i>
+                            </button>
+                            <button class="btn btn-circle default add-item-box">
+                              <input type="text" data-ng-blur="addVariantKindItem($index, newObjects.variantKindItem)" ng-keypress="onInputKeypress($event)" data-ng-model="newObjects.variantKindItem"> <i data-ng-click="hideAddItemBox()" class="fa fa-remove"></i>
+                            </button>
+                            <button class="btn blue add-variant-btn" data-ng-click="clickAddVariantOrItem($event)">
+                              <i class="fa fa-plus"></i>
+                            </button>
+                            <button data-ng-click="removeVariantKind($index)" class="btn red" style="margin-left: 30px;">
+                              <i class="fa fa-remove"></i> {{'product.edit.removeVariantKind' | translate}}
+                            </button>
+                          </div>
+                        </div>
+                        <div class="col-md-12">
+                          <button class="btn btn-circle default add-item-box">
+                            <input type="text" data-ng-blur="addVariantKind(newObjects.variantKind)" ng-keypress="onInputKeypress($event)" data-ng-model="newObjects.variantKind"> <i data-ng-click="hideAddItemBox()" class="fa fa-remove"></i>
+                          </button>
+                          <button class="btn blue add-variant-btn" data-ng-click="clickAddVariantOrItem($event)">
+                            <i class="fa fa-plus"></i> {{'product.edit.addVariantKind' | translate}}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-md-2 control-label">{{'product.edit.labelVariant' | translate}}</label>
+                      <div class="col-md-10">
+
+                      </div>
+                    </div>
+                  </uib-tab>
+                  <uib-tab heading="Images">images</uib-tab>
+                </uib-tabset>
               </div>
               <div style="clear: both;"></div>
             </form>

@@ -1,0 +1,10 @@
+.add-item-box {
+  display: none;
+}
+.add-item-box input {
+  width: 70px;
+  height: 20px;
+}
+.add-variant-btn i {
+  pointer-events: none;
+}

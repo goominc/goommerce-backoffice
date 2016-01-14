@@ -1,6 +1,7 @@
 
 const productModule = angular.module('backoffice.product', [
   'ui.router',
+  'ui.bootstrap',
   require('../utils/module').name,
   require('../third_party/angular-translate'),
 ]);

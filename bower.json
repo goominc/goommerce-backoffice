@@ -5,7 +5,9 @@
   ],
   "description": "goommerce-backoffice",
   "main": "backoffice/main/index.js",
-  "ignore": ["backoffice"],
+  "ignore": [
+    "backoffice"
+  ],
   "moduleType": [],
   "keywords": [
     "goommerce",
@@ -16,6 +18,9 @@
   "private": true,
   "dependencies": {
     "angular": "~1.4.8",
-    "angular-ui-router": "~0.2.15"
+    "angular-ui-router": "~0.2.15",
+    "jstree": "~3.2.1",
+    "angular-cookies": "~1.4.8",
+    "angular-ui-bootstrap": "~1.0.3"
   }
 }

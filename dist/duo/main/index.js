@@ -92,7 +92,7 @@
 1: [function(require, module, exports) {
 'use strict';
 
-var mainModule = angular.module('backoffice.main', ['ui.router', require('../dashboard/module').name, require('../product/module').name, require('../third_party/angular-translate')]).config(function ($translateProvider) {
+var mainModule = angular.module('backoffice.main', ['ui.router', 'ngCookies', require('../dashboard/module').name, require('../product/module').name, require('../third_party/angular-translate')]).config(function ($translateProvider) {
   $translateProvider.registerAvailableLanguageKeys(['en', 'ko'], {
     'en_US': 'en',
     'en_UK': 'en',
@@ -107,22 +107,23 @@ var mainModule = angular.module('backoffice.main', ['ui.router', require('../das
 module.exports = mainModule.name;
 
 // 2015. 01. 05. [heekyu] Use this on seperated server
-/*
-mainModule.config(($httpProvider) => {
-  $httpProvider.interceptors.push(($q) => {
+
+mainModule.config(function ($httpProvider) {
+  $httpProvider.interceptors.push(function ($q) {
     return {
-      'request': function(config) {
+      'request': function request(config) {
         if (config.url && config.url[0] === '/') {
           config.url = 'http://localhost:8080' + config.url;
         }
         return config || $q.when(config);
       }
-    }
+    };
   });
 });
-*/
 
-mainModule.controller('MainController', function ($scope, $rootScope, $compile, $translate) {
+var ACCESS_TOKEN_KEY = 'GOOMMERCE-BO-TOKEN';
+
+mainModule.controller('MainController', function ($scope, $rootScope, $compile, $translate, $cookies) {
   $rootScope.menus = [{
     key: 'product', // TODO get key from router
     name: $translate.instant('product.main.title'),
@@ -210,31 +211,49 @@ mainModule.controller('MainController', function ($scope, $rootScope, $compile, 
     handleMenus(stateName);
   };
 
+  $rootScope.doLogout = function () {
+    // TODO server logout
+    $cookies.remove(ACCESS_TOKEN_KEY);
+    checkLogin();
+  };
+
+  var checkLogin = function checkLogin() {
+    var token = $cookies.get(ACCESS_TOKEN_KEY);
+    // TODO check if token is valid
+    if (!token) {
+      $rootScope.modalBox = 'login';
+      $('.modal').modal({
+        backdrop: 'static',
+        keyboard: false
+      });
+    }
+  };
+  checkLogin();
+
   // $http.get('http://localhost:8080/api/')
 });
 
-mainModule.controller('LoginModalController', function ($scope, $http, $state) {
+mainModule.controller('LoginModalController', function ($scope, $http, $cookies) {
   $scope.credential = {};
 
   $scope.doLogin = function () {
     var data = { email: $scope.credential.email, password: $scope.credential.password };
     $http.post('/api/v1/login', data).then(function (res) {
-      $state.reload(true);
+      // TODO better way
+      $('.modal').modal('hide');
+
+      var token = 'Bearer ' + res.data.bearer;
+      $http.defaults.headers.common.Authorization = token;
+      $cookies.put(ACCESS_TOKEN_KEY, token);
+
+      $http.get('/api/v1/login');
+    }, function (err) {
+      // TODO
+      window.alert(err.data);
     });
   };
 
-  $scope.doSignup = function () {};
-  // $http.post('http://localhost:8080/api/v1/users', {email: '', password: '', data: {singup: 'backoffice'} })
-
-  $http.get('/api/v1/login').then(function () {/* skip success callback */}, function () {
-    // fail callback
-    $('.modal').modal({
-      backdrop: 'static',
-      keyboard: false
-    });
-  });
-
-  $scope.modalBox = 'login';
+  // $http.post('http://localhost:8080/api/v1/users', {email: 'heekyu', password: '1111', data: {singup: 'backoffice'} })
 });
 }, {"../dashboard/module":2,"../product/module":3,"../third_party/angular-translate":4,"./i18n/translations.en.json":5,"./i18n/translations.ko.json":6}],
 2: [function(require, module, exports) {
@@ -315,7 +334,7 @@ dashboardModule.controller('DashboardController', function ($scope, $rootScope, 
 3: [function(require, module, exports) {
 'use strict';
 
-var productModule = angular.module('backoffice.product', ['ui.router', require('../utils/module').name, require('../third_party/angular-translate')]);
+var productModule = angular.module('backoffice.product', ['ui.router', 'ui.bootstrap', require('../utils/module').name, require('../third_party/angular-translate')]);
 
 productModule.config(function ($translateProvider) {
   $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
@@ -404,7 +423,11 @@ module.exports = {
       },
       "labelPrice": {
         "KRW": "가격(원)"
-      }
+      },
+      "labelCombination": "상품 속성",
+      "labelVariant": "상품 규격",
+      "addVariantKind": "종류 추가",
+      "removeVariantKind": "종류 삭제"
     }
   }
 };
@@ -450,12 +473,127 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   $rootScope.initAll($scope, $state.current.name);
 
   $scope.names = [{ title: $translate.instant('product.edit.labelName.KO'), key: 'ko' }, { title: $translate.instant('product.edit.labelName.EN'), key: 'en' }, { title: $translate.instant('product.edit.labelName.ZH_CN'), key: 'zh_cn' }, { title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh_tw' }];
-  $scope.prices = [{ title: $translate.instant('product.edit.labelPrice.KRW'), key: 'krw' }];
 
   $scope.inputFields = [];
 
+  // BEGIN Manipulate Variant Kinds
+  $scope.variantKinds = [{ name: '색상', kinds: ['blue', 'red'] }, { name: '사이즈', kinds: ['S', 'M', 'Free'] }];
+
+  $scope.newObjects = {
+    variantKind: '',
+    variantKindItem: ''
+  };
+
+  $scope.addVariantKind = function (name) {
+    if (name && name.trim() !== '') {
+      $scope.newObjects.variantKind = '';
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = $scope.variantKinds[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var kind = _step.value;
+
+          if (kind.name === name) {
+            $scope.hideAddItemBox();
+            window.alert('duplicate name');
+            return false;
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator['return']) {
+            _iterator['return']();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      $scope.variantKinds.push({ name: name, kinds: [] });
+      // TODO enhance hiding add item box
+      $scope.hideAddItemBox();
+    }
+  };
+  $scope.addVariantKindItem = function (index, name) {
+    if (name && name.trim() !== '') {
+      $scope.newObjects.variantKindItem = '';
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = $scope.variantKinds[index].kinds[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var kindItem = _step2.value;
+
+          if (kindItem === name) {
+            $scope.hideAddItemBox();
+            window.alert('duplicate name');
+            return false;
+          }
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2['return']) {
+            _iterator2['return']();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+
+      $scope.variantKinds[index].kinds.push(name);
+      // TODO enhance hiding add item box
+      $('.add-item-box').css('display', 'none');
+    }
+  };
+
+  $scope.removeVariantKind = function (kindIndex) {
+    var kind = $scope.variantKinds[kindIndex];
+    if (window.confirm('Really Delete [' + kind.name + '] ?')) {
+      $scope.variantKinds.splice(kindIndex, 1);
+    }
+  };
+
+  $scope.removeVariantKindItem = function (kindIndex, itemIndex) {
+    $scope.variantKinds[kindIndex].kinds.splice(itemIndex, 1);
+  };
+
+  $scope.clickAddVariantOrItem = function (event) {
+    $scope.hideAddItemBox();
+    $(event.target).prev().css('display', 'inline-block');
+    $(event.target).prev().find('input').focus();
+  };
+
+  $scope.onInputKeypress = function (event) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      $(event.target).blur();
+      return false;
+    }
+    return true;
+  };
+
+  $scope.hideAddItemBox = function () {
+    $('.add-item-box').css('display', 'none');
+  };
+  // END Manipulate Variant Kinds
+
+  // BEGIN Manipulate Variants
+  // END Manipulate Variants
+
   $scope.save = function () {
-    console.log($scope.product);
     var method = "POST";
     var url = '/api/v1/products';
     if ($scope.product.id) {
@@ -479,6 +617,7 @@ module.exports = {
     "login": {
       "title": "로그인",
       "backBtn": "뒤로",
+      "forgetPasswordBtn": "비밀번호를 잊으셨나요?",
       "resetPasswordTitle": "비밀번호 재설정",
       "resetPasswordBtn": "비밀번호 재설정 이메일 발송"
     }
