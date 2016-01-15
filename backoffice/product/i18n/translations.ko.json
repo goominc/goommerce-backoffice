@@ -16,6 +16,7 @@
       "labelPrice": {
         "KRW": "가격(원)"
       },
+      "labelActive": "활성화",
       "labelCombination": "상품 속성",
       "labelVariant": "상품 규격",
       "addVariantKind": "종류 추가",

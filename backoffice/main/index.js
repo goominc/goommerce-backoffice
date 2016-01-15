@@ -3,6 +3,7 @@ const mainModule = angular.module('backoffice.main', [
   'ui.router',
   'ngCookies',
   require('../dashboard/module').name,
+  require('../user/module').name,
   require('../product/module').name,
   require('../third_party/angular-translate'),
 ])
@@ -58,7 +59,7 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     {
       key: 'user', // TODO get key from router
       name: 'User',
-      sref: 'user.main',
+      sref: 'user.manage',
       active: false,
     },
     {
@@ -112,7 +113,8 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     for (let menu of $rootScope.menus) {
       if (stateName.startsWith(menu.key)) {
         menu.active = true;
-        break;
+      } else {
+        menu.active = false;
       }
     }
   };
@@ -134,7 +136,7 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     // TODO check if token is valid
     if (!token) {
       $rootScope.modalBox = 'login';
-      $('.modal').modal({
+      $('#login_modal').modal({
         backdrop: 'static',
         keyboard: false,
       });
@@ -154,7 +156,7 @@ mainModule.controller('LoginModalController', ($scope, $http, $cookies) => {
     const data = {email: $scope.credential.email, password: $scope.credential.password};
     $http.post('/api/v1/login', data).then((res) => {
       // TODO better way
-      $('.modal').modal('hide');
+      $('#login_modal').modal('hide');
 
       const token = 'Bearer ' + res.data.bearer;
       $http.defaults.headers.common.Authorization = token;
