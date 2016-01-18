@@ -115,3 +115,30 @@ directiveModule.directive('boServerDatatables', ($http, datatableCommons, boUtil
     },
   }
 });
+
+directiveModule.directive('clUploadWidget', function () {
+  return {
+    restrict: 'A',
+    scope: {
+      callback: '&callback',
+    },
+    link: function (scope, elem) {
+      elem.click(function() {
+        cloudinary.openUploadWidget({
+          cloud_name: 'linkshops',
+          upload_preset: 'nd9k8295',
+          multiple: false,
+        }, function(error, result) {
+          if (!error) {
+            if (scope.callback) {
+              scope.callback(
+                {result: result[0]}
+              );
+            }
+            scope.$apply();
+          }
+        });
+      });
+    }
+  };
+});

@@ -1,5 +1,7 @@
 {
   "main": {
+    "closeButton": "닫기",
+    "deleteButton": "삭제",
     "login": {
       "title": "로그인",
       "backBtn": "뒤로",

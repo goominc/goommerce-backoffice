@@ -32,13 +32,30 @@ productModule.controller('ProductMainController', ($scope, $state, $rootScope, $
   };
 });
 
-productModule.controller('ProductEditController', ($scope, $http, $state, $rootScope, $translate, product) => {
-  let titleKey = 'product.edit.createTitle';
-  $scope.product = product;
-  if ($scope.product.id) {
-    titleKey = 'product.edit.updateTitle';
-  }
-  $scope.contentTitle = $translate.instant(titleKey);
+productModule.controller('ProductEditController', ($scope, $http, $q, $state, $rootScope, $translate, product) => {
+  const initFromProduct = () => {
+    let titleKey = 'product.edit.createTitle';
+    $scope.product = product;
+    if ($scope.product.id) {
+      titleKey = 'product.edit.updateTitle';
+    }
+    $scope.productVariantsMap = {};
+    $scope.origVariants = new Set();
+    if ($scope.product.productVariants) {
+      $scope.productVariants = $scope.product.productVariants;
+      for (const productVariant of $scope.productVariants) {
+        $scope.productVariantsMap[productVariant.sku] = productVariant;
+        $scope.origVariants.add(productVariant.id);
+      }
+    } else {
+      $scope.productVariants = [];
+    }
+    return {titleKey};
+  };
+
+  const initObj = initFromProduct();
+
+  $scope.contentTitle = $translate.instant(initObj.titleKey);
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
     {
@@ -51,20 +68,19 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     },
     {
       sref: 'product.edit',
-      name: $translate.instant(titleKey),
+      name: $translate.instant(initObj.titleKey),
     },
   ];
   $rootScope.initAll($scope, $state.current.name);
-/*
-  $scope.names = [
-    {title: $translate.instant('product.edit.labelName.KO'), key: 'ko'},
-    {title: $translate.instant('product.edit.labelName.EN'), key: 'en'},
-    {title: $translate.instant('product.edit.labelName.ZH_CN'), key: 'zh_cn'},
-    {title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh_tw'},
-  ];
-*/
-  $scope.inputFields = [
-  ];
+  /*
+   $scope.names = [
+   {title: $translate.instant('product.edit.labelName.KO'), key: 'ko'},
+   {title: $translate.instant('product.edit.labelName.EN'), key: 'en'},
+   {title: $translate.instant('product.edit.labelName.ZH_CN'), key: 'zh_cn'},
+   {title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh_tw'},
+   ];
+   */
+  $scope.inputFields = [];
 
   // BEGIN Manipulate Variant Kinds
   $scope.variantKinds = [
@@ -140,8 +156,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   // END Manipulate Variant Kinds
 
   // BEGIN Manipulate Variants
-  $scope.productVariants = [];
-  $scope.productVariantsMap = {};
   $scope.generateProductVariants = () => {
     if (!$scope.product.sku || $scope.product.sku === '') {
       window.alert('insert SKU first.'); // TODO message
@@ -172,8 +186,9 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       const alreadyIn = $scope.productVariantsMap[newVariantSKU];
       if (alreadyIn) {
         newVariants.push(alreadyIn);
+        newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        const newVariant = { sku: newVariantSKU, price: { krw: 0 }, stock: 0, enabled: true };
+        const newVariant = {sku: newVariantSKU, price: {krw: 0}, stock: -1};
         newVariants.push(newVariant);
         newVariantsMap[newVariantSKU] = newVariant;
       }
@@ -198,8 +213,93 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       method = "PUT";
       url += '/' + $scope.product.id;
     }
-    $http({method: method, url: url, data: $scope.product, contentType: 'application/json;charset=UTF-8'}).then((result) => {
-      console.log(result);
+    // 2016. 01. 18. [heekyu] save images
+    $scope.imageToProduct();
+
+    $http({method: method, url: url, data: $scope.product, contentType: 'application/json;charset=UTF-8'}).then((res) => {
+      if (!$scope.product.id) {
+        $scope.product.id = res.data.id; // need if create
+        $state.go('product.edit', {productId: $scope.product.id});
+      }
+      const promises = [];
+      const pvUrl = '/api/v1/products/' + $scope.product.id + '/product_variants';
+      for (const productVariant of $scope.productVariants) {
+        if (productVariant.stock < 0) {
+          continue;
+        }
+        if (productVariant.id) {
+          promises.push($http({
+            method: 'PUT',
+            url: pvUrl + '/' + productVariant.id,
+            data: productVariant,
+            contentType: 'application/json;charset=UTF-8'
+          }));
+          $scope.origVariants.delete(productVariant.id);
+        } else {
+          promises.push($http({
+            method: 'POST',
+            url: pvUrl,
+            data: productVariant,
+            contentType: 'application/json;charset=UTF-8'
+          }));
+        }
+      }
+      // 2016. 01. 18. [heekyu] delete removed variants
+      if ($scope.origVariants.size > 0) {
+        for (const deletedVariant of $scope.origVariants.values()) {
+          promises.push($http({method: 'DELETE', url: pvUrl + '/' + deletedVariant}));
+        }
+      }
+
+      $q.all(promises).then((result) => {
+        console.log(result);
+      });
     });
+  };
+
+  $scope.images = [];
+
+  $scope.generateImages = () => {
+    $scope.images.length = 0;
+    if ($scope.product.appImages && $scope.product.appImages.default && $scope.product.appImages.default.length > 0) {
+      $scope.product.appImages.default.map((image) => {
+        image.product = $scope.product;
+        $scope.images.push(image);
+      });
+    }
+    $scope.productVariants.map((productVariant) => {
+      if (productVariant.appImages && productVariant.appImages && productVariant.appImages.default.length > 0) {
+        productVariant.appImages.default.map((image) => {
+          image.product = productVariant;
+          $scope.images.push(image);
+        });
+      }
+    });
+  };
+  $scope.generateImages();
+  $scope.imageToProduct = () => {
+    $scope.product.appImages = {default: []};
+    $scope.productVariants.map((productVariant) => {
+      productVariant.appImages = {default: []};
+    });
+    $scope.images.map((image) => {
+      image.product.appImages.default.push(_.omit(image, 'product'));
+    });
+  };
+
+  $scope.imageUploaded = (result) => {
+    $scope.images.push({
+      url: result.url.slice(5),
+      product: $scope.product,
+      mainImage: false,
+      thumbnail: false,
+    });
+  };
+
+  $scope.removeProductVariant = (index) => {
+    $scope.productVariants.splice(index, 1);
+  };
+  $scope.removeImage = (index) => {
+    $scope.images.splice(index, 1);
   };
 });

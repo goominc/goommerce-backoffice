@@ -86,28 +86,64 @@
                     <div class="form-group">
                       <label class="col-md-2 control-label">{{'product.edit.labelVariant' | translate}}</label>
                       <div class="col-md-10">
-                        <table class="table table-bordered table-hover dataTable">
+                        <table class="table table-bordered dataTable">
                           <thead>
                           <tr role="row" class="heading">
-                            <th width="2%"><input type="checkbox"/></th>
                             <th>sku</th>
                             <th>price</th>
                             <th>stock</th>
+                            <th></th>
                           </tr>
                           </thead>
                           <tbody>
-                          <tr data-ng-repeat="productVariant in productVariants">
-                            <th width="2%"><input type="checkbox" data-ng-checked="productVariant.stock > 0" /></th>
+                          <tr data-ng-repeat="productVariant in productVariants" data-ng-class="{'bo-invalid-row': productVariant.stock < 0}">
                             <th><input type="text" data-ng-model="productVariant.sku" /></th>
                             <th><input type="number" data-ng-model="productVariant.price.krw" /></th>
-                            <th><input type="text" data-ng-model="productVariant.stock" /></th>
+                            <th><input type="number" data-ng-model="productVariant.stock" /></th>
+                            <th><button class="btn red" type="reset" data-ng-click="removeProductVariant($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></th>
                           </tr>
                           </tbody>
                         </table>
                       </div>
                     </div>
                   </uib-tab>
-                  <uib-tab heading="Images">images</uib-tab>
+                  <uib-tab heading="Images">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <button class="btn blue" cl-upload-widget="" callback="imageUploaded(result)"><i class="fa fa-plus"></i> Add Image</button>
+                      </div>
+                      <div class="col-md-12" style="margin-top: 20px;">
+                        <table class="table table-bordered table-hover">
+                          <thead>
+                          <tr role="row" class="heading">
+                            <th>Image</th>
+                            <th>Product</th>
+                            <th>Main Image</th>
+                            <th>Thumbnail</th>
+                            <th></th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                          <tr data-ng-repeat="image in images">
+                            <th width="15%"><a class="fancybox" data-rel="fancybox-button"><img class="img-responsive" data-ng-src="{{image.url}}"></a></th>
+                            <th>
+                              <div class="dropdown btn-group">
+                                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{image.product.sku}}</button>
+                                <ul class="dropdown-menu" role="menu">
+                                  <li data-ng-click="image.product = product"><a href="javascript:;">{{product.sku}}</a></li>
+                                  <li data-ng-click="image.product = productVariant" data-ng-if="productVariant.stock >= 0" data-ng-repeat="productVariant in productVariants"><a href="javascript:;">{{productVariant.sku}}</a></li>
+                                </ul>
+                              </div>
+                            </th>
+                            <th width="10%"><input type="checkbox" data-ng-model="image.mainImage"></th>
+                            <th width="10%"><input type="checkbox" data-ng-model="image.thumbnail"></th>
+                            <th><button class="btn red" type="reset" data-ng-click="removeImage($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></th>
+                          </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </uib-tab>
                 </uib-tabset>
               </div>
               <div style="clear: both;"></div>

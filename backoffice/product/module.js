@@ -40,8 +40,8 @@ productModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/product/edit.html',
       controller: 'ProductEditController',
       resolve: {
-        product: ($http, $state) => {
-          return $http.get('/api/v1/products/' + $state.params.productId).then((res) => {
+        product: ($http, $stateParams) => {
+          return $http.get('/api/v1/products/' + $stateParams.productId).then((res) => {
             return res.data;
           });
         },

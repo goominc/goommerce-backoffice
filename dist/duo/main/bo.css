@@ -263,4 +263,7 @@ Login page
 .add-variant-btn i {
   pointer-events: none;
 }
+.bo-invalid-row {
+  background-color: #a1a1a1 !important;
+}
 
