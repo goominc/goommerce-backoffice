@@ -1,5 +1,6 @@
 {
   "user": {
+    "createUser": "유저 생성",
     "manage": {
       "title": "사용자 관리"
     }

@@ -2,6 +2,7 @@
 const mainModule = angular.module('backoffice.main', [
   'ui.router',
   'ngCookies',
+  require('../directives/module.js').name,
   require('../dashboard/module').name,
   require('../user/module').name,
   require('../product/module').name,
@@ -27,17 +28,24 @@ module.exports = mainModule.name;
 
 // 2015. 01. 05. [heekyu] Use this on seperated server
 
-mainModule.config(($httpProvider) => {
-  $httpProvider.interceptors.push(($q) => {
-    return {
-      'request': function(config) {
-        if (config.url && config.url[0] === '/') {
-          config.url = 'http://localhost:8080' + config.url;
+mainModule.constant('boConfig', {
+  // apiUrl: 'http://localhost:8080',
+  apiUrl: '',
+});
+
+mainModule.config(($httpProvider, boConfig) => {
+  if (boConfig.apiUrl && boConfig.apiUrl !== '') {
+    $httpProvider.interceptors.push(($q) => {
+      return {
+        'request': function(config) {
+          if (config.url && config.url[0] === '/') {
+            config.url = boConfig.apiUrl + config.url;
+          }
+          return config || $q.when(config);
         }
-        return config || $q.when(config);
       }
-    }
-  });
+    });
+  }
 });
 
 const ACCESS_TOKEN_KEY = 'GOOMMERCE-BO-TOKEN';
@@ -169,5 +177,5 @@ mainModule.controller('LoginModalController', ($scope, $http, $cookies) => {
     });
   };
 
-  $http.post('http://localhost:8080/api/v1/users', {email: 'heekyu', password: '1111', data: {singup: 'backoffice'} })
+  // $http.post('http://localhost:8080/api/v1/users', {email: 'heekyu', password: '1111', data: {singup: 'backoffice'} })
 });

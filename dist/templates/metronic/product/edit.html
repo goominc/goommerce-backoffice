@@ -23,7 +23,13 @@
 
               <div class="col-md-12">
                 <uib-tabset class="tabbable-bordered">
-                  <uib-tab heading="General">
+                  <uib-tab heading="{{'product.edit.tabInfo' | translate}}">
+                    <div class="form-group">
+                      <label class="col-md-2 control-label">SKU <span class="required"> * </span> </label>
+                      <div class="col-md-10">
+                        <input type="text" class="form-control ng-pristine ng-untouched ng-invalid ng-invalid-required" placeholder="00000-0000" ng-model="product.sku">
+                      </div>
+                    </div>
                     <div class="form-group" ng-repeat="field in names">
                       <label class="col-md-2 control-label">{{field.title}} <span class="required"> * </span> </label>
                       <div class="col-md-10">
@@ -40,7 +46,7 @@
                       <label class="col-md-2 control-label">{{'product.edit.labelActive' | translate}}</label>
                       <div class="col-md-10">
                         <div class="form-control">
-                          <input type="checkbox" value="1">
+                          <input type="checkbox" data-ng-model="product.isActive">
                         </div>
                       </div>
                     </div>
@@ -71,13 +77,33 @@
                           <button class="btn blue add-variant-btn" data-ng-click="clickAddVariantOrItem($event)">
                             <i class="fa fa-plus"></i> {{'product.edit.addVariantKind' | translate}}
                           </button>
+                          <button class="btn blue" data-ng-click="generateProductVariants()">
+                            규격 상품 생성 <i class="fa fa-angle-down"></i>
+                          </button>
                         </div>
                       </div>
                     </div>
                     <div class="form-group">
                       <label class="col-md-2 control-label">{{'product.edit.labelVariant' | translate}}</label>
                       <div class="col-md-10">
-
+                        <table class="table table-bordered table-hover dataTable">
+                          <thead>
+                          <tr role="row" class="heading">
+                            <th width="2%"><input type="checkbox"/></th>
+                            <th>sku</th>
+                            <th>price</th>
+                            <th>stock</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                          <tr data-ng-repeat="productVariant in productVariants">
+                            <th width="2%"><input type="checkbox" data-ng-checked="productVariant.stock > 0" /></th>
+                            <th><input type="text" data-ng-model="productVariant.sku" /></th>
+                            <th><input type="number" data-ng-model="productVariant.price.krw" /></th>
+                            <th><input type="text" data-ng-model="productVariant.stock" /></th>
+                          </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   </uib-tab>

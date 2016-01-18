@@ -11,10 +11,22 @@
         <div class="col-md-12">
           <div class="portlet light">
             <div class="portlet-title">
-              Title
+              <div class="actions btn-set">
+                <button class="btn blue" ui-sref="product.add">
+                  <i class="fa fa-plus"></i> {{'product.edit.createTitle' | translate}}
+                </button>
+              </div>
             </div>
-            <div class="portlet-body">
-              <button ui-sref="product.add">상품 생성</button>
+            <div bo-datatables="productDatatables">
+              <table class="table table-bordered table-hover">
+                <thead>
+                <tr role="row" class="heading">
+                  <th>ID</th>
+                  <th>SKU</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
           </div>
         </div>
