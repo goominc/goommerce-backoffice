@@ -108,10 +108,10 @@ module.exports = mainModule.name;
 
 // 2015. 01. 05. [heekyu] Use this on seperated server
 mainModule.constant('boConfig', {
-  apiUrl: 'http://localhost:8080'
+  // apiUrl: 'http://localhost:8080',
+  apiUrl: ''
 });
 
-// apiUrl: '',
 mainModule.config(function ($httpProvider, boConfig) {
   if (boConfig.apiUrl && boConfig.apiUrl !== '') {
     $httpProvider.interceptors.push(function ($q) {
