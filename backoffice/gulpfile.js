@@ -1,6 +1,9 @@
 var gulp = require('gulp');
 var del = require('del');
 var shell = require('gulp-shell');
+var replace = require('gulp-replace');
+var rename = require('gulp-rename');
+var argv = require('yargs').argv;
 
 var config = require('./gulp-config');
 
@@ -12,8 +15,18 @@ gulp.task('clean', function(cb) {
   }, cb);
 });
 
-gulp.task('scripts', ['clean'], function(cb) {
-  gulp.src(['main/index.js', 'main/bo.css'])
+gulp.task('dist', ['clean'], function(cb) {
+  var indexjs = './main/index.js';
+  var apiUrl = '';
+  if (argv.dev) {
+    apiUrl = 'http://localhost:8080';
+  }
+  gulp.src('./main/index-template.js')
+    .pipe(replace('@apiUrl', apiUrl))
+    .pipe(rename('index.js'))
+    .pipe(gulp.dest('./main'));
+
+  gulp.src([indexjs, 'main/bo.css'])
     .pipe(shell([
       'node_modules/duo/bin/duo <%= file.path %> ' +
       '--use duo-babel --output <%= buildDir %>',
@@ -28,7 +41,7 @@ gulp.task('watch', function() {
   gulp.watch([
     '**/*.js',
     '**/*.html',
-  ], ['scripts']);
+  ], ['dist']);
 });
 
-gulp.task('default', ['scripts']);
+gulp.task('default', ['dist']);

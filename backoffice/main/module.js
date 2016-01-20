@@ -1,36 +1,30 @@
 
 const mainModule = angular.module('backoffice.main', [
-  'ui.router',
-  'ngCookies',
-  require('../directives/module.js').name,
-  require('../dashboard/module').name,
-  require('../user/module').name,
-  require('../product/module').name,
-  require('../third_party/angular-translate'),
-])
-.config(($translateProvider) => {
-  $translateProvider
-  .registerAvailableLanguageKeys(['en', 'ko'], {
-    'en_US': 'en',
-    'en_UK': 'en',
-    'ko_KR': 'ko',
-  })
-  .determinePreferredLanguage();
+    'ui.router',
+    'ngCookies',
+    require('../directives/module.js').name,
+    require('../dashboard/module').name,
+    require('../user/module').name,
+    require('../product/module').name,
+    require('../third_party/angular-translate'),
+  ])
+  .config(($translateProvider) => {
+    $translateProvider
+      .registerAvailableLanguageKeys(['en', 'ko'], {
+        'en_US': 'en',
+        'en_UK': 'en',
+        'ko_KR': 'ko',
+      })
+      .determinePreferredLanguage();
 
-  $translateProvider
-    .translations('en', require('./i18n/translations.en.json'))
-    .translations('ko', require('./i18n/translations.ko.json'));
+    $translateProvider
+      .translations('en', require('./i18n/translations.en.json'))
+      .translations('ko', require('./i18n/translations.ko.json'));
 
-  // TODO sanitize or escape translation strings for security
-  // $translateProvider.useSanitizeValueStrategy('sanitize');
-});
-module.exports = mainModule.name;
-
-// 2015. 01. 05. [heekyu] Use this on seperated server
-mainModule.constant('boConfig', {
-  // apiUrl: 'http://localhost:8080',
-  apiUrl: '',
-});
+    // TODO sanitize or escape translation strings for security
+    // $translateProvider.useSanitizeValueStrategy('sanitize');
+  });
+module.exports = mainModule;
 
 mainModule.config(($httpProvider, boConfig) => {
   if (boConfig.apiUrl && boConfig.apiUrl !== '') {

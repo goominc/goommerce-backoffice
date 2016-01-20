@@ -10,5 +10,10 @@
     "duo-babel": "w4-sjcho/duo-babel",
     "gulp": "^3.9.0",
     "gulp-shell": "^0.4.2"
+  },
+  "dependencies": {
+    "yargs": "^3.32.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4"
   }
 }
