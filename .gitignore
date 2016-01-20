@@ -3,3 +3,4 @@
 bower_components
 backoffice/components
 node_modules
+backoffice/main/index.js
