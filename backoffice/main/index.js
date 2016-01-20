@@ -27,7 +27,6 @@ const mainModule = angular.module('backoffice.main', [
 module.exports = mainModule.name;
 
 // 2015. 01. 05. [heekyu] Use this on seperated server
-
 mainModule.constant('boConfig', {
   // apiUrl: 'http://localhost:8080',
   apiUrl: '',
@@ -57,6 +56,18 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
       name: $translate.instant('product.main.title'),
       sref: 'product.main',
       active: false,
+      children: [
+        {
+          key: 'product.category',
+          name: $translate.instant('product.category.title'),
+          sref: 'product.category',
+        },
+        {
+          key: 'product.add',
+          name: $translate.instant('product.edit.createTitle'),
+          sref: 'product.add',
+        },
+      ],
     },
     {
       key: 'order', // TODO get key from router

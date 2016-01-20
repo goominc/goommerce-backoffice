@@ -267,3 +267,8 @@ Login page
   background-color: #a1a1a1 !important;
 }
 
+.category-action-box {
+  width: 100%;
+  margin-bottom: 20px;
+}
+

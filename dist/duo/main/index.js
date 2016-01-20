@@ -134,7 +134,16 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
     key: 'product', // TODO get key from router
     name: $translate.instant('product.main.title'),
     sref: 'product.main',
-    active: false
+    active: false,
+    children: [{
+      key: 'product.category',
+      name: $translate.instant('product.category.title'),
+      sref: 'product.category'
+    }, {
+      key: 'product.add',
+      name: $translate.instant('product.edit.createTitle'),
+      sref: 'product.add'
+    }]
   }, {
     key: 'order', // TODO get key from router
     name: 'Order',
@@ -619,6 +628,19 @@ productModule.config(function ($stateProvider) {
         });
       }
     }
+  }).state('product.category', {
+    url: '/category',
+    templateUrl: templateRoot + '/product/category.html',
+    controller: 'CategoryEditController',
+    resolve: {
+      categories: function categories($http) {
+        return $http.get('/api/v1/categories').then(function (res) {
+          return res.data;
+        });
+      }
+    }
+  }).state('product.category.child', {
+    url: '/:categoryId'
   });
 });
 
@@ -669,6 +691,13 @@ module.exports = {
       "labelVariant": "상품 규격",
       "addVariantKind": "종류 추가",
       "removeVariantKind": "종류 삭제"
+    },
+    "category": {
+      "title": "상품 카테고리",
+      "rootName": "전체",
+      "nameNewCategory": "새 카테고리",
+      "labelNewCategory": "카테고리 생성",
+      "labelDeleteCategory": "삭제"
     }
   }
 };
@@ -696,7 +725,10 @@ productModule.controller('ProductMainController', function ($scope, $state, $roo
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: boConfig.apiUrl + '/api/v1/products',
     columns: [{
-      data: 'id'
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="product.edit({productId: ' + id + '})">' + id + '</a>';
+      }
     }, {
       data: 'sku'
     }]
@@ -1117,6 +1149,153 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
   $scope.removeImage = function (index) {
     $scope.images.splice(index, 1);
   };
+});
+
+productModule.controller('CategoryEditController', function ($scope, $rootScope, $http, $state, categories, $translate) {
+  $scope.contentTitle = $translate.instant('product.category.title');
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'product.main',
+    name: $translate.instant('product.main.title')
+  }, {
+    sref: 'product.category',
+    name: $translate.instant('product.category.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.root = categories;
+  var categoryIdMap = {};
+  var currentCategoryId = $state.params.categoryId;
+  if (!currentCategoryId) {
+    currentCategoryId = $scope.root.id;
+  }
+  $scope.root.name.ko = $translate.instant('product.category.rootName'); // TODO root name i18n
+
+  var getTreeData = function getTreeData(root, currentCategoryId) {
+    var json = {
+      id: root.id,
+      text: root.name ? root.name.ko : 'NoName',
+      data: { id: root.id },
+      state: { selected: false, opened: true } };
+    /* TODO disabled: !root.isActive, */
+    categoryIdMap[root.id] = root;
+    if (currentCategoryId && root.id === currentCategoryId) {
+      $scope.category = root;
+      json.state.selected = true;
+    }
+
+    if (root.children) {
+      json.children = root.children.map(function (child) {
+        return getTreeData(child, $state.params.categoryId);
+      });
+    }
+    return json;
+  };
+
+  var jstreeData = getTreeData($scope.root, currentCategoryId);
+  var jstreeNode = $('#categoryTree');
+  jstreeNode.jstree({
+    core: {
+      themes: {
+        responsive: false
+      },
+      check_callback: function check_callback(operation, node, node_parent, node_position, more) {
+        if (operation === 'move_node') {
+          if (node.parent === '#') {
+            // root node cannot be moved
+            return false;
+          }
+          if (more && more.ref && more.ref.parent === '#') {
+            // cannot move to root
+            return false;
+          }
+          return true;
+        }
+        if (operation === 'rename_node') {
+          return false;
+        }
+        return true;
+      },
+      data: jstreeData,
+      multiple: false
+    },
+    types: {
+      'default': {
+        max_depth: 3,
+        icon: 'fa fa-folder icon-state-warning icon-lg'
+      },
+      file: {
+        max_depth: 3,
+        icon: 'fa fa-file icon-state-warning icon-lg'
+      }
+    },
+    plugins: ['dnd', 'types', 'contextmenu'],
+    contextmenu: {
+      items: function items($node) {
+        var tree = jstreeNode.jstree(true);
+        var newNodeName = $translate.instant('product.category.nameNewCategory');
+        return {
+          Create: {
+            label: $translate.instant('product.category.labelNewCategory'),
+            action: function action() {
+              var newCategory = {
+                name: { ko: newNodeName },
+                isActive: false,
+                parentId: $node.id
+              };
+              $http.post('/api/v1/categories', newCategory).then(function (res) {
+                categoryIdMap[res.data.id] = res.data;
+                var newNodeId = tree.create_node($node, res.data.name.ko); // TODO i18n
+                jstreeNode.jstree('set_id', newNodeId, res.data.id);
+                selectNode(res.data.id);
+              }, function (err) {
+                window.alert(err.data);
+              });
+            }
+          },
+          Delete: {
+            label: $translate.instant('product.category.labelDeleteCategory'),
+            action: function action(obj) {
+              var categoryId = $node.id;
+              $http['delete']('/api/v1/categories/' + categoryId).then(function () {
+                delete categoryIdMap[categoryId];
+                jstreeNode.jstree('delete_node', categoryId);
+              }, function (err) {
+                window.alert(err.data);
+              });
+            }
+          }
+        };
+      }
+    }
+  });
+
+  // 2016. 01. 20. [heekyu] refer to https://www.jstree.com/api
+  jstreeNode.on('move_node.jstree', function (e, data) {
+    console.log(data);
+  });
+  jstreeNode.on('select_node.jstree', function (e, data) {
+    $scope.category = categoryIdMap[data.node.id];
+    if (!$scope.$$phase) {
+      $scope.$apply();
+    }
+  });
+  // TODO update all tree
+
+  var selectNode = function selectNode(categoryId) {
+    jstreeNode.jstree('select_node', categoryId);
+    var selected = jstreeNode.jstree('get_selected');
+    selected.map(function (id) {
+      if (id != categoryId) {
+        jstreeNode.jstree('deselect_node', id);
+      }
+    });
+  };
+
+  $scope.names = [{ title: 'ko', key: 'ko' }, { title: 'en', key: 'en' }];
 });
 }, {"./module.js":5}],
 7: [function(require, module, exports) {

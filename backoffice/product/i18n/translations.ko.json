@@ -26,6 +26,13 @@
       "labelVariant": "상품 규격",
       "addVariantKind": "종류 추가",
       "removeVariantKind": "종류 삭제"
+    },
+    "category": {
+      "title": "상품 카테고리",
+      "rootName": "전체",
+      "nameNewCategory": "새 카테고리",
+      "labelNewCategory": "카테고리 생성",
+      "labelDeleteCategory": "삭제"
     }
   }
 }

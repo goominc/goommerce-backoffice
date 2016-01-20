@@ -46,6 +46,21 @@ productModule.config(($stateProvider) => {
           });
         },
       },
+    })
+    .state('product.category', {
+      url: '/category',
+      templateUrl: templateRoot + '/product/category.html',
+      controller: 'CategoryEditController',
+      resolve: {
+        categories: ($http) => {
+          return $http.get('/api/v1/categories').then((res) => {
+            return res.data;
+          });
+        },
+      },
+    })
+    .state('product.category.child', {
+      url: '/:categoryId',
     });
 });
 
