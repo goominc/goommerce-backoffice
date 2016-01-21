@@ -618,6 +618,11 @@ productModule.config(function ($stateProvider) {
     resolve: {
       product: function product() {
         return { name: {}, price: {} };
+      },
+      categories: function categories($http) {
+        return $http.get('/api/v1/categories').then(function (res) {
+          return res.data;
+        });
       }
     }
   }).state('product.edit', {
@@ -627,6 +632,11 @@ productModule.config(function ($stateProvider) {
     resolve: {
       product: function product($http, $stateParams) {
         return $http.get('/api/v1/products/' + $stateParams.productId).then(function (res) {
+          return res.data;
+        });
+      },
+      categories: function categories($http) {
+        return $http.get('/api/v1/categories').then(function (res) {
           return res.data;
         });
       }
@@ -738,7 +748,7 @@ productModule.controller('ProductMainController', function ($scope, $state, $roo
   };
 });
 
-productModule.controller('ProductEditController', function ($scope, $http, $q, $state, $rootScope, $translate, product) {
+productModule.controller('ProductEditController', function ($scope, $http, $q, $state, $rootScope, $translate, product, categories) {
   var initFromProduct = function initFromProduct() {
     var titleKey = 'product.edit.createTitle';
     $scope.product = product;
@@ -777,10 +787,46 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
     } else {
       $scope.productVariants = [];
     }
+    // 2016. 01. 21. [heekyu] products' categories
+    $scope.productCategorySet = new Set();
+    if (!$scope.product.categories) {
+      $scope.product.categories = [];
+    }
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+      for (var _iterator2 = $scope.product.categories[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        var productCategory = _step2.value;
+
+        if ($scope.productCategorySet.has(productCategory)) {
+          window.alert('[DATA ERROR] (' + productCategory + ') is contained multiple');
+          continue;
+        }
+        $scope.productCategorySet.add(productCategory);
+      }
+      // 2016. 01. 21. [heekyu] products' categories
+    } catch (err) {
+      _didIteratorError2 = true;
+      _iteratorError2 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion2 && _iterator2['return']) {
+          _iterator2['return']();
+        }
+      } finally {
+        if (_didIteratorError2) {
+          throw _iteratorError2;
+        }
+      }
+    }
+
     return { titleKey: titleKey };
   };
 
   var initObj = initFromProduct();
+  $scope.allCategories = categories;
 
   $scope.contentTitle = $translate.instant(initObj.titleKey);
   $scope.contentSubTitle = '';
@@ -816,52 +862,15 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
   $scope.addVariantKind = function (name) {
     if (name && name.trim() !== '') {
       $scope.newObjects.variantKind = '';
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
-
-      try {
-        for (var _iterator2 = $scope.variantKinds[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var kind = _step2.value;
-
-          if (kind.name === name) {
-            $scope.hideAddItemBox();
-            window.alert('duplicate name');
-            return false;
-          }
-        }
-      } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2['return']) {
-            _iterator2['return']();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
-        }
-      }
-
-      $scope.variantKinds.push({ name: name, kinds: [] });
-      // TODO enhance hiding add item box
-      $scope.hideAddItemBox();
-    }
-  };
-  $scope.addVariantKindItem = function (index, name) {
-    if (name && name.trim() !== '') {
-      $scope.newObjects.variantKindItem = '';
       var _iteratorNormalCompletion3 = true;
       var _didIteratorError3 = false;
       var _iteratorError3 = undefined;
 
       try {
-        for (var _iterator3 = $scope.variantKinds[index].kinds[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var kindItem = _step3.value;
+        for (var _iterator3 = $scope.variantKinds[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var kind = _step3.value;
 
-          if (kindItem === name) {
+          if (kind.name === name) {
             $scope.hideAddItemBox();
             window.alert('duplicate name');
             return false;
@@ -878,6 +887,43 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
         } finally {
           if (_didIteratorError3) {
             throw _iteratorError3;
+          }
+        }
+      }
+
+      $scope.variantKinds.push({ name: name, kinds: [] });
+      // TODO enhance hiding add item box
+      $scope.hideAddItemBox();
+    }
+  };
+  $scope.addVariantKindItem = function (index, name) {
+    if (name && name.trim() !== '') {
+      $scope.newObjects.variantKindItem = '';
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
+
+      try {
+        for (var _iterator4 = $scope.variantKinds[index].kinds[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var kindItem = _step4.value;
+
+          if (kindItem === name) {
+            $scope.hideAddItemBox();
+            window.alert('duplicate name');
+            return false;
+          }
+        }
+      } catch (err) {
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion4 && _iterator4['return']) {
+            _iterator4['return']();
+          }
+        } finally {
+          if (_didIteratorError4) {
+            throw _iteratorError4;
           }
         }
       }
@@ -927,13 +973,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
     }
     var newVariantSKUs = [];
     var idx = 0;
-    var _iteratorNormalCompletion4 = true;
-    var _didIteratorError4 = false;
-    var _iteratorError4 = undefined;
+    var _iteratorNormalCompletion5 = true;
+    var _didIteratorError5 = false;
+    var _iteratorError5 = undefined;
 
     try {
-      for (var _iterator4 = $scope.variantKinds[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-        var variantKind = _step4.value;
+      for (var _iterator5 = $scope.variantKinds[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+        var variantKind = _step5.value;
 
         if (variantKind.kinds.length < 1) {
           continue;
@@ -945,43 +991,43 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
         idx = newVariantSKUs.length;
         for (var i = start; i < idx; i++) {
           var newVariantSKU = newVariantSKUs[i];
-          var _iteratorNormalCompletion5 = true;
-          var _didIteratorError5 = false;
-          var _iteratorError5 = undefined;
+          var _iteratorNormalCompletion6 = true;
+          var _didIteratorError6 = false;
+          var _iteratorError6 = undefined;
 
           try {
-            for (var _iterator5 = variantKind.kinds[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-              var kind = _step5.value;
+            for (var _iterator6 = variantKind.kinds[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+              var kind = _step6.value;
 
               newVariantSKUs.push(newVariantSKU + '-' + kind);
             }
           } catch (err) {
-            _didIteratorError5 = true;
-            _iteratorError5 = err;
+            _didIteratorError6 = true;
+            _iteratorError6 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion5 && _iterator5['return']) {
-                _iterator5['return']();
+              if (!_iteratorNormalCompletion6 && _iterator6['return']) {
+                _iterator6['return']();
               }
             } finally {
-              if (_didIteratorError5) {
-                throw _iteratorError5;
+              if (_didIteratorError6) {
+                throw _iteratorError6;
               }
             }
           }
         }
       }
     } catch (err) {
-      _didIteratorError4 = true;
-      _iteratorError4 = err;
+      _didIteratorError5 = true;
+      _iteratorError5 = err;
     } finally {
       try {
-        if (!_iteratorNormalCompletion4 && _iterator4['return']) {
-          _iterator4['return']();
+        if (!_iteratorNormalCompletion5 && _iterator5['return']) {
+          _iterator5['return']();
         }
       } finally {
-        if (_didIteratorError4) {
-          throw _iteratorError4;
+        if (_didIteratorError5) {
+          throw _iteratorError5;
         }
       }
     }
@@ -1030,13 +1076,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
       }
       var promises = [];
       var pvUrl = '/api/v1/products/' + $scope.product.id + '/product_variants';
-      var _iteratorNormalCompletion6 = true;
-      var _didIteratorError6 = false;
-      var _iteratorError6 = undefined;
+      var _iteratorNormalCompletion7 = true;
+      var _didIteratorError7 = false;
+      var _iteratorError7 = undefined;
 
       try {
-        for (var _iterator6 = $scope.productVariants[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-          var productVariant = _step6.value;
+        for (var _iterator7 = $scope.productVariants[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+          var productVariant = _step7.value;
 
           if (productVariant.stock < 0) {
             continue;
@@ -1060,42 +1106,42 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
         }
         // 2016. 01. 18. [heekyu] delete removed variants
       } catch (err) {
-        _didIteratorError6 = true;
-        _iteratorError6 = err;
+        _didIteratorError7 = true;
+        _iteratorError7 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion6 && _iterator6['return']) {
-            _iterator6['return']();
+          if (!_iteratorNormalCompletion7 && _iterator7['return']) {
+            _iterator7['return']();
           }
         } finally {
-          if (_didIteratorError6) {
-            throw _iteratorError6;
+          if (_didIteratorError7) {
+            throw _iteratorError7;
           }
         }
       }
 
       if ($scope.origVariants.size > 0) {
-        var _iteratorNormalCompletion7 = true;
-        var _didIteratorError7 = false;
-        var _iteratorError7 = undefined;
+        var _iteratorNormalCompletion8 = true;
+        var _didIteratorError8 = false;
+        var _iteratorError8 = undefined;
 
         try {
-          for (var _iterator7 = $scope.origVariants.values()[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-            var deletedVariant = _step7.value;
+          for (var _iterator8 = $scope.origVariants.values()[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+            var deletedVariant = _step8.value;
 
             promises.push($http({ method: 'DELETE', url: pvUrl + '/' + deletedVariant }));
           }
         } catch (err) {
-          _didIteratorError7 = true;
-          _iteratorError7 = err;
+          _didIteratorError8 = true;
+          _iteratorError8 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion7 && _iterator7['return']) {
-              _iterator7['return']();
+            if (!_iteratorNormalCompletion8 && _iterator8['return']) {
+              _iterator8['return']();
             }
           } finally {
-            if (_didIteratorError7) {
-              throw _iteratorError7;
+            if (_didIteratorError8) {
+              throw _iteratorError8;
             }
           }
         }
@@ -1151,6 +1197,22 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
   };
   $scope.removeImage = function (index) {
     $scope.images.splice(index, 1);
+  };
+
+  $scope.toggleCategory = function (categoryId) {
+    if ($scope.productCategorySet.has(categoryId)) {
+      $scope.productCategorySet['delete'](categoryId);
+      for (var i = 0; i < $scope.product.categories.length; i++) {
+        var category = $scope.product.categories[i];
+        if (category === categoryId) {
+          $scope.product.categories.splice(i, 1);
+          break;
+        }
+      }
+    } else {
+      $scope.productCategorySet.add(categoryId);
+      $scope.product.categories.push(categoryId);
+    }
   };
 });
 
@@ -1309,7 +1371,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     $http.put('/api/v1/categories/' + $scope.category.id, $scope.category).then(function (res) {
       var category = res.data;
       categoryIdMap[category.id] = category;
-      jstreeNode.jstree('rename_node', category.id, category.name.ko); // TODO i18n
+      jstreeNode.jstree('set_text', category.id, category.name.ko); // TODO i18n
       $scope.category = category;
     }, function (err) {
       window.alert(err.data);

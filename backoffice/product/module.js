@@ -33,6 +33,11 @@ productModule.config(($stateProvider) => {
       controller: 'ProductEditController',
       resolve: {
         product: () => { return { name: {}, price: {} }; },
+        categories: ($http) => {
+          return $http.get('/api/v1/categories').then((res) => {
+            return res.data;
+          });
+        },
       },
     })
     .state('product.edit', {
@@ -42,6 +47,11 @@ productModule.config(($stateProvider) => {
       resolve: {
         product: ($http, $stateParams) => {
           return $http.get('/api/v1/products/' + $stateParams.productId).then((res) => {
+            return res.data;
+          });
+        },
+        categories: ($http) => {
+          return $http.get('/api/v1/categories').then((res) => {
             return res.data;
           });
         },

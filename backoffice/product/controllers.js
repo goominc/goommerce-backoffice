@@ -35,7 +35,7 @@ productModule.controller('ProductMainController', ($scope, $state, $rootScope, $
   };
 });
 
-productModule.controller('ProductEditController', ($scope, $http, $q, $state, $rootScope, $translate, product) => {
+productModule.controller('ProductEditController', ($scope, $http, $q, $state, $rootScope, $translate, product, categories) => {
   const initFromProduct = () => {
     let titleKey = 'product.edit.createTitle';
     $scope.product = product;
@@ -53,10 +53,24 @@ productModule.controller('ProductEditController', ($scope, $http, $q, $state, $r
     } else {
       $scope.productVariants = [];
     }
+    // 2016. 01. 21. [heekyu] products' categories
+    $scope.productCategorySet = new Set();
+    if (!$scope.product.categories) {
+      $scope.product.categories = [];
+    }
+    for (const productCategory of $scope.product.categories) {
+      if ($scope.productCategorySet.has(productCategory)) {
+        window.alert('[DATA ERROR] (' + productCategory + ') is contained multiple');
+        continue;
+      }
+      $scope.productCategorySet.add(productCategory);
+    }
+    // 2016. 01. 21. [heekyu] products' categories
     return {titleKey};
   };
 
   const initObj = initFromProduct();
+  $scope.allCategories = categories;
 
   $scope.contentTitle = $translate.instant(initObj.titleKey);
   $scope.contentSubTitle = '';
@@ -305,6 +319,22 @@ productModule.controller('ProductEditController', ($scope, $http, $q, $state, $r
   $scope.removeImage = (index) => {
     $scope.images.splice(index, 1);
   };
+
+  $scope.toggleCategory = (categoryId) => {
+    if ($scope.productCategorySet.has(categoryId)) {
+      $scope.productCategorySet.delete(categoryId);
+      for (let i = 0; i < $scope.product.categories.length; i++) {
+        const category = $scope.product.categories[i];
+        if (category === categoryId) {
+          $scope.product.categories.splice(i, 1);
+          break;
+        }
+      }
+    } else {
+      $scope.productCategorySet.add(categoryId);
+      $scope.product.categories.push(categoryId);
+    }
+  };
 });
 
 productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $state, categories, $translate) => {
@@ -471,7 +501,7 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     $http.put('/api/v1/categories/' + $scope.category.id, $scope.category).then((res) => {
       const category = res.data;
       categoryIdMap[category.id] = category;
-      jstreeNode.jstree('rename_node', category.id, category.name.ko); // TODO i18n
+      jstreeNode.jstree('set_text', category.id, category.name.ko); // TODO i18n
       $scope.category = category;
     }, (err) => {
       window.alert(err.data);

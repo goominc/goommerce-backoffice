@@ -144,6 +144,41 @@
                       </div>
                     </div>
                   </uib-tab>
+                  <uib-tab heading="Category">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label class="col-md-2 control-label">Categories:
+                            <span class="required"> * </span>
+                          </label>
+                          <div class="col-md-10">
+                            <div class="form-control height-auto">
+                              <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 275px;"><div class="scroller" style="height: 275px; overflow: hidden; width: auto;" data-always-visible="1" data-initialized="1">
+                                <ul class="list-unstyled">
+                                  <li data-ng-repeat="category in allCategories.children">
+                                    <input type="checkbox" data-ng-model="category.isChecked" data-ng-checked="productCategorySet.has(category.id)" data-ng-change="toggleCategory(category.id)"/>
+                                    {{ category.name.ko }}
+                                    <ul class="list-unstyled">
+                                      <li data-ng-repeat="child1 in category.children">
+                                        <input type="checkbox" data-ng-model="child1.isChecked" data-ng-checked="productCategorySet.has(child1.id)" data-ng-change="toggleCategory(child1.id)"/>
+                                        {{ child1.name.ko }}
+                                        <ul class="list-unstyled">
+                                          <li data-ng-repeat="child2 in child1.children">
+                                            <input type="checkbox" data-ng-model="child2.isChecked" data-ng-checked="productCategorySet.has(child2.id)" data-ng-change="toggleCategory(child2.id)"/>
+                                            {{ child2.name.ko }}
+                                          </li>
+                                        </ul>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </div></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </uib-tab>
                 </uib-tabset>
               </div>
               <div style="clear: both;"></div>
