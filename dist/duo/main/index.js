@@ -1285,6 +1285,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     if (!$scope.$$phase) {
       $scope.$apply();
     }
+    $state.go('product.category.child', { categoryId: data.node.id });
   });
   // TODO update all tree
 
@@ -1298,7 +1299,22 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     });
   };
 
-  $scope.names = [{ title: 'ko', key: 'ko' }, { title: 'en', key: 'en' }];
+  $scope.names = [{ title: 'ko', key: 'ko' }, { title: 'en', key: 'en' }, { title: 'zh_cn', key: 'zh_cn' }, { title: 'zh_tw', key: 'zh_tw' }];
+
+  $scope.save = function () {
+    if (!$scope.category) {
+      window.alert('[ERROR] Category is NULL');
+      return false;
+    }
+    $http.put('/api/v1/categories/' + $scope.category.id, $scope.category).then(function (res) {
+      var category = res.data;
+      categoryIdMap[category.id] = category;
+      jstreeNode.jstree('rename_node', category.id, category.name.ko); // TODO i18n
+      $scope.category = category;
+    }, function (err) {
+      window.alert(err.data);
+    });
+  };
 });
 }, {"./module.js":6}],
 8: [function(require, module, exports) {

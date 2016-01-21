@@ -442,6 +442,7 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     if (!$scope.$$phase) {
       $scope.$apply();
     }
+    $state.go('product.category.child', { categoryId: data.node.id });
   });
   // TODO update all tree
 
@@ -458,5 +459,22 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
   $scope.names = [
     {title: 'ko', key: 'ko'},
     {title: 'en', key: 'en'},
+    {title: 'zh_cn', key: 'zh_cn'},
+    {title: 'zh_tw', key: 'zh_tw'},
   ];
+
+  $scope.save = () => {
+    if (!$scope.category) {
+      window.alert('[ERROR] Category is NULL');
+      return false;
+    }
+    $http.put('/api/v1/categories/' + $scope.category.id, $scope.category).then((res) => {
+      const category = res.data;
+      categoryIdMap[category.id] = category;
+      jstreeNode.jstree('rename_node', category.id, category.name.ko); // TODO i18n
+      $scope.category = category;
+    }, (err) => {
+      window.alert(err.data);
+    });
+  };
 });
