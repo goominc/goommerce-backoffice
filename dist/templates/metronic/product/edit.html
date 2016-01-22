@@ -98,7 +98,7 @@
                           <tbody>
                           <tr data-ng-repeat="productVariant in productVariants" data-ng-class="{'bo-invalid-row': productVariant.stock < 0}">
                             <th><input type="text" data-ng-model="productVariant.sku" /></th>
-                            <th><input type="number" data-ng-model="productVariant.price.krw" /></th>
+                            <th><input type="number" data-ng-model="productVariant.price.KRW" /></th>
                             <th><input type="number" data-ng-model="productVariant.stock" /></th>
                             <th><button class="btn red" type="reset" data-ng-click="removeProductVariant($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></th>
                           </tr>

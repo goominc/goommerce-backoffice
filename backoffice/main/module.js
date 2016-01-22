@@ -158,8 +158,6 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     }
   };
   checkLogin();
-
-  // $http.get('http://localhost:8080/api/')
 });
 
 mainModule.controller('LoginModalController', ($scope, $http, $cookies) => {

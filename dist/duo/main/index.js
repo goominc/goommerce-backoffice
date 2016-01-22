@@ -250,8 +250,6 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
     }
   };
   checkLogin();
-
-  // $http.get('http://localhost:8080/api/')
 });
 
 mainModule.controller('LoginModalController', function ($scope, $http, $cookies) {
@@ -1041,7 +1039,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        var newVariant = { sku: newVariantSKU, price: { krw: 0 }, stock: -1 };
+        var newVariant = { sku: newVariantSKU, price: { KRW: 0 }, stock: -1 };
         newVariants.push(newVariant);
         newVariantsMap[newVariantSKU] = newVariant;
       }

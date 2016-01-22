@@ -205,7 +205,7 @@ productModule.controller('ProductEditController', ($scope, $http, $q, $state, $r
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        const newVariant = {sku: newVariantSKU, price: {krw: 0}, stock: -1};
+        const newVariant = {sku: newVariantSKU, price: {KRW: 0}, stock: -1};
         newVariants.push(newVariant);
         newVariantsMap[newVariantSKU] = newVariant;
       }
