@@ -1184,6 +1184,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
   $scope.imageUploaded = function (result) {
     $scope.images.push({
       url: result.url.slice(5),
+      publicId: result.public_id,
+      version: result.version,
       product: $scope.product,
       mainImage: false,
       thumbnail: false
