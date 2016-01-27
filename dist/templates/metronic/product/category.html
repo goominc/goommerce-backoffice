@@ -32,7 +32,8 @@
                       <label class="col-md-2 control-label">{{'product.edit.labelActive' | translate}}</label>
                       <div class="col-md-10">
                         <div class="form-control">
-                          <input type="checkbox" data-ng-model="category.isActive">
+                          <input id="category-{{category.id}}" type="checkbox" data-ng-model="category.isActive">
+                          <label for="category-{{category.id}}"><span></span></label>
                         </div>
                       </div>
                     </div>

@@ -202,6 +202,7 @@ productModule.controller('ProductEditController', ($scope, $http, $q, $state, $r
       const newVariantSKU = newVariantSKUs[i];
       const alreadyIn = $scope.productVariantsMap[newVariantSKU];
       if (alreadyIn) {
+        delete $scope.productVariantsMap[newVariantSKU];
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
@@ -210,18 +211,16 @@ productModule.controller('ProductEditController', ($scope, $http, $q, $state, $r
         newVariantsMap[newVariantSKU] = newVariant;
       }
     }
+    for (const key in $scope.productVariantsMap) {
+      if ($scope.productVariantsMap.hasOwnProperty(key)) {
+        newVariants.push($scope.productVariantsMap[key]);
+        newVariantsMap[key] = $scope.productVariantsMap[key];
+      }
+    }
     $scope.productVariants = newVariants;
     $scope.productVariantsMap = newVariantsMap;
-    window.setTimeout(() => {
-      $("input[type=checkbox]").uniform();
-    }, 0);
   };
   // END Manipulate Variants
-
-  // TODO more convenient way
-  window.setTimeout(() => {
-    $("input[type=checkbox]").uniform();
-  }, 0);
 
   $scope.save = () => {
     let method = "POST";
@@ -315,6 +314,24 @@ productModule.controller('ProductEditController', ($scope, $http, $q, $state, $r
     });
   };
 
+  $scope.newProductVariant = { price: {} };
+  $scope.addProductVariant = (newProductVariant) => {
+    if (!newProductVariant.sku || newProductVariant.sku === '') {
+      window.alert('sku must be valid string');
+      return;
+    }
+    if ($scope.productVariantsMap[newProductVariant.sku]) {
+      window.alert(newProductVariant.sku + ' already exists');
+      return;
+    }
+    if (newProductVariant.price <= 0 || newProductVariant.stock < 0) {
+      window.alert('Price > 0, Stock >= 0');
+      return;
+    }
+    $scope.newProductVariant = { price: {} };
+    $scope.productVariants.push(newProductVariant);
+    $scope.productVariantsMap[newProductVariant.sku] = newProductVariant;
+  };
   $scope.removeProductVariant = (index) => {
     $scope.productVariants.splice(index, 1);
   };

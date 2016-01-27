@@ -1,5 +1,6 @@
 {
   "main": {
+    "createButton": "추가",
     "closeButton": "닫기",
     "deleteButton": "삭제",
     "login": {

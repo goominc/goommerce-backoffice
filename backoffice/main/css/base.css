@@ -1,0 +1,23 @@
+input[type="checkbox"] {
+  display:none;
+}
+input[type="checkbox"] + label {
+  display:inline-block;
+  width:19px;
+  height:19px;
+  background-image: url("/vendor/metronic/theme/assets/global/plugins/uniform/images/sprite.png");
+  background-repeat: no-repeat;
+  background-position: 0 -260px;
+  vertical-align: top;
+  zoom: 1;
+  text-align: center;
+  -webkit-font-smoothing: antialiased;
+  cursor:pointer;
+}
+input[type="checkbox"]:checked + label {
+  background-position: -76px -260px;
+}
+/* 2016. 01. 27. [heekyu] for angular ng-change */
+input[type="checkbox"] + .checkbox-active {
+  background-position: -76px -260px;
+}
