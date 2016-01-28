@@ -15,7 +15,8 @@
                 <div class="portlet">
                   <div class="portlet-title">
                     <div class="actions btn-set">
-                      <button class="btn blue" ng-click="save()"><i class="fa fa-check"></i> {{'product.save' | translate}}</button>
+                      <button class="btn blue" ng-click="saveAndContinue()"><i class="fa fa-check"></i> {{'main.saveAndContinueButton' | translate}}</button>
+                      <button class="btn blue" ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
                     </div>
                   </div>
                 </div>
@@ -178,7 +179,7 @@
                                                data-ng-model="child1.isChecked"
                                                data-ng-checked="productCategorySet.has(child1.id)"
                                                data-ng-change="toggleCategory(child1.id)"/>
-                                        <label for="category-{{child1.id}}" data-ng-class="{'checkbox-active': category.isChecked}"></label>
+                                        <label for="category-{{child1.id}}" data-ng-class="{'checkbox-active': child1.isChecked}"></label>
                                         {{ child1.name.ko }}
                                         <ul class="list-unstyled">
                                           <li data-ng-repeat="child2 in child1.children">
@@ -187,7 +188,7 @@
                                                    data-ng-model="child2.isChecked"
                                                    data-ng-checked="productCategorySet.has(child2.id)"
                                                    data-ng-change="toggleCategory(child2.id)"/>
-                                            <label for="category-{{child2.id}}" data-ng-class="{'checkbox-active': category.isChecked}"></label>
+                                            <label for="category-{{child2.id}}" data-ng-class="{'checkbox-active': child2.isChecked}"></label>
                                             {{ child2.name.ko }}
                                           </li>
                                         </ul>

@@ -71,6 +71,9 @@ productModule.config(($stateProvider) => {
     })
     .state('product.category.child', {
       url: '/:categoryId',
+    })
+    .state('product.batchUpload', {
+      url: '/batch-upload',
     });
 });
 

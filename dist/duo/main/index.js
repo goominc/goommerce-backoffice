@@ -413,6 +413,34 @@ directiveModule.directive('clUploadWidget', function () {
     }
   };
 });
+
+directiveModule.directive('boFileReader', function () {
+  return {
+    scope: {
+      boFileReader: "=",
+      onRead: '&'
+    },
+    link: function link(scope, element) {
+      $(element).on('change', function (changeEvent) {
+        var files = changeEvent.target.files;
+        if (files.length) {
+          var r = new FileReader();
+          r.onload = function (e) {
+            var contents = e.target.result;
+            scope.$apply(function () {
+              scope.boFileReader = contents;
+              if (scope.onRead) {
+                scope.onRead(contents);
+              }
+            });
+          };
+
+          r.readAsText(files[0], 'EUC-KR'); // april send me EUC-KR encoded files
+        }
+      });
+    }
+  };
+});
 }, {"../utils/module":10}],
 10: [function(require, module, exports) {
 'use strict';
@@ -652,6 +680,8 @@ productModule.config(function ($stateProvider) {
     }
   }).state('product.category.child', {
     url: '/:categoryId'
+  }).state('product.batchUpload', {
+    url: '/batch-upload'
   });
 });
 
@@ -676,7 +706,6 @@ module.exports = {
 19: [function(require, module, exports) {
 module.exports = {
   "product": {
-    "save": "저장",
     "main": {
       "title": "상품"
     },
@@ -709,6 +738,9 @@ module.exports = {
       "nameNewCategory": "새 카테고리",
       "labelNewCategory": "카테고리 생성",
       "labelDeleteCategory": "삭제"
+    },
+    "batchUpload": {
+      "upload": "업로드"
     }
   }
 };
@@ -744,9 +776,134 @@ productModule.controller('ProductMainController', function ($scope, $state, $roo
       data: 'sku'
     }]
   };
+  $scope.fileContents = 'before';
 });
 
-productModule.controller('ProductEditController', function ($scope, $http, $q, $state, $rootScope, $translate, product, categories) {
+productModule.factory('productUtil', function ($http, $q) {
+  return {
+    createProduct: function createProduct(product, productVariants) {
+      var url = '/api/v1/products';
+
+      return $http.post(url, product).then(function (res) {
+        if (!product.id) {
+          product.id = res.data.id; // need if create
+          // $state.go('product.edit', {productId: $scope.product.id});
+        }
+        var promises = [];
+        var pvUrl = '/api/v1/products/' + product.id + '/product_variants';
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = productVariants[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var productVariant = _step.value;
+
+            if (productVariant.stock < 0) {
+              continue;
+            }
+            promises.push($http.post(pvUrl, productVariant));
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator['return']) {
+              _iterator['return']();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+
+        return $q.all(promises).then(function (res2) {
+          return { product: res.data, productVariants: res2.map(function (item) {
+              return item.data;
+            }) };
+        });
+      });
+    },
+    updateProduct: function updateProduct(product, productVariants, oldProductVariants) {
+      var url = '/api/v1/products/' + product.id;
+
+      return $http.put(url, product).then(function (res) {
+        var promises = [];
+        var pvUrl = '/api/v1/products/' + product.id + '/product_variants';
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
+        try {
+          for (var _iterator2 = productVariants[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var productVariant = _step2.value;
+
+            if (productVariant.stock < 0) {
+              continue;
+            }
+            oldProductVariants['delete'](productVariant.id);
+            if (!productVariant.id) {
+              promises.push($http.post(pvUrl, productVariant));
+            } else {
+              promises.push($http.put(pvUrl + '/' + productVariant.id, productVariant));
+            }
+          }
+          // 2016. 01. 18. [heekyu] delete removed variants
+        } catch (err) {
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion2 && _iterator2['return']) {
+              _iterator2['return']();
+            }
+          } finally {
+            if (_didIteratorError2) {
+              throw _iteratorError2;
+            }
+          }
+        }
+
+        if (oldProductVariants.size > 0) {
+          var _iteratorNormalCompletion3 = true;
+          var _didIteratorError3 = false;
+          var _iteratorError3 = undefined;
+
+          try {
+            for (var _iterator3 = oldProductVariants.values()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+              var deletedVariant = _step3.value;
+
+              promises.push($http({ method: 'DELETE', url: pvUrl + '/' + deletedVariant }));
+            }
+          } catch (err) {
+            _didIteratorError3 = true;
+            _iteratorError3 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion3 && _iterator3['return']) {
+                _iterator3['return']();
+              }
+            } finally {
+              if (_didIteratorError3) {
+                throw _iteratorError3;
+              }
+            }
+          }
+        }
+
+        return $q.all(promises).then(function (res2) {
+          return { product: res.data, productVariants: res2.map(function (item) {
+              return item.data;
+            }) };
+        });
+      });
+    }
+  };
+});
+
+productModule.controller('ProductEditController', function ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil) {
   var initFromProduct = function initFromProduct() {
     var titleKey = 'product.edit.createTitle';
     $scope.product = product;
@@ -757,28 +914,28 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
     $scope.origVariants = new Set();
     if ($scope.product.productVariants) {
       $scope.productVariants = $scope.product.productVariants;
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
 
       try {
-        for (var _iterator = $scope.productVariants[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var productVariant = _step.value;
+        for (var _iterator4 = $scope.productVariants[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var productVariant = _step4.value;
 
           $scope.productVariantsMap[productVariant.sku] = productVariant;
           $scope.origVariants.add(productVariant.id);
         }
       } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion && _iterator['return']) {
-            _iterator['return']();
+          if (!_iteratorNormalCompletion4 && _iterator4['return']) {
+            _iterator4['return']();
           }
         } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
+          if (_didIteratorError4) {
+            throw _iteratorError4;
           }
         }
       }
@@ -790,13 +947,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
     if (!$scope.product.categories) {
       $scope.product.categories = [];
     }
-    var _iteratorNormalCompletion2 = true;
-    var _didIteratorError2 = false;
-    var _iteratorError2 = undefined;
+    var _iteratorNormalCompletion5 = true;
+    var _didIteratorError5 = false;
+    var _iteratorError5 = undefined;
 
     try {
-      for (var _iterator2 = $scope.product.categories[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-        var productCategory = _step2.value;
+      for (var _iterator5 = $scope.product.categories[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+        var productCategory = _step5.value;
 
         if ($scope.productCategorySet.has(productCategory)) {
           window.alert('[DATA ERROR] (' + productCategory + ') is contained multiple');
@@ -806,16 +963,16 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
       }
       // 2016. 01. 21. [heekyu] products' categories
     } catch (err) {
-      _didIteratorError2 = true;
-      _iteratorError2 = err;
+      _didIteratorError5 = true;
+      _iteratorError5 = err;
     } finally {
       try {
-        if (!_iteratorNormalCompletion2 && _iterator2['return']) {
-          _iterator2['return']();
+        if (!_iteratorNormalCompletion5 && _iterator5['return']) {
+          _iterator5['return']();
         }
       } finally {
-        if (_didIteratorError2) {
-          throw _iteratorError2;
+        if (_didIteratorError5) {
+          throw _iteratorError5;
         }
       }
     }
@@ -860,13 +1017,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
   $scope.addVariantKind = function (name) {
     if (name && name.trim() !== '') {
       $scope.newObjects.variantKind = '';
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
+      var _iteratorNormalCompletion6 = true;
+      var _didIteratorError6 = false;
+      var _iteratorError6 = undefined;
 
       try {
-        for (var _iterator3 = $scope.variantKinds[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var kind = _step3.value;
+        for (var _iterator6 = $scope.variantKinds[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+          var kind = _step6.value;
 
           if (kind.name === name) {
             $scope.hideAddItemBox();
@@ -875,16 +1032,16 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
           }
         }
       } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
+        _didIteratorError6 = true;
+        _iteratorError6 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion3 && _iterator3['return']) {
-            _iterator3['return']();
+          if (!_iteratorNormalCompletion6 && _iterator6['return']) {
+            _iterator6['return']();
           }
         } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
+          if (_didIteratorError6) {
+            throw _iteratorError6;
           }
         }
       }
@@ -897,13 +1054,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
   $scope.addVariantKindItem = function (index, name) {
     if (name && name.trim() !== '') {
       $scope.newObjects.variantKindItem = '';
-      var _iteratorNormalCompletion4 = true;
-      var _didIteratorError4 = false;
-      var _iteratorError4 = undefined;
+      var _iteratorNormalCompletion7 = true;
+      var _didIteratorError7 = false;
+      var _iteratorError7 = undefined;
 
       try {
-        for (var _iterator4 = $scope.variantKinds[index].kinds[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-          var kindItem = _step4.value;
+        for (var _iterator7 = $scope.variantKinds[index].kinds[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+          var kindItem = _step7.value;
 
           if (kindItem === name) {
             $scope.hideAddItemBox();
@@ -912,16 +1069,16 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
           }
         }
       } catch (err) {
-        _didIteratorError4 = true;
-        _iteratorError4 = err;
+        _didIteratorError7 = true;
+        _iteratorError7 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion4 && _iterator4['return']) {
-            _iterator4['return']();
+          if (!_iteratorNormalCompletion7 && _iterator7['return']) {
+            _iterator7['return']();
           }
         } finally {
-          if (_didIteratorError4) {
-            throw _iteratorError4;
+          if (_didIteratorError7) {
+            throw _iteratorError7;
           }
         }
       }
@@ -971,13 +1128,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
     }
     var newVariantSKUs = [];
     var idx = 0;
-    var _iteratorNormalCompletion5 = true;
-    var _didIteratorError5 = false;
-    var _iteratorError5 = undefined;
+    var _iteratorNormalCompletion8 = true;
+    var _didIteratorError8 = false;
+    var _iteratorError8 = undefined;
 
     try {
-      for (var _iterator5 = $scope.variantKinds[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-        var variantKind = _step5.value;
+      for (var _iterator8 = $scope.variantKinds[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+        var variantKind = _step8.value;
 
         if (variantKind.kinds.length < 1) {
           continue;
@@ -989,43 +1146,43 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
         idx = newVariantSKUs.length;
         for (var i = start; i < idx; i++) {
           var newVariantSKU = newVariantSKUs[i];
-          var _iteratorNormalCompletion6 = true;
-          var _didIteratorError6 = false;
-          var _iteratorError6 = undefined;
+          var _iteratorNormalCompletion9 = true;
+          var _didIteratorError9 = false;
+          var _iteratorError9 = undefined;
 
           try {
-            for (var _iterator6 = variantKind.kinds[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-              var kind = _step6.value;
+            for (var _iterator9 = variantKind.kinds[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+              var kind = _step9.value;
 
               newVariantSKUs.push(newVariantSKU + '-' + kind);
             }
           } catch (err) {
-            _didIteratorError6 = true;
-            _iteratorError6 = err;
+            _didIteratorError9 = true;
+            _iteratorError9 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion6 && _iterator6['return']) {
-                _iterator6['return']();
+              if (!_iteratorNormalCompletion9 && _iterator9['return']) {
+                _iterator9['return']();
               }
             } finally {
-              if (_didIteratorError6) {
-                throw _iteratorError6;
+              if (_didIteratorError9) {
+                throw _iteratorError9;
               }
             }
           }
         }
       }
     } catch (err) {
-      _didIteratorError5 = true;
-      _iteratorError5 = err;
+      _didIteratorError8 = true;
+      _iteratorError8 = err;
     } finally {
       try {
-        if (!_iteratorNormalCompletion5 && _iterator5['return']) {
-          _iterator5['return']();
+        if (!_iteratorNormalCompletion8 && _iterator8['return']) {
+          _iterator8['return']();
         }
       } finally {
-        if (_didIteratorError5) {
-          throw _iteratorError5;
+        if (_didIteratorError8) {
+          throw _iteratorError8;
         }
       }
     }
@@ -1056,98 +1213,80 @@ productModule.controller('ProductEditController', function ($scope, $http, $q, $
   };
   // END Manipulate Variants
 
+  $scope.saveAndContinue = function () {
+    // 2016. 01. 18. [heekyu] save images
+    $scope.imageToProduct();
+    if (!$scope.product.id) {
+      return productUtil.createProduct($scope.product, $scope.productVariants).then(function (res) {
+        $state.go('product.edit', { productId: res.product.id });
+      }, function (err) {
+        window.alert('Product Create Fail' + err.data);
+      });
+    } else {
+      return productUtil.updateProduct($scope.product, $scope.productVariants, $scope.origVariants).then(function (res) {
+        $state.go('product.edit', { productId: res.product.id });
+        $scope.origVariants.clear();
+      }, function (err) {
+        window.alert('Product Update Fail' + err.data);
+        $scope.origVariants.clear();
+        return err;
+      });
+    }
+  };
+
   $scope.save = function () {
-    var method = "POST";
-    var url = '/api/v1/products';
+    var createOrUpdate = !$scope.product.id; // create is true
+    $scope.saveAndContinue().then(function (err) {
+      if (!createOrUpdate && !err) {
+        $state.go('product.main');
+      }
+    });
+    /*
+    let method = "POST";
+    let url = '/api/v1/products';
     if ($scope.product.id) {
       method = "PUT";
       url += '/' + $scope.product.id;
     }
-    // 2016. 01. 18. [heekyu] save images
-    $scope.imageToProduct();
-
-    $http({ method: method, url: url, data: $scope.product, contentType: 'application/json;charset=UTF-8' }).then(function (res) {
+      $http({method: method, url: url, data: $scope.product, contentType: 'application/json;charset=UTF-8'}).then((res) => {
       if (!$scope.product.id) {
         $scope.product.id = res.data.id; // need if create
-        $state.go('product.edit', { productId: $scope.product.id });
+        $state.go('product.edit', {productId: $scope.product.id});
       }
-      var promises = [];
-      var pvUrl = '/api/v1/products/' + $scope.product.id + '/product_variants';
-      var _iteratorNormalCompletion7 = true;
-      var _didIteratorError7 = false;
-      var _iteratorError7 = undefined;
-
-      try {
-        for (var _iterator7 = $scope.productVariants[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-          var productVariant = _step7.value;
-
-          if (productVariant.stock < 0) {
-            continue;
-          }
-          if (productVariant.id) {
-            promises.push($http({
-              method: 'PUT',
-              url: pvUrl + '/' + productVariant.id,
-              data: productVariant,
-              contentType: 'application/json;charset=UTF-8'
-            }));
-            $scope.origVariants['delete'](productVariant.id);
-          } else {
-            promises.push($http({
-              method: 'POST',
-              url: pvUrl,
-              data: productVariant,
-              contentType: 'application/json;charset=UTF-8'
-            }));
-          }
+      const promises = [];
+      const pvUrl = '/api/v1/products/' + $scope.product.id + '/product_variants';
+      for (const productVariant of $scope.productVariants) {
+        if (productVariant.stock < 0) {
+          continue;
         }
-        // 2016. 01. 18. [heekyu] delete removed variants
-      } catch (err) {
-        _didIteratorError7 = true;
-        _iteratorError7 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion7 && _iterator7['return']) {
-            _iterator7['return']();
-          }
-        } finally {
-          if (_didIteratorError7) {
-            throw _iteratorError7;
-          }
+        if (productVariant.id) {
+          promises.push($http({
+            method: 'PUT',
+            url: pvUrl + '/' + productVariant.id,
+            data: productVariant,
+            contentType: 'application/json;charset=UTF-8'
+          }));
+          $scope.origVariants.delete(productVariant.id);
+        } else {
+          promises.push($http({
+            method: 'POST',
+            url: pvUrl,
+            data: productVariant,
+            contentType: 'application/json;charset=UTF-8'
+          }));
         }
       }
-
+      // 2016. 01. 18. [heekyu] delete removed variants
       if ($scope.origVariants.size > 0) {
-        var _iteratorNormalCompletion8 = true;
-        var _didIteratorError8 = false;
-        var _iteratorError8 = undefined;
-
-        try {
-          for (var _iterator8 = $scope.origVariants.values()[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-            var deletedVariant = _step8.value;
-
-            promises.push($http({ method: 'DELETE', url: pvUrl + '/' + deletedVariant }));
-          }
-        } catch (err) {
-          _didIteratorError8 = true;
-          _iteratorError8 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion8 && _iterator8['return']) {
-              _iterator8['return']();
-            }
-          } finally {
-            if (_didIteratorError8) {
-              throw _iteratorError8;
-            }
-          }
+        for (const deletedVariant of $scope.origVariants.values()) {
+          promises.push($http({method: 'DELETE', url: pvUrl + '/' + deletedVariant}));
         }
       }
-
-      $q.all(promises).then(function (result) {
+       $q.all(promises).then((result) => {
         console.log(result);
       });
     });
+     */
   };
 
   $scope.images = [];
@@ -1395,6 +1534,17 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     });
   };
 });
+
+productModule.controller('BatchUploadController', function ($scope) {
+  $scope.fileContents = $scope.fileContents;
+  $scope.onFileLoad = function (contents) {
+    var rows = contents.split('/');
+    $scope.rowCount = rows.length;
+    for (var i = 0; i < rows.length; i++) {
+      var newProduct = {};
+    }
+  };
+});
 }, {"./module.js":6}],
 8: [function(require, module, exports) {
 module.exports = {
@@ -1407,6 +1557,8 @@ module.exports = {
     "createButton": "추가",
     "closeButton": "닫기",
     "deleteButton": "삭제",
+    "saveButton": "저장",
+    "saveAndContinueButton": "저장 후 계속",
     "login": {
       "title": "로그인",
       "backBtn": "뒤로",

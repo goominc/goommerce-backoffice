@@ -3,6 +3,8 @@
     "createButton": "추가",
     "closeButton": "닫기",
     "deleteButton": "삭제",
+    "saveButton": "저장",
+    "saveAndContinueButton": "저장 후 계속",
     "login": {
       "title": "로그인",
       "backBtn": "뒤로",

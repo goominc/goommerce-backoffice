@@ -21,3 +21,7 @@ input[type="checkbox"]:checked + label {
 input[type="checkbox"] + .checkbox-active {
   background-position: -76px -260px;
 }
+
+.nav-tabs > li {
+  cursor: pointer;
+}

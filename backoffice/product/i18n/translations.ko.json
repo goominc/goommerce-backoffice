@@ -1,6 +1,5 @@
 {
   "product": {
-    "save": "저장",
     "main": {
       "title": "상품"
     },
@@ -33,6 +32,9 @@
       "nameNewCategory": "새 카테고리",
       "labelNewCategory": "카테고리 생성",
       "labelDeleteCategory": "삭제"
+    },
+    "batchUpload": {
+      "upload": "업로드"
     }
   }
 }

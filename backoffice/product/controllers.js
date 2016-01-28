@@ -33,9 +33,65 @@ productModule.controller('ProductMainController', ($scope, $state, $rootScope, $
       },
     ],
   };
+  $scope.fileContents = 'before';
 });
 
-productModule.controller('ProductEditController', ($scope, $http, $q, $state, $rootScope, $translate, product, categories) => {
+productModule.factory('productUtil', ($http, $q) => {
+  return {
+    createProduct: (product, productVariants) => {
+      const url = '/api/v1/products';
+
+      return $http.post(url, product).then((res) => {
+        if (!product.id) {
+          product.id = res.data.id; // need if create
+          // $state.go('product.edit', {productId: $scope.product.id});
+        }
+        const promises = [];
+        const pvUrl = '/api/v1/products/' + product.id + '/product_variants';
+        for (const productVariant of productVariants) {
+          if (productVariant.stock < 0) {
+            continue;
+          }
+          promises.push($http.post(pvUrl, productVariant));
+        }
+        return $q.all(promises).then((res2) => {
+          return { product: res.data, productVariants: res2.map((item) => item.data) }
+        });
+      });
+    },
+    updateProduct: (product, productVariants, oldProductVariants) => {
+      const url = '/api/v1/products/' + product.id;
+
+      return $http.put(url, product).then((res) => {
+        const promises = [];
+        const pvUrl = '/api/v1/products/' + product.id + '/product_variants';
+        for (const productVariant of productVariants) {
+          if (productVariant.stock < 0) {
+            continue;
+          }
+          oldProductVariants.delete(productVariant.id);
+          if (!productVariant.id) {
+            promises.push($http.post(pvUrl, productVariant));
+          } else {
+            promises.push($http.put(pvUrl + '/' + productVariant.id, productVariant));
+          }
+        }
+        // 2016. 01. 18. [heekyu] delete removed variants
+        if (oldProductVariants.size > 0) {
+          for (const deletedVariant of oldProductVariants.values()) {
+            promises.push($http({method: 'DELETE', url: pvUrl + '/' + deletedVariant}));
+          }
+        }
+
+        return $q.all(promises).then((res2) => {
+          return { product: res.data, productVariants: res2.map((item) => item.data) }
+        });
+      });
+    },
+  };
+});
+
+productModule.controller('ProductEditController', ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil) => {
   const initFromProduct = () => {
     let titleKey = 'product.edit.createTitle';
     $scope.product = product;
@@ -222,15 +278,42 @@ productModule.controller('ProductEditController', ($scope, $http, $q, $state, $r
   };
   // END Manipulate Variants
 
+  $scope.saveAndContinue = () => {
+    // 2016. 01. 18. [heekyu] save images
+    $scope.imageToProduct();
+    if (!$scope.product.id) {
+      return productUtil.createProduct($scope.product, $scope.productVariants).then((res) => {
+        $state.go('product.edit', { productId: res.product.id });
+      }, (err) => {
+        window.alert('Product Create Fail' + err.data);
+      });
+    } else {
+      return productUtil.updateProduct($scope.product, $scope.productVariants, $scope.origVariants).then((res) => {
+        $state.go('product.edit', {productId: res.product.id });
+        $scope.origVariants.clear();
+      }, (err) => {
+        window.alert('Product Update Fail' + err.data);
+        $scope.origVariants.clear();
+        return err;
+      });
+    }
+  };
+
   $scope.save = () => {
+    const createOrUpdate = !$scope.product.id; // create is true
+    $scope.saveAndContinue().then((err) => {
+      if (!createOrUpdate && !err) {
+        $state.go('product.main');
+      }
+    });
+    /*
     let method = "POST";
     let url = '/api/v1/products';
     if ($scope.product.id) {
       method = "PUT";
       url += '/' + $scope.product.id;
     }
-    // 2016. 01. 18. [heekyu] save images
-    $scope.imageToProduct();
+
 
     $http({method: method, url: url, data: $scope.product, contentType: 'application/json;charset=UTF-8'}).then((res) => {
       if (!$scope.product.id) {
@@ -271,6 +354,7 @@ productModule.controller('ProductEditController', ($scope, $http, $q, $state, $r
         console.log(result);
       });
     });
+     */
   };
 
   $scope.images = [];
@@ -525,5 +609,16 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     }, (err) => {
       window.alert(err.data);
     });
+  };
+});
+
+productModule.controller('BatchUploadController', ($scope) => {
+  $scope.fileContents = $scope.fileContents;
+  $scope.onFileLoad = (contents) => {
+    const rows = contents.split('/');
+    $scope.rowCount = rows.length;
+    for (let i = 0; i < rows.length; i++) {
+      const newProduct = {};
+    }
   };
 });
