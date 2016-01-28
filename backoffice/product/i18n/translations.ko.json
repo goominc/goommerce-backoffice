@@ -34,6 +34,7 @@
       "labelDeleteCategory": "삭제"
     },
     "batchUpload": {
+      "title": "상품 일괄 등록",
       "upload": "업로드"
     }
   }

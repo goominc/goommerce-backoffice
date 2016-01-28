@@ -1,0 +1,31 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <!--div class="col-md-12">
+              <div class="portlet-title">
+                <div class="actions btn-set">
+                  <button class="btn blue" ng-click="save()"><i class="fa fa-check"></i> {{'product.batchUpload.upload' | translate}}</button>
+                </div>
+              </div>
+            </div-->
+            <div class="portlet-body">
+              <input type="file" bo-file-reader on-read="onFileLoad(contents)"/>
+              <div>CSV 파일 줄 수 : {{rowCount}}</div>
+              <div>등록된 상품 개수 : {{productCount}}</div>
+              <div>등록된 규격 상품 개수 : {{productVariantCount}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

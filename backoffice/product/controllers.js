@@ -88,6 +88,21 @@ productModule.factory('productUtil', ($http, $q) => {
         });
       });
     },
+    setObjectValue: (obj, key, value, type) => {
+      if (type === 'number') {
+        value = Number(value);
+      }
+      const paths = key.split('.');
+      let curObj = obj;
+      paths.forEach((path, index) => {
+        if (index === paths.length - 1) {
+          curObj[path] = value;
+        } else {
+          curObj[path] = {};
+          curObj = curObj[path];
+        }
+      })
+    },
   };
 });
 
@@ -306,55 +321,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         $state.go('product.main');
       }
     });
-    /*
-    let method = "POST";
-    let url = '/api/v1/products';
-    if ($scope.product.id) {
-      method = "PUT";
-      url += '/' + $scope.product.id;
-    }
-
-
-    $http({method: method, url: url, data: $scope.product, contentType: 'application/json;charset=UTF-8'}).then((res) => {
-      if (!$scope.product.id) {
-        $scope.product.id = res.data.id; // need if create
-        $state.go('product.edit', {productId: $scope.product.id});
-      }
-      const promises = [];
-      const pvUrl = '/api/v1/products/' + $scope.product.id + '/product_variants';
-      for (const productVariant of $scope.productVariants) {
-        if (productVariant.stock < 0) {
-          continue;
-        }
-        if (productVariant.id) {
-          promises.push($http({
-            method: 'PUT',
-            url: pvUrl + '/' + productVariant.id,
-            data: productVariant,
-            contentType: 'application/json;charset=UTF-8'
-          }));
-          $scope.origVariants.delete(productVariant.id);
-        } else {
-          promises.push($http({
-            method: 'POST',
-            url: pvUrl,
-            data: productVariant,
-            contentType: 'application/json;charset=UTF-8'
-          }));
-        }
-      }
-      // 2016. 01. 18. [heekyu] delete removed variants
-      if ($scope.origVariants.size > 0) {
-        for (const deletedVariant of $scope.origVariants.values()) {
-          promises.push($http({method: 'DELETE', url: pvUrl + '/' + deletedVariant}));
-        }
-      }
-
-      $q.all(promises).then((result) => {
-        console.log(result);
-      });
-    });
-     */
   };
 
   $scope.images = [];
@@ -612,13 +578,87 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
   };
 });
 
-productModule.controller('BatchUploadController', ($scope) => {
-  $scope.fileContents = $scope.fileContents;
+/**
+ * CSS File Rule
+ *   1. product variants must be just after it's product
+ */
+productModule.controller('ProductBatchUploadController', ($scope, productUtil) => {
+  const fields = [
+    {columnName: 'sku', apiName: 'sku', type: 'string'},
+    {columnName: 'price', apiName: 'price.KRW', type: 'number'},
+    {columnName: 'qty', apiName: 'stock', type: 'string'},
+    // {columnName: 'product_nickname', apiName: 'nickname'},
+    // {columnName: 'seller', apiName: 'brandId'},
+    // TODO categories
+  ];
   $scope.onFileLoad = (contents) => {
-    const rows = contents.split('/');
-    $scope.rowCount = rows.length;
-    for (let i = 0; i < rows.length; i++) {
-      const newProduct = {};
+    const rows = contents.split('\n');
+    if (rows.length < 2) {
+      window.alert('There is no data');
+      return;
     }
+    const columns = $.csv.toArray(rows[0]);
+    const columnCount = columns.length;
+    for (let idx = 0; idx < columnCount; idx++) {
+      const column = columns[idx].trim();
+      for (var i = 0; i < fields.length; i++) {
+        if (fields[i].columnName === column) {
+          console.log (fields[i].apiName + ' is in ' + idx);
+          fields[i].idx = idx;
+          break;
+        }
+      }
+    }
+    $scope.rowCount = rows.length - 1;
+    $scope.productCount = 0;
+    $scope.productVariantCount = 0;
+
+    let requestCount = 0;
+    let currentProduct = { sku: '\\-x*;:/' };
+
+    const startCreate = (product, productVariants) => {
+      $scope.productCount++;
+      $scope.productVariantCount += productVariants.length;
+      requestCount++;
+      console.log('Start Request.' + requestCount);
+      productUtil.createProduct(product, productVariants).then(() => {
+        requestCount--;
+        console.log('End Request.' + requestCount);
+      });
+    };
+    let productVariants = [];
+    for (let i = 1; i < rows.length; i++) {
+      const columns = $.csv.toArray(rows[i]);
+      if (columns.length < 2) {
+        console.log('skip');
+        continue;
+      } else if (columns.length < columnCount) {
+        window.alert('lack columns : ' + columns);
+        continue;
+      }
+      if (columns[fields[0].idx].startsWith(currentProduct.sku)) {
+        // product variant
+        const productVariant = {};
+        for (let j = 0; j < fields.length; j++) {
+          productUtil.setObjectValue(productVariant, fields[j].apiName, columns[fields[j].idx], fields[j].type);
+        }
+        productVariants.push(productVariant);
+      } else {
+        // product
+        // if (productVariants.length > 0) {
+        // can product without product variants?
+        if (i > 1) {
+          startCreate(currentProduct, productVariants);
+        }
+        productVariants = [];
+        currentProduct = {};
+        for (let j = 0; j < fields.length; j++) {
+          productUtil.setObjectValue(currentProduct, fields[j].apiName, columns[fields[j].idx], fields[j].type);
+          console.log(currentProduct);
+        }
+      }
+    }
+    // if (productVariants.length > 0) {
+    startCreate(currentProduct, productVariants);
   };
 });

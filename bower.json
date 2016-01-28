@@ -25,6 +25,7 @@
     "datatables": "~1.10.10",
     "cloudinary": "~2.0.4",
     "fancybox": "~2.1.5",
-    "lodash": "~3.10.1"
+    "lodash": "~3.10.1",
+    "jquery-csv": "*"
   }
 }

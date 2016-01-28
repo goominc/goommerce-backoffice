@@ -74,6 +74,8 @@ productModule.config(($stateProvider) => {
     })
     .state('product.batchUpload', {
       url: '/batch-upload',
+      templateUrl: templateRoot + '/product/batch-upload.html',
+      controller: 'ProductBatchUploadController',
     });
 });
 

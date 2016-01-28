@@ -142,3 +142,29 @@ directiveModule.directive('clUploadWidget', function () {
     }
   };
 });
+
+directiveModule.directive('boFileReader', () => {
+  return {
+    restrict: 'A',
+    scope: {
+      onRead:'&onRead',
+    },
+    link: function(scope, element) {
+      $(element).on('change', function(changeEvent) {
+        const files = changeEvent.target.files;
+        if (files.length) {
+          const r = new FileReader();
+          r.onload = function(e) {
+            const contents = e.target.result;
+            if (scope.onRead) {
+              scope.onRead({ contents: contents });
+            }
+            scope.$apply();
+          };
+
+          r.readAsText(files[0], 'EUC-KR'); // 2016. 01. 28. [heekyu] april send me EUC-KR encoded files
+        }
+      });
+    }
+  };
+});
