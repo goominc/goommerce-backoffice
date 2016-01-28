@@ -828,7 +828,11 @@ productModule.factory('productUtil', function ($http, $q) {
           return { product: res.data, productVariants: res2.map(function (item) {
               return item.data;
             }) };
+        }, function (err) {
+          window.alert(err.data);
         });
+      }, function (err) {
+        window.alert(err.data);
       });
     },
     updateProduct: function updateProduct(product, productVariants, oldProductVariants) {
@@ -902,12 +906,16 @@ productModule.factory('productUtil', function ($http, $q) {
           return { product: res.data, productVariants: res2.map(function (item) {
               return item.data;
             }) };
+        }, function (err) {
+          window.alert(err.data);
         });
+      }, function (err) {
+        window.alert(err.data);
       });
     },
-    setObjectValue: function setObjectValue(obj, key, value, type) {
-      if (type === 'number') {
-        value = Number(value);
+    setObjectValue: function setObjectValue(obj, key, value, convert) {
+      if (convert) {
+        value = convert(value);
       }
       var paths = key.split('.');
       var curObj = obj;
@@ -915,7 +923,9 @@ productModule.factory('productUtil', function ($http, $q) {
         if (index === paths.length - 1) {
           curObj[path] = value;
         } else {
-          curObj[path] = {};
+          if (!curObj[path]) {
+            curObj[path] = {};
+          }
           curObj = curObj[path];
         }
       });
@@ -1514,11 +1524,15 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
  *   1. product variants must be just after it's product
  */
 productModule.controller('ProductBatchUploadController', function ($scope, productUtil) {
-  var fields = [{ columnName: 'sku', apiName: 'sku', type: 'string' }, { columnName: 'price', apiName: 'price.KRW', type: 'number' }, { columnName: 'qty', apiName: 'stock', type: 'string' }];
-
-  // {columnName: 'product_nickname', apiName: 'nickname'},
-  // {columnName: 'seller', apiName: 'brandId'},
-  // TODO categories
+  var fields = [{ columnName: 'sku', apiName: 'sku' }, { columnName: 'price', apiName: 'price.KRW', convert: function convert(value) {
+      return Number(value);
+    } }, { columnName: 'qty', apiName: 'stock' }, { columnName: 'product_nickname', apiName: 'data.nickname' }, { columnName: 'category_ids', apiName: 'categories', convert: function convert(value) {
+      return value.split(',').map(function (v) {
+        return Number(v);
+      });
+    } }, { columnName: 'seller', apiName: 'data.seller', onlyProduct: true, convert: function convert(value) {
+      return Number(value);
+    } }];
   $scope.onFileLoad = function (contents) {
     var rows = contents.split('\n');
     if (rows.length < 2) {
@@ -1545,12 +1559,13 @@ productModule.controller('ProductBatchUploadController', function ($scope, produ
     var currentProduct = { sku: '\\-x*;:/' };
 
     var startCreate = function startCreate(product, productVariants) {
-      $scope.productCount++;
-      $scope.productVariantCount += productVariants.length;
       requestCount++;
       console.log('Start Request.' + requestCount);
       productUtil.createProduct(product, productVariants).then(function () {
+        // TODO display Uploaded products
         requestCount--;
+        $scope.productCount++;
+        $scope.productVariantCount += productVariants.length;
         console.log('End Request.' + requestCount);
       });
     };
@@ -1568,7 +1583,10 @@ productModule.controller('ProductBatchUploadController', function ($scope, produ
         // product variant
         var productVariant = {};
         for (var j = 0; j < fields.length; j++) {
-          productUtil.setObjectValue(productVariant, fields[j].apiName, _columns[fields[j].idx], fields[j].type);
+          if (fields[j].onlyProduct) {
+            continue;
+          }
+          productUtil.setObjectValue(productVariant, fields[j].apiName, _columns[fields[j].idx], fields[j].convert);
         }
         productVariants.push(productVariant);
       } else {
@@ -1581,8 +1599,10 @@ productModule.controller('ProductBatchUploadController', function ($scope, produ
         productVariants = [];
         currentProduct = {};
         for (var j = 0; j < fields.length; j++) {
-          productUtil.setObjectValue(currentProduct, fields[j].apiName, _columns[fields[j].idx], fields[j].type);
-          console.log(currentProduct);
+          if (fields[j].onlyProductVariant) {
+            continue;
+          }
+          productUtil.setObjectValue(currentProduct, fields[j].apiName, _columns[fields[j].idx], fields[j].convert);
         }
       }
     }

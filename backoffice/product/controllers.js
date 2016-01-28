@@ -56,7 +56,11 @@ productModule.factory('productUtil', ($http, $q) => {
         }
         return $q.all(promises).then((res2) => {
           return { product: res.data, productVariants: res2.map((item) => item.data) }
+        }, (err) => {
+          window.alert(err.data);
         });
+      }, (err) => {
+        window.alert(err.data);
       });
     },
     updateProduct: (product, productVariants, oldProductVariants) => {
@@ -85,12 +89,16 @@ productModule.factory('productUtil', ($http, $q) => {
 
         return $q.all(promises).then((res2) => {
           return { product: res.data, productVariants: res2.map((item) => item.data) }
+        }, (err) => {
+          window.alert(err.data);
         });
+      }, (err) => {
+        window.alert(err.data);
       });
     },
-    setObjectValue: (obj, key, value, type) => {
-      if (type === 'number') {
-        value = Number(value);
+    setObjectValue: (obj, key, value, convert) => {
+      if (convert) {
+        value  = convert(value);
       }
       const paths = key.split('.');
       let curObj = obj;
@@ -98,7 +106,9 @@ productModule.factory('productUtil', ($http, $q) => {
         if (index === paths.length - 1) {
           curObj[path] = value;
         } else {
-          curObj[path] = {};
+          if (!curObj[path]) {
+            curObj[path] = {};
+          }
           curObj = curObj[path];
         }
       })
@@ -584,12 +594,12 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
  */
 productModule.controller('ProductBatchUploadController', ($scope, productUtil) => {
   const fields = [
-    {columnName: 'sku', apiName: 'sku', type: 'string'},
-    {columnName: 'price', apiName: 'price.KRW', type: 'number'},
-    {columnName: 'qty', apiName: 'stock', type: 'string'},
-    // {columnName: 'product_nickname', apiName: 'nickname'},
-    // {columnName: 'seller', apiName: 'brandId'},
-    // TODO categories
+    {columnName: 'sku', apiName: 'sku'},
+    {columnName: 'price', apiName: 'price.KRW', convert: (value) => Number(value)},
+    {columnName: 'qty', apiName: 'stock'},
+    {columnName: 'product_nickname', apiName: 'data.nickname'},
+    {columnName: 'category_ids', apiName: 'categories', convert: (value) => value.split(',').map((v) => Number(v))},
+    {columnName: 'seller', apiName: 'data.seller', onlyProduct: true, convert: (value) => Number(value)},
   ];
   $scope.onFileLoad = (contents) => {
     const rows = contents.split('\n');
@@ -617,12 +627,13 @@ productModule.controller('ProductBatchUploadController', ($scope, productUtil) =
     let currentProduct = { sku: '\\-x*;:/' };
 
     const startCreate = (product, productVariants) => {
-      $scope.productCount++;
-      $scope.productVariantCount += productVariants.length;
       requestCount++;
       console.log('Start Request.' + requestCount);
       productUtil.createProduct(product, productVariants).then(() => {
+        // TODO display Uploaded products
         requestCount--;
+        $scope.productCount++;
+        $scope.productVariantCount += productVariants.length;
         console.log('End Request.' + requestCount);
       });
     };
@@ -640,7 +651,10 @@ productModule.controller('ProductBatchUploadController', ($scope, productUtil) =
         // product variant
         const productVariant = {};
         for (let j = 0; j < fields.length; j++) {
-          productUtil.setObjectValue(productVariant, fields[j].apiName, columns[fields[j].idx], fields[j].type);
+          if (fields[j].onlyProduct) {
+            continue;
+          }
+          productUtil.setObjectValue(productVariant, fields[j].apiName, columns[fields[j].idx], fields[j].convert);
         }
         productVariants.push(productVariant);
       } else {
@@ -653,8 +667,10 @@ productModule.controller('ProductBatchUploadController', ($scope, productUtil) =
         productVariants = [];
         currentProduct = {};
         for (let j = 0; j < fields.length; j++) {
-          productUtil.setObjectValue(currentProduct, fields[j].apiName, columns[fields[j].idx], fields[j].type);
-          console.log(currentProduct);
+          if (fields[j].onlyProductVariant) {
+            continue;
+          }
+          productUtil.setObjectValue(currentProduct, fields[j].apiName, columns[fields[j].idx], fields[j].convert);
         }
       }
     }
