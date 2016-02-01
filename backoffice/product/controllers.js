@@ -600,6 +600,8 @@ productModule.controller('ProductBatchUploadController', ($scope, productUtil) =
     {columnName: 'product_nickname', apiName: 'data.nickname'},
     {columnName: 'category_ids', apiName: 'categories', onlyProduct: true, convert: (value) => value.split(',').map((v) => Number(v))},
     {columnName: 'seller', apiName: 'data.seller', onlyProduct: true, convert: (value) => Number(value)},
+    {columnName: 'size', apiName: 'data.size', onlyProductVariant: true},
+    {columnName: 'color', apiName: 'data.color', onlyProductVariant: true},
   ];
   $scope.onFileLoad = (contents) => {
     const rows = contents.split('\n');

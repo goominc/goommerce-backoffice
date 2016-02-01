@@ -1532,7 +1532,7 @@ productModule.controller('ProductBatchUploadController', function ($scope, produ
       });
     } }, { columnName: 'seller', apiName: 'data.seller', onlyProduct: true, convert: function convert(value) {
       return Number(value);
-    } }];
+    } }, { columnName: 'size', apiName: 'data.size', onlyProductVariant: true }, { columnName: 'color', apiName: 'data.color', onlyProductVariant: true }];
   $scope.onFileLoad = function (contents) {
     var rows = contents.split('\n');
     if (rows.length < 2) {
