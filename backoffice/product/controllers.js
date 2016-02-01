@@ -589,16 +589,16 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
 });
 
 /**
- * CSS File Rule
+ * CSV File Rule
  *   1. product variants must be just after it's product
  */
 productModule.controller('ProductBatchUploadController', ($scope, productUtil) => {
   const fields = [
     {columnName: 'sku', apiName: 'sku'},
-    {columnName: 'price', apiName: 'price.KRW', convert: (value) => Number(value)},
-    {columnName: 'qty', apiName: 'stock'},
+    {columnName: 'price', apiName: 'price.KRW', onlyProductVariant: true, convert: (value) => Number(value)},
+    {columnName: 'qty', apiName: 'stock', onlyProductVariant: true},
     {columnName: 'product_nickname', apiName: 'data.nickname'},
-    {columnName: 'category_ids', apiName: 'categories', convert: (value) => value.split(',').map((v) => Number(v))},
+    {columnName: 'category_ids', apiName: 'categories', onlyProduct: true, convert: (value) => value.split(',').map((v) => Number(v))},
     {columnName: 'seller', apiName: 'data.seller', onlyProduct: true, convert: (value) => Number(value)},
   ];
   $scope.onFileLoad = (contents) => {
