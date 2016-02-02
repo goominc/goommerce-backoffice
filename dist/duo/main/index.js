@@ -724,6 +724,7 @@ module.exports = {
       "updateTitle": "상품 변경",
       "tabInfo": "상품 정보",
       "tabImage": "이미지",
+      "tabCategory": "카테고리",
       "labelName": {
         "KO": "상품명(한국어)",
         "EN": "상품명(영어)",
@@ -1736,6 +1737,8 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     name: $translate.instant('order.detail.title')
   }];
   $rootScope.initAll($scope, $state.current.name);
+
+  $scope.order = order;
 });
 }, {"./module":7}],
 9: [function(require, module, exports) {
