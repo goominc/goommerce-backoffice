@@ -27,5 +27,4 @@ userModule.controller('UserManageController', ($scope, $http, $state, $rootScope
   $scope.closeUserPopup = () => {
     $('#user_manage_create_user').modal('hide');
   };
-
 });

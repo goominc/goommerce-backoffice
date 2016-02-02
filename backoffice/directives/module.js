@@ -38,17 +38,14 @@ directiveModule.factory('datatableCommons', ($compile) => {
   };
 });
 
-directiveModule.directive('boDatatables', ($compile, $parse, datatableCommons) => {
+directiveModule.directive('boDatatables', ($http, $compile, $parse, datatableCommons) => {
   return {
     restrict: 'A',
     transclude: true,
     template: '<div ng-transclude></div>',
     link: (scope, elem, attr) => {
       const dataTables = $parse(attr.boDatatables)(scope);
-      const data = dataTables.data || $.get(dataTables.url).then((realData) => {
-          return realData[dataTables.field];
-        });
-      $.when(data).then((realData) => {
+      const handleData = (realData) => {
         if (realData) {
           realData.forEach(function (elem, index) {
             elem._index = index;
@@ -66,7 +63,15 @@ directiveModule.directive('boDatatables', ($compile, $parse, datatableCommons) =
         if (attr.directiveLoad && scope[attr.directiveLoad]) {
           scope[attr.directiveLoad]();
         }
-      });
+      };
+      if (dataTables.data) {
+        handleData(dataTables.data);
+      } else {
+        $http.get(dataTables.url).then((res) => {
+          const realData = res.data[dataTables.field];
+          handleData(realData);
+        });
+      }
     },
   };
 });

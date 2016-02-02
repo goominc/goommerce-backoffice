@@ -6,6 +6,7 @@ const mainModule = angular.module('backoffice.main', [
     require('../dashboard/module').name,
     require('../user/module').name,
     require('../product/module').name,
+    require('../order/module').name,
     require('../third_party/angular-translate'),
   ])
   .config(($translateProvider) => {
@@ -71,7 +72,7 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     {
       key: 'order', // TODO get key from router
       name: 'Order',
-      sref: 'order.list',
+      sref: 'order.main',
       active: false,
     },
     {
@@ -184,6 +185,4 @@ mainModule.controller('LoginModalController', ($scope, $http, $cookies) => {
       window.alert(err.data);
     });
   };
-
-  // $http.post('http://localhost:8080/api/v1/users', {email: 'heekyu', password: '1111', data: {singup: 'backoffice'} })
 });

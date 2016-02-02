@@ -1,0 +1,33 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="portlet-body">
+              <div bo-datatables="orderDatatables">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                  <tr role="row" class="heading">
+                    <td>ID</td>
+                    <td>{{'order.main.createdAtColumn' | translate}}</td>
+                    <td>{{'order.main.paymentStatusColumn' | translate}}</td>
+                    <td>{{'order.main.priceColumn' | translate}}</td>
+                  </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
