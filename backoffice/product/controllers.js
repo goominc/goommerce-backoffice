@@ -66,7 +66,7 @@ productModule.factory('productUtil', ($http, $q) => {
     updateProduct: (product, productVariants, oldProductVariants) => {
       const url = '/api/v1/products/' + product.id;
 
-      return $http.put(url, product).then((res) => {
+      return $http.put(url, _.omit(product, ['id', 'productVariants'])).then((res) => {
         const promises = [];
         const pvUrl = '/api/v1/products/' + product.id + '/product_variants';
         for (const productVariant of productVariants) {
@@ -77,7 +77,7 @@ productModule.factory('productUtil', ($http, $q) => {
           if (!productVariant.id) {
             promises.push($http.post(pvUrl, productVariant));
           } else {
-            promises.push($http.put(pvUrl + '/' + productVariant.id, productVariant));
+            promises.push($http.put(pvUrl + '/' + productVariant.id, _.omit(productVariant, 'id')));
           }
         }
         // 2016. 01. 18. [heekyu] delete removed variants

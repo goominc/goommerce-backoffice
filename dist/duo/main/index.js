@@ -842,7 +842,7 @@ productModule.factory('productUtil', function ($http, $q) {
     updateProduct: function updateProduct(product, productVariants, oldProductVariants) {
       var url = '/api/v1/products/' + product.id;
 
-      return $http.put(url, product).then(function (res) {
+      return $http.put(url, _.omit(product, ['id', 'productVariants'])).then(function (res) {
         var promises = [];
         var pvUrl = '/api/v1/products/' + product.id + '/product_variants';
         var _iteratorNormalCompletion2 = true;
@@ -860,7 +860,7 @@ productModule.factory('productUtil', function ($http, $q) {
             if (!productVariant.id) {
               promises.push($http.post(pvUrl, productVariant));
             } else {
-              promises.push($http.put(pvUrl + '/' + productVariant.id, productVariant));
+              promises.push($http.put(pvUrl + '/' + productVariant.id, _.omit(productVariant, 'id')));
             }
           }
           // 2016. 01. 18. [heekyu] delete removed variants
