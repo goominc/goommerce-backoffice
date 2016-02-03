@@ -1250,6 +1250,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   $scope.saveAndContinue = function () {
     // 2016. 01. 18. [heekyu] save images
     $scope.imageToProduct();
+    $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then(function (res) {
         $state.go('product.edit', { productId: res.product.id });
@@ -1357,6 +1358,58 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       $scope.productCategorySet.add(categoryId);
       $scope.product.categories.push(categoryId);
     }
+  };
+  // 2016. 02. 03. [heekyu] TODO this logic must be in server side
+  $scope.updateCategoryPath = function () {
+    if ($scope.product.categories.length < 1) {
+      return true;
+    }
+    var paths = [];
+    var getPathObject = function getPathObject(path) {
+      var res = {};
+      var root = path[0];
+      var langKeys = [];
+      for (var k in root.name) {
+        if (root.name.hasOwnProperty(k)) {
+          res[k] = [root.name[k]];
+          langKeys.push(k);
+        }
+      }
+      for (var i = 1; i < path.length; i++) {
+        var categoryName = path[i].name;
+        for (var j = 0; j < langKeys.length; j++) {
+          res[langKeys[j]].push(categoryName[langKeys[j]]);
+        }
+      }
+      return res;
+    };
+    var dfs = function dfs(root, path) {
+      if (!root.children) {
+        return false;
+      }
+      var exist = false;
+      for (var i = 0; i < root.children.length; i++) {
+        var child = root.children[i];
+        if ($scope.productCategorySet.has(child.id)) {
+          path.push(child);
+          if (!dfs(child, path)) {
+            paths.push(getPathObject(path));
+          }
+          path.length--;
+          exist = true;
+        } else {
+          path.push(child);
+          exist = exist | dfs(child, path);
+          path.length--;
+        }
+      }
+      return exist;
+    };
+    dfs($scope.allCategories, []);
+    if (!$scope.product.data) {
+      $scope.product.data = {};
+    }
+    $scope.product.data.categoryPath = paths;
   };
 });
 
