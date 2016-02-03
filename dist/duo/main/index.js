@@ -1512,7 +1512,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
       window.alert('[ERROR] Category is NULL');
       return false;
     }
-    $http.put('/api/v1/categories/' + $scope.category.id, $scope.category).then(function (res) {
+    $http.put('/api/v1/categories/' + $scope.category.id, _.omit($scope.category, ['id', 'children'])).then(function (res) {
       var category = res.data;
       categoryIdMap[category.id] = category;
       jstreeNode.jstree('set_text', category.id, category.name.ko); // TODO i18n
