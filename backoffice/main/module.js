@@ -7,6 +7,7 @@ const mainModule = angular.module('backoffice.main', [
     require('../user/module').name,
     require('../product/module').name,
     require('../order/module').name,
+    require('../brand/module').name,
     require('../third_party/angular-translate'),
   ])
   .config(($translateProvider) => {
@@ -71,14 +72,20 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     },
     {
       key: 'order', // TODO get key from router
-      name: 'Order',
+      name: $translate.instant('order.title'),
       sref: 'order.main',
       active: false,
     },
     {
       key: 'user', // TODO get key from router
-      name: 'User',
+      name: $translate.instant('user.manage.title'),
       sref: 'user.manage',
+      active: false,
+    },
+    {
+      key: 'brand', // TODO get key from router
+      name: $translate.instant('brand.title'),
+      sref: 'brand.main',
       active: false,
     },
     {

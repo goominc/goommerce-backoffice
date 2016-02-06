@@ -1,0 +1,66 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="portlet-body">
+              <div class="row" style="margin-bottom: 15px;">
+                <div class="col-md-12">
+                  <button class="btn blue" data-toggle="modal" data-target="#new_brand_modal">
+                    <i class="fa fa-plus"></i> 셀러 생성
+                  </button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div bo-datatables="brandDatatables">
+                    <table>
+                      <thead>
+                      <tr role="heading">
+                        <th>ID</th>
+                        <th>Name</th>
+                        <!-- TODO Owner -->
+                      </tr>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="new_brand_modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form data-ng-submit="createBrand(newBrand)">
+        <div class="modal-header">
+          {{'brand.main.createBrandTitle' | translate}}
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12">
+              <input type="text" data-ng-model="newBrand.pathname" placeholder="Brand Name" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn default" type="reset" data-ng-click="closeBrandPopup()">{{'main.closeButton' | translate}}</button>
+          <button class="btn blue" type="submit"><i class="fa fa-plus"></i> {{'brand.main.createBrandTitle' | translate}}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
