@@ -119,10 +119,13 @@ productModule.factory('productUtil', ($http, $q) => {
 productModule.controller('ProductEditController', ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil) => {
   const initFromProduct = () => {
     let titleKey = 'product.edit.createTitle';
-    $scope.product = product;
-    if ($scope.product.id) {
+    if (!product) {
+      $scope.product = { data: {} };
+    } else {
+      $scope.product = product;
       titleKey = 'product.edit.updateTitle';
     }
+    $scope.tmpObj = {};
     $scope.productVariantsMap = {};
     $scope.origVariants = new Set();
     if ($scope.product.productVariants) {
@@ -178,12 +181,42 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
    {title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh_tw'},
    ];
    */
-  $scope.inputFields = [];
+  $scope.inputFields = [
+    {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
+    {title: 'nickname', key: 'data.nickname', tmpKey: 'nickname', isRequired: true},
+  ];
+
+  $scope.saveProductField = (key, value) => {
+    const path = key.split('.');
+    let obj = $scope.product;
+    for (let i = 0; i < path.length - 1; i++) {
+      if (!obj[path[i]]) {
+        obj[path[i]] = {};
+      }
+      obj = obj[path[i]];
+    }
+    obj[path[path.length - 1]] = value;
+  };
+  $scope.tmpObjToProduct = () => {
+    for (let i = 0; i < $scope.inputFields.length; i++) {
+      const field = $scope.inputFields[i];
+      $scope.saveProductField(field.key, $scope.tmpObj[field.tmpKey]);
+    }
+  };
+  $scope.productToTmpObj = () => {
+    for (let i = 0; i < $scope.inputFields.length; i++) {
+      const field = $scope.inputFields[i];
+      $scope.tmpObj[field.tmpKey] = _.get($scope.product, field.key);
+    }
+  };
+  if ($scope.product.id) {
+    $scope.productToTmpObj();
+  }
 
   // BEGIN Manipulate Variant Kinds
   $scope.variantKinds = [
-    {name: '사이즈', kinds: ['S', 'M', 'Free']},
-    {name: '색상', kinds: ['blue', 'red']},
+    {name: '사이즈', kinds: ['S', 'M', ]},
+    {name: '색상', kinds: ['blue']},
   ];
 
   $scope.newObjects = {
@@ -305,6 +338,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
 
   $scope.saveAndContinue = () => {
     // 2016. 01. 18. [heekyu] save images
+    $scope.tmpObjToProduct();
     $scope.imageToProduct();
     $scope.updateCategoryPath();
     if (!$scope.product.id) {

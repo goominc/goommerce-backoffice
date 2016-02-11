@@ -32,7 +32,7 @@ productModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/product/edit.html',
       controller: 'ProductEditController',
       resolve: {
-        product: () => { return { name: {}, price: {} }; },
+        product: () => null,
         categories: ($http) => {
           return $http.get('/api/v1/categories').then((res) => {
             return res.data;
