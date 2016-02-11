@@ -22,6 +22,18 @@ input[type="checkbox"] + .checkbox-active {
   background-position: -76px -260px;
 }
 
+input[type="number"] {
+  text-align: right;
+}
+
 .nav-tabs > li {
   cursor: pointer;
+}
+
+.bo-align-right {
+  text-align: right;
+}
+
+.dropdown-menu > li > a:not(:hover) {
+  background-color: inherit;
 }
