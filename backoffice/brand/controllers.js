@@ -26,7 +26,11 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, boUtils)
       $scope.closeBrandPopup();
       boUtils.refreshDatatableAjax(brandsUrl, $($element), fieldName);
     }).catch((err) => {
-      console.log(err);
+      let message = err.data.message;
+      if (!message) {
+        message = 'ERROR Occurred';
+      }
+      window.alert(message);
     });
   };
 
