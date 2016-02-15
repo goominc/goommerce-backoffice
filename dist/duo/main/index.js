@@ -715,100 +715,6 @@ productModule.config(function ($stateProvider) {
 
 module.exports = productModule;
 
-// BEGIN module require js
-require('./controllers.js');
-// END module require js
-}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":21,"./i18n/translations.ko.json":22,"./controllers.js":23}],
-21: [function(require, module, exports) {
-module.exports = {
-  "product": {
-    "main": {
-      "title": "상품"
-    },
-    "edit": {
-
-    }
-  }
-};
-}, {}],
-22: [function(require, module, exports) {
-module.exports = {
-  "product": {
-    "main": {
-      "title": "상품"
-    },
-    "list": {
-      "columnName": "상품명"
-    },
-    "edit": {
-      "createTitle": "상품 생성",
-      "updateTitle": "상품 변경",
-      "tabInfo": "상품 정보",
-      "tabImage": "이미지",
-      "tabCategory": "카테고리",
-      "labelName": {
-        "KO": "상품명(한국어)",
-        "EN": "상품명(영어)",
-        "ZH_CN": "상품명(중국어)",
-        "ZH_TW": "상품명(대만어)"
-      },
-      "labelPrice": {
-        "KRW": "가격(원)"
-      },
-      "labelActive": "활성화",
-      "labelCombination": "상품 속성",
-      "labelVariant": "상품 규격",
-      "addVariantKind": "종류 추가",
-      "removeVariantKind": "종류 삭제"
-    },
-    "category": {
-      "title": "상품 카테고리",
-      "rootName": "전체",
-      "nameNewCategory": "새 카테고리",
-      "labelNewCategory": "카테고리 생성",
-      "labelDeleteCategory": "삭제"
-    },
-    "batchUpload": {
-      "title": "상품 일괄 등록",
-      "upload": "업로드"
-    }
-  }
-};
-}, {}],
-23: [function(require, module, exports) {
-'use strict';
-
-var productModule = require('./module.js');
-
-productModule.controller('ProductMainController', function ($scope, $state, $rootScope, $translate, boConfig) {
-  $scope.contentTitle = $translate.instant('product.main.title');
-  $scope.contentSubTitle = '';
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'product.main',
-    name: $translate.instant('product.main.title')
-  }];
-  $rootScope.initAll($scope, $state.current.name);
-
-  $scope.productDatatables = {
-    field: 'products',
-    // disableFilter: true,
-    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: boConfig.apiUrl + '/api/v1/products',
-    columns: [{
-      data: 'id',
-      render: function render(id) {
-        return '<a ui-sref="product.edit({productId: ' + id + '})">' + id + '</a>';
-      }
-    }, {
-      data: 'sku'
-    }]
-  };
-  $scope.fileContents = 'before';
-});
-
 productModule.factory('productUtil', function ($http, $q) {
   return {
     createProduct: function createProduct(product, productVariants) {
@@ -958,6 +864,112 @@ productModule.factory('productUtil', function ($http, $q) {
   };
 });
 
+// BEGIN module require js
+require('./controllers/ProductMainController');
+require('./controllers/ProductEditController');
+require('./controllers/CategoryEditController');
+require('./controllers/ProductBatchUploadController');
+// END module require js
+}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":21,"./i18n/translations.ko.json":22,"./controllers/ProductMainController":23,"./controllers/ProductEditController":24,"./controllers/CategoryEditController":25,"./controllers/ProductBatchUploadController":26}],
+21: [function(require, module, exports) {
+module.exports = {
+  "product": {
+    "main": {
+      "title": "상품"
+    },
+    "edit": {
+
+    }
+  }
+};
+}, {}],
+22: [function(require, module, exports) {
+module.exports = {
+  "product": {
+    "main": {
+      "title": "상품"
+    },
+    "list": {
+      "columnName": "상품명"
+    },
+    "edit": {
+      "createTitle": "상품 생성",
+      "updateTitle": "상품 변경",
+      "tabInfo": "상품 정보",
+      "tabImage": "이미지",
+      "tabCategory": "카테고리",
+      "labelName": {
+        "KO": "상품명(한국어)",
+        "EN": "상품명(영어)",
+        "ZH_CN": "상품명(중국어)",
+        "ZH_TW": "상품명(대만어)"
+      },
+      "labelPrice": {
+        "KRW": "가격(원)"
+      },
+      "labelActive": "활성화",
+      "labelCombination": "상품 속성",
+      "labelVariant": "상품 규격",
+      "addVariantKind": "종류 추가",
+      "removeVariantKind": "종류 삭제"
+    },
+    "category": {
+      "title": "상품 카테고리",
+      "rootName": "전체",
+      "nameNewCategory": "새 카테고리",
+      "labelNewCategory": "카테고리 생성",
+      "labelDeleteCategory": "삭제"
+    },
+    "batchUpload": {
+      "title": "상품 일괄 등록",
+      "upload": "업로드"
+    }
+  }
+};
+}, {}],
+23: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var productModule = require('../module.js');
+
+productModule.controller('ProductMainController', function ($scope, $state, $rootScope, $translate, boConfig) {
+  $scope.contentTitle = $translate.instant('product.main.title');
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'product.main',
+    name: $translate.instant('product.main.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.productDatatables = {
+    field: 'products',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: boConfig.apiUrl + '/api/v1/products',
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="product.edit({productId: ' + id + '})">' + id + '</a>';
+      }
+    }, {
+      data: 'sku'
+    }]
+  };
+  $scope.fileContents = 'before';
+});
+}, {"../module.js":6}],
+24: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var productModule = require('../module.js');
+
 productModule.controller('ProductEditController', function ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil) {
   var initFromProduct = function initFromProduct() {
     var titleKey = 'product.edit.createTitle';
@@ -972,28 +984,28 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.origVariants = new Set();
     if ($scope.product.productVariants) {
       $scope.productVariants = $scope.product.productVariants;
-      var _iteratorNormalCompletion4 = true;
-      var _didIteratorError4 = false;
-      var _iteratorError4 = undefined;
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
 
       try {
-        for (var _iterator4 = $scope.productVariants[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-          var productVariant = _step4.value;
+        for (var _iterator = $scope.productVariants[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var productVariant = _step.value;
 
           $scope.productVariantsMap[productVariant.sku] = productVariant;
           $scope.origVariants.add(productVariant.id);
         }
       } catch (err) {
-        _didIteratorError4 = true;
-        _iteratorError4 = err;
+        _didIteratorError = true;
+        _iteratorError = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion4 && _iterator4['return']) {
-            _iterator4['return']();
+          if (!_iteratorNormalCompletion && _iterator['return']) {
+            _iterator['return']();
           }
         } finally {
-          if (_didIteratorError4) {
-            throw _iteratorError4;
+          if (_didIteratorError) {
+            throw _iteratorError;
           }
         }
       }
@@ -1005,13 +1017,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     if (!$scope.product.categories) {
       $scope.product.categories = [];
     }
-    var _iteratorNormalCompletion5 = true;
-    var _didIteratorError5 = false;
-    var _iteratorError5 = undefined;
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
 
     try {
-      for (var _iterator5 = $scope.product.categories[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-        var productCategory = _step5.value;
+      for (var _iterator2 = $scope.product.categories[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        var productCategory = _step2.value;
 
         if ($scope.productCategorySet.has(productCategory)) {
           window.alert('[DATA ERROR] (' + productCategory + ') is contained multiple');
@@ -1021,16 +1033,16 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       }
       // 2016. 01. 21. [heekyu] products' categories
     } catch (err) {
-      _didIteratorError5 = true;
-      _iteratorError5 = err;
+      _didIteratorError2 = true;
+      _iteratorError2 = err;
     } finally {
       try {
-        if (!_iteratorNormalCompletion5 && _iterator5['return']) {
-          _iterator5['return']();
+        if (!_iteratorNormalCompletion2 && _iterator2['return']) {
+          _iterator2['return']();
         }
       } finally {
-        if (_didIteratorError5) {
-          throw _iteratorError5;
+        if (_didIteratorError2) {
+          throw _iteratorError2;
         }
       }
     }
@@ -1102,13 +1114,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   $scope.addVariantKind = function (name) {
     if (name && name.trim() !== '') {
       $scope.newObjects.variantKind = '';
-      var _iteratorNormalCompletion6 = true;
-      var _didIteratorError6 = false;
-      var _iteratorError6 = undefined;
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
 
       try {
-        for (var _iterator6 = $scope.variantKinds[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-          var kind = _step6.value;
+        for (var _iterator3 = $scope.variantKinds[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var kind = _step3.value;
 
           if (kind.name === name) {
             $scope.hideAddItemBox();
@@ -1117,16 +1129,16 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
           }
         }
       } catch (err) {
-        _didIteratorError6 = true;
-        _iteratorError6 = err;
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion6 && _iterator6['return']) {
-            _iterator6['return']();
+          if (!_iteratorNormalCompletion3 && _iterator3['return']) {
+            _iterator3['return']();
           }
         } finally {
-          if (_didIteratorError6) {
-            throw _iteratorError6;
+          if (_didIteratorError3) {
+            throw _iteratorError3;
           }
         }
       }
@@ -1139,13 +1151,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   $scope.addVariantKindItem = function (index, name) {
     if (name && name.trim() !== '') {
       $scope.newObjects.variantKindItem = '';
-      var _iteratorNormalCompletion7 = true;
-      var _didIteratorError7 = false;
-      var _iteratorError7 = undefined;
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
 
       try {
-        for (var _iterator7 = $scope.variantKinds[index].kinds[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-          var kindItem = _step7.value;
+        for (var _iterator4 = $scope.variantKinds[index].kinds[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var kindItem = _step4.value;
 
           if (kindItem === name) {
             $scope.hideAddItemBox();
@@ -1154,16 +1166,16 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
           }
         }
       } catch (err) {
-        _didIteratorError7 = true;
-        _iteratorError7 = err;
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion7 && _iterator7['return']) {
-            _iterator7['return']();
+          if (!_iteratorNormalCompletion4 && _iterator4['return']) {
+            _iterator4['return']();
           }
         } finally {
-          if (_didIteratorError7) {
-            throw _iteratorError7;
+          if (_didIteratorError4) {
+            throw _iteratorError4;
           }
         }
       }
@@ -1213,13 +1225,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     }
     var newVariantSKUs = [];
     var idx = 0;
-    var _iteratorNormalCompletion8 = true;
-    var _didIteratorError8 = false;
-    var _iteratorError8 = undefined;
+    var _iteratorNormalCompletion5 = true;
+    var _didIteratorError5 = false;
+    var _iteratorError5 = undefined;
 
     try {
-      for (var _iterator8 = $scope.variantKinds[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-        var variantKind = _step8.value;
+      for (var _iterator5 = $scope.variantKinds[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+        var variantKind = _step5.value;
 
         if (variantKind.kinds.length < 1) {
           continue;
@@ -1231,43 +1243,43 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         idx = newVariantSKUs.length;
         for (var i = start; i < idx; i++) {
           var newVariantSKU = newVariantSKUs[i];
-          var _iteratorNormalCompletion9 = true;
-          var _didIteratorError9 = false;
-          var _iteratorError9 = undefined;
+          var _iteratorNormalCompletion6 = true;
+          var _didIteratorError6 = false;
+          var _iteratorError6 = undefined;
 
           try {
-            for (var _iterator9 = variantKind.kinds[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-              var kind = _step9.value;
+            for (var _iterator6 = variantKind.kinds[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+              var kind = _step6.value;
 
               newVariantSKUs.push(newVariantSKU + '-' + kind);
             }
           } catch (err) {
-            _didIteratorError9 = true;
-            _iteratorError9 = err;
+            _didIteratorError6 = true;
+            _iteratorError6 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion9 && _iterator9['return']) {
-                _iterator9['return']();
+              if (!_iteratorNormalCompletion6 && _iterator6['return']) {
+                _iterator6['return']();
               }
             } finally {
-              if (_didIteratorError9) {
-                throw _iteratorError9;
+              if (_didIteratorError6) {
+                throw _iteratorError6;
               }
             }
           }
         }
       }
     } catch (err) {
-      _didIteratorError8 = true;
-      _iteratorError8 = err;
+      _didIteratorError5 = true;
+      _iteratorError5 = err;
     } finally {
       try {
-        if (!_iteratorNormalCompletion8 && _iterator8['return']) {
-          _iterator8['return']();
+        if (!_iteratorNormalCompletion5 && _iterator5['return']) {
+          _iterator5['return']();
         }
       } finally {
-        if (_didIteratorError8) {
-          throw _iteratorError8;
+        if (_didIteratorError5) {
+          throw _iteratorError5;
         }
       }
     }
@@ -1464,6 +1476,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.product.data.categoryPath = paths;
   };
 });
+}, {"../module.js":6}],
+25: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var productModule = require('../module.js');
 
 productModule.controller('CategoryEditController', function ($scope, $rootScope, $http, $state, categories, $translate) {
   $scope.contentTitle = $translate.instant('product.category.title');
@@ -1627,6 +1646,13 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     });
   };
 });
+}, {"../module.js":6}],
+26: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var productModule = require('../module.js');
 
 /**
  * CSV File Rule
@@ -1719,7 +1745,7 @@ productModule.controller('ProductBatchUploadController', function ($scope, produ
     startCreate(currentProduct, productVariants);
   };
 });
-}, {"./module.js":6}],
+}, {"../module.js":6}],
 7: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
@@ -1763,15 +1789,15 @@ module.exports = orderModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":24,"./i18n/translations.ko.json":25,"./controllers.js":26}],
-24: [function(require, module, exports) {
+}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":27,"./i18n/translations.ko.json":28,"./controllers.js":29}],
+27: [function(require, module, exports) {
 module.exports = {
   "order": {
 
   }
 };
 }, {}],
-25: [function(require, module, exports) {
+28: [function(require, module, exports) {
 module.exports = {
   "order": {
     "title": "주문",
@@ -1787,7 +1813,7 @@ module.exports = {
   }
 };
 }, {}],
-26: [function(require, module, exports) {
+29: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -1883,13 +1909,13 @@ module.exports = brandModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../utils/module":13,"../third_party/angular-translate":10,"./i18n/translations.en.json":27,"./i18n/translations.ko.json":28,"./controllers.js":29}],
-27: [function(require, module, exports) {
+}, {"../utils/module":13,"../third_party/angular-translate":10,"./i18n/translations.en.json":30,"./i18n/translations.ko.json":31,"./controllers.js":32}],
+30: [function(require, module, exports) {
 module.exports = {
 
 };
 }, {}],
-28: [function(require, module, exports) {
+31: [function(require, module, exports) {
 module.exports = {
   "brand": {
     "title": "셀러",
@@ -1899,7 +1925,7 @@ module.exports = {
   }
 };
 }, {}],
-29: [function(require, module, exports) {
+32: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -1972,14 +1998,14 @@ module.exports = currencyModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":30,"./i18n/translations.ko.json":31,"./controllers.js":32}],
-30: [function(require, module, exports) {
+}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":33,"./i18n/translations.ko.json":34,"./controllers.js":35}],
+33: [function(require, module, exports) {
 module.exports = {
 
 }
 ;
 }, {}],
-31: [function(require, module, exports) {
+34: [function(require, module, exports) {
 module.exports = {
   "currency": {
     "title": "환율"
@@ -1987,7 +2013,7 @@ module.exports = {
 }
 ;
 }, {}],
-32: [function(require, module, exports) {
+35: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';

@@ -81,6 +81,89 @@ productModule.config(($stateProvider) => {
 
 module.exports = productModule;
 
+productModule.factory('productUtil', ($http, $q) => {
+  return {
+    createProduct: (product, productVariants) => {
+      const url = '/api/v1/products';
+
+      return $http.post(url, product).then((res) => {
+        if (!product.id) {
+          product.id = res.data.id; // need if create
+          // $state.go('product.edit', {productId: $scope.product.id});
+        }
+        const promises = [];
+        const pvUrl = '/api/v1/products/' + product.id + '/product_variants';
+        for (const productVariant of productVariants) {
+          if (productVariant.stock < 0) {
+            continue;
+          }
+          promises.push($http.post(pvUrl, productVariant));
+        }
+        return $q.all(promises).then((res2) => {
+          return { product: res.data, productVariants: res2.map((item) => item.data) }
+        }, (err) => {
+          window.alert(err.data);
+        });
+      }, (err) => {
+        window.alert(err.data);
+      });
+    },
+    updateProduct: (product, productVariants, oldProductVariants) => {
+      const url = '/api/v1/products/' + product.id;
+
+      return $http.put(url, _.omit(product, ['id', 'productVariants'])).then((res) => {
+        const promises = [];
+        const pvUrl = '/api/v1/products/' + product.id + '/product_variants';
+        for (const productVariant of productVariants) {
+          if (productVariant.stock < 0) {
+            continue;
+          }
+          oldProductVariants.delete(productVariant.id);
+          if (!productVariant.id) {
+            promises.push($http.post(pvUrl, productVariant));
+          } else {
+            promises.push($http.put(pvUrl + '/' + productVariant.id, _.omit(productVariant, 'id')));
+          }
+        }
+        // 2016. 01. 18. [heekyu] delete removed variants
+        if (oldProductVariants.size > 0) {
+          for (const deletedVariant of oldProductVariants.values()) {
+            promises.push($http({method: 'DELETE', url: pvUrl + '/' + deletedVariant}));
+          }
+        }
+
+        return $q.all(promises).then((res2) => {
+          return { product: res.data, productVariants: res2.map((item) => item.data) }
+        }, (err) => {
+          window.alert(err.data);
+        });
+      }, (err) => {
+        window.alert(err.data);
+      });
+    },
+    setObjectValue: (obj, key, value, convert) => {
+      if (convert) {
+        value  = convert(value);
+      }
+      const paths = key.split('.');
+      let curObj = obj;
+      paths.forEach((path, index) => {
+        if (index === paths.length - 1) {
+          curObj[path] = value;
+        } else {
+          if (!curObj[path]) {
+            curObj[path] = {};
+          }
+          curObj = curObj[path];
+        }
+      })
+    },
+  };
+});
+
 // BEGIN module require js
-require('./controllers.js');
+require('./controllers/ProductMainController');
+require('./controllers/ProductEditController');
+require('./controllers/CategoryEditController');
+require('./controllers/ProductBatchUploadController');
 // END module require js
