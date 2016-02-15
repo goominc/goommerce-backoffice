@@ -2,7 +2,7 @@
 
 const productModule = require('../module.js');
 
-productModule.controller('ProductMainController', ($scope, $state, $rootScope, $translate, boConfig) => {
+productModule.controller('ProductMainController', ($scope, $http, $state, $rootScope, $translate, boConfig) => {
   $scope.contentTitle = $translate.instant('product.main.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
@@ -32,7 +32,24 @@ productModule.controller('ProductMainController', ($scope, $state, $rootScope, $
       {
         data: 'sku',
       },
+      {
+        data: 'id',
+        render: (id) => {
+          return `<button data-ng-click="deleteProduct(${id})" class="btn red"><i class="fa fa-remove"></i> ${$translate.instant('main.deleteButton')}</button>`;
+        },
+      },
     ],
   };
   $scope.fileContents = 'before';
+
+  $scope.deleteProduct = (productId) => {
+    if (window.confirm(`Really delete product (${productId})?`)) {
+      $http.delete(`/api/v1/products/${productId}`).then(() => {
+        // reload
+        $state.reload(true);
+      }).catch((err) => {
+        window.alert(err);
+      });
+    }
+  };
 });
