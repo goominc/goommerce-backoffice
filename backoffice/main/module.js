@@ -178,6 +178,11 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     }
   };
   checkLogin();
+
+  // 2016. 02. 15. [heekyu] app-wide state
+  $rootScope.state = {
+    batchUploadedProducts: [],
+  };
 });
 
 mainModule.controller('LoginModalController', ($scope, $http, $cookies) => {

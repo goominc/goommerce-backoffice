@@ -264,6 +264,11 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
     }
   };
   checkLogin();
+
+  // 2016. 02. 15. [heekyu] app-wide state
+  $rootScope.state = {
+    batchUploadedProducts: []
+  };
 });
 
 mainModule.controller('LoginModalController', function ($scope, $http, $cookies) {
@@ -1698,16 +1703,23 @@ productModule.controller('ProductBatchUploadController', function ($scope, $stat
     } }, { columnName: 'seller', apiName: 'data.seller', onlyProduct: true, convert: function convert(value) {
       return Number(value);
     } }, { columnName: 'size', apiName: 'data.size', onlyProductVariant: true }, { columnName: 'color', apiName: 'data.color', onlyProductVariant: true }];
-  $scope.uploadedProducts = [];
   $scope.rowCount = 0;
-  $scope.productCount = 0;
+  $scope.productCount = $rootScope.state.batchUploadedProducts.length;
   $scope.productVariantCount = 0;
+
+  for (var i = 0; i < $rootScope.state.batchUploadedProducts.length; i++) {
+    var product = $rootScope.state.batchUploadedProducts[i];
+    $scope.productVariantCount += product.productVariants ? product.productVariants.length : 0;
+  }
+
   $scope.onFileLoad = function (contents) {
     var rows = contents.split('\n');
     if (rows.length < 2) {
       window.alert('There is no data');
       return;
     }
+    $scope.resetUploaded();
+
     var columns = $.csv.toArray(rows[0]);
     var columnCount = columns.length;
     for (var idx = 0; idx < columnCount; idx++) {
@@ -1723,7 +1735,6 @@ productModule.controller('ProductBatchUploadController', function ($scope, $stat
     $scope.rowCount = rows.length - 1;
     $scope.productCount = 0;
     $scope.productVariantCount = 0;
-    $scope.uploadedProducts.length = 0;
 
     var requestCount = 0;
     var currentProduct = { sku: '\\-x*;:/' };
@@ -1732,7 +1743,6 @@ productModule.controller('ProductBatchUploadController', function ($scope, $stat
       requestCount++;
       console.log('Start Request.' + requestCount);
       productUtil.createProduct(product, productVariants).then(function (res) {
-        // TODO display Uploaded products
         requestCount--;
         console.log('End Request.' + requestCount);
         if (!res || !res.product) {
@@ -1740,7 +1750,7 @@ productModule.controller('ProductBatchUploadController', function ($scope, $stat
         }
         $scope.productCount++;
         $scope.productVariantCount += productVariants.length;
-        $scope.uploadedProducts.push(_.assign({}, product, { productVariants: productVariants }));
+        $rootScope.state.batchUploadedProducts.push(_.assign({}, product, { productVariants: productVariants }));
       });
     };
     var productVariants = [];
@@ -1782,6 +1792,10 @@ productModule.controller('ProductBatchUploadController', function ($scope, $stat
     }
     // if (productVariants.length > 0) {
     startCreate(currentProduct, productVariants);
+  };
+
+  $scope.resetUploaded = function () {
+    $rootScope.state.batchUploadedProducts.length = 0;
   };
 });
 }, {"../module.js":6}],

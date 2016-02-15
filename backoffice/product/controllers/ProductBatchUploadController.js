@@ -35,16 +35,23 @@ productModule.controller('ProductBatchUploadController', ($scope, $state, $rootS
     {columnName: 'size', apiName: 'data.size', onlyProductVariant: true},
     {columnName: 'color', apiName: 'data.color', onlyProductVariant: true},
   ];
-  $scope.uploadedProducts = [];
   $scope.rowCount = 0;
-  $scope.productCount = 0;
+  $scope.productCount = $rootScope.state.batchUploadedProducts.length;
   $scope.productVariantCount = 0;
+
+  for (let i = 0; i < $rootScope.state.batchUploadedProducts.length; i++) {
+    const product = $rootScope.state.batchUploadedProducts[i];
+    $scope.productVariantCount += product.productVariants ? product.productVariants.length : 0;
+  }
+
   $scope.onFileLoad = (contents) => {
     const rows = contents.split('\n');
     if (rows.length < 2) {
       window.alert('There is no data');
       return;
     }
+    $scope.resetUploaded();
+
     const columns = $.csv.toArray(rows[0]);
     const columnCount = columns.length;
     for (let idx = 0; idx < columnCount; idx++) {
@@ -60,7 +67,6 @@ productModule.controller('ProductBatchUploadController', ($scope, $state, $rootS
     $scope.rowCount = rows.length - 1;
     $scope.productCount = 0;
     $scope.productVariantCount = 0;
-    $scope.uploadedProducts.length = 0;
 
     let requestCount = 0;
     let currentProduct = { sku: '\\-x*;:/' };
@@ -69,7 +75,6 @@ productModule.controller('ProductBatchUploadController', ($scope, $state, $rootS
       requestCount++;
       console.log('Start Request.' + requestCount);
       productUtil.createProduct(product, productVariants).then((res) => {
-        // TODO display Uploaded products
         requestCount--;
         console.log('End Request.' + requestCount);
         if (!res || !res.product) {
@@ -77,7 +82,7 @@ productModule.controller('ProductBatchUploadController', ($scope, $state, $rootS
         }
         $scope.productCount++;
         $scope.productVariantCount += productVariants.length;
-        $scope.uploadedProducts.push(_.assign({}, product, { productVariants }));
+        $rootScope.state.batchUploadedProducts.push(_.assign({}, product, { productVariants }));
       });
     };
     let productVariants = [];
@@ -119,5 +124,9 @@ productModule.controller('ProductBatchUploadController', ($scope, $state, $rootS
     }
     // if (productVariants.length > 0) {
     startCreate(currentProduct, productVariants);
+  };
+
+  $scope.resetUploaded = () => {
+    $rootScope.state.batchUploadedProducts.length = 0;
   };
 });

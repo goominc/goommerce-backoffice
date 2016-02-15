@@ -44,7 +44,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr data-ng-repeat="product in uploadedProducts">
+                    <tr data-ng-repeat="product in state.batchUploadedProducts">
                       <td><a ui-sref="product.edit({ productId: product.id })">{{product.id}}</a></td>
                       <td>{{product.sku}}</td>
                       <td>{{product.productVariants.length}}</td>
