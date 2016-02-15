@@ -19,9 +19,42 @@
             </div-->
             <div class="portlet-body">
               <input type="file" bo-file-reader on-read="onFileLoad(contents)"/>
-              <div>CSV 파일 줄 수 : {{rowCount}}</div>
-              <div>등록된 상품 개수 : {{productCount}}</div>
-              <div>등록된 규격 상품 개수 : {{productVariantCount}}</div>
+              <div class="row bo-top-bottom-margin">
+                <div class="col-md-4">CSV 파일 줄 수 :</div>
+                <div class="col-md-8">{{rowCount}}</div>
+              </div>
+              <div class="row bo-top-bottom-margin">
+                <div class="col-md-4">등록된 상품 개수 :</div>
+                <div class="col-md-8">{{productCount}}</div>
+              </div>
+              <div class="row bo-top-bottom-margin">
+                <div class="col-md-4">등록된 규격 상품 개수 :</div>
+                <div class="col-md-8">{{productVariantCount}}</div>
+              </div>
+              <!-- BEGIN uploaded products Table -->
+              <div class="row">
+                <div class="col-md-12">
+                  <table class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                      <th width="20%">ID</th>
+                      <th width="20%">SKU</th>
+                      <th width="20%">Variants Count</th>
+                      <th width="40%"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr data-ng-repeat="product in uploadedProducts">
+                      <td><a ui-sref="product.edit({ productId: product.id })">{{product.id}}</a></td>
+                      <td>{{product.sku}}</td>
+                      <td>{{product.productVariants.length}}</td>
+                      <td>-</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- END uploaded products Table -->
             </div>
           </div>
         </div>

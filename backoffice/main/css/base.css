@@ -37,3 +37,7 @@ input[type="number"] {
 .dropdown-menu > li > a:not(:hover) {
   background-color: inherit;
 }
+
+.bo-top-bottom-margin {
+  margin: 15px 0;
+}

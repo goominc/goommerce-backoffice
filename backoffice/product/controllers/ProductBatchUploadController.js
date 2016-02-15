@@ -6,7 +6,25 @@ const productModule = require('../module.js');
  * CSV File Rule
  *   1. product variants must be just after it's product
  */
-productModule.controller('ProductBatchUploadController', ($scope, productUtil) => {
+productModule.controller('ProductBatchUploadController', ($scope, $state, $rootScope, $translate, productUtil) => {
+  $scope.contentTitle = $translate.instant('product.batchUpload.title');
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'product.main',
+      name: $translate.instant('product.main.title'),
+    },
+    {
+      sref: '-',
+      name: $translate.instant('product.batchUpload.title'),
+    },
+  ];
+  $rootScope.initAll($scope, $state.current.name);
+
   const fields = [
     {columnName: 'sku', apiName: 'sku'},
     {columnName: 'price', apiName: 'price.KRW', onlyProductVariant: true, convert: (value) => Number(value)},
@@ -17,6 +35,10 @@ productModule.controller('ProductBatchUploadController', ($scope, productUtil) =
     {columnName: 'size', apiName: 'data.size', onlyProductVariant: true},
     {columnName: 'color', apiName: 'data.color', onlyProductVariant: true},
   ];
+  $scope.uploadedProducts = [];
+  $scope.rowCount = 0;
+  $scope.productCount = 0;
+  $scope.productVariantCount = 0;
   $scope.onFileLoad = (contents) => {
     const rows = contents.split('\n');
     if (rows.length < 2) {
@@ -38,6 +60,7 @@ productModule.controller('ProductBatchUploadController', ($scope, productUtil) =
     $scope.rowCount = rows.length - 1;
     $scope.productCount = 0;
     $scope.productVariantCount = 0;
+    $scope.uploadedProducts.length = 0;
 
     let requestCount = 0;
     let currentProduct = { sku: '\\-x*;:/' };
@@ -45,12 +68,16 @@ productModule.controller('ProductBatchUploadController', ($scope, productUtil) =
     const startCreate = (product, productVariants) => {
       requestCount++;
       console.log('Start Request.' + requestCount);
-      productUtil.createProduct(product, productVariants).then(() => {
+      productUtil.createProduct(product, productVariants).then((res) => {
         // TODO display Uploaded products
         requestCount--;
+        console.log('End Request.' + requestCount);
+        if (!res || !res.product) {
+          return;
+        }
         $scope.productCount++;
         $scope.productVariantCount += productVariants.length;
-        console.log('End Request.' + requestCount);
+        $scope.uploadedProducts.push(_.assign({}, product, { productVariants }));
       });
     };
     let productVariants = [];
