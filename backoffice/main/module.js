@@ -68,7 +68,12 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
           key: 'product.batchUpload',
           name: $translate.instant('product.batchUpload.title'),
           sref: 'product.batchUpload',
-        }
+        },
+        {
+          key: 'product.imageUpload',
+          name: $translate.instant('product.imageUpload.title'),
+          sref: 'product.imageUpload',
+        },
       ],
     },
     {

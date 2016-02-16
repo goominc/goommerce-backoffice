@@ -1,0 +1,75 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="portlet-body">
+              <span class="btn green fileinput-button" style="margin: 15px 0;">
+                <i class="fa fa-plus"></i> Add Images
+                <input type="file" id="image-upload-button" webkitdirectory directory multiple/>
+              </span>
+              <button data-ng-disabled="saveDisabled" data-ng-click="saveImages()" class="btn green">Start Upload</button>
+              <div class="row">
+                <div class="col-md-12" data-ng-repeat="brandId in brandIds">
+                  <h2>Brand: {{brandId > 0 ? brandId : 'NotAssigned'}}</h2>
+                  <table class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                      <th width="10%">Product ID</th>
+                      <th width="10%">Variant ID</th>
+                      <th width="10%">Slot</th>
+                      <th width="10%">MainImage</th>
+                      <th width="60%">Images</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr data-ng-repeat="row in brands[brandId]">
+                      <td>{{row.productId}}</td>
+                      <td>{{row.variantId}}</td>
+                      <td>{{row.slotCount}}</td>
+                      <td>
+                        <input data-ng-if="row.productId == ''"
+                               id="check-{{row.productId}}-{{row.variantId}}"
+                               data-ng-model="row.mainProduct" type="checkbox"
+                               data-ng-change="row.slotCount = row.mainProduct ? 6 : 2"/>
+                        <label data-ng-if="row.productId == ''" for="check-{{row.productId}}-{{row.variantId}}"></label>
+                      </td>
+                      <td>
+                        <img class="image-inline" data-ng-repeat="image in row.images" width="80px" height="120px" data-ng-src="{{image.url}}" />
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->

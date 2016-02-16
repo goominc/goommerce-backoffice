@@ -150,6 +150,10 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
       key: 'product.batchUpload',
       name: $translate.instant('product.batchUpload.title'),
       sref: 'product.batchUpload'
+    }, {
+      key: 'product.imageUpload',
+      name: $translate.instant('product.imageUpload.title'),
+      sref: 'product.imageUpload'
     }]
   }, {
     key: 'order', // TODO get key from router
@@ -308,7 +312,7 @@ directiveModule.factory('datatableCommons', function ($compile) {
         pageLength: 50, // default record count per page
         // data: realData, need implement
         columns: dataTables.columns,
-        order: dataTables.order || [[0, 'asc']], // set first column as a default sort by asc
+        order: dataTables.order || [[0, 'desc']], // set first column as a default sort by desc
         fnCreatedRow: function fnCreatedRow(nRow) {
           $compile(nRow)(scope);
         },
@@ -715,6 +719,36 @@ productModule.config(function ($stateProvider) {
     url: '/batch-upload',
     templateUrl: templateRoot + '/product/batch-upload.html',
     controller: 'ProductBatchUploadController'
+  }).state('product.imageUpload', {
+    url: '/image-upload',
+    templateUrl: templateRoot + '/product/image-upload.html',
+    controller: 'ProductImageUploadController',
+    resolve: {
+      products: function products($http, $q) {
+        return $http.get('/api/v1/products').then(function (res) {
+          var products = res.data.products;
+          if (products.length > 5) {
+            products.length = 5;
+          }
+          var len = products.length;
+          var promises = [];
+
+          var _loop = function (i) {
+            var product = products[i];
+            promises.push($http.get('/api/v1/products/' + product.id + '/product_variants').then(function (res2) {
+              product.productVariants = res2.data.productVariants;
+            }));
+          };
+
+          for (var i = 0; i < len; i++) {
+            _loop(i);
+          }
+          return $q.all(promises).then(function (res) {
+            return products;
+          });
+        });
+      }
+    }
   });
 });
 
@@ -874,8 +908,9 @@ require('./controllers/ProductMainController');
 require('./controllers/ProductEditController');
 require('./controllers/CategoryEditController');
 require('./controllers/ProductBatchUploadController');
+require('./controllers/ProductImageUploadController');
 // END module require js
-}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":21,"./i18n/translations.ko.json":22,"./controllers/ProductMainController":23,"./controllers/ProductEditController":24,"./controllers/CategoryEditController":25,"./controllers/ProductBatchUploadController":26}],
+}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":21,"./i18n/translations.ko.json":22,"./controllers/ProductMainController":23,"./controllers/ProductEditController":24,"./controllers/CategoryEditController":25,"./controllers/ProductBatchUploadController":26,"./controllers/ProductImageUploadController":27}],
 21: [function(require, module, exports) {
 module.exports = {
   "product": {
@@ -928,6 +963,9 @@ module.exports = {
     "batchUpload": {
       "title": "상품 일괄 등록",
       "upload": "업로드"
+    },
+    "imageUpload": {
+      "title": "이미지 일괄 등록"
     }
   }
 };
@@ -1797,8 +1835,223 @@ productModule.controller('ProductBatchUploadController', function ($scope, $stat
   $scope.resetUploaded = function () {
     $rootScope.state.batchUploadedProducts.length = 0;
   };
+
+  $scope.onDirLoad = function (contents) {
+    console.log(contents);
+  };
 });
 }, {"../module.js":6}],
+27: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var productModule = require('../module');
+
+productModule.controller('ProductImageUploadController', function ($scope, $http, $q, products) {
+  $scope.saveDisabled = true;
+  $scope.brands = {};
+  $scope.brandIds = [];
+  var productsToRows = function productsToRows() {
+    // must be called once
+    // if called multiple, $scope.brands must be clear
+    var len = products.length;
+    for (var i = 0; i < len; i++) {
+      var product = products[i];
+      var brandId = product.data.seller || -1;
+      if (!$scope.brands[brandId]) {
+        $scope.brands[brandId] = [];
+      }
+      $scope.brands[brandId].push({ productId: product.id, variantId: '', mainProduct: false, slotCount: 0, images: [] });
+      for (var j = 0; j < product.productVariants.length; j++) {
+        var productVariant = product.productVariants[j];
+        var mainProduct = j == 0;
+        $scope.brands[brandId].push({ productId: '', variantId: productVariant.id, mainProduct: mainProduct, slotCount: mainProduct ? 6 : 2, images: [] });
+      }
+    }
+    $scope.brandIds = Object.keys($scope.brands);
+  };
+  productsToRows();
+
+  var imgExt = new Set(['jpg', 'jpeg', 'png']);
+  $('#image-upload-button').on('change', function (changeEvent) {
+    var imagesByBrand = {};
+    for (var i = 0; i < changeEvent.target.files.length; i++) {
+      var file = changeEvent.target.files[i];
+      var split = file.webkitRelativePath.split('.');
+      var ext = split[split.length - 1];
+      if (imgExt.has(ext)) {
+        var paths = file.webkitRelativePath.split('/');
+        if (paths.length < 2) {
+          continue;
+        }
+        var brandId = paths[paths.length - 2];
+        if (!imagesByBrand[brandId]) {
+          imagesByBrand[brandId] = [];
+        }
+        imagesByBrand[brandId].push(file);
+      }
+    }
+    var brandIds = Object.keys(imagesByBrand);
+    for (var i = 0; i < brandIds.length; i++) {
+      var brandId = brandIds[i];
+      if ($scope.brands[brandId]) {
+        (function () {
+          var rows = $scope.brands[brandId];
+          var images = imagesByBrand[brandId];
+          /*
+          if (rows.length != images.length) {
+            window.alert(`Brand [${brandId}]'s image count mismatch. Slot = ${rows.length} Image = ${images.length}`);
+            continue;
+          }
+          */
+          var imgIdx = 0;
+          var loadDone = 0;
+          var plusLoadDone = function plusLoadDone() {
+            loadDone++;
+            if (loadDone == imgIdx) {
+              $scope.saveDisabled = false;
+              if (!$scope.$$phase) {
+                $scope.$apply();
+              }
+            }
+          };
+
+          var _loop = function (j) {
+            var row = rows[j];
+            row.images.length = row.slotCount;
+
+            var _loop2 = function (k) {
+              if (imgIdx == images.length) {
+                window.alert('image count mismatch');
+                return 'break';
+              }
+              var r = new FileReader();
+              r.onload = function (e) {
+                row.images[k] = { url: e.target.result };
+                plusLoadDone();
+              };
+              r.readAsDataURL(images[imgIdx++]);
+            };
+
+            for (var k = 0; k < row.slotCount; k++) {
+              var _ret3 = _loop2(k);
+
+              if (_ret3 === 'break') break;
+            }
+            if (imgIdx == images.length) return 'break';
+          };
+
+          for (var j = 0; j < rows.length; j++) {
+            var _ret2 = _loop(j);
+
+            if (_ret2 === 'break') break;
+          }
+        })();
+      }
+    }
+    /*
+    const r = new FileReader();
+    r.onload = function(e) {
+      const contents = e.target.result;
+      $.ajax({
+        url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
+        type: 'POST',
+        data: {file: contents, upload_preset: 'nd9k8295', public_id: 'tmp/tmpImage'},
+        success: (res) => {
+          console.log(res);
+        },
+        error: (res) => {
+          console.log(res);
+        },
+      });
+    };
+    r.readAsDataURL($scope.files[1]);
+    */
+  });
+  $scope.saveImages = function () {
+    var uploadRowImages = function uploadRowImages(productId, productVariantId, images, isMainProduct) {
+      // TODO append exist images
+      var appImages = new Array(images.length);
+      var uploadCount = 0;
+      var done = 0;
+
+      var _loop3 = function (i) {
+        var imageUrl = images[i].url;
+        if (imageUrl.length > 2 && imageUrl.substring(0, 2) === '//') {
+          appImages[i] = images[i];
+        } else {
+          uploadCount++;
+          $.ajax({
+            url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
+            type: 'POST',
+            data: { file: imageUrl, upload_preset: 'nd9k8295', public_id: 'tmp/batch_image/' + productId + '-' + productVariantId + '-' + i },
+            success: function success(res) {
+              appImages[i] = {
+                url: res.url.substring(5),
+                publicId: res.public_id,
+                version: res.version,
+                mainImage: false
+              };
+              plusDone();
+              if (res) return res;
+            },
+            error: function error(res) {
+              window.alert(res);
+              appImages[i] = {};
+              plusDone();
+            }
+          });
+        }
+      };
+
+      for (var i = 0; i < images.length; i++) {
+        _loop3(i);
+      }
+      var saveProductVariant = function saveProductVariant() {
+        var promises = [];
+        var data = {
+          appImages: { 'default': appImages }
+        };
+        promises.push($http.put('/api/v1/products/' + productId + '/product_variants/' + productVariantId, data));
+        if (isMainProduct) {
+          var productData = {
+            appImages: { 'default': [_.assign({}, appImages[0], { mainImage: true })] }
+          };
+          promises.push($http.put('/api/v1/products/' + productId, productData));
+        }
+        $q.all(promises).then(function (res) {
+          console.log(res);
+        });
+      };
+      var plusDone = function plusDone() {
+        done++;
+        if (done === uploadCount) {
+          saveProductVariant();
+        }
+      };
+      if (uploadCount === 0) {
+        saveProductVariant();
+      }
+    };
+
+    for (var i = 0; i < $scope.brandIds.length; i++) {
+      var rows = $scope.brands[$scope.brandIds[i]];
+      var productId = -1;
+      for (var j = 0; j < rows.length; j++) {
+        var row = rows[j];
+        if (row.productId !== '') {
+          productId = row.productId;
+          continue;
+        }
+        if (!row.images || row.images.length < 1) continue;
+
+        uploadRowImages(productId, row.variantId, row.images, row.mainProduct);
+      }
+    }
+  };
+});
+}, {"../module":6}],
 7: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
@@ -1842,15 +2095,15 @@ module.exports = orderModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":27,"./i18n/translations.ko.json":28,"./controllers.js":29}],
-27: [function(require, module, exports) {
+}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":28,"./i18n/translations.ko.json":29,"./controllers.js":30}],
+28: [function(require, module, exports) {
 module.exports = {
   "order": {
 
   }
 };
 }, {}],
-28: [function(require, module, exports) {
+29: [function(require, module, exports) {
 module.exports = {
   "order": {
     "title": "주문",
@@ -1866,7 +2119,7 @@ module.exports = {
   }
 };
 }, {}],
-29: [function(require, module, exports) {
+30: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -1962,13 +2215,13 @@ module.exports = brandModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../utils/module":13,"../third_party/angular-translate":10,"./i18n/translations.en.json":30,"./i18n/translations.ko.json":31,"./controllers.js":32}],
-30: [function(require, module, exports) {
+}, {"../utils/module":13,"../third_party/angular-translate":10,"./i18n/translations.en.json":31,"./i18n/translations.ko.json":32,"./controllers.js":33}],
+31: [function(require, module, exports) {
 module.exports = {
 
 };
 }, {}],
-31: [function(require, module, exports) {
+32: [function(require, module, exports) {
 module.exports = {
   "brand": {
     "title": "셀러",
@@ -1978,7 +2231,7 @@ module.exports = {
   }
 };
 }, {}],
-32: [function(require, module, exports) {
+33: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -2051,14 +2304,14 @@ module.exports = currencyModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":33,"./i18n/translations.ko.json":34,"./controllers.js":35}],
-33: [function(require, module, exports) {
+}, {"../third_party/angular-translate":10,"./i18n/translations.en.json":34,"./i18n/translations.ko.json":35,"./controllers.js":36}],
+34: [function(require, module, exports) {
 module.exports = {
 
 }
 ;
 }, {}],
-34: [function(require, module, exports) {
+35: [function(require, module, exports) {
 module.exports = {
   "currency": {
     "title": "환율"
@@ -2066,7 +2319,7 @@ module.exports = {
 }
 ;
 }, {}],
-35: [function(require, module, exports) {
+36: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';

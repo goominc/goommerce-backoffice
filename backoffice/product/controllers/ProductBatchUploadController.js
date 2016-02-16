@@ -129,4 +129,8 @@ productModule.controller('ProductBatchUploadController', ($scope, $state, $rootS
   $scope.resetUploaded = () => {
     $rootScope.state.batchUploadedProducts.length = 0;
   };
+
+  $scope.onDirLoad = (contents) => {
+    console.log(contents);
+  };
 });

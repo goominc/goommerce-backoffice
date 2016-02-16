@@ -17,8 +17,8 @@ directiveModule.factory('datatableCommons', ($compile) => {
         // data: realData, need implement
         columns: dataTables.columns,
         order: dataTables.order || [
-          [0, 'asc'],
-        ], // set first column as a default sort by asc
+          [0, 'desc'],
+        ], // set first column as a default sort by desc
         fnCreatedRow: (nRow) => {
           $compile(nRow)(scope);
         },
@@ -144,7 +144,7 @@ directiveModule.directive('clUploadWidget', function () {
           }
         });
       });
-    }
+    },
   };
 });
 
@@ -170,6 +170,6 @@ directiveModule.directive('boFileReader', () => {
           r.readAsText(files[0], 'EUC-KR'); // 2016. 01. 28. [heekyu] april send me EUC-KR encoded files
         }
       });
-    }
+    },
   };
 });

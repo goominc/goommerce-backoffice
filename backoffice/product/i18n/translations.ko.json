@@ -37,6 +37,9 @@
     "batchUpload": {
       "title": "상품 일괄 등록",
       "upload": "업로드"
+    },
+    "imageUpload": {
+      "title": "이미지 일괄 등록"
     }
   }
 }

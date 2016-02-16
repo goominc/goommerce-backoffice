@@ -76,6 +76,32 @@ productModule.config(($stateProvider) => {
       url: '/batch-upload',
       templateUrl: templateRoot + '/product/batch-upload.html',
       controller: 'ProductBatchUploadController',
+    })
+    .state('product.imageUpload', {
+      url: '/image-upload',
+      templateUrl: templateRoot + '/product/image-upload.html',
+      controller: 'ProductImageUploadController',
+      resolve: {
+        products: ($http, $q) => {
+          return $http.get('/api/v1/products').then((res) => {
+            const products = res.data.products;
+            if (products.length > 5) {
+              products.length = 5;
+            }
+            const len = products.length;
+            const promises = [];
+            for (let i = 0; i < len; i++) {
+              const product = products[i];
+              promises.push($http.get(`/api/v1/products/${product.id}/product_variants`).then((res2) => {
+                product.productVariants = res2.data.productVariants;
+              }));
+            }
+            return $q.all(promises).then((res) => {
+              return products;
+            });
+          });
+        },
+      },
     });
 });
 
@@ -166,4 +192,5 @@ require('./controllers/ProductMainController');
 require('./controllers/ProductEditController');
 require('./controllers/CategoryEditController');
 require('./controllers/ProductBatchUploadController');
+require('./controllers/ProductImageUploadController');
 // END module require js

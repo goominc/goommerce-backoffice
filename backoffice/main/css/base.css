@@ -41,3 +41,7 @@ input[type="number"] {
 .bo-top-bottom-margin {
   margin: 15px 0;
 }
+
+.table > thead > tr > th {
+  text-align: center;
+}
