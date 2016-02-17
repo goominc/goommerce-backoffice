@@ -130,7 +130,10 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
 
   // 2016. 01. 20. [heekyu] refer to https://www.jstree.com/api
   jstreeNode.on('move_node.jstree', (e, data) => {
-    console.log(data);
+    // TODO update client tree after server updated
+    $http.put(`/api/v1/categories/${data.node.id}`, { parentId: data.parent }).then((res) => {
+      console.log(res);
+    });
   });
   jstreeNode.on('select_node.jstree', (e, data) => {
     $scope.category = categoryIdMap[data.node.id];
