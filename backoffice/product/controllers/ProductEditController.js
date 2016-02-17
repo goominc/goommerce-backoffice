@@ -174,6 +174,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
 
   // BEGIN Manipulate Variants
   $scope.generateProductVariants = () => {
+    $scope.tmpObjToProduct();
     if (!$scope.product.sku || $scope.product.sku === '') {
       window.alert('insert SKU first.'); // TODO message
       return false;
