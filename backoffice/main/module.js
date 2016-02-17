@@ -11,6 +11,7 @@ const mainModule = angular.module('backoffice.main', [
     require('../brand/module').name,
     require('../currency/module').name,
     require('../cms/module').name,
+    require('../text/module').name,
     require('../third_party/angular-translate'),
   ])
   .config(($translateProvider) => {
@@ -116,6 +117,12 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
       key: 'currency', // TODO get key from router
       name: $translate.instant('currency.title'),
       sref: 'currency.main',
+      active: false,
+    },
+    {
+      key: 'text',
+      name: $translate.instant('text.title'),
+      sref: 'text.main',
       active: false,
     },
   ];
