@@ -26,6 +26,7 @@
     "cloudinary": "~2.0.4",
     "fancybox": "~2.1.5",
     "lodash": "~3.10.1",
-    "jquery-csv": "*"
+    "jquery-csv": "*",
+    "angular-ui-sortable": "~0.13.4"
   }
 }

@@ -2334,7 +2334,7 @@ currencyModule.controller('CurrencyMainController', function ($scope, $http) {
 
 'use strict';
 
-var cmsModule = angular.module('backoffice.cms', ['ui.router', require('../third_party/angular-translate')]);
+var cmsModule = angular.module('backoffice.cms', ['ui.router', 'ui.sortable', require('../third_party/angular-translate')]);
 
 module.exports = cmsModule;
 
@@ -2432,6 +2432,11 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
     $http.post('/api/v1/cms', { name: $scope.name, data: $scope.cms }).then(function (res) {
       console.log(res);
     });
+  };
+
+  $scope.rowSortable = {
+    handle: '.cms-simple-sortable-pointer',
+    placeholder: 'ui-state-highlight'
   };
 });
 }, {"./module":10}],

@@ -2,6 +2,7 @@
 
 const cmsModule = angular.module('backoffice.cms', [
   'ui.router',
+  'ui.sortable',
   require('../third_party/angular-translate'),
 ]);
 

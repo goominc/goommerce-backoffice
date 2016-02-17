@@ -59,4 +59,9 @@ cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, 
       console.log(res);
     });
   };
+
+  $scope.rowSortable = {
+    handle: '.cms-simple-sortable-pointer',
+    placeholder: 'ui-state-highlight',
+  };
 });
