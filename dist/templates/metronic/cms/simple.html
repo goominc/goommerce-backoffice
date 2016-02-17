@@ -1,0 +1,74 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="portlet-title">
+              <div class="actions btn-set">
+                <button class="btn blue" data-ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
+              </div>
+            </div>
+            <div class="portlet-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <table class="table table-bordered dataTable">
+                    <thead>
+                    <tr>
+                      <th width="20%">link</th>
+                      <th width="50%">image</th>
+                      <th width="15%"></th>
+                      <th width="15%"></th>
+                    </tr>
+                    <tr>
+                      <th><input type="text" data-ng-model="newObject.link" /></th>
+                      <th style="text-align: left;">
+                        <img width="auto" height="150px" data-ng-if="newObject.image" data-ng-src="{{newObject.image.url}}"/>
+                      </th>
+                      <th>
+                        <button class="btn blue" cl-upload-widget="" callback="imageUploaded(result, newObject)"><i class="fa fa-plus"></i> {{'main.addImageButton' | translate}}</button>
+                      </th>
+                      <th><button class="btn blue" data-ng-click="addRow()"><i class="fa fa-plus"></i> {{'main.createButton' | translate}}</button></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr data-ng-repeat="child in cms.children">
+                      <td>{{child.link}}</td>
+                      <td><img width="auto" height="150px" data-ng-src="{{child.image.url}}" /></td>
+                      <td></td>
+                      <td><button class="btn red"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->

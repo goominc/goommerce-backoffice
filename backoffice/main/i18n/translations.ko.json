@@ -5,6 +5,7 @@
     "deleteButton": "삭제",
     "saveButton": "저장",
     "saveAndContinueButton": "저장 후 계속",
+    "addImageButton": "이미지 추가",
     "login": {
       "title": "로그인",
       "backBtn": "뒤로",

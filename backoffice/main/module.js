@@ -1,3 +1,4 @@
+// Copyright (C) 2016 Goom Inc. All rights reserved.
 
 const mainModule = angular.module('backoffice.main', [
     'ui.router',
@@ -9,6 +10,7 @@ const mainModule = angular.module('backoffice.main', [
     require('../order/module').name,
     require('../brand/module').name,
     require('../currency/module').name,
+    require('../cms/module').name,
     require('../third_party/angular-translate'),
   ])
   .config(($translateProvider) => {
@@ -101,18 +103,12 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
       active: false,
       children: [
         {
-          name: 'main1',
-          sref: 'cms.edit({cms_id: "main1_1"})',
-          children: [
-            {
-              name: 'kk',
-              sref: '/',
-            },
-          ],
+          name: 'pc_main_banner1',
+          sref: 'cms.simple({name: "pc_main_banner1"})',
         },
         {
-          name: 'main2',
-          sref: 'cms.edit({cms_id: "main2_1"})',
+          name: 'pc_main_banner2',
+          sref: 'cms.simple({name: "pc_main_banner2"})',
         },
       ],
     },
