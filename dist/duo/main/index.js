@@ -1278,6 +1278,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
   // BEGIN Manipulate Variants
   $scope.generateProductVariants = function () {
+    $scope.tmpObjToProduct();
     if (!$scope.product.sku || $scope.product.sku === '') {
       window.alert('insert SKU first.'); // TODO message
       return false;
@@ -2175,8 +2176,6 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     name: $translate.instant('order.detail.title')
   }];
   $rootScope.initAll($scope, $state.current.name);
-
-  $scope.order = order;
 });
 }, {"./module":7}],
 8: [function(require, module, exports) {
