@@ -9,6 +9,10 @@
     },
     "detail": {
       "title": "주문상세"
+    },
+    "beforePayment": {
+      "title": "무통장 입금 대기",
+      "subTitle": "또는 결제 전"
     }
   }
 }

@@ -28,6 +28,11 @@ orderModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/order/main.html',
       controller: 'OrderMainController',
     })
+    .state('order.beforePayment', {
+      url: '/before_payment',
+      templateUrl: templateRoot + '/order/step0-before-payment.html',
+      controller: 'OrderListBeforePaymentController',
+    })
     .state('order.detail', {
       url: '/detail/:orderId',
       templateUrl: templateRoot + '/order/detail.html',

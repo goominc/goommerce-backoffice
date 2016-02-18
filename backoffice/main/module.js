@@ -84,6 +84,13 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
       name: $translate.instant('order.title'),
       sref: 'order.main',
       active: false,
+      children: [
+        {
+          key: 'order.beforePayment',
+          name: $translate.instant('order.beforePayment.title'),
+          sref: 'order.beforePayment',
+        },
+      ],
     },
     {
       key: 'user', // TODO get key from router

@@ -45,6 +45,26 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
   };
 });
 
+orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, $http, $state, $translate) => {
+  $scope.contentTitle = $translate.instant('order.beforePayment.title');
+  $scope.contentSubTitle = $translate.instant('order.beforePayment.subTitle');
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'order.main',
+      name: $translate.instant('order.main.title'),
+    },
+    {
+      sref: 'order.beforePayment',
+      name: $translate.instant('order.beforePayment.title'),
+    },
+  ];
+  $rootScope.initAll($scope, $state.current.name);
+});
+
 orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $state, $translate, order) => {
   $scope.contentTitle = $translate.instant('order.detail.title');
   $scope.contentSubTitle = 'Order Detail';

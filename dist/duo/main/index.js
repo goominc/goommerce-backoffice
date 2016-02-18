@@ -161,7 +161,12 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
     key: 'order', // TODO get key from router
     name: $translate.instant('order.title'),
     sref: 'order.main',
-    active: false
+    active: false,
+    children: [{
+      key: 'order.beforePayment',
+      name: $translate.instant('order.beforePayment.title'),
+      sref: 'order.beforePayment'
+    }]
   }, {
     key: 'user', // TODO get key from router
     name: $translate.instant('user.manage.title'),
@@ -2108,9 +2113,9 @@ orderModule.config(function ($stateProvider) {
     url: '/main',
     templateUrl: templateRoot + '/order/main.html',
     controller: 'OrderMainController'
-  }).state('order.BeforePayment', {
+  }).state('order.beforePayment', {
     url: '/before_payment',
-    templateUrl: templateRoot + '/order/step0-before-payment',
+    templateUrl: templateRoot + '/order/step0-before-payment.html',
     controller: 'OrderListBeforePaymentController'
   }).state('order.detail', {
     url: '/detail/:orderId',
