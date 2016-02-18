@@ -207,7 +207,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        const newVariant = {sku: newVariantSKU, price: {KRW: 0}, stock: -1};
+        const newVariant = {sku: newVariantSKU, KRW: 0, stock: -1};
         newVariants.push(newVariant);
         newVariantsMap[newVariantSKU] = newVariant;
       }
@@ -296,7 +296,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     });
   };
 
-  $scope.newProductVariant = { price: {} };
+  $scope.newProductVariant = {};
   $scope.addProductVariant = (newProductVariant) => {
     if (!newProductVariant.sku || newProductVariant.sku === '') {
       window.alert('sku must be valid string');
@@ -306,11 +306,11 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       window.alert(newProductVariant.sku + ' already exists');
       return;
     }
-    if (newProductVariant.price <= 0 || newProductVariant.stock < 0) {
-      window.alert('Price > 0, Stock >= 0');
+    if (newProductVariant.stock < 0) {
+      window.alert('Stock >= 0');
       return;
     }
-    $scope.newProductVariant = { price: {} };
+    $scope.newProductVariant = {};
     $scope.productVariants.push(newProductVariant);
     $scope.productVariantsMap[newProductVariant.sku] = newProductVariant;
   };

@@ -27,7 +27,7 @@ productModule.controller('ProductBatchUploadController', ($scope, $state, $rootS
 
   const fields = [
     {columnName: 'sku', apiName: 'sku'},
-    {columnName: 'price', apiName: 'price.KRW', onlyProductVariant: true, convert: (value) => Number(value)},
+    {columnName: 'price', apiName: 'KRW', onlyProductVariant: true, convert: (value) => Number(value)},
     {columnName: 'qty', apiName: 'stock', onlyProductVariant: true},
     {columnName: 'product_nickname', apiName: 'data.nickname'},
     {columnName: 'category_ids', apiName: 'categories', onlyProduct: true, convert: (value) => value.split(',').map((v) => Number(v))},

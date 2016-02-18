@@ -667,6 +667,13 @@ productModule.config(function ($stateProvider) {
   // 2016. 01. 04. [heekyu] how can I configure this outside of config?
   var templateRoot = 'templates/metronic';
 
+  var narrowProduct = function narrowProduct(product) {
+    return _.pick(product, ['id', 'sku', 'categories', 'isActive', 'brand', 'data', 'appImages']);
+  };
+  var narrowProductVariant = function narrowProductVariant(variant) {
+    return _.pick(variant, ['id', 'productId', 'sku', 'stock', 'KRW', 'data', 'appImages']);
+  };
+
   $stateProvider.state('product', {
     abstract: true,
     url: '/product',
@@ -696,7 +703,11 @@ productModule.config(function ($stateProvider) {
     resolve: {
       product: function product($http, $stateParams) {
         return $http.get('/api/v1/products/' + $stateParams.productId).then(function (res) {
-          return res.data;
+          var product = narrowProduct(res.data);
+          product.productVariants = res.data.productVariants.map(function (variant) {
+            return narrowProductVariant(variant);
+          });
+          return product;
         });
       },
       categories: function categories($http) {
@@ -737,9 +748,11 @@ productModule.config(function ($stateProvider) {
           var promises = [];
 
           var _loop = function (i) {
-            var product = products[i];
+            var product = narrowProduct(products[i]);
             promises.push($http.get('/api/v1/products/' + product.id + '/product_variants').then(function (res2) {
-              product.productVariants = res2.data.productVariants;
+              product.productVariants = res2.data.productVariants.map(function (variant) {
+                return narrowProductVariant(variant);
+              });
             }));
           };
 
@@ -1357,7 +1370,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        var newVariant = { sku: newVariantSKU, price: { KRW: 0 }, stock: -1 };
+        var newVariant = { sku: newVariantSKU, KRW: 0, stock: -1 };
         newVariants.push(newVariant);
         newVariantsMap[newVariantSKU] = newVariant;
       }
@@ -1446,7 +1459,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     });
   };
 
-  $scope.newProductVariant = { price: {} };
+  $scope.newProductVariant = {};
   $scope.addProductVariant = function (newProductVariant) {
     if (!newProductVariant.sku || newProductVariant.sku === '') {
       window.alert('sku must be valid string');
@@ -1456,11 +1469,11 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       window.alert(newProductVariant.sku + ' already exists');
       return;
     }
-    if (newProductVariant.price <= 0 || newProductVariant.stock < 0) {
-      window.alert('Price > 0, Stock >= 0');
+    if (newProductVariant.stock < 0) {
+      window.alert('Stock >= 0');
       return;
     }
-    $scope.newProductVariant = { price: {} };
+    $scope.newProductVariant = {};
     $scope.productVariants.push(newProductVariant);
     $scope.productVariantsMap[newProductVariant.sku] = newProductVariant;
   };
@@ -1739,7 +1752,7 @@ productModule.controller('ProductBatchUploadController', function ($scope, $stat
   }];
   $rootScope.initAll($scope, $state.current.name);
 
-  var fields = [{ columnName: 'sku', apiName: 'sku' }, { columnName: 'price', apiName: 'price.KRW', onlyProductVariant: true, convert: function convert(value) {
+  var fields = [{ columnName: 'sku', apiName: 'sku' }, { columnName: 'price', apiName: 'KRW', onlyProductVariant: true, convert: function convert(value) {
       return Number(value);
     } }, { columnName: 'qty', apiName: 'stock', onlyProductVariant: true }, { columnName: 'product_nickname', apiName: 'data.nickname' }, { columnName: 'category_ids', apiName: 'categories', onlyProduct: true, convert: function convert(value) {
       return value.split(',').map(function (v) {
@@ -2083,6 +2096,10 @@ orderModule.config(function ($stateProvider) {
     url: '/main',
     templateUrl: templateRoot + '/order/main.html',
     controller: 'OrderMainController'
+  }).state('order.BeforePayment', {
+    url: '/before_payment',
+    templateUrl: templateRoot + '/order/step0-before-payment',
+    controller: 'OrderListBeforePaymentController'
   }).state('order.detail', {
     url: '/detail/:orderId',
     templateUrl: templateRoot + '/order/detail.html',
@@ -2122,6 +2139,10 @@ module.exports = {
     },
     "detail": {
       "title": "주문상세"
+    },
+    "beforePayment": {
+      "title": "무통장 입금 대기",
+      "subTitle": "또는 결제 전"
     }
   }
 };
@@ -2166,6 +2187,22 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
       }
     }]
   };
+});
+
+orderModule.controller('OrderListBeforePaymentController', function ($scope, $rootScope, $http, $state, $translate) {
+  $scope.contentTitle = $translate.instant('order.beforePayment.title');
+  $scope.contentSubTitle = $translate.instant('order.beforePayment.subTitle');
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
+    sref: 'order.beforePayment',
+    name: $translate.instant('order.beforePayment.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
 });
 
 orderModule.controller('OrderDetailController', function ($scope, $rootScope, $http, $state, $translate, order) {

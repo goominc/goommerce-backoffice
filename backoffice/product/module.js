@@ -16,6 +16,9 @@ productModule.config(($stateProvider) => {
   // 2016. 01. 04. [heekyu] how can I configure this outside of config?
   const templateRoot = 'templates/metronic';
 
+  const narrowProduct = (product) => _.pick(product, ['id', 'sku', 'categories', 'isActive', 'brand', 'data', 'appImages']);
+  const narrowProductVariant = (variant) => _.pick(variant, ['id', 'productId', 'sku', 'stock', 'KRW', 'data', 'appImages']);
+
   $stateProvider
     .state('product', {
       abstract: true,
@@ -47,7 +50,9 @@ productModule.config(($stateProvider) => {
       resolve: {
         product: ($http, $stateParams) => {
           return $http.get('/api/v1/products/' + $stateParams.productId).then((res) => {
-            return res.data;
+            const product = narrowProduct(res.data);
+            product.productVariants = res.data.productVariants.map((variant) => narrowProductVariant(variant));
+            return product;
           });
         },
         categories: ($http) => {
@@ -91,9 +96,9 @@ productModule.config(($stateProvider) => {
             const len = products.length;
             const promises = [];
             for (let i = 0; i < len; i++) {
-              const product = products[i];
+              const product = narrowProduct(products[i]);
               promises.push($http.get(`/api/v1/products/${product.id}/product_variants`).then((res2) => {
-                product.productVariants = res2.data.productVariants;
+                product.productVariants = res2.data.productVariants.map((variant) => narrowProductVariant(variant));
               }));
             }
             return $q.all(promises).then((res) => {
