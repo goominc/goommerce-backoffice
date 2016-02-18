@@ -97,6 +97,7 @@ productModule.config(($stateProvider) => {
             const promises = [];
             for (let i = 0; i < len; i++) {
               const product = narrowProduct(products[i]);
+              products[i] = product;
               promises.push($http.get(`/api/v1/products/${product.id}/product_variants`).then((res2) => {
                 product.productVariants = res2.data.productVariants.map((variant) => narrowProductVariant(variant));
               }));

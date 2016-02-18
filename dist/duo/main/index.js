@@ -749,6 +749,7 @@ productModule.config(function ($stateProvider) {
 
           var _loop = function (i) {
             var product = narrowProduct(products[i]);
+            products[i] = product;
             promises.push($http.get('/api/v1/products/' + product.id + '/product_variants').then(function (res2) {
               product.productVariants = res2.data.productVariants.map(function (variant) {
                 return narrowProductVariant(variant);
@@ -1819,7 +1820,6 @@ productModule.controller('ProductBatchUploadController', function ($scope, $http
         $rootScope.state.batchUploadedProducts.push(_.assign({}, product, { productVariants: productVariants }));
         $http.put('/api/v1/products/' + product.id + '/index').then(function (res) {
           // ignore
-          console.log('indexing');
         });
       });
     };

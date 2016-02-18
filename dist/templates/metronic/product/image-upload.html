@@ -29,13 +29,13 @@
                       <th width="60%">Images</th>
                     </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="cell-center">
                     <tr data-ng-repeat="row in brands[brandId]">
                       <td>{{row.productId}}</td>
                       <td>{{row.variantId}}</td>
-                      <td>{{row.slotCount}}</td>
+                      <td><input data-ng-if="row.productId === ''" style="width: 100px;" type="number" data-ng-model="row.slotCount" /></td>
                       <td>
-                        <input data-ng-if="row.productId == ''"
+                        <input data-ng-if="row.productId === ''"
                                id="check-{{row.productId}}-{{row.variantId}}"
                                data-ng-model="row.mainProduct" type="checkbox"
                                data-ng-change="row.slotCount = row.mainProduct ? 6 : 2"/>

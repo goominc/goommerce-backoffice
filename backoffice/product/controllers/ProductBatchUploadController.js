@@ -85,7 +85,6 @@ productModule.controller('ProductBatchUploadController', ($scope, $http, $state,
         $rootScope.state.batchUploadedProducts.push(_.assign({}, product, { productVariants }));
         $http.put(`/api/v1/products/${product.id}/index`).then((res) => {
           // ignore
-          console.log('indexing');
         });
       });
     };

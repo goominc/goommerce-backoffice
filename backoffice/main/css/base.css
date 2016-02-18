@@ -44,7 +44,10 @@ input[type="number"] {
 
 .table > thead > tr > th {
   text-align: center;
-}
-.table > thead > tr > th {
   vertical-align: middle;
+}
+
+tbody.cell-center > tr > td {
+  text-align: center !important;
+  vertical-align: middle !important;
 }
