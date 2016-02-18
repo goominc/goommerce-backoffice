@@ -15,7 +15,7 @@
                 <div class="col-md-4">
                   <div id="categoryTree"></div>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-8" data-ng-if="category && category.id != root.id">
                   <div class="col-md-12 category-action-box">
                     <div class="actions btn-set">
                       <button class="btn blue" ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>

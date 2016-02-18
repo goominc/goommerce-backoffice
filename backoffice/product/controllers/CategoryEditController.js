@@ -51,6 +51,7 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
   };
 
   const jstreeData = getTreeData($scope.root, currentCategoryId);
+  $scope.category = categoryIdMap[currentCategoryId];
   const jstreeNode = $('#categoryTree');
   jstreeNode.jstree({
     core: {
