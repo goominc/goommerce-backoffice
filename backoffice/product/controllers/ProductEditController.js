@@ -223,6 +223,13 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
   // END Manipulate Variants
 
+  const afterSaveProduct = (product) => {
+    $http.put(`/api/v1/products/${product.id}/index`).then((res) => {
+      // ignore
+    });
+    $state.go('product.edit', { productId: product.id });
+  };
+
   $scope.saveAndContinue = () => {
     // 2016. 01. 18. [heekyu] save images
     $scope.tmpObjToProduct();
@@ -230,15 +237,16 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then((res) => {
-        $state.go('product.edit', { productId: res.product.id });
+        afterSaveProduct(res.product);
       }, (err) => {
         window.alert('Product Create Fail' + err.data);
       });
     } else {
       return productUtil.updateProduct($scope.product, $scope.productVariants, $scope.origVariants).then((res) => {
-        $state.go('product.edit', {productId: res.product.id });
+        afterSaveProduct(res.product);
         $scope.origVariants.clear();
       }, (err) => {
+        console.log(err);
         window.alert('Product Update Fail' + err.data);
         $scope.origVariants.clear();
         return err;
@@ -247,9 +255,8 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
 
   $scope.save = () => {
-    const createOrUpdate = !$scope.product.id; // create is true
     $scope.saveAndContinue().then((err) => {
-      if (!createOrUpdate && !err) {
+      if (!err) {
         $state.go('product.main');
       }
     });

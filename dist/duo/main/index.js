@@ -1386,6 +1386,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
   // END Manipulate Variants
 
+  var afterSaveProduct = function afterSaveProduct(product) {
+    $http.put('/api/v1/products/' + product.id + '/index').then(function (res) {
+      // ignore
+    });
+    $state.go('product.edit', { productId: product.id });
+  };
+
   $scope.saveAndContinue = function () {
     // 2016. 01. 18. [heekyu] save images
     $scope.tmpObjToProduct();
@@ -1393,15 +1400,16 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then(function (res) {
-        $state.go('product.edit', { productId: res.product.id });
+        afterSaveProduct(res.product);
       }, function (err) {
         window.alert('Product Create Fail' + err.data);
       });
     } else {
       return productUtil.updateProduct($scope.product, $scope.productVariants, $scope.origVariants).then(function (res) {
-        $state.go('product.edit', { productId: res.product.id });
+        afterSaveProduct(res.product);
         $scope.origVariants.clear();
       }, function (err) {
+        console.log(err);
         window.alert('Product Update Fail' + err.data);
         $scope.origVariants.clear();
         return err;
@@ -1410,9 +1418,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
 
   $scope.save = function () {
-    var createOrUpdate = !$scope.product.id; // create is true
     $scope.saveAndContinue().then(function (err) {
-      if (!createOrUpdate && !err) {
+      if (!err) {
         $state.go('product.main');
       }
     });
@@ -1605,6 +1612,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
   };
 
   var jstreeData = getTreeData($scope.root, currentCategoryId);
+  $scope.category = categoryIdMap[currentCategoryId];
   var jstreeNode = $('#categoryTree');
   jstreeNode.jstree({
     core: {
@@ -1737,7 +1745,7 @@ var productModule = require('../module.js');
  * CSV File Rule
  *   1. product variants must be just after it's product
  */
-productModule.controller('ProductBatchUploadController', function ($scope, $state, $rootScope, $translate, productUtil) {
+productModule.controller('ProductBatchUploadController', function ($scope, $http, $state, $rootScope, $translate, productUtil) {
   $scope.contentTitle = $translate.instant('product.batchUpload.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [{
@@ -1809,6 +1817,10 @@ productModule.controller('ProductBatchUploadController', function ($scope, $stat
         $scope.productCount++;
         $scope.productVariantCount += productVariants.length;
         $rootScope.state.batchUploadedProducts.push(_.assign({}, product, { productVariants: productVariants }));
+        $http.put('/api/v1/products/' + product.id + '/index').then(function (res) {
+          // ignore
+          console.log('indexing');
+        });
       });
     };
     var productVariants = [];

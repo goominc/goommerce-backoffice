@@ -6,7 +6,7 @@ const productModule = require('../module.js');
  * CSV File Rule
  *   1. product variants must be just after it's product
  */
-productModule.controller('ProductBatchUploadController', ($scope, $state, $rootScope, $translate, productUtil) => {
+productModule.controller('ProductBatchUploadController', ($scope, $http, $state, $rootScope, $translate, productUtil) => {
   $scope.contentTitle = $translate.instant('product.batchUpload.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
@@ -83,6 +83,10 @@ productModule.controller('ProductBatchUploadController', ($scope, $state, $rootS
         $scope.productCount++;
         $scope.productVariantCount += productVariants.length;
         $rootScope.state.batchUploadedProducts.push(_.assign({}, product, { productVariants }));
+        $http.put(`/api/v1/products/${product.id}/index`).then((res) => {
+          // ignore
+          console.log('indexing');
+        });
       });
     };
     let productVariants = [];
