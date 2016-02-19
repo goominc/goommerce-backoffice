@@ -1889,6 +1889,58 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
   $scope.saveDisabled = true;
   $scope.brands = {};
   $scope.brandIds = [];
+  var extractDataFromVariant = function extractDataFromVariant(variant) {
+    var splits = variant.sku.split('-');
+    if (splits.length === 3) {
+      return {
+        color: splits[1],
+        size: splits[2]
+      };
+    }
+    return {};
+  };
+  var productToTableData = function productToTableData(product) {
+    var colorMap = {};
+    var mainColor = null;
+    var variants = [];
+    for (var i = 0; i < product.productVariants.length; i++) {
+      var productVariant = product.productVariants[i];
+      var color = productVariant.data.color;
+      var size = productVariant.data.size;
+      if (!color) {
+        var parsed = extractDataFromVariant(productVariant);
+        color = parsed.color;
+        if (!size) size = productVariant.data.size;
+      }
+      if (!color) {
+        console.log('cannot detect color name for variant ' + productVariant.sku);
+        window.alert('invalid product variant ' + productVariant.sku);
+        continue;
+      }
+      if (!colorMap[color]) {
+        colorMap[color] = [];
+        if (mainColor) mainColor = color;
+      }
+      colorMap[color].push(productVariant);
+    }
+    var rows = [];
+    var colors = Object.keys(colorMap);
+    for (var i = 0; i < colors.length; i++) {
+      var _variants = colorMap[colors[i]];
+      for (var j = 0; j < _variants.length; j++) {
+        rows.push({
+          color: colors[i],
+          rowspan: j === 0 ? _variants.length : 0,
+          sku: _variants[j].sku,
+          mainProduct: i === 0,
+          slotCount: j > 0 ? 0 : i === 0 ? 6 : 2,
+          images: [],
+          variantId: _variants[j].id
+        });
+      }
+    }
+    return { rows: rows, product: product };
+  };
   var productsToRows = function productsToRows() {
     // must be called once
     // if called multiple, $scope.brands must be clear
@@ -1899,12 +1951,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       if (!$scope.brands[brandId]) {
         $scope.brands[brandId] = [];
       }
-      $scope.brands[brandId].push({ productId: product.id, variantId: '', mainProduct: false, slotCount: 0, images: [] });
-      for (var j = 0; j < product.productVariants.length; j++) {
-        var productVariant = product.productVariants[j];
-        var mainProduct = j == 0;
-        $scope.brands[brandId].push({ productId: '', variantId: productVariant.id, mainProduct: mainProduct, slotCount: mainProduct ? 6 : 2, images: [] });
-      }
+      $scope.brands[brandId].push(productToTableData(product));
     }
     $scope.brandIds = Object.keys($scope.brands);
   };
@@ -1934,14 +1981,9 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       var brandId = brandIds[i];
       if ($scope.brands[brandId]) {
         (function () {
-          var rows = $scope.brands[brandId];
+          var items = $scope.brands[brandId]; // { product: , rows: }
           var images = imagesByBrand[brandId];
-          /*
-          if (rows.length != images.length) {
-            window.alert(`Brand [${brandId}]'s image count mismatch. Slot = ${rows.length} Image = ${images.length}`);
-            continue;
-          }
-          */
+
           var imgIdx = 0;
           var loadDone = 0;
           var plusLoadDone = function plusLoadDone() {
@@ -1953,67 +1995,68 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
               }
             }
           };
+          for (var j = 0; j < items.length; j++) {
+            var rows = items[j].rows;
 
-          var _loop = function (j) {
-            var row = rows[j];
-            row.images.length = row.slotCount;
-
-            var _loop2 = function (k) {
-              if (imgIdx == images.length) {
-                window.alert('image count mismatch');
-                return 'break';
+            var _loop = function (k) {
+              var row = rows[k];
+              if (row.rowspan < 1) {
+                return 'continue';
               }
-              var r = new FileReader();
-              r.onload = function (e) {
-                row.images[k] = { url: e.target.result };
-                plusLoadDone();
+              row.images.length = row.slotCount;
+
+              var _loop3 = function (_k) {
+                if (imgIdx == images.length) {
+                  window.alert('image count mismatch');
+                  return 'break';
+                }
+                var r = new FileReader();
+                r.onload = function (e) {
+                  row.images[_k] = { url: e.target.result };
+                  plusLoadDone();
+                };
+                r.readAsDataURL(images[imgIdx++]);
               };
-              r.readAsDataURL(images[imgIdx++]);
+
+              for (var _k = 0; _k < row.slotCount; _k++) {
+                var _ret3 = _loop3(_k);
+
+                if (_ret3 === 'break') break;
+              }
+              if (imgIdx == images.length) return 'break';
             };
 
-            for (var k = 0; k < row.slotCount; k++) {
-              var _ret3 = _loop2(k);
+            _loop2: for (var k = 0; k < rows.length; k++) {
+              var _ret2 = _loop(k);
 
-              if (_ret3 === 'break') break;
+              switch (_ret2) {
+                case 'continue':
+                  continue;
+
+                case 'break':
+                  break _loop2;}
             }
-            if (imgIdx == images.length) return 'break';
-          };
-
-          for (var j = 0; j < rows.length; j++) {
-            var _ret2 = _loop(j);
-
-            if (_ret2 === 'break') break;
           }
         })();
       }
     }
-    /*
-    const r = new FileReader();
-    r.onload = function(e) {
-      const contents = e.target.result;
-      $.ajax({
-        url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
-        type: 'POST',
-        data: {file: contents, upload_preset: 'nd9k8295', public_id: 'tmp/tmpImage'},
-        success: (res) => {
-          console.log(res);
-        },
-        error: (res) => {
-          console.log(res);
-        },
-      });
-    };
-    r.readAsDataURL($scope.files[1]);
-    */
   });
   $scope.saveImages = function () {
+    var uploadedVariantCount = 0;
+    var allVariantCount = 0;
+    var plusDoneVariant = function plusDoneVariant() {
+      uploadedVariantCount++;
+      if (allVariantCount === uploadedVariantCount) {
+        window.alert('all images uploaded and product informations saved');
+      }
+    };
     var uploadRowImages = function uploadRowImages(productId, productVariantId, images, isMainProduct) {
       // TODO append exist images
       var appImages = new Array(images.length);
       var uploadCount = 0;
       var done = 0;
 
-      var _loop3 = function (i) {
+      var _loop4 = function (i) {
         var imageUrl = images[i].url;
         if (imageUrl.length > 2 && imageUrl.substring(0, 2) === '//') {
           appImages[i] = images[i];
@@ -2043,7 +2086,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       };
 
       for (var i = 0; i < images.length; i++) {
-        _loop3(i);
+        _loop4(i);
       }
       var saveProductVariant = function saveProductVariant() {
         var promises = [];
@@ -2059,6 +2102,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         }
         $q.all(promises).then(function (res) {
           console.log(res);
+          plusDoneVariant();
         });
       };
       var plusDone = function plusDone() {
@@ -2073,17 +2117,25 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     };
 
     for (var i = 0; i < $scope.brandIds.length; i++) {
-      var rows = $scope.brands[$scope.brandIds[i]];
-      var productId = -1;
-      for (var j = 0; j < rows.length; j++) {
-        var row = rows[j];
-        if (row.productId !== '') {
-          productId = row.productId;
-          continue;
-        }
-        if (!row.images || row.images.length < 1) continue;
+      var items = $scope.brands[$scope.brandIds[i]];
+      for (var j = 0; j < items.length; j++) {
+        var item = items[j];
+        var r = 0;
+        while (r < item.rows.length) {
+          var sameColor = item.rows[r].rowspan;
+          var images = item.rows[r].images;
+          for (var k = 0; k < sameColor; k++) {
+            var row = item.rows[r++];
+            if (!row.images || row.images.length < 1) continue;
 
-        uploadRowImages(productId, row.variantId, row.images, row.mainProduct);
+            allVariantCount++;
+            uploadRowImages(item.product.id, row.variantId, images, row.mainProduct);
+          }
+        }
+        for (var k = 0; k < item.rows.length; k++) {
+          var row = item.rows[k];
+          if (!row.images || row.images.length < 1) continue;
+        }
       }
     }
   };

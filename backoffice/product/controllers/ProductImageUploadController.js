@@ -6,6 +6,58 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
   $scope.saveDisabled = true;
   $scope.brands = {};
   $scope.brandIds = [];
+  const extractDataFromVariant = (variant) => {
+    const splits = variant.sku.split('-');
+    if (splits.length === 3) {
+      return {
+        color: splits[1],
+        size: splits[2],
+      }
+    }
+    return {};
+  };
+  const productToTableData = (product) => {
+    const colorMap = {};
+    let mainColor = null;
+    const variants = [];
+    for (let i = 0; i < product.productVariants.length; i++) {
+      const productVariant = product.productVariants[i];
+      let color = productVariant.data.color;
+      let size = productVariant.data.size;
+      if (!color) {
+        const parsed = extractDataFromVariant(productVariant);
+        color = parsed.color;
+        if (!size) size = productVariant.data.size;
+      }
+      if (!color) {
+        console.log(`cannot detect color name for variant ${productVariant.sku}`);
+        window.alert(`invalid product variant ${productVariant.sku}`)
+        continue;
+      }
+      if (!colorMap[color]) {
+        colorMap[color] = [];
+        if (mainColor) mainColor = color;
+      }
+      colorMap[color].push(productVariant);
+    }
+    const rows = [];
+    const colors = Object.keys(colorMap);
+    for (let i = 0; i < colors.length; i++) {
+      const variants = colorMap[colors[i]];
+      for (let j = 0; j < variants.length; j++) {
+        rows.push({
+          color: colors[i],
+          rowspan: j === 0 ? variants.length : 0,
+          sku: variants[j].sku,
+          mainProduct: i === 0,
+          slotCount: j > 0 ? 0 : (i === 0 ? 6 : 2),
+          images: [],
+          variantId: variants[j].id,
+        });
+      }
+    }
+    return { rows, product };
+  };
   const productsToRows = () => {
     // must be called once
     // if called multiple, $scope.brands must be clear
@@ -16,16 +68,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
       if (!$scope.brands[brandId]) {
         $scope.brands[brandId] = [];
       }
-      $scope.brands[brandId].push(
-        { productId: product.id, variantId: '', mainProduct: false, slotCount: 0, images: [] }
-      );
-      for (let j = 0; j < product.productVariants.length; j++) {
-        const productVariant = product.productVariants[j];
-        const mainProduct = j == 0;
-        $scope.brands[brandId].push(
-          { productId: '', variantId: productVariant.id, mainProduct, slotCount: mainProduct ? 6 : 2, images: [] }
-        );
-      }
+      $scope.brands[brandId].push(productToTableData(product));
     }
     $scope.brandIds = Object.keys($scope.brands);
   };
@@ -54,14 +97,9 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     for (let i = 0; i < brandIds.length; i++) {
       const brandId = brandIds[i];
       if ($scope.brands[brandId]) {
-        const rows = $scope.brands[brandId];
+        const items = $scope.brands[brandId]; // { product: , rows: }
         const images = imagesByBrand[brandId];
-        /*
-        if (rows.length != images.length) {
-          window.alert(`Brand [${brandId}]'s image count mismatch. Slot = ${rows.length} Image = ${images.length}`);
-          continue;
-        }
-        */
+
         let imgIdx = 0;
         let loadDone = 0;
         const plusLoadDone = () => {
@@ -73,45 +111,41 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
             }
           }
         };
-        for (let j = 0; j < rows.length; j++) {
-          const row = rows[j];
-          row.images.length = row.slotCount;
-          for (let k = 0; k < row.slotCount; k++) {
-            if (imgIdx == images.length) {
-              window.alert('image count mismatch');
-              break;
+        for (let j = 0; j < items.length; j++) {
+          const rows = items[j].rows;
+          for (let k = 0; k < rows.length; k++) {
+            const row = rows[k];
+            if (row.rowspan < 1) {
+              continue;
             }
-            const r = new FileReader();
-            r.onload = function(e) {
-              row.images[k] = { url: e.target.result };
-              plusLoadDone();
-            };
-            r.readAsDataURL(images[imgIdx++]);
+            row.images.length = row.slotCount;
+            for (let k = 0; k < row.slotCount; k++) {
+              if (imgIdx == images.length) {
+                window.alert('image count mismatch');
+                break;
+              }
+              const r = new FileReader();
+              r.onload = function(e) {
+                row.images[k] = { url: e.target.result };
+                plusLoadDone();
+              };
+              r.readAsDataURL(images[imgIdx++]);
+            }
+            if (imgIdx == images.length) break;
           }
-          if (imgIdx == images.length) break;
         }
       }
     }
-    /*
-    const r = new FileReader();
-    r.onload = function(e) {
-      const contents = e.target.result;
-      $.ajax({
-        url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
-        type: 'POST',
-        data: {file: contents, upload_preset: 'nd9k8295', public_id: 'tmp/tmpImage'},
-        success: (res) => {
-          console.log(res);
-        },
-        error: (res) => {
-          console.log(res);
-        },
-      });
-    };
-    r.readAsDataURL($scope.files[1]);
-    */
   });
   $scope.saveImages = () => {
+    let uploadedVariantCount = 0;
+    let allVariantCount = 0;
+    const plusDoneVariant = () => {
+      uploadedVariantCount++;
+      if (allVariantCount === uploadedVariantCount) {
+        window.alert('all images uploaded and product informations saved');
+      }
+    }
     const uploadRowImages = (productId, productVariantId, images, isMainProduct) => {
       // TODO append exist images
       const appImages = new Array(images.length);
@@ -159,6 +193,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         }
         $q.all(promises).then((res) => {
           console.log(res);
+          plusDoneVariant();
         });
       };
       const plusDone = () => {
@@ -173,17 +208,25 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     };
 
     for (let i = 0; i < $scope.brandIds.length; i++) {
-      const rows = $scope.brands[$scope.brandIds[i]];
-      let productId = -1;
-      for (let j = 0; j < rows.length; j++) {
-        const row = rows[j];
-        if (row.productId !== '') {
-          productId = row.productId;
-          continue;
-        }
-        if (!row.images || row.images.length < 1) continue;
+      const items = $scope.brands[$scope.brandIds[i]];
+      for (let j = 0; j < items.length; j++) {
+        const item = items[j];
+        let r = 0;
+        while (r < item.rows.length) {
+          const sameColor = item.rows[r].rowspan;
+          const images = item.rows[r].images;
+          for (let k = 0; k < sameColor; k++) {
+            const row = item.rows[r++];
+            if (!row.images || row.images.length < 1) continue;
 
-        uploadRowImages(productId, row.variantId, row.images, row.mainProduct);
+            allVariantCount++;
+            uploadRowImages(item.product.id, row.variantId, images, row.mainProduct);
+          }
+        }
+        for (let k = 0; k < item.rows.length; k++) {
+          const row = item.rows[k];
+          if (!row.images || row.images.length < 1) continue;
+        }
       }
     }
   };
