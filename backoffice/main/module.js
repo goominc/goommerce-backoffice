@@ -97,6 +97,13 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
       name: $translate.instant('user.manage.title'),
       sref: 'user.manage',
       active: false,
+      children: [
+        {
+          key: 'user.waitConfirm',
+          name: $translate.instant('user.waitConfirm.title'),
+          sref: 'user.waitConfirm',
+        },
+      ],
     },
     {
       key: 'brand', // TODO get key from router

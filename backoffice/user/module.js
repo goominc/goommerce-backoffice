@@ -27,6 +27,11 @@ userModule.config(($stateProvider) => {
       url: '/manage',
       templateUrl: templateRoot + '/user/manage.html',
       controller: 'UserManageController',
+    })
+    .state('user.waitConfirm', {
+      url: '/wait_confirm',
+      templateUrl: templateRoot + '/user/wait-confirm.html',
+      controller: 'UserWaitConfirmController',
     });
 });
 

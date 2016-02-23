@@ -1,8 +1,14 @@
 {
   "user": {
-    "createUser": "유저 생성",
+    "createUser": {
+      "admin": "어드민 생성",
+      "seller": "셀러 생성"
+    },
     "manage": {
       "title": "사용자"
+    },
+    "waitConfirm": {
+      "title": "바이어 인증 대기"
     }
   }
 }

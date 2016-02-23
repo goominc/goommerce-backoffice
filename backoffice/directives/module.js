@@ -68,8 +68,11 @@ directiveModule.directive('boDatatables', ($http, $compile, $parse, datatableCom
         handleData(dataTables.data);
       } else {
         $http.get(dataTables.url).then((res) => {
-          const realData = res.data[dataTables.field];
-          handleData(realData);
+          if (dataTables.field && dataTables.field !== '') {
+            handleData(res.data[dataTables.field]);
+          } else {
+            handleData(res.data);
+          }
         });
       }
     },

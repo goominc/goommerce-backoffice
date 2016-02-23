@@ -52,6 +52,11 @@ tbody.cell-center > tr > td {
   vertical-align: middle !important;
 }
 
+@media (min-width: 768px) {
+  .modal-dialog {
+    margin-top: 100px;
+  }
+}
 
 .cms-simple-sortable-pointer {
   text-align: center;

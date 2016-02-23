@@ -11,14 +11,31 @@
         <div class="col-md-12">
           <div class="portlet light">
             <div class="portlet-title">
-              {{'user.manage.title' | translate}}
+              <div class="actions btn-set">
+                <button class="btn blue" data-toggle="modal" data-ng-click="newUseris('admin')" data-target="#user_manage_create_user">
+                  <i class="fa fa-plus"></i> {{'user.createUser.admin' | translate}}
+                </button>
+                <button class="btn blue" data-toggle="modal" data-ng-click="newUseris('seller')">
+                  <i class="fa fa-plus"></i> {{'user.createUser.seller' | translate}}
+                </button>
+              </div>
             </div>
             <div class="portlet-body">
-              <button class="btn blue" data-toggle="modal" data-target="#user_manage_create_user">
-                <i class="fa fa-plus"></i> {{'user.createUser' | translate}}
-              </button>
-              <div class="col-md-12">
-
+              <div class="row">
+                <div class="col-md-12">
+                  <div bo-datatables="userDatatables">
+                    <table class="table table-bordered table-hover">
+                      <thead>
+                      <tr role="row" class="heading">
+                        <td>ID</td>
+                        <td>Email</td>
+                        <td>Roles</td>
+                      </tr>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -32,21 +49,31 @@
     <div class="modal-content">
       <form data-ng-submit="createUser(newUser)">
         <div class="modal-header">
-          {{'user.createUser' | translate}}
+          {{newUserPopup.name}}
         </div>
         <div class="modal-body">
           <div class="row">
-            <div class="col-md-12">
-              <input type="email" data-ng-model="newUser.email" placeholder="Email" />
+            <div class="col-md-9" style="margin-bottom: 20px;">
+              <div class="input-group">
+                <span class="input-group-addon">
+                  <i class="fa fa-envelope"></i>
+                </span>
+                <input type="text" class="form-control" data-ng-model="newUser.email" placeholder="Email Address">
+              </div>
             </div>
-            <div class="col-md-12">
-              <input type="password" data-ng-model="newUser.password" placeholder="Password" />
+            <div class="col-md-9">
+              <div class="input-group">
+                <span class="input-group-addon" style="padding-left: 13.5px; padding-right: 13.5px;">
+                  <i class="fa fa-user"></i>
+                </span>
+                <input type="password" class="form-control" data-ng-model="newUser.password" placeholder="Password" />
+              </div>
             </div>
           </div>
         </div>
         <div class="modal-footer">
           <button class="btn default" type="reset" data-ng-click="closeUserPopup()">{{'main.closeButton' | translate}}</button>
-          <button class="btn blue" type="submit"><i class="fa fa-plus"></i> {{'user.createUser' | translate}}</button>
+          <button class="btn blue" type="submit"><i class="fa fa-plus"></i> {{newUserPopup.name}}</button>
         </div>
       </form>
     </div>

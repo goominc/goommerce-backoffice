@@ -171,7 +171,12 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
     key: 'user', // TODO get key from router
     name: $translate.instant('user.manage.title'),
     sref: 'user.manage',
-    active: false
+    active: false,
+    children: [{
+      key: 'user.waitConfirm',
+      name: $translate.instant('user.waitConfirm.title'),
+      sref: 'user.waitConfirm'
+    }]
   }, {
     key: 'brand', // TODO get key from router
     name: $translate.instant('brand.title'),
@@ -370,8 +375,11 @@ directiveModule.directive('boDatatables', function ($http, $compile, $parse, dat
         handleData(dataTables.data);
       } else {
         $http.get(dataTables.url).then(function (res) {
-          var realData = res.data[dataTables.field];
-          handleData(realData);
+          if (dataTables.field && dataTables.field !== '') {
+            handleData(res.data[dataTables.field]);
+          } else {
+            handleData(res.data);
+          }
         });
       }
     }
@@ -605,6 +613,10 @@ userModule.config(function ($stateProvider) {
     url: '/manage',
     templateUrl: templateRoot + '/user/manage.html',
     controller: 'UserManageController'
+  }).state('user.waitConfirm', {
+    url: '/wait_confirm',
+    templateUrl: templateRoot + '/user/wait-confirm.html',
+    controller: 'UserWaitConfirmController'
   });
 });
 
@@ -620,9 +632,15 @@ module.exports = {
 21: [function(require, module, exports) {
 module.exports = {
   "user": {
-    "createUser": "유저 생성",
+    "createUser": {
+      "admin": "어드민 생성",
+      "seller": "셀러 생성"
+    },
     "manage": {
       "title": "사용자"
+    },
+    "waitConfirm": {
+      "title": "바이어 인증 대기"
     }
   }
 }
@@ -645,17 +663,65 @@ userModule.controller('UserManageController', function ($scope, $http, $state, $
   }];
   $rootScope.initAll($scope, $state.current.name);
 
+  $scope.userDatatables = {
+    field: '',
+    url: '/api/v1/users',
+    columns: [{
+      data: 'id'
+    }, {
+      data: 'email'
+    }, {
+      data: 'roles',
+      render: function render(roles) {
+        if (!roles) return '';
+        return JSON.stringify(roles);
+      }
+    }]
+  };
+
   $scope.newUser = {};
   $scope.createUser = function (user) {
-    $http.post('/api/v1/users', user).then(function () {
-      $scope.closeUserPopup();
-    }, function (res) {
-      window.alert(res.data.message);
+    $http.post('/api/v1/users', user).then(function (res) {
+      console.log(res);
+      $http.post('/api/v1/users/' + res.data.id + '/roles', $scope.newUserRole).then(function () {
+        // $scope.closeUserPopup();
+        $state.reload();
+      })['catch'](function (err) {
+        window.alert(err.data.message);
+      });
+      $state.reload();
+    }, function (err) {
+      window.alert(err.data.message);
     });
   };
   $scope.closeUserPopup = function () {
-    $('#user_manage_create_user').modal('hide');
+    // 2016. 02. 23. [heekyu] modal hide is not work on page reload
+    // $('#user_manage_create_user').modal('hide');
+    $('.modal').removeClass('in');
+    $('.modal-backdrop').remove();
   };
+  $scope.newUserPopup = {};
+  $scope.newUseris = function (role) {
+    $scope.newUserPopup.name = $translate.instant('user.createUser.' + role);
+    $scope.newUserRole = { roleType: role };
+  };
+  $scope.closeUserPopup();
+});
+
+userModule.controller('UserWaitConfirmController', function ($scope, $state, $rootScope, $translate) {
+  $scope.contentTitle = $translate.instant('user.waitConfirm.title');
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'user.main',
+    name: $translate.instant('user.manage.title')
+  }, {
+    sref: 'user.waitConfirm',
+    name: $translate.instant('user.waitConfirm.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
 });
 }, {"./module":5}],
 6: [function(require, module, exports) {
@@ -1902,7 +1968,6 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
   var productToTableData = function productToTableData(product) {
     var colorMap = {};
     var mainColor = null;
-    var variants = [];
     for (var i = 0; i < product.productVariants.length; i++) {
       var productVariant = product.productVariants[i];
       var color = productVariant.data.color;
@@ -1914,7 +1979,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       }
       if (!color) {
         console.log('cannot detect color name for variant ' + productVariant.sku);
-        window.alert('invalid product variant ' + productVariant.sku);
+        window.alert('cannot extract \'color\' and/or \'size\' from ' + productVariant.sku);
         continue;
       }
       if (!colorMap[color]) {
@@ -1926,16 +1991,16 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     var rows = [];
     var colors = Object.keys(colorMap);
     for (var i = 0; i < colors.length; i++) {
-      var _variants = colorMap[colors[i]];
-      for (var j = 0; j < _variants.length; j++) {
+      var variants = colorMap[colors[i]];
+      for (var j = 0; j < variants.length; j++) {
         rows.push({
           color: colors[i],
-          rowspan: j === 0 ? _variants.length : 0,
-          sku: _variants[j].sku,
+          rowspan: j === 0 ? variants.length : 0,
+          sku: variants[j].sku,
           mainProduct: i === 0,
           slotCount: j > 0 ? 0 : i === 0 ? 6 : 2,
           images: [],
-          variantId: _variants[j].id
+          variantId: variants[j].id
         });
       }
     }
@@ -2438,7 +2503,24 @@ module.exports = {
 var currencyModule = require('./module');
 
 currencyModule.controller('CurrencyMainController', function ($scope, $http) {
-  $scope.save = function () {};
+  $scope.rates = {
+    USD: 0,
+    CNY: 0
+  };
+  $http.get('/api/v1/currency').then(function (res) {
+    if (res.data.USD) {
+      $scope.rates.USD = res.data.USD;
+    }
+    if (res.data.CNY) {
+      $scope.rates.CNY = res.data.CNY;
+    }
+  });
+  $scope.save = function () {
+    $http.post('/api/v1/currency', $scope.rates).then(function () {})['catch'](function (res) {
+      window.alert(res);
+      console.log(res);
+    });
+  };
 });
 }, {"./module":9}],
 10: [function(require, module, exports) {
