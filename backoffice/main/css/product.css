@@ -20,3 +20,10 @@
 .image-inline {
   margin: 0 10px;
 }
+
+.product-variant-table td {
+  vertical-align: middle !important;
+}
+.product-variant-table td input {
+  max-width: 120px;
+}

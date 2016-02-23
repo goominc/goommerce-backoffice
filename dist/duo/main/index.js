@@ -1250,7 +1250,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   var initFromProduct = function initFromProduct() {
     var titleKey = 'product.edit.createTitle';
     if (!product) {
-      $scope.product = { data: {} };
+      $scope.product = { sku: 'autogen', data: {} };
+      $scope.variantKinds = [{ name: '색상', key: 'color', kinds: ['White', 'Black'] }, { name: '사이즈', key: 'size', kinds: ['Free'] }];
     } else {
       $scope.product = product;
       titleKey = 'product.edit.updateTitle';
@@ -1350,23 +1351,14 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
    {title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh_tw'},
    ];
    */
-  $scope.inputFields = [{ title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true }, { title: 'nickname', key: 'data.nickname', tmpKey: 'nickname', isRequired: true }];
+  $scope.inputFields = [
+  // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
+  { title: 'nickname', key: 'data.nickname', tmpKey: 'nickname', isRequired: true }];
 
-  $scope.saveProductField = function (key, value) {
-    var path = key.split('.');
-    var obj = $scope.product;
-    for (var i = 0; i < path.length - 1; i++) {
-      if (!obj[path[i]]) {
-        obj[path[i]] = {};
-      }
-      obj = obj[path[i]];
-    }
-    obj[path[path.length - 1]] = value;
-  };
   $scope.tmpObjToProduct = function () {
     for (var i = 0; i < $scope.inputFields.length; i++) {
       var field = $scope.inputFields[i];
-      $scope.saveProductField(field.key, $scope.tmpObj[field.tmpKey]);
+      _.set($scope.product, field.key, $scope.tmpObj[field.tmpKey]);
     }
   };
   $scope.productToTmpObj = function () {
@@ -1380,7 +1372,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   }
 
   // BEGIN Manipulate Variant Kinds
-  $scope.variantKinds = [{ name: '사이즈', kinds: ['S', 'M'] }, { name: '색상', kinds: ['blue'] }];
 
   $scope.newObjects = {
     variantKind: '',
@@ -1496,10 +1487,12 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   // BEGIN Manipulate Variants
   $scope.generateProductVariants = function () {
     $scope.tmpObjToProduct();
+    /*
     if (!$scope.product.sku || $scope.product.sku === '') {
       window.alert('insert SKU first.'); // TODO message
       return false;
     }
+    */
     var newVariantSKUs = [];
     var idx = 0;
     var _iteratorNormalCompletion5 = true;
@@ -1667,7 +1660,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     });
   };
 
-  $scope.newProductVariant = {};
+  $scope.newProductVariant = { data: {} };
   $scope.addProductVariant = function (newProductVariant) {
     if (!newProductVariant.sku || newProductVariant.sku === '') {
       window.alert('sku must be valid string');

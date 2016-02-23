@@ -6,7 +6,11 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   const initFromProduct = () => {
     let titleKey = 'product.edit.createTitle';
     if (!product) {
-      $scope.product = { data: {} };
+      $scope.product = { sku: 'autogen', data: {} };
+      $scope.variantKinds = [
+        {name: '색상', key: 'color', kinds: ['White', 'Black']},
+        {name: '사이즈', key: 'size', kinds: ['Free']},
+      ];
     } else {
       $scope.product = product;
       titleKey = 'product.edit.updateTitle';
@@ -68,25 +72,14 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
    ];
    */
   $scope.inputFields = [
-    {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
+    // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
     {title: 'nickname', key: 'data.nickname', tmpKey: 'nickname', isRequired: true},
   ];
 
-  $scope.saveProductField = (key, value) => {
-    const path = key.split('.');
-    let obj = $scope.product;
-    for (let i = 0; i < path.length - 1; i++) {
-      if (!obj[path[i]]) {
-        obj[path[i]] = {};
-      }
-      obj = obj[path[i]];
-    }
-    obj[path[path.length - 1]] = value;
-  };
   $scope.tmpObjToProduct = () => {
     for (let i = 0; i < $scope.inputFields.length; i++) {
       const field = $scope.inputFields[i];
-      $scope.saveProductField(field.key, $scope.tmpObj[field.tmpKey]);
+      _.set($scope.product, field.key, $scope.tmpObj[field.tmpKey]);
     }
   };
   $scope.productToTmpObj = () => {
@@ -100,10 +93,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   }
 
   // BEGIN Manipulate Variant Kinds
-  $scope.variantKinds = [
-    {name: '사이즈', kinds: ['S', 'M', ]},
-    {name: '색상', kinds: ['blue']},
-  ];
 
   $scope.newObjects = {
     variantKind: '',
@@ -175,10 +164,12 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   // BEGIN Manipulate Variants
   $scope.generateProductVariants = () => {
     $scope.tmpObjToProduct();
+    /*
     if (!$scope.product.sku || $scope.product.sku === '') {
       window.alert('insert SKU first.'); // TODO message
       return false;
     }
+    */
     const newVariantSKUs = [];
     let idx = 0;
     for (const variantKind of $scope.variantKinds) {
@@ -303,7 +294,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     });
   };
 
-  $scope.newProductVariant = {};
+  $scope.newProductVariant = { data: {} };
   $scope.addProductVariant = (newProductVariant) => {
     if (!newProductVariant.sku || newProductVariant.sku === '') {
       window.alert('sku must be valid string');
