@@ -9,6 +9,9 @@
     },
     "waitConfirm": {
       "title": "바이어 인증 대기"
+    },
+    "role": {
+      "changeTitle": "유저 권한 변경"
     }
   }
 }

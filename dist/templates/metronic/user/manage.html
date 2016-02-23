@@ -23,7 +23,7 @@
             <div class="portlet-body">
               <div class="row">
                 <div class="col-md-12">
-                  <div bo-datatables="userDatatables">
+                  <div id="user_list" bo-datatables="userDatatables" directive-load="datatablesLoaded">
                     <table class="table table-bordered table-hover">
                       <thead>
                       <tr role="row" class="heading">
@@ -76,6 +76,46 @@
           <button class="btn blue" type="submit"><i class="fa fa-plus"></i> {{newUserPopup.name}}</button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="user_change_role">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        {{'user.role.changeTitle' | translate}}
+      </div>
+      <div class="modal-body">
+        <table class="table table-borded dataTable">
+          <thead>
+          <tr>
+            <th>Admin</th>
+            <th>Buyer</th>
+            <th>Seller</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td style="text-align: center;">
+              <input id="edit_role_admin" type="checkbox" data-ng-model="editRole.admin" />
+              <label for="edit_role_admin"></label>
+            </td>
+            <td style="text-align: center;">
+              <input data-ng-if="!editRole.admin && !editRole.seller" id="edit_role_buyer" type="checkbox" data-ng-model="editRole.buyer" />
+              <label for="edit_role_buyer"></label>
+            </td>
+            <td style="text-align: center;">
+              <input id="edit_role_seller" type="checkbox" data-ng-model="editRole.seller" disabled />
+              <label for="edit_role_seller"></label>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn default" type="reset" data-ng-click="closeRolePopup()">{{'main.closeButton' | translate}}</button>
+        <button class="btn blue" data-ng-click="saveRole()"><i class="fa fa-plus"></i> {{'main.saveButton' | translate}}</button>
+      </div>
     </div>
   </div>
 </div>
