@@ -59,14 +59,16 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
   $scope.editRole = { admin: false, buyer: false, seller: false };
   $scope.makeUserRolePopupData = (user) => {
     const res = { admin: false, buyer: false, seller: false };
-    for (let i = 0; i < user.roles.length; i++) {
-      const role = user.roles[i];
-      if (role.type === 'admin') {
-        res.admin = true;
-      } else if (role.type === 'buyer') {
-        res.buyer = true;
-      }
-    };
+    if (user.roles) {
+      for (let i = 0; i < user.roles.length; i++) {
+        const role = user.roles[i];
+        if (role.type === 'admin') {
+          res.admin = true;
+        } else if (role.type === 'buyer') {
+          res.buyer = true;
+        }
+      };
+    }
     $scope.editRole = res;
   };
   $scope.closeRolePopup = () => {
