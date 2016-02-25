@@ -1,0 +1,23 @@
+{
+  "name": "goommerce-back-office",
+  "version": "0.0.1",
+  "description": "Goommerce Back Office",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goominc/goommerce-backoffice.git"
+  },
+  "author": "Goom Inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/goominc/goommerce-backoffice/issues"
+  },
+  "homepage": "https://github.com/goominc/goommerce-backoffice#readme",
+  "devDependencies": {
+    "express": "^4.13.4"
+  }
+}

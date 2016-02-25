@@ -18,15 +18,15 @@
   "private": true,
   "dependencies": {
     "angular": "~1.4.8",
-    "angular-ui-router": "~0.2.15",
-    "jstree": "~3.2.1",
-    "angular-cookies": "~1.4.8",
     "angular-bootstrap": "~1.0.3",
-    "datatables": "~1.10.10",
+    "angular-cookies": "~1.4.8",
+    "angular-ui-router": "~0.2.15",
+    "angular-ui-sortable": "~0.13.4",
     "cloudinary": "~2.0.4",
+    "datatables": "~1.10.10",
     "fancybox": "~2.1.5",
-    "lodash": "~3.10.1",
     "jquery-csv": "*",
-    "angular-ui-sortable": "~0.13.4"
+    "jstree": "~3.2.1",
+    "lodash": "~3.10.1"
   }
 }
