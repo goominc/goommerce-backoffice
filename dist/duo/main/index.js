@@ -188,10 +188,10 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
     sref: 'cms.main',
     active: false,
     children: [{
-      name: 'pc_main_banner1',
+      name: $translate.instant('cms.mainBanner'),
       sref: 'cms.simple({name: "pc_main_banner1"})'
     }, {
-      name: 'pc_main_banner2',
+      name: $translate.instant('cms.subBanner'),
       sref: 'cms.simple({name: "pc_main_banner2"})'
     }]
   }, {
@@ -3022,12 +3022,14 @@ module.exports = {
 34: [function(require, module, exports) {
 module.exports = {
   "brand": {
-    "title": "셀러",
+    "title": "브랜드",
+    "createButton": "브랜드 생성",
     "main": {
-      "createBrandTitle": "셀러 생성"
+      "createBrandTitle": "브랜드 생성"
     }
   }
-};
+}
+;
 }, {}],
 35: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
@@ -3185,8 +3187,12 @@ module.exports = {
 }, {}],
 40: [function(require, module, exports) {
 module.exports = {
-
-};
+  "cms": {
+    "mainBanner": "메인 배너",
+    "subBanner": "서브 배너"
+  }
+}
+;
 }, {}],
 41: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.

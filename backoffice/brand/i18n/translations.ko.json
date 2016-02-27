@@ -1,8 +1,9 @@
 {
   "brand": {
-    "title": "셀러",
+    "title": "브랜드",
+    "createButton": "브랜드 생성",
     "main": {
-      "createBrandTitle": "셀러 생성"
+      "createBrandTitle": "브랜드 생성"
     }
   }
 }

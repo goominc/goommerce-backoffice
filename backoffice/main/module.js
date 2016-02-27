@@ -118,11 +118,11 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
       active: false,
       children: [
         {
-          name: 'pc_main_banner1',
+          name: $translate.instant('cms.mainBanner'),
           sref: 'cms.simple({name: "pc_main_banner1"})',
         },
         {
-          name: 'pc_main_banner2',
+          name: $translate.instant('cms.subBanner'),
           sref: 'cms.simple({name: "pc_main_banner2"})',
         },
       ],

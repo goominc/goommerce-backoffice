@@ -47,7 +47,7 @@ gulp.task('serve', ['dist'], function() {
     files: [{ match: ['dist/templates/**/*', 'dist/vendor/**/*'] }],
   });
 
-  gulp.watch(['backoffice/**/*.js', '!backoffice/main/index.js'], ['reload']);
+  gulp.watch(['backoffice/**/*.js*', '!backoffice/main/index.js'], ['reload']);
 });
 
 gulp.task('default', ['serve']);
