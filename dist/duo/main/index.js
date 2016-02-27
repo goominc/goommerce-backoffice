@@ -2938,13 +2938,9 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
     }, {
       data: 'createdAt'
     }, {
-      data: 'paymentStatus',
-      defaultContent: ''
+      data: 'status'
     }, {
-      data: 'total',
-      render: function render(total) {
-        return total && total.KRW ? total.KRW : '';
-      }
+      data: 'totalEstimationKRW'
     }]
   };
 });
