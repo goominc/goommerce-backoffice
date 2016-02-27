@@ -34,11 +34,12 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
       },
       {
         data: 'paymentStatus',
+        defaultContent: '',
       },
       {
         data: 'total',
         render: (total) => {
-          return total.KRW;
+          return total && total.KRW ? total.KRW : '';
         },
       },
     ],

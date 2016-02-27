@@ -2938,11 +2938,12 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
     }, {
       data: 'createdAt'
     }, {
-      data: 'paymentStatus'
+      data: 'paymentStatus',
+      defaultContent: ''
     }, {
       data: 'total',
       render: function render(total) {
-        return total.KRW;
+        return total && total.KRW ? total.KRW : '';
       }
     }]
   };
@@ -3051,7 +3052,7 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
         return '<a ui-sref="brand.info({brandId: ' + id + '})">' + id + '</a>';
       }
     }, {
-      data: 'pathname'
+      data: 'data.name.ko'
     }]
   };
 

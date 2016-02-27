@@ -16,7 +16,7 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, boUtils)
         },
       },
       {
-        data: 'pathname',
+        data: 'data.name.ko',
       },
     ],
   };
