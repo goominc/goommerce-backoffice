@@ -1,6 +1,8 @@
 [global]
 .idea
 bower_components
+build
+components
 backoffice/components
 node_modules
 backoffice/main/index.js
