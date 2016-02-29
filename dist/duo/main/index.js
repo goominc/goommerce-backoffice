@@ -1191,7 +1191,6 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       })['catch'](function (err) {
         window.alert(err.data.message);
       });
-      $state.reload();
     }, function (err) {
       window.alert(err.data.message);
     });
@@ -2592,7 +2591,6 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
   var productToTableData = function productToTableData(product) {
     var colorMap = {};
     var mainColor = null;
-    var variants = [];
     for (var i = 0; i < product.productVariants.length; i++) {
       var productVariant = product.productVariants[i];
       var color = productVariant.data.color;
@@ -2604,7 +2602,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       }
       if (!color) {
         console.log('cannot detect color name for variant ' + productVariant.sku);
-        window.alert('invalid product variant ' + productVariant.sku);
+        window.alert('cannot extract \'color\' and/or \'size\' from ' + productVariant.sku);
         continue;
       }
       if (!colorMap[color]) {
@@ -2616,16 +2614,16 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     var rows = [];
     var colors = Object.keys(colorMap);
     for (var i = 0; i < colors.length; i++) {
-      var _variants = colorMap[colors[i]];
-      for (var j = 0; j < _variants.length; j++) {
+      var variants = colorMap[colors[i]];
+      for (var j = 0; j < variants.length; j++) {
         rows.push({
           color: colors[i],
-          rowspan: j === 0 ? _variants.length : 0,
-          sku: _variants[j].sku,
+          rowspan: j === 0 ? variants.length : 0,
+          sku: variants[j].sku,
           mainProduct: i === 0,
           slotCount: j > 0 ? 0 : i === 0 ? 6 : 2,
           images: [],
-          variantId: _variants[j].id
+          variantId: variants[j].id
         });
       }
     }
@@ -3212,7 +3210,6 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
     children: []
   };
   $http.get('/api/v1/cms/' + $state.params.name).then(function (res) {
-    console.log(res);
     if (res.data) {
       $scope.cms = res.data;
     }
@@ -3260,6 +3257,10 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
     handle: '.cms-simple-sortable-pointer',
     placeholder: 'ui-state-highlight'
   };
+});
+
+cmsModule.controller('MainCategoryController', function ($scope, $http) {
+  $scope.rows = [];
 });
 }, {"./module":10}],
 11: [function(require, module, exports) {

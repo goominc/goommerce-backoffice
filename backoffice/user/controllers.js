@@ -45,7 +45,6 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       }).catch((err) => {
         window.alert(err.data.message);
       });
-      $state.reload();
     }, (err) => {
       window.alert(err.data.message);
     });
