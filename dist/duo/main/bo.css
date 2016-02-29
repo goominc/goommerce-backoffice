@@ -58,6 +58,18 @@ tbody.cell-center > tr > td {
   }
 }
 
+.image-delete-button {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-size: 14px;
+}
+.brand-create-form-input {
+  display: inline-block;
+  width: 150px;
+  margin: 5px 0;
+}
+
 .cms-simple-sortable-pointer {
   text-align: center;
   vertical-align: middle !important;
@@ -350,6 +362,8 @@ Login page
 
 .image-inline {
   margin: 0 10px;
+  width: 80px;
+  height: 120px;
 }
 
 .product-variant-table td {
@@ -357,5 +371,9 @@ Login page
 }
 .product-variant-table td input {
   text-align: center;
+}
+
+.product-small-number-input {
+  width: 80px;
 }
 
