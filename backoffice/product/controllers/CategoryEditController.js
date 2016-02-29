@@ -173,7 +173,7 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     $http.put('/api/v1/categories/' + $scope.category.id, _.omit($scope.category, ['id', 'children'])).then((res) => {
       const category = res.data;
       categoryIdMap[category.id] = category;
-      jstreeNode.jstree('set_text', category.id, category.name[state.editLocale]); // TODO i18n
+      jstreeNode.jstree('set_text', category.id, category.name[editLocale]);
       $scope.category = category;
     }, (err) => {
       window.alert(err.data);
