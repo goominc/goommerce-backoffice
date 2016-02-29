@@ -371,6 +371,39 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       }
     }
   };
+  const insertImages = (images) => {
+    let used = 0;
+    for (let i = 0; i < $scope.imageRows.length; i++) {
+      const row = $scope.imageRows[i];
+      if (row.rowspan < 1) continue;
+      if (row.slotCount > row.images.length) {
+        const count = Math.min(row.slotCount - row.images.length, images.length - used);
+        for (let j = 0; j < count; j++) {
+          row.images.push(images[used++]);
+        }
+        if (used === images.length) {
+          window.alert(`(${used}) images uploaded`);
+          return;
+        }
+      }
+    }
+    window.alert(`(${used}) images uploaded`);
+  };
+  $scope.imageUploaded = (result) => {
+    insertImages([{
+      url: result.url.slice(5),
+      publicId: result.public_id,
+      version: result.version,
+      mainImage: false,
+      thumbnail: false,
+    }]);
+  };
+  // TODO
+  /*
+  $('#image-upload-button').on('change', function (changeEvent) {
+
+  });
+  */
   // 2016. 02. 29. [heekyu] update image selecting UI
 /*
   $scope.images = [];
