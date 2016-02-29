@@ -138,9 +138,12 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
   $rootScope.menus = [{
     key: 'product', // TODO get key from router
     name: $translate.instant('product.main.title'),
-    sref: 'product.main',
     active: false,
     children: [{
+      key: 'product.main',
+      name: $translate.instant('main.mainMenu'),
+      sref: 'product.main'
+    }, {
       key: 'product.category',
       name: $translate.instant('product.category.title'),
       sref: 'product.category'
@@ -160,9 +163,12 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
   }, {
     key: 'order', // TODO get key from router
     name: $translate.instant('order.title'),
-    sref: 'order.main',
     active: false,
     children: [{
+      key: 'order.main',
+      name: $translate.instant('main.mainMenu'),
+      sref: 'order.main'
+    }, {
       key: 'order.beforePayment',
       name: $translate.instant('order.beforePayment.title'),
       sref: 'order.beforePayment'
@@ -170,9 +176,12 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
   }, {
     key: 'user', // TODO get key from router
     name: $translate.instant('user.manage.title'),
-    sref: 'user.manage',
     active: false,
     children: [{
+      key: 'order.main',
+      name: $translate.instant('main.mainMenu'),
+      sref: 'user.manage'
+    }, {
       key: 'user.waitConfirm',
       name: $translate.instant('user.waitConfirm.title'),
       sref: 'user.waitConfirm'
@@ -185,7 +194,6 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
   }, {
     key: 'cms', // TODO get key from router
     name: 'CMS',
-    sref: 'cms.main',
     active: false,
     children: [{
       name: $translate.instant('cms.mainBanner'),
@@ -254,11 +262,13 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
       }
     }
   };
+  $rootScope.$on('$stateChangeSuccess', function (event, toState) {
+    handleMenus(toState.name);
+  });
 
   $rootScope.initAll = function (scope, stateName) {
     initContentTitle(scope);
     initBreadcrumb(scope);
-    handleMenus(stateName);
   };
 
   $rootScope.doLogout = function () {
@@ -284,7 +294,14 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
 
   // 2016. 02. 15. [heekyu] app-wide state
   $rootScope.state = {
-    batchUploadedProducts: []
+    batchUploadedProducts: [],
+    locales: ['ko', 'en', 'zh_cn', 'zh_tw'],
+    editLocale: 'ko'
+  };
+
+  // 2016. 02. 29. [heekyu] change locale in each page
+  $rootScope.changeEditLocale = function (locale) {
+    $rootScope.state.editLocale = locale;
   };
 });
 
@@ -1372,7 +1389,7 @@ productModule.config(function ($stateProvider) {
     return _.pick(product, ['id', 'sku', 'categories', 'isActive', 'brand', 'data', 'appImages']);
   };
   var narrowProductVariant = function narrowProductVariant(variant) {
-    return _.pick(variant, ['id', 'productId', 'sku', 'stock', 'KRW', 'data', 'appImages']);
+    return _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages']);
   };
 
   $stateProvider.state('product', {
@@ -1492,9 +1509,6 @@ productModule.factory('productUtil', function ($http, $q) {
           for (var _iterator = productVariants[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
             var productVariant = _step.value;
 
-            if (productVariant.stock < 0) {
-              continue;
-            }
             promises.push($http.post(pvUrl, productVariant));
           }
         } catch (err) {
@@ -1537,9 +1551,6 @@ productModule.factory('productUtil', function ($http, $q) {
           for (var _iterator2 = productVariants[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
             var productVariant = _step2.value;
 
-            if (productVariant.stock < 0) {
-              continue;
-            }
             oldProductVariants['delete'](productVariant.id);
             if (!productVariant.id) {
               promises.push($http.post(pvUrl, productVariant));
@@ -2065,7 +2076,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        var newVariant = { sku: newVariantSKU, KRW: 0, stock: -1 };
+        var newVariant = { sku: newVariantSKU, KRW: 0 };
         newVariants.push(newVariant);
         newVariantsMap[newVariantSKU] = newVariant;
       }
@@ -2085,10 +2096,20 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $http.put('/api/v1/products/' + product.id + '/index').then(function (res) {
       // ignore
     });
-    $state.go('product.edit', { productId: product.id });
   };
 
   $scope.saveAndContinue = function () {
+    $scope.doSave().then(function (product) {
+      if ($scope.product.id) {
+        // 2016. 02. 29. [heekyu] update product variant id for deny multiple create
+        $state.reload();
+      } else {
+        $state.go('product.edit', { productId: product.id });
+      }
+    });
+  };
+
+  $scope.doSave = function () {
     // 2016. 01. 18. [heekyu] save images
     $scope.tmpObjToProduct();
     $scope.imageToProduct();
@@ -2096,6 +2117,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then(function (res) {
         afterSaveProduct(res.product);
+        return res.product;
       }, function (err) {
         window.alert('Product Create Fail' + err.data);
       });
@@ -2103,6 +2125,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       return productUtil.updateProduct($scope.product, $scope.productVariants, $scope.origVariants).then(function (res) {
         afterSaveProduct(res.product);
         $scope.origVariants.clear();
+        return res.product;
       }, function (err) {
         console.log(err);
         window.alert('Product Update Fail' + err.data);
@@ -2113,8 +2136,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
 
   $scope.save = function () {
-    $scope.saveAndContinue().then(function (err) {
-      if (!err) {
+    $scope.doSave().then(function (product) {
+      if (product && product.id) {
         $state.go('product.main');
       }
     });
@@ -2171,10 +2194,12 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       window.alert(newProductVariant.sku + ' already exists');
       return;
     }
+    /*
     if (newProductVariant.stock < 0) {
       window.alert('Stock >= 0');
       return;
     }
+    */
     $scope.newProductVariant = {};
     $scope.productVariants.push(newProductVariant);
     $scope.productVariantsMap[newProductVariant.sku] = newProductVariant;
@@ -2277,20 +2302,22 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
   }];
   $rootScope.initAll($scope, $state.current.name);
 
+  var editLocale = $rootScope.state.editLocale;
+
   $scope.root = categories;
   var categoryIdMap = {};
   var currentCategoryId = $state.params.categoryId;
   if (!currentCategoryId) {
     currentCategoryId = $scope.root.id;
   }
-  $scope.root.name.ko = $translate.instant('product.category.rootName'); // TODO root name i18n
+  $scope.root.name[editLocale] = $translate.instant('product.category.rootName'); // TODO root name i18n
 
-  var getTreeData = function getTreeData(root, currentCategoryId) {
+  var getTreeData = function getTreeData(root, currentCategoryId, opened) {
     var json = {
       id: root.id,
-      text: root.name ? root.name.ko : 'NoName',
+      text: root.name ? root.name[editLocale] : 'NoName',
       data: { id: root.id },
-      state: { selected: false, opened: true } };
+      state: { selected: false, opened: opened } };
     /* TODO disabled: !root.isActive, */
     categoryIdMap[root.id] = root;
     if (currentCategoryId && root.id === currentCategoryId) {
@@ -2300,13 +2327,13 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
 
     if (root.children) {
       json.children = root.children.map(function (child) {
-        return getTreeData(child, $state.params.categoryId);
+        return getTreeData(child, $state.params.categoryId, false);
       });
     }
     return json;
   };
 
-  var jstreeData = getTreeData($scope.root, currentCategoryId);
+  var jstreeData = getTreeData($scope.root, currentCategoryId, true);
   $scope.category = categoryIdMap[currentCategoryId];
   var jstreeNode = $('#categoryTree');
   jstreeNode.jstree({
@@ -2354,13 +2381,14 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
             label: $translate.instant('product.category.labelNewCategory'),
             action: function action() {
               var newCategory = {
-                name: { ko: newNodeName },
+                name: {},
                 isActive: false,
                 parentId: $node.id
               };
+              newCategory.name[editLocale] = 'NewNode';
               $http.post('/api/v1/categories', newCategory).then(function (res) {
                 categoryIdMap[res.data.id] = res.data;
-                var newNodeId = tree.create_node($node, res.data.name.ko); // TODO i18n
+                var newNodeId = tree.create_node($node, res.data.name[editLocale]);
                 jstreeNode.jstree('set_id', newNodeId, res.data.id);
                 selectNode(res.data.id);
               }, function (err) {
@@ -2421,11 +2449,16 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     $http.put('/api/v1/categories/' + $scope.category.id, _.omit($scope.category, ['id', 'children'])).then(function (res) {
       var category = res.data;
       categoryIdMap[category.id] = category;
-      jstreeNode.jstree('set_text', category.id, category.name.ko); // TODO i18n
+      jstreeNode.jstree('set_text', category.id, category.name[state.editLocale]); // TODO i18n
       $scope.category = category;
     }, function (err) {
       window.alert(err.data);
     });
+  };
+
+  $scope.changeCategoryEditLocale = function (locale) {
+    $rootScope.changeEditLocale(locale);
+    $state.reload();
   };
 });
 }, {"../module.js":6}],
@@ -3261,6 +3294,49 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
 
 cmsModule.controller('MainCategoryController', function ($scope, $http) {
   $scope.rows = [];
+  $scope.locale = 'ko';
+  var dataToRows = function dataToRows(data) {
+    $scope.rows.length = 0;
+    data.forEach(function (top) {
+      $scope.rows.push({
+        top: top,
+        depth1: '',
+        depth2: '',
+        name: top.name[$scope.locale],
+        link: top.link
+      });
+      (top.children || []).forEach(function (depth1) {
+        $scope.rows.push({
+          top: '',
+          depth1: depth1,
+          depth2: '',
+          name: depth1.name[$scope.locale],
+          link: depth1.link
+        });
+        (depth1.children || []).forEach(function (depth2) {
+          $scope.rows.push({
+            top: '',
+            depth1: '',
+            depth2: depth2,
+            name: depth2.name[$scope.locale],
+            link: depth2.link
+          });
+        });
+      });
+    });
+  };
+  var rowsToData = function rowsToData() {};
+  var cmsName = 'main_categories';
+  $http.get('/api/v1/cms/' + cmsName).then(function (res) {
+    if (res.data) {
+      dataToRows(res.data);
+    }
+  });
+  $scope.save = function () {
+    $http.post('/api/v1/cms', { name: cmsName, data: rowsToData() }).then(function () {
+      console.log(res);
+    });
+  };
 });
 }, {"./module":10}],
 11: [function(require, module, exports) {
@@ -3416,6 +3492,7 @@ module.exports = {
 14: [function(require, module, exports) {
 module.exports = {
   "main": {
+    "mainMenu": "메인",
     "createButton": "추가",
     "closeButton": "닫기",
     "deleteButton": "삭제",

@@ -184,11 +184,13 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
       }
     }
   };
+  $rootScope.$on('$stateChangeSuccess', (event, toState) => {
+    handleMenus(toState.name);
+  });
 
   $rootScope.initAll = (scope, stateName) => {
     initContentTitle(scope);
     initBreadcrumb(scope);
-    handleMenus(stateName);
   };
 
   $rootScope.doLogout = () => {
