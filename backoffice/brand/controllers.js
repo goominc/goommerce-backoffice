@@ -7,7 +7,6 @@ brandModule.factory('brandCommons', ($http) => {
     saveBrand: (brand) => {
       const brandsUrl = '/api/v1/brands';
       let promise = null;
-      brand.pathname += `/bo/brand/${brand.data.name.en}`;
       const brandFields = ['pathname', 'data'];
       if (brand.id) {
         promise = $http.put(`brandsUrl/${brand.id}`, _.pick(brand, brandFields));
