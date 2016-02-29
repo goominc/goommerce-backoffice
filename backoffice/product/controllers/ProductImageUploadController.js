@@ -19,7 +19,6 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
   const productToTableData = (product) => {
     const colorMap = {};
     let mainColor = null;
-    const variants = [];
     for (let i = 0; i < product.productVariants.length; i++) {
       const productVariant = product.productVariants[i];
       let color = productVariant.data.color;
@@ -31,7 +30,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
       }
       if (!color) {
         console.log(`cannot detect color name for variant ${productVariant.sku}`);
-        window.alert(`invalid product variant ${productVariant.sku}`)
+        window.alert(`cannot extract 'color' and/or 'size' from ${productVariant.sku}`);
         continue;
       }
       if (!colorMap[color]) {
@@ -64,7 +63,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     const len = products.length;
     for (let i = 0; i < len; i++) {
       const product = products[i];
-      const brandId = product.data.seller || -1;
+      const brandId = _.get(product, 'brand.id') || -1;
       if (!$scope.brands[brandId]) {
         $scope.brands[brandId] = [];
       }
@@ -145,7 +144,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
       if (allVariantCount === uploadedVariantCount) {
         window.alert('all images uploaded and product informations saved');
       }
-    }
+    };
     const uploadRowImages = (productId, productVariantId, images, isMainProduct) => {
       // TODO append exist images
       const appImages = new Array(images.length);

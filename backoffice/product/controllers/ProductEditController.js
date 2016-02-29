@@ -276,7 +276,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       });
     }
     $scope.productVariants.map((productVariant) => {
-      if (productVariant.appImages && productVariant.appImages && productVariant.appImages.default.length > 0) {
+      if (productVariant.appImages && productVariant.appImages.default && productVariant.appImages.default.length > 0) {
         productVariant.appImages.default.map((image) => {
           image.product = productVariant;
           $scope.images.push(image);
