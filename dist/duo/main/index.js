@@ -525,6 +525,23 @@ utilModule.factory('boUtils', function ($http) {
         }
         table.fnDraw();
       });
+    },
+    formatDate: function formatDate(date) {
+      if (!(date instanceof Date)) {
+        date = new Date(date);
+      }
+      var yyyy = date.getFullYear().toString();
+      function appendLeadingZeroIfNeeded(str) {
+        if (str[1]) return str;
+        return '0' + str;
+      }
+      var mm = appendLeadingZeroIfNeeded((date.getMonth() + 1).toString()); // getMonth() is zero-based
+      var dd = appendLeadingZeroIfNeeded(date.getDate().toString());
+
+      var HH = appendLeadingZeroIfNeeded(date.getHours().toString());
+      var MM = appendLeadingZeroIfNeeded(date.getMinutes().toString());
+      var SS = appendLeadingZeroIfNeeded(date.getSeconds().toString());
+      return yyyy + '-' + mm + '-' + dd + ' ' + HH + ':' + MM + ':' + SS;
     }
   };
 });
@@ -2106,13 +2123,15 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       } else {
         $state.go('product.edit', { productId: product.id });
       }
+      window.alert('Saved Successfully');
     });
   };
 
   $scope.doSave = function () {
     // 2016. 01. 18. [heekyu] save images
     $scope.tmpObjToProduct();
-    $scope.imageToProduct();
+    // $scope.imageToProduct();
+    $scope.imageRowsToVariant();
     $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then(function (res) {
@@ -2143,47 +2162,209 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     });
   };
 
-  $scope.images = [];
+  var makeImageRows = function makeImageRows() {
+    $scope.imageRows = [];
+    var colors = Object.keys($scope.variantsByColor);
+    var firstVariant = true;
+    colors.forEach(function (color) {
+      var item = $scope.variantsByColor[color];
 
-  $scope.generateImages = function () {
-    $scope.images.length = 0;
-    if ($scope.product.appImages && $scope.product.appImages['default'] && $scope.product.appImages['default'].length > 0) {
-      $scope.product.appImages['default'].map(function (image) {
-        image.product = $scope.product;
-        $scope.images.push(image);
-      });
-    }
-    $scope.productVariants.map(function (productVariant) {
-      if (productVariant.appImages && productVariant.appImages && productVariant.appImages['default'].length > 0) {
-        productVariant.appImages['default'].map(function (image) {
-          image.product = productVariant;
-          $scope.images.push(image);
-        });
+      var _loop = function (i) {
+        var variant = item.variants[i];
+        var rowspan = i === 0 ? item.variants.length : 0;
+        var imagespan = item.share ? rowspan : 1;
+        var row = {
+          sku: variant.sku,
+          color: color,
+          rowspan: rowspan,
+          imagespan: imagespan,
+          mainProduct: firstVariant,
+          slotCount: firstVariant ? 6 : 2, // TODO,
+          images: []
+        };
+        firstVariant = false;
+        if (imagespan === 1) {
+          row.images = _.get(variant, 'appImages.default') || [];
+        } else if (imagespan > 1) {
+          (function () {
+            var imageSet = new Set();
+            for (var j = 0; j < row.imagespan; j++) {
+              var imgVariant = item.variants[i + j];
+              _.get(imgVariant, 'appImages.default').forEach(function (image) {
+                if (!imageSet.has(image.url)) {
+                  imageSet.add(image.url);
+                  row.images.push(image);
+                }
+              });
+            }
+          })();
+        }
+        $scope.imageRows.push(row);
+      };
+
+      for (var i = 0; i < item.variants.length; i++) {
+        _loop(i);
       }
     });
   };
-  $scope.generateImages();
-  $scope.imageToProduct = function () {
-    $scope.product.appImages = { 'default': [] };
-    $scope.productVariants.map(function (productVariant) {
-      productVariant.appImages = { 'default': [] };
-    });
-    $scope.images.map(function (image) {
-      image.product.appImages['default'].push(_.omit(image, 'product'));
-    });
-  };
+  var isImageShared = function isImageShared(variants) {
+    if (variants.length < 2) return true;
+    var imgCount = -1;
+    for (var i = 0; i < variants.length; i++) {
+      var images = _.get(variants[i], 'appImages.default');
+      if (!images) {
+        return false;
+      }
+      if (i === 0) {
+        imgCount = images.length;
+      } else if (imgCount !== images.length) {
+        return false;
+      }
+    }
 
+    for (var i = 0; i < imgCount; i++) {
+      var url = variants[0].appImages['default'][i].url;
+      for (var j = 1; j < variants.length; j++) {
+        if (variants[j].appImages['default'][i].url !== url) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+  var collectByColor = function collectByColor() {
+    $scope.variantsByColor = {};
+    var imageUrls = new Set();
+    $scope.productVariants.forEach(function (variant) {
+      var color = _.get(variant, 'data.color');
+      if (!color) {
+        color = '-';
+      }
+      if (!$scope.variantsByColor[color]) {
+        $scope.variantsByColor[color] = { variants: [] };
+      }
+      $scope.variantsByColor[color].variants.push(variant);
+    });
+    var colors = Object.keys($scope.variantsByColor);
+    for (var i = 0; i < colors.length; i++) {
+      var color = colors[i];
+      $scope.variantsByColor[color].share = isImageShared($scope.variantsByColor[color].variants);
+    }
+  };
+  $scope.initImages = function () {
+    collectByColor();
+    makeImageRows();
+  };
+  $scope.toggleShare = function () {
+    makeImageRows();
+  };
+  $scope.imageSortable = {
+    connectWith: '.image-container, .product-image-trash',
+    placeholder: 'ui-state-highlight'
+  };
+  $scope.imageRowsToVariant = function () {
+    var i = 0;
+    while (i < $scope.imageRows.length) {
+      var row = $scope.imageRows[i];
+      for (var j = 0; j < row.imagespan; j++) {
+        var variant = $scope.productVariantsMap[$scope.imageRows[i].sku];
+        variant.appImages = { 'default': row.images };
+        i++;
+      }
+    }
+  };
+  var insertImages = function insertImages(images) {
+    var used = 0;
+    for (var i = 0; i < $scope.imageRows.length; i++) {
+      var row = $scope.imageRows[i];
+      if (row.rowspan < 1) continue;
+      if (row.slotCount > row.images.length) {
+        var count = Math.min(row.slotCount - row.images.length, images.length - used);
+        for (var j = 0; j < count; j++) {
+          row.images.push(images[used++]);
+        }
+        if (used === images.length) {
+          window.alert('(' + used + ') images uploaded');
+          return;
+        }
+      }
+    }
+    window.alert('(' + used + ') images uploaded');
+  };
   $scope.imageUploaded = function (result) {
-    $scope.images.push({
+    insertImages([{
       url: result.url.slice(5),
       publicId: result.public_id,
       version: result.version,
-      product: $scope.product,
       mainImage: false,
       thumbnail: false
-    });
+    }]);
   };
-
+  // TODO
+  /*
+  $('#image-upload-button').on('change', function (changeEvent) {
+   });
+  */
+  setTimeout(function () {
+    // 2016. 02. 29. [heekyu] I cannot find on load event doing this
+    $('.product-image-trash').droppable({
+      accept: '.image-container img',
+      drop: function drop(event, ui) {
+        var row = $(event.srcElement).attr('row-index');
+        var imgIndex = $(event.srcElement).attr('img-index');
+        $scope.imageRows[row].images.splice(imgIndex, 1);
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      }
+    });
+  }, 1000);
+  // 2016. 02. 29. [heekyu] update image selecting UI
+  /*
+    $scope.images = [];
+  
+    $scope.generateImages = () => {
+      $scope.images.length = 0;
+      if ($scope.product.appImages && $scope.product.appImages.default && $scope.product.appImages.default.length > 0) {
+        $scope.product.appImages.default.map((image) => {
+          image.product = $scope.product;
+          $scope.images.push(image);
+        });
+      }
+      $scope.productVariants.map((productVariant) => {
+        if (productVariant.appImages && productVariant.appImages.default && productVariant.appImages.default.length > 0) {
+          productVariant.appImages.default.map((image) => {
+            image.product = productVariant;
+            $scope.images.push(image);
+          });
+        }
+      });
+    };
+    $scope.generateImages();
+    $scope.imageToProduct = () => {
+      $scope.product.appImages = {default: []};
+      $scope.productVariants.map((productVariant) => {
+        productVariant.appImages = {default: []};
+      });
+      $scope.images.map((image) => {
+        image.product.appImages.default.push(_.omit(image, 'product'));
+      });
+    };
+  
+    $scope.imageUploaded = (result) => {
+      $scope.images.push({
+        url: result.url.slice(5),
+        publicId: result.public_id,
+        version: result.version,
+        product: $scope.product,
+        mainImage: false,
+        thumbnail: false,
+      });
+    };
+   $scope.removeImage = (index) => {
+   $scope.images.splice(index, 1);
+   };
+  */
   $scope.newProductVariant = { data: {} };
   $scope.addProductVariant = function (newProductVariant) {
     if (!newProductVariant.sku || newProductVariant.sku === '') {
@@ -2206,9 +2387,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
   $scope.removeProductVariant = function (index) {
     $scope.productVariants.splice(index, 1);
-  };
-  $scope.removeImage = function (index) {
-    $scope.images.splice(index, 1);
   };
 
   $scope.toggleCategory = function (categoryId) {
@@ -2449,7 +2627,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     $http.put('/api/v1/categories/' + $scope.category.id, _.omit($scope.category, ['id', 'children'])).then(function (res) {
       var category = res.data;
       categoryIdMap[category.id] = category;
-      jstreeNode.jstree('set_text', category.id, category.name[state.editLocale]); // TODO i18n
+      jstreeNode.jstree('set_text', category.id, category.name[editLocale]);
       $scope.category = category;
     }, function (err) {
       window.alert(err.data);
@@ -2668,7 +2846,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     var len = products.length;
     for (var i = 0; i < len; i++) {
       var product = products[i];
-      var brandId = product.data.seller || -1;
+      var brandId = _.get(product, 'brand.id') || -1;
       if (!$scope.brands[brandId]) {
         $scope.brands[brandId] = [];
       }
@@ -2992,7 +3170,7 @@ orderModule.controller('OrderListBeforePaymentController', function ($scope, $ro
   $rootScope.initAll($scope, $state.current.name);
 });
 
-orderModule.controller('OrderDetailController', function ($scope, $rootScope, $http, $state, $translate, order) {
+orderModule.controller('OrderDetailController', function ($scope, $rootScope, $http, $state, $translate, boUtils, order) {
   $scope.contentTitle = $translate.instant('order.detail.title');
   $scope.contentSubTitle = 'Order Detail';
   $scope.breadcrumb = [{
@@ -3006,6 +3184,13 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     name: $translate.instant('order.detail.title')
   }];
   $rootScope.initAll($scope, $state.current.name);
+
+  order.createdAt = boUtils.formatDate(order.createdAt);
+  $scope.order = order;
+  $scope.user = {};
+  $http.get('/api/v1/users/' + order.userId).then(function (res) {
+    $scope.user = res.data;
+  });
 });
 }, {"./module":7}],
 8: [function(require, module, exports) {
@@ -3069,7 +3254,28 @@ module.exports = {
 
 var brandModule = require('./module');
 
-brandModule.controller('BrandMainController', function ($scope, $http, $element, boUtils) {
+brandModule.factory('brandCommons', function ($http) {
+  return {
+    saveBrand: function saveBrand(brand) {
+      var brandsUrl = '/api/v1/brands';
+      var promise = null;
+      var brandFields = ['pathname', 'data'];
+      if (brand.id) {
+        promise = $http.put('brandsUrl/' + brand.id, _.pick(brand, brandFields));
+      } else {
+        promise = $http.post(brandsUrl, _.pick(brand, brandFields));
+      }
+      return promise.then(function (res) {
+        $http.put('/api/v1/brands/' + res.data.id + '/index').then(function () {
+          // ignore
+        });
+        return res;
+      });
+    }
+  };
+});
+
+brandModule.controller('BrandMainController', function ($scope, $http, $element, brandCommons, boUtils) {
   var brandsUrl = '/api/v1/brands';
   var fieldName = 'brands';
   $scope.brandDatatables = {
@@ -3086,8 +3292,9 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
   };
 
   $scope.createBrand = function (brand) {
-    $http.post(brandsUrl, brand).then(function (res) {
+    brandCommons.saveBrand(brand).then(function () {
       $scope.closeBrandPopup();
+      $scope.newBrand.data.name = {};
       boUtils.refreshDatatableAjax(brandsUrl, $($element), fieldName);
     })['catch'](function (err) {
       var message = err.data.message;
@@ -3096,6 +3303,10 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
       }
       window.alert(message);
     });
+  };
+
+  $scope.newBrand = {
+    data: { name: {} }
   };
 
   $scope.closeBrandPopup = function () {
@@ -3243,6 +3454,7 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
     children: []
   };
   $http.get('/api/v1/cms/' + $state.params.name).then(function (res) {
+    console.log(res);
     if (res.data) {
       $scope.cms = res.data;
     }
@@ -3289,53 +3501,6 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
   $scope.rowSortable = {
     handle: '.cms-simple-sortable-pointer',
     placeholder: 'ui-state-highlight'
-  };
-});
-
-cmsModule.controller('MainCategoryController', function ($scope, $http) {
-  $scope.rows = [];
-  $scope.locale = 'ko';
-  var dataToRows = function dataToRows(data) {
-    $scope.rows.length = 0;
-    data.forEach(function (top) {
-      $scope.rows.push({
-        top: top,
-        depth1: '',
-        depth2: '',
-        name: top.name[$scope.locale],
-        link: top.link
-      });
-      (top.children || []).forEach(function (depth1) {
-        $scope.rows.push({
-          top: '',
-          depth1: depth1,
-          depth2: '',
-          name: depth1.name[$scope.locale],
-          link: depth1.link
-        });
-        (depth1.children || []).forEach(function (depth2) {
-          $scope.rows.push({
-            top: '',
-            depth1: '',
-            depth2: depth2,
-            name: depth2.name[$scope.locale],
-            link: depth2.link
-          });
-        });
-      });
-    });
-  };
-  var rowsToData = function rowsToData() {};
-  var cmsName = 'main_categories';
-  $http.get('/api/v1/cms/' + cmsName).then(function (res) {
-    if (res.data) {
-      dataToRows(res.data);
-    }
-  });
-  $scope.save = function () {
-    $http.post('/api/v1/cms', { name: cmsName, data: rowsToData() }).then(function () {
-      console.log(res);
-    });
   };
 });
 }, {"./module":10}],
@@ -3393,8 +3558,7 @@ module.exports = {
 
 var textModule = require('./module');
 
-textModule.controller('TextMainController', function ($scope, $http, $q) {
-  $scope.currentLang = 'ko';
+textModule.controller('TextMainController', function ($scope, $http, $q, $state, $rootScope) {
   $scope.activeNode = null;
   $scope.langs = ['en', 'ko', 'zh_cn', 'zh_tw'];
   var nodeToKey = {};
@@ -3405,7 +3569,7 @@ textModule.controller('TextMainController', function ($scope, $http, $q) {
     if (obj.ko || obj.en) {
       return {
         id: nodeNum,
-        text: obj[$scope.currentLang],
+        text: obj[$rootScope.state.editLocale],
         data: obj
       };
     }
@@ -3423,15 +3587,20 @@ textModule.controller('TextMainController', function ($scope, $http, $q) {
     }
     return res;
   };
-
-  var initJsTree = function initJsTree(origData) {
-    var jstreeNode = $('#textTree');
-    nodeNum = 0;
-    var jstreeData = [];
+  var jsTreeData = function jsTreeData(origData) {
+    var res = [];
     var keys = Object.keys(origData);
     keys.forEach(function (key) {
-      jstreeData.push(getTreeData(key, origData[key]));
+      res.push(getTreeData(key, origData[key]));
     });
+    return res;
+  };
+
+  var jstreeNode = $('#textTree');
+  var initJsTree = function initJsTree(origData) {
+    nodeNum = 0;
+    var jstreeData = jsTreeData(origData);
+
     jstreeNode.jstree({
       core: {
         themes: {
@@ -3449,11 +3618,23 @@ textModule.controller('TextMainController', function ($scope, $http, $q) {
     });
   };
 
-  $http.get('/api/v1/i18n/texts').then(function (res) {
-    initJsTree(res.data);
-  })['catch'](function (err) {
-    window.alert(err);
-  });
+  var redraw = function redraw() {
+    var treeData = jsTreeData($scope.origData);
+    jstreeNode.jstree(true).settings.core.data = treeData;
+
+    jstreeNode.jstree('refresh');
+  };
+
+  $scope.origData = null;
+  var getTextsAndDrawTree = function getTextsAndDrawTree(func) {
+    $http.get('/api/v1/i18n/texts').then(function (res) {
+      $scope.origData = res.data;
+      func($scope.origData);
+    })['catch'](function (err) {
+      window.alert(err);
+    });
+  };
+  getTextsAndDrawTree(initJsTree);
 
   var jstreeToJson = function jstreeToJson() {
     var tops = $('#textTree').jstree('get_json', '#');
@@ -3478,9 +3659,17 @@ textModule.controller('TextMainController', function ($scope, $http, $q) {
       var key = keys[i];
       promises.push($http.put('/api/v1/i18n/texts', { path: key, data: data[key] }));
     }
-    $q.all(promises).then(function (res) {
-      console.log(res);
+    $q.all(promises).then(function () {
+      getTextsAndDrawTree(redraw);
+      // 2016. 02. 29. [heekyu] activeNode is changed when redraw
+      //                TODO maintain activeNode
+      $scope.activeNode = null;
     });
+  };
+
+  $scope.changeTextEditLocale = function (locale) {
+    $rootScope.changeEditLocale(locale);
+    redraw();
   };
 });
 }, {"./module":11}],
