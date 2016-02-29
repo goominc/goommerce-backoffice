@@ -215,6 +215,13 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
   // 2016. 02. 15. [heekyu] app-wide state
   $rootScope.state = {
     batchUploadedProducts: [],
+    locales: ['ko', 'en', 'zh_cn', 'zh_tw'],
+    editLocale: 'ko',
+  };
+
+  // 2016. 02. 29. [heekyu] change locale in each page
+  $rootScope.changeEditLocale = (locale) => {
+    $rootScope.state.editLocale = locale;
   };
 });
 

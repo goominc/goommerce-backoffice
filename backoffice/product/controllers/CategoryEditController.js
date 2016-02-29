@@ -21,20 +21,22 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
   ];
   $rootScope.initAll($scope, $state.current.name);
 
+  const editLocale = $rootScope.state.editLocale;
+
   $scope.root = categories;
   const categoryIdMap = {};
   let currentCategoryId = $state.params.categoryId;
   if (!currentCategoryId) {
     currentCategoryId = $scope.root.id;
   }
-  $scope.root.name.ko = $translate.instant('product.category.rootName'); // TODO root name i18n
+  $scope.root.name[editLocale] = $translate.instant('product.category.rootName'); // TODO root name i18n
 
-  const getTreeData = (root, currentCategoryId) => {
+  const getTreeData = (root, currentCategoryId, opened) => {
     let json = {
       id: root.id,
-      text: root.name ? root.name.ko : 'NoName',
+      text: root.name ? root.name[editLocale] : 'NoName',
       data: { id: root.id },
-      state: { selected: false, opened: true }, /* TODO disabled: !root.isActive, */
+      state: { selected: false, opened }, /* TODO disabled: !root.isActive, */
     };
     categoryIdMap[root.id] = root;
     if (currentCategoryId && root.id === currentCategoryId) {
@@ -44,13 +46,13 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
 
     if (root.children) {
       json.children = root.children.map((child) => {
-        return getTreeData(child, $state.params.categoryId);
+        return getTreeData(child, $state.params.categoryId, false);
       });
     }
     return json;
   };
 
-  const jstreeData = getTreeData($scope.root, currentCategoryId);
+  const jstreeData = getTreeData($scope.root, currentCategoryId, true);
   $scope.category = categoryIdMap[currentCategoryId];
   const jstreeNode = $('#categoryTree');
   jstreeNode.jstree({
@@ -98,13 +100,14 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
             label: $translate.instant('product.category.labelNewCategory'),
             action: () => {
               const newCategory = {
-                name: { ko: newNodeName },
+                name: {},
                 isActive: false,
                 parentId: $node.id,
               };
+              newCategory.name[editLocale] = 'NewNode';
               $http.post('/api/v1/categories', newCategory).then((res) => {
                 categoryIdMap[res.data.id] = res.data;
-                const newNodeId = tree.create_node($node, res.data.name.ko); // TODO i18n
+                const newNodeId = tree.create_node($node, res.data.name[editLocale]);
                 jstreeNode.jstree('set_id', newNodeId, res.data.id);
                 selectNode(res.data.id);
               }, (err) => {
@@ -170,10 +173,15 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     $http.put('/api/v1/categories/' + $scope.category.id, _.omit($scope.category, ['id', 'children'])).then((res) => {
       const category = res.data;
       categoryIdMap[category.id] = category;
-      jstreeNode.jstree('set_text', category.id, category.name.ko); // TODO i18n
+      jstreeNode.jstree('set_text', category.id, category.name[state.editLocale]); // TODO i18n
       $scope.category = category;
     }, (err) => {
       window.alert(err.data);
     });
+  };
+
+  $scope.changeCategoryEditLocale = (locale) => {
+    $rootScope.changeEditLocale(locale);
+    $state.reload();
   };
 });

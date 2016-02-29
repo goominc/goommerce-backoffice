@@ -12,6 +12,15 @@
           <div class="portlet light">
             <div class="portlet-body">
               <div class="row">
+                <div class="col-md-12" style="margin-bottom: 20px;">
+                  <button class="btn" style="margin-right: 20px;"
+                          data-ng-repeat="locale in state.locales"
+                          data-ng-class="{'red': state.editLocale === locale, 'blue': state.editLocale !== locale}"
+                          data-ng-click="changeCategoryEditLocale(locale)"
+                  >
+                    {{locale}}
+                  </button>
+                </div>
                 <div class="col-md-4">
                   <div id="categoryTree"></div>
                 </div>
