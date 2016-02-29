@@ -1,5 +1,6 @@
 {
   "main": {
+    "mainMenu": "메인",
     "createButton": "추가",
     "closeButton": "닫기",
     "deleteButton": "삭제",

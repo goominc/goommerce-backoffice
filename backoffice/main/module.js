@@ -54,9 +54,13 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     {
       key: 'product', // TODO get key from router
       name: $translate.instant('product.main.title'),
-      sref: 'product.main',
       active: false,
       children: [
+        {
+          key: 'product.main',
+          name: $translate.instant('main.mainMenu'),
+          sref: 'product.main',
+        },
         {
           key: 'product.category',
           name: $translate.instant('product.category.title'),
@@ -82,9 +86,13 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     {
       key: 'order', // TODO get key from router
       name: $translate.instant('order.title'),
-      sref: 'order.main',
       active: false,
       children: [
+        {
+          key: 'order.main',
+          name: $translate.instant('main.mainMenu'),
+          sref: 'order.main',
+        },
         {
           key: 'order.beforePayment',
           name: $translate.instant('order.beforePayment.title'),
@@ -95,9 +103,13 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     {
       key: 'user', // TODO get key from router
       name: $translate.instant('user.manage.title'),
-      sref: 'user.manage',
       active: false,
       children: [
+        {
+          key: 'order.main',
+          name: $translate.instant('main.mainMenu'),
+          sref: 'user.manage',
+        },
         {
           key: 'user.waitConfirm',
           name: $translate.instant('user.waitConfirm.title'),
@@ -114,7 +126,6 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     {
       key: 'cms', // TODO get key from router
       name: 'CMS',
-      sref: 'cms.main',
       active: false,
       children: [
         {
