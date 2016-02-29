@@ -112,7 +112,50 @@
                       </div>
                     </div>
                   </uib-tab>
-                  <uib-tab heading="{{'product.edit.tabImage' | translate}}">
+                  <uib-tab heading="{{'product.edit.tabImage' | translate}}" data-ng-click="initImages()">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <button class="btn blue" cl-upload-widget="" callback="imageUploaded(result)"><i class="fa fa-plus"></i> 한 장씩 추가</button>
+                        <span class="btn green fileinput-button" style="margin: 15px 0;">
+                          <i class="fa fa-plus"></i> 여러 장 추가
+                          <input type="file" id="image-upload-button" webkitdirectory directory multiple/>
+                        </span>
+                      </div>
+                      <div class="col-md-12" style="margin-top: 20px">
+                        <table class="table table-bordered dataTable">
+                          <thead>
+                          <tr>
+                            <th width="15%">SKU</th>
+                            <th width="15%">Color</th>
+                            <th width="10%">Collapse</th>
+                            <th width="10%">SlotCount</th>
+                            <th width="50%">Image</th>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center">
+                          <tr data-ng-repeat="row in imageRows">
+                            <td style="border-right: 1px solid #e7ecf1;">{{row.sku}}</td>
+                            <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
+                              {{row.color}}
+                            </td>
+                            <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
+                              <input id="product-image-{{row.sku}}" type="checkbox"
+                                     data-ng-model="variantsByColor[row.color].share"
+                                     data-ng-change="toggleShare(row.color)"
+                              />
+                              <label for="product-image-{{row.sku}}" data-ng-class="{'checkbox-active': row.share}"></label>
+                            </td>
+                            <td data-ng-if="row.imagespan > 0" rowspan="{{row.imagespan}}" style="border-right: 1px solid #e7ecf1;">2</td>
+                            <td data-ng-if="row.imagespan > 0" rowspan="{{row.imagespan}}">
+                              <img class="image-inline" data-ng-repeat="image in row.images" width="80px" height="120px" data-ng-src="{{image.url}}" />
+                            </td>
+                          </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </uib-tab>
+                  <!--uib-tab heading="{{'product.edit.tabImage' | translate}}">
                     <div class="row">
                       <div class="col-md-12">
                         <button class="btn blue" cl-upload-widget="" callback="imageUploaded(result)"><i class="fa fa-plus"></i> {{'main.addImageButton' | translate}}</button>
@@ -149,7 +192,7 @@
                         </table>
                       </div>
                     </div>
-                  </uib-tab>
+                  </uib-tab-->
                   <uib-tab heading="{{'product.edit.tabCategory' | translate}}">
                     <div class="row">
                       <div class="col-md-12">

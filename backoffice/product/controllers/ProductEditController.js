@@ -265,6 +265,64 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     });
   };
 
+  const makeImageRows = () => {
+    $scope.imageRows = [];
+    const colors = Object.keys($scope.variantsByColor);
+    colors.forEach((color) => {
+      const item = $scope.variantsByColor[color];
+      for (let i = 0; i < item.variants.length; i++) {
+        const variant = item.variants[i];
+        const rowspan = i === 0 ? item.variants.length : 0;
+        const imagespan = item.share ? rowspan : 1;
+        const row = {
+          sku: variant.sku,
+          color,
+          rowspan,
+          imagespan: imagespan,
+          SlotCount: 2, // TODO,
+          images: [],
+        };
+        if (imagespan === 1) {
+          row.images = _.get(variant, 'appImages.default') || [];
+        } else if (imagespan > 1) {
+          const imageSet = new Set();
+          for (let j = 0; j < row.imagespan; j++) {
+            const imgVariant = item.variants[i+j];
+            (_.get(imgVariant, 'appImages.default').forEach((image) => {
+              if (!imageSet.has(image)) {
+                imageSet.add(image);
+                row.images.push(image);
+              }
+            }));
+          }
+        }
+        $scope.imageRows.push(row);
+      }
+    });
+  };
+  const collectByColor = () => {
+    $scope.variantsByColor = {};
+    const imageUrls = new Set();
+    $scope.productVariants.forEach((variant) => {
+      let color = _.get(variant, 'data.color');
+      if (!color) {
+        color = '-';
+      }
+      if (!$scope.variantsByColor[color]) {
+        $scope.variantsByColor[color] = { share: true, variants: [] };
+      }
+      $scope.variantsByColor[color].variants.push(variant);
+    });
+  };
+  $scope.initImages = () => {
+    collectByColor();
+    makeImageRows();
+  };
+  $scope.toggleShare = () => {
+    makeImageRows();
+  };
+  // 2016. 02. 29. [heekyu] update image selecting UI
+/*
   $scope.images = [];
 
   $scope.generateImages = () => {
@@ -305,7 +363,10 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       thumbnail: false,
     });
   };
-
+ $scope.removeImage = (index) => {
+ $scope.images.splice(index, 1);
+ };
+*/
   $scope.newProductVariant = { data: {} };
   $scope.addProductVariant = (newProductVariant) => {
     if (!newProductVariant.sku || newProductVariant.sku === '') {
@@ -328,9 +389,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
   $scope.removeProductVariant = (index) => {
     $scope.productVariants.splice(index, 1);
-  };
-  $scope.removeImage = (index) => {
-    $scope.images.splice(index, 1);
   };
 
   $scope.toggleCategory = (categoryId) => {
