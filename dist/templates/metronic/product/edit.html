@@ -125,9 +125,9 @@
                         <table class="table table-bordered dataTable">
                           <thead>
                           <tr>
-                            <th width="15%">SKU</th>
+                            <th width="20%">SKU</th>
                             <th width="15%">Color</th>
-                            <th width="10%">Collapse</th>
+                            <th width="5%">Collapse</th>
                             <th width="10%">SlotCount</th>
                             <th width="50%">Image</th>
                           </tr>
@@ -140,14 +140,17 @@
                             </td>
                             <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
                               <input id="product-image-{{row.sku}}" type="checkbox"
+                                     data-ng-if="row.rowspan > 1"
                                      data-ng-model="variantsByColor[row.color].share"
                                      data-ng-change="toggleShare(row.color)"
                               />
-                              <label for="product-image-{{row.sku}}" data-ng-class="{'checkbox-active': row.share}"></label>
+                              <label for="product-image-{{row.sku}}"></label>
                             </td>
-                            <td data-ng-if="row.imagespan > 0" rowspan="{{row.imagespan}}" style="border-right: 1px solid #e7ecf1;">2</td>
-                            <td data-ng-if="row.imagespan > 0" rowspan="{{row.imagespan}}">
-                              <img class="image-inline" data-ng-repeat="image in row.images" width="80px" height="120px" data-ng-src="{{image.url}}" />
+                            <td data-ng-if="row.imagespan > 0" rowspan="{{row.imagespan}}" style="border-right: 1px solid #e7ecf1;">
+                              <input class="product-small-number-input" type="number" min="0" data-ng-model="row.slotCount" />
+                            </td>
+                            <td data-ng-if="row.imagespan > 0" rowspan="{{row.imagespan}}" class="image-container" ui-sortable="imageSortable" data-ng-model="row.images">
+                              <img class="image-inline" data-ng-repeat="image in row.images" data-ng-src="{{image.url}}" />
                             </td>
                           </tr>
                           </tbody>

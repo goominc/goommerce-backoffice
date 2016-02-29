@@ -228,13 +228,15 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       } else {
         $state.go('product.edit', { productId: product.id });
       }
+      window.alert('Saved Successfully');
     });
   };
 
   $scope.doSave = () => {
     // 2016. 01. 18. [heekyu] save images
     $scope.tmpObjToProduct();
-    $scope.imageToProduct();
+    // $scope.imageToProduct();
+    $scope.imageRowsToVariant();
     $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then((res) => {
@@ -268,6 +270,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   const makeImageRows = () => {
     $scope.imageRows = [];
     const colors = Object.keys($scope.variantsByColor);
+    let firstVariant = true;
     colors.forEach((color) => {
       const item = $scope.variantsByColor[color];
       for (let i = 0; i < item.variants.length; i++) {
@@ -279,9 +282,11 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           color,
           rowspan,
           imagespan: imagespan,
-          SlotCount: 2, // TODO,
+          mainProduct: firstVariant,
+          slotCount: firstVariant ? 6 : 2, // TODO,
           images: [],
         };
+        firstVariant = false;
         if (imagespan === 1) {
           row.images = _.get(variant, 'appImages.default') || [];
         } else if (imagespan > 1) {
@@ -289,8 +294,8 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           for (let j = 0; j < row.imagespan; j++) {
             const imgVariant = item.variants[i+j];
             (_.get(imgVariant, 'appImages.default').forEach((image) => {
-              if (!imageSet.has(image)) {
-                imageSet.add(image);
+              if (!imageSet.has(image.url)) {
+                imageSet.add(image.url);
                 row.images.push(image);
               }
             }));
@@ -299,6 +304,31 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         $scope.imageRows.push(row);
       }
     });
+  };
+  const isImageShared = (variants) => {
+    if (variants.length < 2) return true;
+    let imgCount = -1;
+    for (let i = 0; i < variants.length; i++) {
+      const images = _.get(variants[i], 'appImages.default');
+      if (!images) {
+        return false;
+      }
+      if (i === 0) {
+        imgCount = images.length;
+      } else if (imgCount !== images.length) {
+        return false;
+      }
+    }
+
+    for (let i = 0; i < imgCount; i++) {
+      const url = variants[0].appImages.default[i].url;
+      for (let j = 1; j < variants.length; j++) {
+        if (variants[j].appImages.default[i].url !== url) {
+          return false;
+        }
+      }
+    }
+    return true;
   };
   const collectByColor = () => {
     $scope.variantsByColor = {};
@@ -309,10 +339,15 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         color = '-';
       }
       if (!$scope.variantsByColor[color]) {
-        $scope.variantsByColor[color] = { share: true, variants: [] };
+        $scope.variantsByColor[color] = { variants: [] };
       }
       $scope.variantsByColor[color].variants.push(variant);
     });
+    const colors = Object.keys($scope.variantsByColor);
+    for (let i = 0; i < colors.length; i++) {
+      const color = colors[i];
+      $scope.variantsByColor[color].share = isImageShared($scope.variantsByColor[color].variants);
+    }
   };
   $scope.initImages = () => {
     collectByColor();
@@ -320,6 +355,21 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
   $scope.toggleShare = () => {
     makeImageRows();
+  };
+  $scope.imageSortable = {
+    connectWith: '.image-container',
+    placeholder: 'ui-state-highlight',
+  };
+  $scope.imageRowsToVariant = () => {
+    let i = 0;
+    while (i < $scope.imageRows.length) {
+      const row = $scope.imageRows[i];
+      for (let j = 0; j < row.imagespan; j++) {
+        const variant = $scope.productVariantsMap[$scope.imageRows[i].sku];
+        variant.appImages = { default: row.images };
+        i++;
+      }
+    }
   };
   // 2016. 02. 29. [heekyu] update image selecting UI
 /*

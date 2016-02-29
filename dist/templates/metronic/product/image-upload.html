@@ -43,7 +43,7 @@
                       <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}"></td>
                       <td>{{row.sku}}</td>
                       <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">{{row.color}}</td>
-                      <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}"><input style="width: 80px;" type="number" data-ng-model="row.slotCount" /></td>
+                      <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}"><input class="product-small-number-input" type="number" min="0" data-ng-model="row.slotCount" /></td>
                       <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
                         <input id="check-{{item.product.id}}-{{row.sku}}" type="checkbox"
                                data-ng-model="row.mainProduct"
