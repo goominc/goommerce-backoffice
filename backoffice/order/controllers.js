@@ -62,7 +62,7 @@ orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, 
   $rootScope.initAll($scope, $state.current.name);
 });
 
-orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $state, $translate, order) => {
+orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $state, $translate, boUtils, order) => {
   $scope.contentTitle = $translate.instant('order.detail.title');
   $scope.contentSubTitle = 'Order Detail';
   $scope.breadcrumb = [
@@ -81,4 +81,10 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   ];
   $rootScope.initAll($scope, $state.current.name);
 
+  order.createdAt = boUtils.formatDate(order.createdAt);
+  $scope.order = order;
+  $scope.user = {};
+  $http.get(`/api/v1/users/${order.userId}`).then((res) => {
+    $scope.user = res.data;
+  });
 });

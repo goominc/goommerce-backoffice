@@ -14,7 +14,168 @@
               {{order.id}}
             </div>
             <div class="portlet-body">
-              Body
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="portlet yellow-crusta box">
+                    <div class="portlet-title">
+                      <div class="caption">
+                        <i class="fa fa-cogs"></i>Order Details
+                      </div>
+                    </div>
+                    <div class="portlet-body">
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          Order #:
+                        </div>
+                        <div class="col-md-7 value">
+                          {{order.id}} <!--span class="label label-info label-sm">Email confirmation was sent </span-->
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          Order Time:
+                        </div>
+                        <div class="col-md-7 value">
+                          {{order.createdAt}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          Order Status:
+                        </div>
+                        <div class="col-md-7 value">
+                          <span class="label label-success">{{order.status}}</span>
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          Total:
+                        </div>
+                        <div class="col-md-7 value">
+                          KRW {{order.totalEstimationKRW}} <br/>
+                          USD {{order.totalEstimationUSD}} <br/>
+                          CNY {{order.totalEstimationCNY}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          Payment:
+                        </div>
+                        <div class="col-md-7 value">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="portlet blue-hoki box">
+                    <div class="portlet-title">
+                      <div class="caption">
+                        <i class="fa fa-cogs"></i>Customer Information
+                      </div>
+                    </div>
+                    <div class="portlet-body">
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          Customer Name:
+                        </div>
+                        <div class="col-md-7 value">
+                          {{user.email}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          Email:
+                        </div>
+                        <div class="col-md-7 value">
+                          {{user.email}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          Biz Number:
+                        </div>
+                        <div class="col-md-7 value">
+                          111-00-22222
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          Phone Number:
+                        </div>
+                        <div class="col-md-7 value">
+                          01012345678
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="portlet red-sunglo box">
+                    <div class="portlet-title">
+                      <div class="caption">
+                        <i class="fa fa-cogs"></i>Shipping Address
+                      </div>
+                    </div>
+                    <div class="portlet-body">
+                      <div class="row static-info">
+                        <div class="col-md-12 value">
+                          Jhon Done<br>
+                          #24 Park Avenue Str<br>
+                          New York<br>
+                          Connecticut, 23456 New York<br>
+                          United States<br>
+                          T: 123123232<br>
+                          F: 231231232<br>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="portlet grey-cascade box">
+                    <div class="portlet-title">
+                      <div class="caption">
+                        <i class="fa fa-cogs"></i>Shopping Cart
+                      </div>
+                    </div>
+                    <div class="portlet-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover table-bordered table-striped">
+                          <thead>
+                          <tr>
+                            <th width="20%">Product</th>
+                            <th width="20%">Original Price</th>
+                            <th width="20%">Price</th>
+                            <th width="20%">Quantity</th>
+                            <th width="20%">Total</th>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center">
+                          <tr data-ng-repeat="row in order.orderProducts">
+                            <td>
+                              <a ui-sref="product.edit({productId: row.id})">{{row.id}}</a>
+                            </td>
+                            <td>
+                              <span>{{row.productVariant.KRW}} KRW</span>
+                            </td>
+                            <td>
+                              <span>{{row.productVariant.KRW}} KRW</span>
+                            </td>
+                            <td>
+                              {{row.orderedCount}}
+                            </td>
+                            <td>
+                              {{row.totalKRW}}
+                            </td>
+                          </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
