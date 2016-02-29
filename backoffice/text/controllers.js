@@ -96,7 +96,6 @@ textModule.controller('TextMainController', ($scope, $http, $q, $state, $rootSco
     return dfs({ children: tops });
   };
   $scope.save = () => {
-    console.log($scope.activeNode);
     const data = jstreeToJson();
     const keys = Object.keys(data);
     const promises = [];
