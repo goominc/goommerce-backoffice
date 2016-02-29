@@ -87,25 +87,22 @@
                           <tr role="row" class="heading">
                             <th style="min-width: 150px;">SKU</th>
                             <th width="5%">price</th>
-                            <th width="5%">stock</th>
                             <th width="20%">color</th>
                             <th width="20%">size</th>
-                            <th width="10%"></th>
+                            <th width="15%"></th>
                           </tr>
                           </thead>
                           <tbody>
-                          <tr data-ng-class="{'bo-invalid-row': newProductVariant.stock < 0}">
-                            <td>{{newProductVariant.sku}}</td>
+                          <tr>
+                            <td><input style="width: 100%; max-width: 300px;" type="text" data-ng-model="newProductVariant.sku" /></td>
                             <td><input type="number" data-ng-model="newProductVariant.KRW" /></td>
-                            <td><input type="number" data-ng-model="newProductVariant.stock" /></td>
                             <td><input type="text" data-ng-model="newProductVariant.data.color" /></td>
                             <td><input type="text" data-ng-model="newProductVariant.data.size" /></td>
                             <td><button class="btn blue" data-ng-click="addProductVariant(newProductVariant)"><i class="fa fa-plus"></i> {{'main.createButton' | translate}}</button></td>
                           </tr>
-                          <tr data-ng-repeat="productVariant in productVariants" data-ng-class="{'bo-invalid-row': productVariant.stock < 0}">
-                            <td>{{productVariant.sku}}</td>
+                          <tr data-ng-repeat="productVariant in productVariants">
+                            <td><input style="width: 100%; max-width: 300px;" type="text" data-ng-model="productVariant.sku" /></td>
                             <td><input type="number" data-ng-model="productVariant.KRW" /></td>
-                            <td><input type="number" data-ng-model="productVariant.stock" /></td>
                             <td><input type="text" data-ng-model="productVariant.data.color" /></td>
                             <td><input type="text" data-ng-model="productVariant.data.size" /></td>
                             <td><button class="btn red" data-ng-click="removeProductVariant($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></td>

@@ -356,6 +356,6 @@ Login page
   vertical-align: middle !important;
 }
 .product-variant-table td input {
-  max-width: 120px;
+  text-align: center;
 }
 

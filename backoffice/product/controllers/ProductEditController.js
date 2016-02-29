@@ -198,7 +198,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        const newVariant = {sku: newVariantSKU, KRW: 0, stock: -1};
+        const newVariant = {sku: newVariantSKU, KRW: 0};
         newVariants.push(newVariant);
         newVariantsMap[newVariantSKU] = newVariant;
       }
@@ -218,10 +218,20 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     $http.put(`/api/v1/products/${product.id}/index`).then((res) => {
       // ignore
     });
-    $state.go('product.edit', { productId: product.id });
   };
 
   $scope.saveAndContinue = () => {
+    $scope.doSave().then((product) => {
+      if ($scope.product.id) {
+        // 2016. 02. 29. [heekyu] update product variant id for deny multiple create
+        $state.reload();
+      } else {
+        $state.go('product.edit', { productId: product.id });
+      }
+    });
+  };
+
+  $scope.doSave = () => {
     // 2016. 01. 18. [heekyu] save images
     $scope.tmpObjToProduct();
     $scope.imageToProduct();
@@ -229,6 +239,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then((res) => {
         afterSaveProduct(res.product);
+        return res.product;
       }, (err) => {
         window.alert('Product Create Fail' + err.data);
       });
@@ -236,6 +247,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       return productUtil.updateProduct($scope.product, $scope.productVariants, $scope.origVariants).then((res) => {
         afterSaveProduct(res.product);
         $scope.origVariants.clear();
+        return res.product;
       }, (err) => {
         console.log(err);
         window.alert('Product Update Fail' + err.data);
@@ -246,8 +258,8 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
 
   $scope.save = () => {
-    $scope.saveAndContinue().then((err) => {
-      if (!err) {
+    $scope.doSave().then((product) => {
+      if (product && product.id) {
         $state.go('product.main');
       }
     });
@@ -304,10 +316,12 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       window.alert(newProductVariant.sku + ' already exists');
       return;
     }
+    /*
     if (newProductVariant.stock < 0) {
       window.alert('Stock >= 0');
       return;
     }
+    */
     $scope.newProductVariant = {};
     $scope.productVariants.push(newProductVariant);
     $scope.productVariantsMap[newProductVariant.sku] = newProductVariant;

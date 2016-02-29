@@ -17,7 +17,7 @@ productModule.config(($stateProvider) => {
   const templateRoot = 'templates/metronic';
 
   const narrowProduct = (product) => _.pick(product, ['id', 'sku', 'categories', 'isActive', 'brand', 'data', 'appImages']);
-  const narrowProductVariant = (variant) => _.pick(variant, ['id', 'productId', 'sku', 'stock', 'KRW', 'data', 'appImages']);
+  const narrowProductVariant = (variant) => _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages']);
 
   $stateProvider
     .state('product', {
@@ -126,9 +126,6 @@ productModule.factory('productUtil', ($http, $q) => {
         const promises = [];
         const pvUrl = '/api/v1/products/' + product.id + '/product_variants';
         for (const productVariant of productVariants) {
-          if (productVariant.stock < 0) {
-            continue;
-          }
           promises.push($http.post(pvUrl, productVariant));
         }
         return $q.all(promises).then((res2) => {
@@ -147,9 +144,6 @@ productModule.factory('productUtil', ($http, $q) => {
         const promises = [];
         const pvUrl = '/api/v1/products/' + product.id + '/product_variants';
         for (const productVariant of productVariants) {
-          if (productVariant.stock < 0) {
-            continue;
-          }
           oldProductVariants.delete(productVariant.id);
           if (!productVariant.id) {
             promises.push($http.post(pvUrl, productVariant));
