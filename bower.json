@@ -27,6 +27,7 @@
     "fancybox": "~2.1.5",
     "jquery-csv": "*",
     "jstree": "~3.2.1",
-    "lodash": "~3.10.1"
+    "lodash": "~3.10.1",
+    "jquery-ui-droppable": "*"
   }
 }

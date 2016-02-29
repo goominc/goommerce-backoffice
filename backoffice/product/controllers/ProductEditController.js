@@ -357,7 +357,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     makeImageRows();
   };
   $scope.imageSortable = {
-    connectWith: '.image-container',
+    connectWith: '.image-container, .product-image-trash',
     placeholder: 'ui-state-highlight',
   };
   $scope.imageRowsToVariant = () => {
@@ -404,6 +404,20 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
 
   });
   */
+  setTimeout(() => {
+    // 2016. 02. 29. [heekyu] I cannot find on load event doing this
+    $('.product-image-trash').droppable({
+      accept:'.image-container img',
+      drop: function( event, ui ) {
+        const row = $(event.srcElement).attr('row-index');
+        const imgIndex = $(event.srcElement).attr('img-index');
+        $scope.imageRows[row].images.splice(imgIndex, 1);
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      }
+    });
+  }, 1000);
   // 2016. 02. 29. [heekyu] update image selecting UI
 /*
   $scope.images = [];

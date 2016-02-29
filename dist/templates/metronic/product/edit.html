@@ -120,6 +120,7 @@
                           <i class="fa fa-plus"></i> 여러 장 추가
                           <input type="file" id="image-upload-button" webkitdirectory directory multiple/>
                         </span>
+                        <button class="btn red product-image-trash"><i class="icon-trash"></i></button>
                       </div>
                       <div class="col-md-12" style="margin-top: 20px">
                         <table class="table table-bordered dataTable">
@@ -150,7 +151,7 @@
                               <input class="product-small-number-input" type="number" min="0" data-ng-model="row.slotCount" />
                             </td>
                             <td data-ng-if="row.imagespan > 0" rowspan="{{row.imagespan}}" class="image-container" ui-sortable="imageSortable" data-ng-model="row.images">
-                              <img class="image-inline" data-ng-repeat="image in row.images" data-ng-src="{{image.url}}" />
+                              <img row-index="{{$parent.$index}}" img-index="{{$index}}" class="image-inline" data-ng-repeat="image in row.images" data-ng-src="{{image.url}}" />
                             </td>
                           </tr>
                           </tbody>
