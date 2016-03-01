@@ -6,10 +6,10 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   const initFromProduct = () => {
     let titleKey = 'product.edit.createTitle';
     if (!product) {
-      $scope.product = { sku: 'autogen', data: {} };
+      $scope.product = { sku: 'autogen', KRW: 0, data: {} };
       $scope.variantKinds = [
         {name: '색상', key: 'color', kinds: ['White', 'Black']},
-        {name: '사이즈', key: 'size', kinds: ['Free']},
+        {name: '크기', key: 'size', kinds: ['Free']},
       ];
     } else {
       $scope.product = product;
@@ -91,6 +91,14 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   if ($scope.product.id) {
     $scope.productToTmpObj();
   }
+
+  $scope.productPriceChanged = (oldKRW, newKRW) => {
+    $scope.productVariants.forEach((variant) => {
+      if (!variant.KRW || Number(variant.KRW) === Number(oldKRW)) {
+        variant.KRW = newKRW;
+      }
+    });
+  };
 
   // BEGIN Manipulate Variant Kinds
 
@@ -353,6 +361,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     collectByColor();
     makeImageRows();
   };
+  $scope.initImages();
   $scope.toggleShare = () => {
     makeImageRows();
   };
