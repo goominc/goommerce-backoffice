@@ -57,6 +57,13 @@ tbody.cell-center > tr > td {
     margin-top: 100px;
   }
 }
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
 .brand-create-form-input {
   display: inline-block;
   width: 150px;
@@ -373,5 +380,32 @@ Login page
 .product-image-trash {
   font-size: 40px;
   float: right;
+}
+
+.product-variant-attr-selected-wrap {
+  width: 100%;
+  margin-bottom: 15px;
+}
+.product-variant-attr-selected-button {
+  margin-right: 15px;
+}
+
+.product-variant-attr-candidate-wrap {
+  border: 1px solid #cb0102;
+  display: inline-block;
+  margin-bottom: 15px;
+}
+.product-variant-color-button {
+  width: 100px;
+}
+.product-variant-size-button {
+  width: 50px;
+}
+.product-variant-attr-candidate-button {
+  display: inline-block;
+  border: 0 !important;
+}
+.product-variant-attr-candidate-button + .product-variant-attr-candidate-button {
+  border-left: 1px solid #cb0102 !important;
 }
 

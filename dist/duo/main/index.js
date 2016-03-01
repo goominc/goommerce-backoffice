@@ -1403,7 +1403,7 @@ productModule.config(function ($stateProvider) {
   var templateRoot = 'templates/metronic';
 
   var narrowProduct = function narrowProduct(product) {
-    return _.pick(product, ['id', 'sku', 'categories', 'isActive', 'brand', 'data', 'appImages']);
+    return _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages']);
   };
   var narrowProductVariant = function narrowProductVariant(variant) {
     return _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages']);
@@ -1776,15 +1776,67 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
 var productModule = require('../module.js');
 
 productModule.controller('ProductEditController', function ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil) {
+  $scope.allColors = {
+    B: ['Beige', 'Big Stripe', 'Black', 'Blue', 'Brown'],
+    C: ['Camel', 'Charcoal', 'Check', 'Choco'],
+    D: ['Dark Blue', 'Dark Grey', 'Denim'],
+    G: ['Glossy Beige', 'Glossy Black', 'Glossy Silver', 'Gold', 'Green', 'Grey'],
+    HIK: ['Hot Pink', 'Indigo', 'Ivory', 'Khaki'],
+    L: ['Lavender', 'Light Beige', 'Light Grey', 'Light Khaki', 'Light Pink', 'Light Silver', 'Lime'],
+    MN: ['Mint', 'Mustard', 'Navy'],
+    OP: ['Oatmeal', 'Olive', 'Orange', 'Others', 'Peach', 'Pink', 'Purple'],
+    RST: ['Red', 'Royal Blue', 'Silver', 'Sky Blue', 'Small Stripe', 'Suede Black', 'Taupe'],
+    WY: ['White', 'Wine', 'Yellow']
+  };
+  $scope.colorKeys = Object.keys($scope.allColors);
+  var getFeetSizes = function getFeetSizes(start, step, end) {
+    var current = start;
+    var res = [];
+    while (current <= end) {
+      res.push(current);
+      current += step;
+    }
+    return res;
+  };
+  $scope.allSizes = {
+    XXX: ['Free', 'XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL'],
+    Feet: getFeetSizes(225, 5, 290)
+  };
+  $scope.variantKinds = [{ name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors }, { name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes }];
+  var kindsFromProductVariants = function kindsFromProductVariants(productVariants) {
+    $scope.variantKinds.forEach(function (kind) {
+      return kind.selected = new Set();
+    });
+    productVariants.forEach(function (variant) {
+      if (!variant.sku) {
+        return;
+      }
+      var split = variant.sku.split('-');
+      if (split.length < 2) {
+        return;
+      }
+      $scope.variantKinds[0].selected.add(split[split.length - 2]);
+      $scope.variantKinds[1].selected.add(split[split.length - 1]);
+    });
+    $scope.variantKinds.forEach(function (kind) {
+      return kind.kinds = Array.from(kind.selected);
+    });
+  };
   var initFromProduct = function initFromProduct() {
     var titleKey = 'product.edit.createTitle';
     if (!product) {
-      $scope.product = { sku: 'autogen', data: {} };
-      $scope.variantKinds = [{ name: '색상', key: 'color', kinds: ['White', 'Black'] }, { name: '사이즈', key: 'size', kinds: ['Free'] }];
+      $scope.product = { sku: 'autogen', KRW: 0, data: {} };
+      $scope.variantKinds[0].kinds = ['White', 'Black'];
+      $scope.variantKinds[1].kinds = ['Free'];
+      $scope.variantKinds.forEach(function (kind) {
+        return kind.selected = new Set(kind.kinds);
+      });
     } else {
       $scope.product = product;
+      kindsFromProductVariants($scope.product.productVariants || []);
       titleKey = 'product.edit.updateTitle';
     }
+
     $scope.tmpObj = {};
     $scope.productVariantsMap = {};
     $scope.origVariants = new Set();
@@ -1900,117 +1952,111 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.productToTmpObj();
   }
 
-  // BEGIN Manipulate Variant Kinds
-
-  $scope.newObjects = {
-    variantKind: '',
-    variantKindItem: ''
+  $scope.productPriceChanged = function (oldKRW, newKRW) {
+    $scope.productVariants.forEach(function (variant) {
+      if (!variant.KRW || Number(variant.KRW) === Number(oldKRW)) {
+        variant.KRW = newKRW;
+      }
+    });
   };
 
-  $scope.addVariantKind = function (name) {
-    if (name && name.trim() !== '') {
-      $scope.newObjects.variantKind = '';
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
+  // 2016. 03. 01. [heekyu] change method for handling variant attributes
+  // BEGIN Manipluate Variant attributes
+  $scope.clickGroupButton = function (index, group) {
+    if ($scope.variantKinds[index].currentGroup === group) {
+      $scope.variantKinds[index].currentGroup = null;
+      return;
+    }
+    $scope.variantKinds[index].currentGroup = group;
+  };
+  $scope.clickVariantAttribute = function (event, index, attr) {
+    var selected = $scope.variantKinds[index].selected;
+    if (selected.has(attr)) {
+      selected['delete'](attr);
+    } else {
+      selected.add(attr);
+    }
+    $scope.variantKinds[index].kinds = Array.from(selected);
 
-      try {
-        for (var _iterator3 = $scope.variantKinds[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var kind = _step3.value;
+    $scope.generateProductVariants();
+    $scope.initImages();
+  };
+  $scope.removeVariantKindItem = function (kindIndex, itemIndex) {
+    var variantKind = $scope.variantKinds[kindIndex];
+    var removed = variantKind.kinds.splice(itemIndex, 1);
+    variantKind.selected['delete'](removed[0]);
+    variantKind.kinds = Array.from(variantKind.selected);
+  };
+  // END Manipluate Variant attributes
 
+  // BEGIN Manipulate Variant Kinds
+  /*
+    $scope.newObjects = {
+      variantKind: '',
+      variantKindItem: '',
+    };
+  
+    $scope.addVariantKind = (name) => {
+      if (name && name.trim() !== '') {
+        $scope.newObjects.variantKind = '';
+        for (const kind of $scope.variantKinds) {
           if (kind.name === name) {
             $scope.hideAddItemBox();
             window.alert('duplicate name');
             return false;
           }
         }
-      } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion3 && _iterator3['return']) {
-            _iterator3['return']();
-          }
-        } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
-          }
-        }
+        $scope.variantKinds.push({name: name, kinds: []});
+        // TODO enhance hiding add item box
+        $scope.hideAddItemBox();
       }
-
-      $scope.variantKinds.push({ name: name, kinds: [] });
-      // TODO enhance hiding add item box
-      $scope.hideAddItemBox();
-    }
-  };
-  $scope.addVariantKindItem = function (index, name) {
-    if (name && name.trim() !== '') {
-      $scope.newObjects.variantKindItem = '';
-      var _iteratorNormalCompletion4 = true;
-      var _didIteratorError4 = false;
-      var _iteratorError4 = undefined;
-
-      try {
-        for (var _iterator4 = $scope.variantKinds[index].kinds[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-          var kindItem = _step4.value;
-
+    };
+    $scope.addVariantKindItem = (index, name) => {
+      if (name && name.trim() !== '') {
+        $scope.newObjects.variantKindItem = '';
+        for (const kindItem of $scope.variantKinds[index].kinds) {
           if (kindItem === name) {
             $scope.hideAddItemBox();
             window.alert('duplicate name');
             return false;
           }
         }
-      } catch (err) {
-        _didIteratorError4 = true;
-        _iteratorError4 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion4 && _iterator4['return']) {
-            _iterator4['return']();
-          }
-        } finally {
-          if (_didIteratorError4) {
-            throw _iteratorError4;
-          }
-        }
+        $scope.variantKinds[index].kinds.push(name);
+        // TODO enhance hiding add item box
+        $('.add-item-box').css('display', 'none');
       }
-
-      $scope.variantKinds[index].kinds.push(name);
-      // TODO enhance hiding add item box
+    };
+  
+    $scope.removeVariantKind = (kindIndex) => {
+      const kind = $scope.variantKinds[kindIndex];
+      if (window.confirm('Really Delete [' + kind.name + '] ?')) {
+        $scope.variantKinds.splice(kindIndex, 1);
+      }
+    };
+  
+    $scope.removeVariantKindItem = (kindIndex, itemIndex) => {
+      $scope.variantKinds[kindIndex].kinds.splice(itemIndex, 1);
+    };
+  
+    $scope.clickAddVariantOrItem = (event) => {
+      $scope.hideAddItemBox();
+      $(event.target).prev().css('display', 'inline-block');
+      $(event.target).prev().find('input').focus();
+    };
+  
+    $scope.onInputKeypress = (event) => {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        $(event.target).blur();
+        return false;
+      }
+      return true;
+    };
+  
+    $scope.hideAddItemBox = () => {
       $('.add-item-box').css('display', 'none');
-    }
-  };
-
-  $scope.removeVariantKind = function (kindIndex) {
-    var kind = $scope.variantKinds[kindIndex];
-    if (window.confirm('Really Delete [' + kind.name + '] ?')) {
-      $scope.variantKinds.splice(kindIndex, 1);
-    }
-  };
-
-  $scope.removeVariantKindItem = function (kindIndex, itemIndex) {
-    $scope.variantKinds[kindIndex].kinds.splice(itemIndex, 1);
-  };
-
-  $scope.clickAddVariantOrItem = function (event) {
-    $scope.hideAddItemBox();
-    $(event.target).prev().css('display', 'inline-block');
-    $(event.target).prev().find('input').focus();
-  };
-
-  $scope.onInputKeypress = function (event) {
-    if (event.keyCode === 13) {
-      event.preventDefault();
-      $(event.target).blur();
-      return false;
-    }
-    return true;
-  };
-
-  $scope.hideAddItemBox = function () {
-    $('.add-item-box').css('display', 'none');
-  };
+    };
+    */
   // END Manipulate Variant Kinds
 
   // BEGIN Manipulate Variants
@@ -2024,13 +2070,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     */
     var newVariantSKUs = [];
     var idx = 0;
-    var _iteratorNormalCompletion5 = true;
-    var _didIteratorError5 = false;
-    var _iteratorError5 = undefined;
+    var _iteratorNormalCompletion3 = true;
+    var _didIteratorError3 = false;
+    var _iteratorError3 = undefined;
 
     try {
-      for (var _iterator5 = $scope.variantKinds[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-        var variantKind = _step5.value;
+      for (var _iterator3 = $scope.variantKinds[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+        var variantKind = _step3.value;
 
         if (variantKind.kinds.length < 1) {
           continue;
@@ -2042,43 +2088,43 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         idx = newVariantSKUs.length;
         for (var i = start; i < idx; i++) {
           var newVariantSKU = newVariantSKUs[i];
-          var _iteratorNormalCompletion6 = true;
-          var _didIteratorError6 = false;
-          var _iteratorError6 = undefined;
+          var _iteratorNormalCompletion4 = true;
+          var _didIteratorError4 = false;
+          var _iteratorError4 = undefined;
 
           try {
-            for (var _iterator6 = variantKind.kinds[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-              var kind = _step6.value;
+            for (var _iterator4 = variantKind.kinds[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+              var kind = _step4.value;
 
               newVariantSKUs.push(newVariantSKU + '-' + kind);
             }
           } catch (err) {
-            _didIteratorError6 = true;
-            _iteratorError6 = err;
+            _didIteratorError4 = true;
+            _iteratorError4 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion6 && _iterator6['return']) {
-                _iterator6['return']();
+              if (!_iteratorNormalCompletion4 && _iterator4['return']) {
+                _iterator4['return']();
               }
             } finally {
-              if (_didIteratorError6) {
-                throw _iteratorError6;
+              if (_didIteratorError4) {
+                throw _iteratorError4;
               }
             }
           }
         }
       }
     } catch (err) {
-      _didIteratorError5 = true;
-      _iteratorError5 = err;
+      _didIteratorError3 = true;
+      _iteratorError3 = err;
     } finally {
       try {
-        if (!_iteratorNormalCompletion5 && _iterator5['return']) {
-          _iterator5['return']();
+        if (!_iteratorNormalCompletion3 && _iterator3['return']) {
+          _iterator3['return']();
         }
       } finally {
-        if (_didIteratorError5) {
-          throw _iteratorError5;
+        if (_didIteratorError3) {
+          throw _iteratorError3;
         }
       }
     }
@@ -2093,7 +2139,12 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        var newVariant = { sku: newVariantSKU, KRW: 0 };
+        var newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, data: {} };
+        var split = newVariantSKU.split('-');
+        var kindPos = split.length - 1;
+        for (var _i = $scope.variantKinds.length - 1; _i >= 0; _i--) {
+          newVariant.data[$scope.variantKinds[_i].key] = split[kindPos--];
+        }
         newVariants.push(newVariant);
         newVariantsMap[newVariantSKU] = newVariant;
       }
@@ -2108,6 +2159,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.productVariantsMap = newVariantsMap;
   };
   // END Manipulate Variants
+
+  $scope.generateProductVariants();
 
   var afterSaveProduct = function afterSaveProduct(product) {
     $http.put('/api/v1/products/' + product.id + '/index').then(function (res) {
@@ -2255,6 +2308,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     collectByColor();
     makeImageRows();
   };
+  $scope.initImages();
   $scope.toggleShare = function () {
     makeImageRows();
   };
@@ -2263,6 +2317,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     placeholder: 'ui-state-highlight'
   };
   $scope.imageRowsToVariant = function () {
+    console.log($scope.imageRows);
     var i = 0;
     while (i < $scope.imageRows.length) {
       var row = $scope.imageRows[i];
@@ -2384,9 +2439,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.newProductVariant = {};
     $scope.productVariants.push(newProductVariant);
     $scope.productVariantsMap[newProductVariant.sku] = newProductVariant;
+    $scope.initImages();
   };
   $scope.removeProductVariant = function (index) {
-    $scope.productVariants.splice(index, 1);
+    var removed = $scope.productVariants.splice(index, 1);
+    delete $scope.productVariantsMap[removed[0].sku];
+    $scope.initImages();
+    console.log($scope.imageRows);
   };
 
   $scope.toggleCategory = function (categoryId) {
