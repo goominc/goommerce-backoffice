@@ -38,3 +38,30 @@
   font-size: 40px;
   float: right;
 }
+
+.product-variant-attr-selected-wrap {
+  width: 100%;
+  margin-bottom: 15px;
+}
+.product-variant-attr-selected-button {
+  margin-right: 15px;
+}
+
+.product-variant-attr-candidate-wrap {
+  border: 1px solid #cb0102;
+  display: inline-block;
+  margin-bottom: 15px;
+}
+.product-variant-color-button {
+  width: 100px;
+}
+.product-variant-size-button {
+  width: 50px;
+}
+.product-variant-attr-candidate-button {
+  display: inline-block;
+  border: 0 !important;
+}
+.product-variant-attr-candidate-button + .product-variant-attr-candidate-button {
+  border-left: 1px solid #cb0102 !important;
+}

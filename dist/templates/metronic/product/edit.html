@@ -58,7 +58,35 @@
                     <div class="form-group" data-ng-if="variantKinds">
                       <label class="col-md-2 control-label">{{'product.edit.labelCombination' | translate}}</label>
                       <div class="col-md-10">
-                        <div class="col-md-12" style="margin-bottom: 20px;" data-ng-repeat="kind in variantKinds">
+                        <div class="col-md-12" data-ng-repeat="kind in variantKinds">
+                          <div class="col-md-1 control-label">{{kind.name}}</div>
+                          <div class="col-md-11">
+                            <div class="product-variant-attr-selected-wrap">
+                              <button class="btn default product-variant-attr-selected-button active" data-ng-repeat="k in kind.kinds">
+                                {{k}} <i data-ng-click="removeVariantKindItem($parent.$index, $index)" class="fa fa-remove"></i>
+                              </button>
+                            </div>
+                            <div class="product-variant-attr-selected-wrap">
+                              <button class="btn btn-circle default"
+                                      data-ng-class="{'active': kind.currentGroup === group}"
+                                      data-ng-repeat="group in kind.groups"
+                                      data-ng-click="clickGroupButton($parent.$index, group)"
+                              >
+                                {{group}}
+                              </button>
+                            </div>
+                            <div class="product-variant-attr-candidate-wrap" data-ng-if="kind.currentGroup && kind.groupMap[kind.currentGroup]">
+                              <button class="btn default product-variant-attr-candidate-button"
+                                      data-ng-class="{'active': kind.selected.has(attr), 'product-variant-color-button': $parent.$index === 0, 'product-variant-size-button': $parent.$index === 1}"
+                                      data-ng-repeat="attr in kind.groupMap[kind.currentGroup]"
+                                      data-ng-click="clickVariantAttribute($event, $parent.$index, attr)"
+                              >
+                                {{attr}}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <!--div class="col-md-12" style="margin-bottom: 20px;" data-ng-repeat="kind in variantKinds">
                           <div class="col-md-1 control-label">{{kind.name}}</div>
                           <div class="col-md-11">
                             <button class="btn btn-circle default" style="margin-right: 20px;" data-ng-repeat="k in kind.kinds">
@@ -85,7 +113,7 @@
                           <button class="btn blue" data-ng-click="generateProductVariants()">
                             규격 상품 생성 <i class="fa fa-angle-down"></i>
                           </button>
-                        </div>
+                        </div-->
                       </div>
                     </div>
                     <div class="form-group">

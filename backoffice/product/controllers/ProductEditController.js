@@ -3,18 +3,64 @@
 const productModule = require('../module.js');
 
 productModule.controller('ProductEditController', ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil) => {
+  $scope.allColors = {
+    B: ['Beige', 'Big Stripe', 'Black', 'Blue', 'Brown'],
+    C: ['Camel', 'Charcoal', 'Check', 'Choco'],
+    D: ['Dark Blue', 'Dark Grey', 'Denim'],
+    G: ['Glossy Beige', 'Glossy Black', 'Glossy Silver', 'Gold', 'Green', 'Grey'],
+    HIK: ['Hot Pink', 'Indigo', 'Ivory', 'Khaki'],
+    L: ['Lavender', 'Light Beige', 'Light Grey', 'Light Khaki', 'Light Pink', 'Light Silver', 'Lime'],
+    MN: ['Mint', 'Mustard', 'Navy'],
+    OP: ['Oatmeal', 'Olive', 'Orange', 'Others', 'Peach', 'Pink', 'Purple'],
+    RST: ['Red', 'Royal Blue', 'Silver', 'Sky Blue', 'Small Stripe', 'Suede Black', 'Taupe'],
+    WY: ['White', 'Wine', 'Yellow'],
+  };
+  $scope.colorKeys = Object.keys($scope.allColors);
+  const getFeetSizes = (start, step, end) => {
+    let current = start;
+    const res = [];
+    while (current <= end) {
+      res.push(current);
+      current += step;
+    }
+    return res;
+  };
+  $scope.allSizes = {
+    XXX: ['Free', 'XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL'],
+    Feet: getFeetSizes(225, 5, 290),
+  };
+  $scope.variantKinds = [
+    {name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors},
+    {name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes},
+  ];
+  const kindsFromProductVariants = (productVariants) => {
+    $scope.variantKinds.forEach((kind) => kind.selected = new Set());
+    productVariants.forEach((variant) => {
+      if (!variant.sku) {
+        return;
+      }
+      const split = variant.sku.split('-');
+      if (split.length < 2) {
+        return;
+      }
+      $scope.variantKinds[0].selected.add(split[split.length - 2]);
+      $scope.variantKinds[1].selected.add(split[split.length - 1]);
+    });
+    $scope.variantKinds.forEach((kind) => kind.kinds = Array.from(kind.selected));
+  };
   const initFromProduct = () => {
     let titleKey = 'product.edit.createTitle';
     if (!product) {
       $scope.product = { sku: 'autogen', KRW: 0, data: {} };
-      $scope.variantKinds = [
-        {name: '색상', key: 'color', kinds: ['White', 'Black']},
-        {name: '크기', key: 'size', kinds: ['Free']},
-      ];
+      $scope.variantKinds[0].kinds = ['White', 'Black'];
+      $scope.variantKinds[1].kinds = ['Free'];
+      $scope.variantKinds.forEach((kind) => kind.selected = new Set(kind.kinds));
     } else {
       $scope.product = product;
+      kindsFromProductVariants($scope.product.productVariants || []);
       titleKey = 'product.edit.updateTitle';
     }
+
     $scope.tmpObj = {};
     $scope.productVariantsMap = {};
     $scope.origVariants = new Set();
@@ -100,8 +146,37 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     });
   };
 
-  // BEGIN Manipulate Variant Kinds
+  // 2016. 03. 01. [heekyu] change method for handling variant attributes
+  // BEGIN Manipluate Variant attributes
+  $scope.clickGroupButton = (index, group) => {
+    if ($scope.variantKinds[index].currentGroup === group) {
+      $scope.variantKinds[index].currentGroup = null;
+      return;
+    }
+    $scope.variantKinds[index].currentGroup = group;
+  };
+  $scope.clickVariantAttribute = (event, index, attr) => {
+    const selected = $scope.variantKinds[index].selected;
+    if (selected.has(attr)) {
+      selected.delete(attr);
+    } else {
+      selected.add(attr);
+    }
+    $scope.variantKinds[index].kinds = Array.from(selected);
 
+    $scope.generateProductVariants();
+    $scope.initImages();
+  };
+  $scope.removeVariantKindItem = (kindIndex, itemIndex) => {
+    const variantKind = $scope.variantKinds[kindIndex];
+    const removed = variantKind.kinds.splice(itemIndex, 1);
+    variantKind.selected.delete(removed[0]);
+    variantKind.kinds = Array.from(variantKind.selected);
+  };
+  // END Manipluate Variant attributes
+
+  // BEGIN Manipulate Variant Kinds
+/*
   $scope.newObjects = {
     variantKind: '',
     variantKindItem: '',
@@ -167,6 +242,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   $scope.hideAddItemBox = () => {
     $('.add-item-box').css('display', 'none');
   };
+  */
   // END Manipulate Variant Kinds
 
   // BEGIN Manipulate Variants
@@ -226,6 +302,8 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     $scope.productVariantsMap = newVariantsMap;
   };
   // END Manipulate Variants
+
+  $scope.generateProductVariants();
 
   const afterSaveProduct = (product) => {
     $http.put(`/api/v1/products/${product.id}/index`).then((res) => {
@@ -375,6 +453,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     placeholder: 'ui-state-highlight',
   };
   $scope.imageRowsToVariant = () => {
+    console.log($scope.imageRows);
     let i = 0;
     while (i < $scope.imageRows.length) {
       const row = $scope.imageRows[i];
@@ -497,9 +576,13 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     $scope.newProductVariant = {};
     $scope.productVariants.push(newProductVariant);
     $scope.productVariantsMap[newProductVariant.sku] = newProductVariant;
+    $scope.initImages();
   };
   $scope.removeProductVariant = (index) => {
-    $scope.productVariants.splice(index, 1);
+    const removed = $scope.productVariants.splice(index, 1);
+    delete $scope.productVariantsMap[removed[0].sku];
+    $scope.initImages();
+    console.log($scope.imageRows);
   };
 
   $scope.toggleCategory = (categoryId) => {
