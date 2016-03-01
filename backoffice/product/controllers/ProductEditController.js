@@ -206,7 +206,12 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        const newVariant = {sku: newVariantSKU, KRW: 0};
+        const newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, data: {} };
+        const split = newVariantSKU.split('-');
+        let kindPos = split.length - 1;
+        for (let i = $scope.variantKinds.length - 1; i >= 0; i--) {
+          newVariant.data[$scope.variantKinds[i].key] = split[kindPos--];
+        }
         newVariants.push(newVariant);
         newVariantsMap[newVariantSKU] = newVariant;
       }
