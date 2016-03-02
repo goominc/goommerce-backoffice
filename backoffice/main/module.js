@@ -129,6 +129,10 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
       active: false,
       children: [
         {
+          name: $translate.instant('cms.mainCategory'),
+          sref: 'cms.main_category',
+        },
+        {
           name: $translate.instant('cms.mainBanner'),
           sref: 'cms.simple({name: "pc_main_banner1"})',
         },

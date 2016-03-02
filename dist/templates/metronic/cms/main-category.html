@@ -1,0 +1,84 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="col-md-9">
+              <div class="portlet">
+                <div class="portlet-title">
+                  <div class="actions btn-set">
+                    <button class="btn blue" ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="portlet-body">
+              <div class="row">
+                <div class="col-md-4">
+                  <div id="categoryTree"></div>
+                </div>
+                <div class="col-md-8">
+                  <p>카테고리를 고르세요</p>
+                  <p ng-if="categoryNameMap[selectedNodeName]">현재 : {{selectedNodeName}}</p>
+                  <input id="selectCategory" />
+                </div>
+              </div>
+              <!--table class="table table-bordered dataTable">
+                <thead>
+                <tr>
+                  <th>root</th>
+                  <th>depth1</th>
+                  <th>depth2</th>
+                  <th>icon</th>
+                  <th>name</th>
+                  <th>link</th>
+                  <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr data-ng-repeat="row in rows">
+                  <td>{{row.top}}</td>
+                  <td>{{row.depth1}}</td>
+                  <td>{{row.depth2}}</td>
+                  <td></td>
+                  <td>{{row.name}}</td>
+                  <td><input type="text" data-ng-model="row.link"/></td>
+                  <td>
+                    <button data-ng-if="row.add" data-ng-click="addRow(row, index)" class="btn blue">
+                      <i class="fa fa-plus"></i> {{'main.createButton' | translate}}
+                    </button>
+                  </td>
+                </tr>
+                </tbody>
+              </table-->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->

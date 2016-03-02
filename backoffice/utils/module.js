@@ -39,7 +39,27 @@ utilModule.factory('boUtils', ($http) => {
       const MM = appendLeadingZeroIfNeeded(date.getMinutes().toString());
       const SS = appendLeadingZeroIfNeeded(date.getSeconds().toString());
       return yyyy + '-' + mm + '-' + dd + ' ' + HH + ':' + MM + ':' + SS;
-    }
+    },
+    autoComplete: (elem, name, data) => {
+      const Bloodhound = window.Bloodhound;
+      const source = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.whitespace,
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        local: data,
+      });
+
+      elem.typeahead(
+        {
+          hint: true,
+          highlight: true,
+          minLength: 1
+        },
+        {
+          name,
+          source,
+        }
+      );
+    },
   };
 });
 

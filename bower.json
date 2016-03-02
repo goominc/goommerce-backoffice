@@ -28,6 +28,7 @@
     "jquery-csv": "*",
     "jstree": "~3.2.1",
     "lodash": "~3.10.1",
-    "jquery-ui-droppable": "*"
+    "jquery-ui-droppable": "*",
+    "typeahead.js": "~0.11.1"
   }
 }

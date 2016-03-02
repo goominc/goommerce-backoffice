@@ -13,7 +13,6 @@ cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, 
     children: [],
   };
   $http.get(`/api/v1/cms/${$state.params.name}`).then((res) => {
-    console.log(res);
     if (res.data) {
       $scope.cms = res.data;
     }
@@ -63,5 +62,143 @@ cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, 
   $scope.rowSortable = {
     handle: '.cms-simple-sortable-pointer',
     placeholder: 'ui-state-highlight',
+  };
+});
+
+cmsModule.controller('CmsMainCategoryController', ($scope, $rootScope, $http, $state, boUtils) => {
+  const cmsName = 'main_categories';
+  $scope.displayLocale = 'ko';
+  const jstreeNode = $('#categoryTree');
+  const autoCompleteNode = $('#selectCategory');
+  const initAutoComplete = (root) => {
+    // TODO locale
+    // const locale = $rootScope.state.editLocale;
+    $scope.allCategories = [];
+    $scope.categoryIdMap = {};
+    $scope.categoryNameMap = {};
+    const dfs = (root) => {
+      const name = root.name[$scope.displayLocale];
+      $scope.allCategories.push(name);
+      $scope.categoryIdMap[root.id] = root;
+      $scope.categoryNameMap[name] = root;
+      (root.children || []).forEach((child) => dfs(child));
+      delete root.children;
+    };
+    dfs(root);
+
+    boUtils.autoComplete(autoCompleteNode, cmsName, $scope.allCategories);
+    autoCompleteNode.on('typeahead:selected', (obj, datum) => {
+      const tree = jstreeNode.jstree(true);
+      const selected = tree.get_selected();
+      if (!selected || selected.length < 1) {
+        return;
+      }
+      const newCategory = $scope.categoryNameMap[datum];
+      if (tree.get_node(newCategory.id)) {
+        window.alert('category already in menu');
+        return;
+      }
+      tree.set_id(selected[0], newCategory.id);
+      tree.set_text(newCategory.id, datum);
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+    });
+  };
+  $http.get('/api/v1/categories').then((res) => {
+    $scope.allCategories = [];
+    const root = res.data;
+    initAutoComplete(root);
+  });
+  const jstreeDataToCmsData = () => {
+    const jstreeData = jstreeNode.jstree(true).get_json('#');
+    const dfs = (root) => {
+      const res = $scope.categoryIdMap[root.id];
+      if (!res) {
+        console.log($scope.categoryIdMap);
+        window.alert(root.id);
+      }
+      if (root.children && root.children.length > 0) {
+        res.children = root.children.map((child) => dfs(child));
+      }
+      return res;
+    };
+    return jstreeData.map((data) => dfs(data));
+  };
+  const cmsDataToJstreeData = (cmsData) => {
+    const dfs = (root) => {
+      const res = {
+        id: root.id,
+        text: root.name ? root.name[$scope.displayLocale] : '카테고리 고르세요',
+        data: { id: root.id },
+      };
+      if (root.children) {
+        res.children = root.children.map(dfs);
+      }
+      return res;
+    };
+    return cmsData.map((data) => dfs(data));
+  };
+  let nextNodeId = 10000;
+  const initJsTree = (cmsData) => {
+    jstreeNode.jstree({
+      core: {
+        themes: {
+          responsive: false,
+        },
+        check_callback: true,
+        data: cmsDataToJstreeData(cmsData),
+        multiple: false,
+      },
+      plugins: [ 'types', 'contextmenu' ],
+      types: {
+        default: {
+          max_depth: 2,
+          icon: 'fa fa-folder icon-state-warning icon-lg',
+        },
+      },
+      contextmenu: {
+        items: function ($node) {
+          const tree = jstreeNode.jstree(true);
+          return {
+            Create: {
+              label: 'Create',
+              action: () => {
+                const newNodeId = tree.create_node($node, 'NewMenu');
+                tree.set_id(newNodeId, nextNodeId);
+                tree.deselect_all();
+                tree.select_node(nextNodeId++);
+                autoCompleteNode.focus();
+              },
+            },
+            Delete: {
+              label: 'Delete',
+              action: () => {
+                tree.delete_node($node);
+              },
+            }
+          };
+        }
+      },
+    });
+    jstreeNode.on('select_node.jstree', (e, data) => {
+      $scope.selectedNodeName = jstreeNode.jstree(true).get_text(data.node.id);
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+    });
+    jstreeNode.on('deselect_node.jstree', () => {
+      $scope.selectedNodeName = null;
+    });
+  };
+
+  $http.get(`/api/v1/cms/${cmsName}`).then((res) => {
+    initJsTree(res.data);
+  });
+  $scope.save = () => {
+    $http.post('/api/v1/cms', { name: cmsName, data: jstreeDataToCmsData() }).then(() => {
+      window.alert('saved successfully');
+      $state.reload();
+    });
   };
 });

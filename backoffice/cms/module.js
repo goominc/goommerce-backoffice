@@ -30,6 +30,11 @@ cmsModule.config(($stateProvider) => {
       url: '/simple/:name',
       templateUrl: templateRoot + '/cms/simple.html',
       controller: 'CmsSimpleController',
+    })
+    .state('cms.main_category', {
+      url: '/main_category',
+      templateUrl: templateRoot + '/cms/main-category.html',
+      controller: 'CmsMainCategoryController',
     });
 });
 
