@@ -196,6 +196,9 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
     name: 'CMS',
     active: false,
     children: [{
+      name: $translate.instant('cms.mainCategory'),
+      sref: 'cms.main_category'
+    }, {
       name: $translate.instant('cms.mainBanner'),
       sref: 'cms.simple({name: "pc_main_banner1"})'
     }, {
@@ -542,6 +545,23 @@ utilModule.factory('boUtils', function ($http) {
       var MM = appendLeadingZeroIfNeeded(date.getMinutes().toString());
       var SS = appendLeadingZeroIfNeeded(date.getSeconds().toString());
       return yyyy + '-' + mm + '-' + dd + ' ' + HH + ':' + MM + ':' + SS;
+    },
+    autoComplete: function autoComplete(elem, name, data) {
+      var Bloodhound = window.Bloodhound;
+      var source = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.whitespace,
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        local: data
+      });
+
+      elem.typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 1
+      }, {
+        name: name,
+        source: source
+      });
     }
   };
 });
@@ -3474,6 +3494,10 @@ cmsModule.config(function ($stateProvider) {
     url: '/simple/:name',
     templateUrl: templateRoot + '/cms/simple.html',
     controller: 'CmsSimpleController'
+  }).state('cms.main_category', {
+    url: '/main_category',
+    templateUrl: templateRoot + '/cms/main-category.html',
+    controller: 'CmsMainCategoryController'
   });
 });
 
@@ -3489,6 +3513,7 @@ module.exports = {
 40: [function(require, module, exports) {
 module.exports = {
   "cms": {
+    "mainCategory": "메인페이지 카테고리",
     "mainBanner": "메인 배너",
     "subBanner": "서브 배너"
   }
@@ -3513,7 +3538,6 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
     children: []
   };
   $http.get('/api/v1/cms/' + $state.params.name).then(function (res) {
-    console.log(res);
     if (res.data) {
       $scope.cms = res.data;
     }
@@ -3560,6 +3584,152 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
   $scope.rowSortable = {
     handle: '.cms-simple-sortable-pointer',
     placeholder: 'ui-state-highlight'
+  };
+});
+
+cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, $http, $state, boUtils) {
+  var cmsName = 'main_categories';
+  $scope.displayLocale = 'ko';
+  var jstreeNode = $('#categoryTree');
+  var autoCompleteNode = $('#selectCategory');
+  var initAutoComplete = function initAutoComplete(root) {
+    // TODO locale
+    // const locale = $rootScope.state.editLocale;
+    $scope.allCategories = [];
+    $scope.categoryIdMap = {};
+    $scope.categoryNameMap = {};
+    var dfs = function dfs(root) {
+      var name = root.name[$scope.displayLocale];
+      $scope.allCategories.push(name);
+      $scope.categoryIdMap[root.id] = root;
+      $scope.categoryNameMap[name] = root;
+      (root.children || []).forEach(function (child) {
+        return dfs(child);
+      });
+      delete root.children;
+    };
+    dfs(root);
+
+    boUtils.autoComplete(autoCompleteNode, cmsName, $scope.allCategories);
+    autoCompleteNode.on('typeahead:selected', function (obj, datum) {
+      var tree = jstreeNode.jstree(true);
+      var selected = tree.get_selected();
+      if (!selected || selected.length < 1) {
+        return;
+      }
+      var newCategory = $scope.categoryNameMap[datum];
+      if (tree.get_node(newCategory.id)) {
+        window.alert('category already in menu');
+        return;
+      }
+      tree.set_id(selected[0], newCategory.id);
+      tree.set_text(newCategory.id, datum);
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+    });
+  };
+  $http.get('/api/v1/categories').then(function (res) {
+    $scope.allCategories = [];
+    var root = res.data;
+    initAutoComplete(root);
+  });
+  var jstreeDataToCmsData = function jstreeDataToCmsData() {
+    var jstreeData = jstreeNode.jstree(true).get_json('#');
+    var dfs = function dfs(root) {
+      var res = $scope.categoryIdMap[root.id];
+      if (!res) {
+        console.log($scope.categoryIdMap);
+        window.alert(root.id);
+      }
+      if (root.children && root.children.length > 0) {
+        res.children = root.children.map(function (child) {
+          return dfs(child);
+        });
+      }
+      return res;
+    };
+    return jstreeData.map(function (data) {
+      return dfs(data);
+    });
+  };
+  var cmsDataToJstreeData = function cmsDataToJstreeData(cmsData) {
+    var dfs = function dfs(root) {
+      var res = {
+        id: root.id,
+        text: root.name ? root.name[$scope.displayLocale] : '카테고리 고르세요',
+        data: { id: root.id }
+      };
+      if (root.children) {
+        res.children = root.children.map(dfs);
+      }
+      return res;
+    };
+    return cmsData.map(function (data) {
+      return dfs(data);
+    });
+  };
+  var nextNodeId = 10000;
+  var initJsTree = function initJsTree(cmsData) {
+    jstreeNode.jstree({
+      core: {
+        themes: {
+          responsive: false
+        },
+        check_callback: true,
+        data: cmsDataToJstreeData(cmsData),
+        multiple: false
+      },
+      plugins: ['types', 'contextmenu'],
+      types: {
+        'default': {
+          max_depth: 2,
+          icon: 'fa fa-folder icon-state-warning icon-lg'
+        }
+      },
+      contextmenu: {
+        items: function items($node) {
+          var tree = jstreeNode.jstree(true);
+          return {
+            Create: {
+              label: 'Create',
+              action: function action() {
+                var newNodeId = tree.create_node($node, 'NewMenu');
+                tree.set_id(newNodeId, nextNodeId);
+                tree.deselect_all();
+                tree.select_node(nextNodeId++);
+                autoCompleteNode.focus();
+              }
+            },
+            Delete: {
+              label: 'Delete',
+              action: function action() {
+                tree.delete_node($node);
+              }
+            }
+          };
+        }
+      }
+    });
+    jstreeNode.on('select_node.jstree', function (e, data) {
+      $scope.selectedNodeName = jstreeNode.jstree(true).get_text(data.node.id);
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+    });
+    jstreeNode.on('deselect_node.jstree', function () {
+      $scope.selectedNodeName = null;
+    });
+  };
+
+  $http.get('/api/v1/cms/' + cmsName).then(function (res) {
+    initJsTree(res.data);
+  });
+  $scope.save = function () {
+    $http.post('/api/v1/cms', { name: cmsName, data: jstreeDataToCmsData() }).then(function () {
+      window.alert('saved successfully');
+      $state.reload();
+    });
   };
 });
 }, {"./module":10}],
