@@ -67,7 +67,7 @@ cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, 
 
 cmsModule.controller('CmsMainCategoryController', ($scope, $rootScope, $http, $state, boUtils) => {
   const cmsName = 'main_categories';
-  $scope.displayLocale = 'ko';
+  $scope.displayLocale = 'en';
   const jstreeNode = $('#categoryTree');
   const autoCompleteNode = $('#selectCategory');
   const initAutoComplete = (root) => {
@@ -115,11 +115,11 @@ cmsModule.controller('CmsMainCategoryController', ($scope, $rootScope, $http, $s
     const dfs = (root) => {
       const res = $scope.categoryIdMap[root.id];
       if (!res) {
-        console.log($scope.categoryIdMap);
-        window.alert(root.id);
+        window.alert('created node does not select category');
+        return null;
       }
       if (root.children && root.children.length > 0) {
-        res.children = root.children.map((child) => dfs(child));
+        res.children = root.children.map((child) => dfs(child)).filter(value => !!value);
       }
       return res;
     };
