@@ -3606,7 +3606,7 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
       }
       $scope.allCategories.push(searchName);
       $scope.categoryIdMap[root.id] = root;
-      $scope.categoryNameMap[name] = root;
+      $scope.categoryNameMap[searchName] = root;
       (root.children || []).forEach(function (child) {
         return dfs(child);
       });
@@ -3617,9 +3617,11 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
     boUtils.autoComplete(autoCompleteNode, cmsName, $scope.allCategories);
     autoCompleteNode.on('typeahead:selected', function (obj, datum) {
       var idx = datum.indexOf('(<-');
+      var text = datum;
       if (idx > 0) {
-        datum = datum.substring(0, idx);
+        text = datum.substring(0, idx);
       }
+      autoCompleteNode.typeahead('val', text);
       var tree = jstreeNode.jstree(true);
       var selected = tree.get_selected();
       if (!selected || selected.length < 1) {
@@ -3631,7 +3633,9 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
         return;
       }
       tree.set_id(selected[0], newCategory.id);
-      tree.set_text(newCategory.id, datum);
+      tree.set_text(newCategory.id, text);
+      $scope.selectedNodeName = newCategory.name[$scope.displayLocale];
+      autoCompleteNode.blur();
       if (!$scope.$$phase) {
         $scope.$apply();
       }
@@ -3708,6 +3712,11 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
                 tree.set_id(newNodeId, nextNodeId);
                 tree.deselect_all();
                 tree.select_node(nextNodeId++);
+                autoCompleteNode.typeahead('val', '');
+                $scope.selectedNodeName = null;
+                if (!$scope.$$phase) {
+                  $scope.$apply();
+                }
                 autoCompleteNode.focus();
               }
             },
@@ -3722,7 +3731,13 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
       }
     });
     jstreeNode.on('select_node.jstree', function (e, data) {
-      $scope.selectedNodeName = jstreeNode.jstree(true).get_text(data.node.id);
+      var category = $scope.categoryIdMap[data.node.id];
+      if (!category) {
+        $scope.selectedNodeName = null;
+        return;
+      }
+      $scope.selectedNodeName = category.name[$scope.displayLocale];
+      autoCompleteNode.typeahead('val', $scope.selectedNodeName);
       if (!$scope.$$phase) {
         $scope.$apply();
       }
