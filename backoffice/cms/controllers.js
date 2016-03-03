@@ -78,7 +78,11 @@ cmsModule.controller('CmsMainCategoryController', ($scope, $rootScope, $http, $s
     $scope.categoryNameMap = {};
     const dfs = (root) => {
       const name = root.name[$scope.displayLocale];
-      $scope.allCategories.push(name);
+      let searchName = name;
+      if (root.parentId && $scope.categoryIdMap[root.parentId]) {
+        searchName += `(<-${$scope.categoryIdMap[root.parentId].name[$scope.displayLocale]})`;
+      }
+      $scope.allCategories.push(searchName);
       $scope.categoryIdMap[root.id] = root;
       $scope.categoryNameMap[name] = root;
       (root.children || []).forEach((child) => dfs(child));
@@ -88,6 +92,10 @@ cmsModule.controller('CmsMainCategoryController', ($scope, $rootScope, $http, $s
 
     boUtils.autoComplete(autoCompleteNode, cmsName, $scope.allCategories);
     autoCompleteNode.on('typeahead:selected', (obj, datum) => {
+      const idx = datum.indexOf('(<-');
+      if (idx > 0) {
+        datum = datum.substring(0, idx);
+      }
       const tree = jstreeNode.jstree(true);
       const selected = tree.get_selected();
       if (!selected || selected.length < 1) {
