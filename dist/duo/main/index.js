@@ -3589,7 +3589,7 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
 
 cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, $http, $state, boUtils) {
   var cmsName = 'main_categories';
-  $scope.displayLocale = 'ko';
+  $scope.displayLocale = 'en';
   var jstreeNode = $('#categoryTree');
   var autoCompleteNode = $('#selectCategory');
   var initAutoComplete = function initAutoComplete(root) {
@@ -3600,7 +3600,11 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
     $scope.categoryNameMap = {};
     var dfs = function dfs(root) {
       var name = root.name[$scope.displayLocale];
-      $scope.allCategories.push(name);
+      var searchName = name;
+      if (root.parentId && $scope.categoryIdMap[root.parentId]) {
+        searchName += '(<-' + $scope.categoryIdMap[root.parentId].name[$scope.displayLocale] + ')';
+      }
+      $scope.allCategories.push(searchName);
       $scope.categoryIdMap[root.id] = root;
       $scope.categoryNameMap[name] = root;
       (root.children || []).forEach(function (child) {
@@ -3612,6 +3616,10 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
 
     boUtils.autoComplete(autoCompleteNode, cmsName, $scope.allCategories);
     autoCompleteNode.on('typeahead:selected', function (obj, datum) {
+      var idx = datum.indexOf('(<-');
+      if (idx > 0) {
+        datum = datum.substring(0, idx);
+      }
       var tree = jstreeNode.jstree(true);
       var selected = tree.get_selected();
       if (!selected || selected.length < 1) {
@@ -3639,12 +3647,14 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
     var dfs = function dfs(root) {
       var res = $scope.categoryIdMap[root.id];
       if (!res) {
-        console.log($scope.categoryIdMap);
-        window.alert(root.id);
+        window.alert('created node does not select category');
+        return null;
       }
       if (root.children && root.children.length > 0) {
         res.children = root.children.map(function (child) {
           return dfs(child);
+        }).filter(function (value) {
+          return !!value;
         });
       }
       return res;
