@@ -54,7 +54,7 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     {
       key: 'product', // TODO get key from router
       name: $translate.instant('product.main.title'),
-      active: false,
+      sref: 'product.main',
       children: [
         {
           key: 'product.main',
@@ -86,7 +86,7 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     {
       key: 'order', // TODO get key from router
       name: $translate.instant('order.title'),
-      active: false,
+      sref: 'order.main',
       children: [
         {
           key: 'order.main',
@@ -103,10 +103,10 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     {
       key: 'user', // TODO get key from router
       name: $translate.instant('user.manage.title'),
-      active: false,
+      sref: 'user.manage',
       children: [
         {
-          key: 'order.main',
+          key: 'user.main',
           name: $translate.instant('main.mainMenu'),
           sref: 'user.manage',
         },
@@ -121,12 +121,11 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
       key: 'brand', // TODO get key from router
       name: $translate.instant('brand.title'),
       sref: 'brand.main',
-      active: false,
     },
     {
       key: 'cms', // TODO get key from router
       name: 'CMS',
-      active: false,
+      sref: 'cms.main_category',
       children: [
         {
           name: $translate.instant('cms.mainCategory'),
@@ -146,13 +145,11 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
       key: 'currency', // TODO get key from router
       name: $translate.instant('currency.title'),
       sref: 'currency.main',
-      active: false,
     },
     {
       key: 'text',
       name: $translate.instant('text.title'),
       sref: 'text.main',
-      active: false,
     },
   ];
 
@@ -218,16 +215,23 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
   };
   checkLogin();
 
+  const editLocaleKey = 'editLocale';
+  let editLocale = 'ko';
+  if ($cookies.get(editLocaleKey)) {
+    editLocale = $cookies.get(editLocaleKey);
+  }
+
   // 2016. 02. 15. [heekyu] app-wide state
   $rootScope.state = {
     batchUploadedProducts: [],
     locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
-    editLocale: 'ko',
+    editLocale,
   };
 
   // 2016. 02. 29. [heekyu] change locale in each page
   $rootScope.changeEditLocale = (locale) => {
     $rootScope.state.editLocale = locale;
+    $cookies.put(editLocaleKey, locale);
   };
 });
 
