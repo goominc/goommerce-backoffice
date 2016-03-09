@@ -2,7 +2,7 @@
 
 const productModule = require('../module.js');
 
-productModule.controller('ProductEditController', ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil) => {
+productModule.controller('ProductEditController', ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil, boUtils) => {
   $scope.allColors = {
     B: ['Beige', 'Big Stripe', 'Black', 'Blue', 'Brown'],
     C: ['Camel', 'Charcoal', 'Check', 'Choco'],
@@ -50,13 +50,18 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
   const initFromProduct = () => {
     let titleKey = 'product.edit.createTitle';
+    const currencies = ['KRW', 'USD', 'CNY'];
     if (!product) {
       $scope.product = { sku: 'autogen', KRW: 0, data: {} };
-      $scope.variantKinds[0].kinds = ['White', 'Black'];
+      $scope.variantKinds[0].kinds = ['Black', 'White'];
       $scope.variantKinds[1].kinds = ['Free'];
       $scope.variantKinds.forEach((kind) => kind.selected = new Set(kind.kinds));
     } else {
       $scope.product = product;
+      currencies.forEach((currency) => $scope.product[currency] = Number($scope.product[currency]));
+      ($scope.product.productVariants || []).forEach((variant) => {
+        currencies.forEach((currency) => variant[currency] = Number(variant[currency]));
+      });
       kindsFromProductVariants($scope.product.productVariants || []);
       titleKey = 'product.edit.updateTitle';
     }
@@ -453,7 +458,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     placeholder: 'ui-state-highlight',
   };
   $scope.imageRowsToVariant = () => {
-    console.log($scope.imageRows);
     let i = 0;
     while (i < $scope.imageRows.length) {
       const row = $scope.imageRows[i];
@@ -475,11 +479,13 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           row.images.push(images[used++]);
         }
         if (used === images.length) {
+          $scope.imageRowsToVariant();
           window.alert(`(${used}) images uploaded`);
           return;
         }
       }
     }
+    $scope.imageRowsToVariant();
     window.alert(`(${used}) images uploaded`);
   };
   $scope.imageUploaded = (result) => {
@@ -491,13 +497,59 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       thumbnail: false,
     }]);
   };
-  // TODO
-  /*
-  $('#image-upload-button').on('change', function (changeEvent) {
 
-  });
-  */
+  // 2016. 03. 09. [heekyu] $('#image-upload-button') does not load on controller init or document ready
+  const addMultipleUploadListener = () => {
+    const imgExt = new Set(['jpg', 'jpeg', 'png']);
+    console.log($('#image-upload-button'));
+    $('#image-upload-button').on('change', function (changeEvent) {
+      const imageFiles = [];
+      for (let i = 0; i < changeEvent.target.files.length; i++) {
+        const file = changeEvent.target.files[i];
+        const split = file.webkitRelativePath.split('.');
+        const ext = split[split.length - 1];
+        if (imgExt.has(ext)) {
+          imageFiles.push(file);
+        }
+      }
+      const len = imageFiles.length;
+      if (len < 1) {
+        return;
+      }
+      if (!window.confirm(`${len} 개의 이미지가 있습니다. 업로드 할까요?`)) {
+        return;
+      }
+      const imageContents = new Array(len);
+      const uploaded = new Array(len);
+      let done = 0;
+      for (let i = 0; i < len; i++) {
+        const r = new FileReader();
+        r.onload = function(e) {
+          imageContents[i] = e.target.result;
+          boUtils.uploadImage(e.target.result, `tmp/product/P(${$scope.product.id || 'add'})-${i}-${Date.now()}`).then((res) => {
+            uploaded[i] = {
+              url: res.url.slice(5),
+              publicId: res.public_id,
+              version: res.version,
+              mainImage: false,
+              thumbnail: false,
+            };
+            done++;
+            if (done === len) {
+              insertImages(uploaded);
+              if (!$scope.$$phase) {
+                $scope.$apply();
+              }
+            }
+          });
+        };
+        r.readAsDataURL(imageFiles[i]);
+      }
+    });
+  };
+
   setTimeout(() => {
+    addMultipleUploadListener();
     // 2016. 02. 29. [heekyu] I cannot find on load event doing this
     $('.product-image-trash').droppable({
       accept:'.image-container img',
@@ -582,7 +634,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     const removed = $scope.productVariants.splice(index, 1);
     delete $scope.productVariantsMap[removed[0].sku];
     $scope.initImages();
-    console.log($scope.imageRows);
   };
 
   $scope.toggleCategory = (categoryId) => {

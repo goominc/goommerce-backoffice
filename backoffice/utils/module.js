@@ -50,7 +50,7 @@ utilModule.factory('boUtils', ($http) => {
 
       elem.typeahead(
         {
-          hint: true,
+          hint: false,
           highlight: true,
           minLength: 1
         },
@@ -58,6 +58,17 @@ utilModule.factory('boUtils', ($http) => {
           name,
           source,
         }
+      );
+    },
+    uploadImage: (imageContent, publicId) => {
+      return $.ajax({
+        url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
+        type: 'POST',
+        // data: {file: imageContent, upload_preset: 'nd9k8295', public_id: `tmp/batch_image/${productId}-${productVariantId}-${i}`},
+        data: {file: imageContent, upload_preset: 'nd9k8295', public_id: publicId},
+      }).then(
+        (res) => res,
+        (err) => window.alert(err)
       );
     },
   };
