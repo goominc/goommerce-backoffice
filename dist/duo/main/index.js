@@ -298,7 +298,7 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
   // 2016. 02. 15. [heekyu] app-wide state
   $rootScope.state = {
     batchUploadedProducts: [],
-    locales: ['ko', 'en', 'zh_cn', 'zh_tw'],
+    locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
     editLocale: 'ko'
   };
 
@@ -555,12 +555,24 @@ utilModule.factory('boUtils', function ($http) {
       });
 
       elem.typeahead({
-        hint: true,
+        hint: false,
         highlight: true,
         minLength: 1
       }, {
         name: name,
         source: source
+      });
+    },
+    uploadImage: function uploadImage(imageContent, publicId) {
+      return $.ajax({
+        url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
+        type: 'POST',
+        // data: {file: imageContent, upload_preset: 'nd9k8295', public_id: `tmp/batch_image/${productId}-${productVariantId}-${i}`},
+        data: { file: imageContent, upload_preset: 'nd9k8295', public_id: publicId }
+      }).then(function (res) {
+        return res;
+      }, function (err) {
+        return window.alert(err);
       });
     }
   };
@@ -1795,7 +1807,7 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
 
 var productModule = require('../module.js');
 
-productModule.controller('ProductEditController', function ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil) {
+productModule.controller('ProductEditController', function ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil, boUtils) {
   $scope.allColors = {
     B: ['Beige', 'Big Stripe', 'Black', 'Blue', 'Brown'],
     C: ['Camel', 'Charcoal', 'Check', 'Choco'],
@@ -1844,15 +1856,24 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
   var initFromProduct = function initFromProduct() {
     var titleKey = 'product.edit.createTitle';
+    var currencies = ['KRW', 'USD', 'CNY'];
     if (!product) {
       $scope.product = { sku: 'autogen', KRW: 0, data: {} };
-      $scope.variantKinds[0].kinds = ['White', 'Black'];
+      $scope.variantKinds[0].kinds = ['Black', 'White'];
       $scope.variantKinds[1].kinds = ['Free'];
       $scope.variantKinds.forEach(function (kind) {
         return kind.selected = new Set(kind.kinds);
       });
     } else {
       $scope.product = product;
+      currencies.forEach(function (currency) {
+        return $scope.product[currency] = Number($scope.product[currency]);
+      });
+      ($scope.product.productVariants || []).forEach(function (variant) {
+        currencies.forEach(function (currency) {
+          return variant[currency] = Number(variant[currency]);
+        });
+      });
       kindsFromProductVariants($scope.product.productVariants || []);
       titleKey = 'product.edit.updateTitle';
     }
@@ -1948,8 +1969,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
    $scope.names = [
    {title: $translate.instant('product.edit.labelName.KO'), key: 'ko'},
    {title: $translate.instant('product.edit.labelName.EN'), key: 'en'},
-   {title: $translate.instant('product.edit.labelName.ZH_CN'), key: 'zh_cn'},
-   {title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh_tw'},
+   {title: $translate.instant('product.edit.labelName.ZH_CN'), key: 'zh-cn'},
+   {title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh-tw'},
    ];
    */
   $scope.inputFields = [
@@ -2337,7 +2358,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     placeholder: 'ui-state-highlight'
   };
   $scope.imageRowsToVariant = function () {
-    console.log($scope.imageRows);
     var i = 0;
     while (i < $scope.imageRows.length) {
       var row = $scope.imageRows[i];
@@ -2359,11 +2379,13 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
           row.images.push(images[used++]);
         }
         if (used === images.length) {
+          $scope.imageRowsToVariant();
           window.alert('(' + used + ') images uploaded');
           return;
         }
       }
     }
+    $scope.imageRowsToVariant();
     window.alert('(' + used + ') images uploaded');
   };
   $scope.imageUploaded = function (result) {
@@ -2375,12 +2397,64 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       thumbnail: false
     }]);
   };
-  // TODO
-  /*
-  $('#image-upload-button').on('change', function (changeEvent) {
-   });
-  */
+
+  // 2016. 03. 09. [heekyu] $('#image-upload-button') does not load on controller init or document ready
+  var addMultipleUploadListener = function addMultipleUploadListener() {
+    var imgExt = new Set(['jpg', 'jpeg', 'png']);
+    console.log($('#image-upload-button'));
+    $('#image-upload-button').on('change', function (changeEvent) {
+      var imageFiles = [];
+      for (var i = 0; i < changeEvent.target.files.length; i++) {
+        var file = changeEvent.target.files[i];
+        var split = file.webkitRelativePath.split('.');
+        var ext = split[split.length - 1];
+        if (imgExt.has(ext)) {
+          imageFiles.push(file);
+        }
+      }
+      var len = imageFiles.length;
+      if (len < 1) {
+        return;
+      }
+      if (!window.confirm(len + ' 개의 이미지가 있습니다. 업로드 할까요?')) {
+        return;
+      }
+      var imageContents = new Array(len);
+      var uploaded = new Array(len);
+      var done = 0;
+
+      var _loop2 = function (i) {
+        var r = new FileReader();
+        r.onload = function (e) {
+          imageContents[i] = e.target.result;
+          boUtils.uploadImage(e.target.result, 'tmp/product/P(' + ($scope.product.id || 'add') + ')-' + i + '-' + Date.now()).then(function (res) {
+            uploaded[i] = {
+              url: res.url.slice(5),
+              publicId: res.public_id,
+              version: res.version,
+              mainImage: false,
+              thumbnail: false
+            };
+            done++;
+            if (done === len) {
+              insertImages(uploaded);
+              if (!$scope.$$phase) {
+                $scope.$apply();
+              }
+            }
+          });
+        };
+        r.readAsDataURL(imageFiles[i]);
+      };
+
+      for (var i = 0; i < len; i++) {
+        _loop2(i);
+      }
+    });
+  };
+
   setTimeout(function () {
+    addMultipleUploadListener();
     // 2016. 02. 29. [heekyu] I cannot find on load event doing this
     $('.product-image-trash').droppable({
       accept: '.image-container img',
@@ -2465,7 +2539,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     var removed = $scope.productVariants.splice(index, 1);
     delete $scope.productVariantsMap[removed[0].sku];
     $scope.initImages();
-    console.log($scope.imageRows);
   };
 
   $scope.toggleCategory = function (categoryId) {
@@ -2696,7 +2769,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     });
   };
 
-  $scope.names = [{ title: 'ko', key: 'ko' }, { title: 'en', key: 'en' }, { title: 'zh_cn', key: 'zh_cn' }, { title: 'zh_tw', key: 'zh_tw' }];
+  $scope.names = [{ title: 'ko', key: 'ko' }, { title: 'en', key: 'en' }, { title: 'zh-cn', key: 'zh-cn' }, { title: 'zh-tw', key: 'zh-tw' }];
 
   $scope.save = function () {
     if (!$scope.category) {
@@ -3814,7 +3887,7 @@ var textModule = require('./module');
 
 textModule.controller('TextMainController', function ($scope, $http, $q, $state, $rootScope) {
   $scope.activeNode = null;
-  $scope.langs = ['en', 'ko', 'zh_cn', 'zh_tw'];
+  $scope.langs = ['en', 'ko', 'zh-cn', 'zh-tw'];
   var nodeToKey = {};
   var nodeNum = 0;
   var getTreeData = function getTreeData(key, obj) {

@@ -118,8 +118,8 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
    $scope.names = [
    {title: $translate.instant('product.edit.labelName.KO'), key: 'ko'},
    {title: $translate.instant('product.edit.labelName.EN'), key: 'en'},
-   {title: $translate.instant('product.edit.labelName.ZH_CN'), key: 'zh_cn'},
-   {title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh_tw'},
+   {title: $translate.instant('product.edit.labelName.ZH_CN'), key: 'zh-cn'},
+   {title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh-tw'},
    ];
    */
   $scope.inputFields = [

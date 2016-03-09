@@ -161,8 +161,8 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
   $scope.names = [
     {title: 'ko', key: 'ko'},
     {title: 'en', key: 'en'},
-    {title: 'zh_cn', key: 'zh_cn'},
-    {title: 'zh_tw', key: 'zh_tw'},
+    {title: 'zh-cn', key: 'zh-cn'},
+    {title: 'zh-tw', key: 'zh-tw'},
   ];
 
   $scope.save = () => {

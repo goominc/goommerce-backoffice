@@ -221,7 +221,7 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
   // 2016. 02. 15. [heekyu] app-wide state
   $rootScope.state = {
     batchUploadedProducts: [],
-    locales: ['ko', 'en', 'zh_cn', 'zh_tw'],
+    locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
     editLocale: 'ko',
   };
 

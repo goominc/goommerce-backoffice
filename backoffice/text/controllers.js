@@ -4,7 +4,7 @@ const textModule = require('./module');
 
 textModule.controller('TextMainController', ($scope, $http, $q, $state, $rootScope) => {
   $scope.activeNode = null;
-  $scope.langs = ['en', 'ko', 'zh_cn', 'zh_tw'];
+  $scope.langs = ['en', 'ko', 'zh-cn', 'zh-tw'];
   const nodeToKey = {};
   let nodeNum = 0;
   const getTreeData = (key, obj) => {
