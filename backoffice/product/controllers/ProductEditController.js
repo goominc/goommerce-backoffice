@@ -66,6 +66,42 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       titleKey = 'product.edit.updateTitle';
     }
 
+    if ($scope.product.brand) {
+      $scope.isSelectBrand = false;
+    } else {
+      $scope.isSelectBrand = true;
+    }
+    const initAutoComplete = () => {
+      const autoCompleteNode = $('#brand_search_input');
+      boUtils.autoComplete(autoCompleteNode, 'product-brand-search', $scope.allBrands, 'data.name.ko');
+      autoCompleteNode.on('typeahead:selected', (obj, datum) => {
+        $scope.product.brand = datum;
+        $scope.toggleBrand();
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      });
+    };
+    $scope.toggleBrand = () => {
+      $scope.isSelectBrand = !$scope.isSelectBrand;
+      if ($scope.needInitAutoComplete) {
+        // 2016. 03. 09. [heekyu] auto complete node is not initialized
+        $scope.needInitAutoComplete = false;
+        setTimeout(() => {
+          initAutoComplete();
+          $('#brand_search_input').focus();
+        }, 100);
+      }
+    };
+    $http.get('/api/v1/brands').then((res) => {
+      $scope.allBrands = res.data.brands || [];
+      if ($scope.isSelectBrand) {
+        initAutoComplete();
+      } else {
+        $scope.needInitAutoComplete = true;
+      }
+    });
+
     $scope.tmpObj = {};
     $scope.productVariantsMap = {};
     $scope.origVariants = new Set();
@@ -501,7 +537,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   // 2016. 03. 09. [heekyu] $('#image-upload-button') does not load on controller init or document ready
   const addMultipleUploadListener = () => {
     const imgExt = new Set(['jpg', 'jpeg', 'png']);
-    console.log($('#image-upload-button'));
     $('#image-upload-button').on('change', function (changeEvent) {
       const imageFiles = [];
       for (let i = 0; i < changeEvent.target.files.length; i++) {

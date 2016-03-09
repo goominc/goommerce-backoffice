@@ -46,6 +46,20 @@
                         />
                       </div>
                     </div>
+                    <div data-ng-if="!isSelectBrand" class="form-group">
+                      <label class="col-md-2 control-label">Brand</label>
+                      <div class="col-md-10">
+                        <div class="form-control" style="cursor: pointer;" data-ng-click="toggleBrand()">
+                          <span data-ng-if="product.brand">{{product.brand.data.name.ko}}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div data-ng-if="isSelectBrand" class="form-group">
+                      <label class="col-md-2 control-label">Brand</label>
+                      <div class="col-md-10">
+                        <input class="form-control" style="display: inline-block; vertical-align: top;" type="text" id="brand_search_input" />
+                      </div>
+                    </div>
                     <div class="form-group">
                       <label class="col-md-2 control-label">{{'product.edit.labelActive' | translate}}</label>
                       <div class="col-md-10">
@@ -196,44 +210,6 @@
                       </div>
                     </div>
                   </uib-tab>
-                  <!--uib-tab heading="{{'product.edit.tabImage' | translate}}">
-                    <div class="row">
-                      <div class="col-md-12">
-                        <button class="btn blue" cl-upload-widget="" callback="imageUploaded(result)"><i class="fa fa-plus"></i> {{'main.addImageButton' | translate}}</button>
-                      </div>
-                      <div class="col-md-12" style="margin-top: 20px;">
-                        <table class="table table-bordered table-hover">
-                          <thead>
-                          <tr role="row" class="heading">
-                            <th>Image</th>
-                            <th>Product</th>
-                            <th>Main Image</th>
-                            <th>Thumbnail</th>
-                            <th></th>
-                          </tr>
-                          </thead>
-                          <tbody>
-                          <tr data-ng-repeat="image in images">
-                            <th width="15%"><a class="fancybox" data-rel="fancybox-button"><img class="img-responsive" data-ng-src="{{image.url}}"></a></th>
-                            <th>
-                              <div class="dropdown btn-group">
-                                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{image.product.sku}}</button>
-                                <ul class="dropdown-menu" role="menu">
-                                  <li data-ng-click="image.product = product"><a href="javascript:;">{{product.sku}}</a></li>
-                                  <li data-ng-click="image.product = productVariant" data-ng-if="productVariant.stock >= 0" data-ng-repeat="productVariant in productVariants"><a href="javascript:;">{{productVariant.sku}}</a></li>
-                                </ul>
-                              </div>
-                              <span><== 상품 지정!</span>
-                            </th>
-                            <th width="10%"><input id="{{image.mainImage}}" type="checkbox" data-ng-model="image.mainImage"><label for="{{image.mainImage}}"><span></span></label></th>
-                            <th width="10%"><input id="{{image.mainImage}}_thumb" type="checkbox" data-ng-model="image.thumbnail"><label for="{{image.mainImage}}_thumb"><span></span></label></th>
-                            <th><button class="btn red" type="reset" data-ng-click="removeImage($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></th>
-                          </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </uib-tab-->
                   <uib-tab heading="{{'product.edit.tabCategory' | translate}}">
                     <div class="row">
                       <div class="col-md-12">

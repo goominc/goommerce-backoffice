@@ -40,24 +40,38 @@ utilModule.factory('boUtils', ($http) => {
       const SS = appendLeadingZeroIfNeeded(date.getSeconds().toString());
       return yyyy + '-' + mm + '-' + dd + ' ' + HH + ':' + MM + ':' + SS;
     },
-    autoComplete: (elem, name, data) => {
+    autoComplete: (elem, name, data, valueKey) => {
       const Bloodhound = window.Bloodhound;
-      const source = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.whitespace,
+      let tokenizer = Bloodhound.tokenizers.whitespace;
+      if (valueKey) {
+        tokenizer = (datum) => {
+          return Bloodhound.tokenizers.whitespace(_.get(datum, valueKey));
+        };
+      }
+      const option1 = {
+        datumTokenizer: tokenizer,
         queryTokenizer: Bloodhound.tokenizers.whitespace,
         local: data,
-      });
+      };
+      const source = new Bloodhound(option1);
+      source.initialize();
 
+      const option2 = {
+        hint: false,
+        highlight: true,
+        minLength: 1,
+      };
+      const option3 = {
+        name,
+        source: source.ttAdapter(),
+      };
+      if (valueKey) {
+        // option3.displayKey = valueKey;
+        option3.display = (d) => _.get(d, valueKey);
+      }
       elem.typeahead(
-        {
-          hint: false,
-          highlight: true,
-          minLength: 1
-        },
-        {
-          name,
-          source,
-        }
+        option2,
+        option3
       );
     },
     uploadImage: (imageContent, publicId) => {
