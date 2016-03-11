@@ -138,7 +138,7 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
   $rootScope.menus = [{
     key: 'product', // TODO get key from router
     name: $translate.instant('product.main.title'),
-    active: false,
+    sref: 'product.main',
     children: [{
       key: 'product.main',
       name: $translate.instant('main.mainMenu'),
@@ -163,7 +163,7 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
   }, {
     key: 'order', // TODO get key from router
     name: $translate.instant('order.title'),
-    active: false,
+    sref: 'order.main',
     children: [{
       key: 'order.main',
       name: $translate.instant('main.mainMenu'),
@@ -176,9 +176,9 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
   }, {
     key: 'user', // TODO get key from router
     name: $translate.instant('user.manage.title'),
-    active: false,
+    sref: 'user.manage',
     children: [{
-      key: 'order.main',
+      key: 'user.main',
       name: $translate.instant('main.mainMenu'),
       sref: 'user.manage'
     }, {
@@ -189,12 +189,11 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
   }, {
     key: 'brand', // TODO get key from router
     name: $translate.instant('brand.title'),
-    sref: 'brand.main',
-    active: false
+    sref: 'brand.main'
   }, {
     key: 'cms', // TODO get key from router
     name: 'CMS',
-    active: false,
+    sref: 'cms.main_category',
     children: [{
       name: $translate.instant('cms.mainCategory'),
       sref: 'cms.main_category'
@@ -208,13 +207,11 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
   }, {
     key: 'currency', // TODO get key from router
     name: $translate.instant('currency.title'),
-    sref: 'currency.main',
-    active: false
+    sref: 'currency.main'
   }, {
     key: 'text',
     name: $translate.instant('text.title'),
-    sref: 'text.main',
-    active: false
+    sref: 'text.main'
   }];
 
   var pageTitleTemplate = '<div class="page-title"><h1>{{contentTitle}} <small data-ng-if="contentSubTitle">{{contentSubTitle}}</small></h1></div>';
@@ -295,16 +292,23 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
   };
   checkLogin();
 
+  var editLocaleKey = 'editLocale';
+  var editLocale = 'ko';
+  if ($cookies.get(editLocaleKey)) {
+    editLocale = $cookies.get(editLocaleKey);
+  }
+
   // 2016. 02. 15. [heekyu] app-wide state
   $rootScope.state = {
     batchUploadedProducts: [],
     locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
-    editLocale: 'ko'
+    editLocale: editLocale
   };
 
   // 2016. 02. 29. [heekyu] change locale in each page
   $rootScope.changeEditLocale = function (locale) {
     $rootScope.state.editLocale = locale;
+    $cookies.put(editLocaleKey, locale);
   };
 });
 
@@ -546,22 +550,38 @@ utilModule.factory('boUtils', function ($http) {
       var SS = appendLeadingZeroIfNeeded(date.getSeconds().toString());
       return yyyy + '-' + mm + '-' + dd + ' ' + HH + ':' + MM + ':' + SS;
     },
-    autoComplete: function autoComplete(elem, name, data) {
+    autoComplete: function autoComplete(elem, name, data, valueKey) {
       var Bloodhound = window.Bloodhound;
-      var source = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.whitespace,
+      var tokenizer = Bloodhound.tokenizers.whitespace;
+      if (valueKey) {
+        tokenizer = function (datum) {
+          return Bloodhound.tokenizers.whitespace(_.get(datum, valueKey));
+        };
+      }
+      var option1 = {
+        datumTokenizer: tokenizer,
         queryTokenizer: Bloodhound.tokenizers.whitespace,
         local: data
-      });
+      };
+      var source = new Bloodhound(option1);
+      source.initialize();
 
-      elem.typeahead({
+      var option2 = {
         hint: false,
         highlight: true,
         minLength: 1
-      }, {
+      };
+      var option3 = {
         name: name,
-        source: source
-      });
+        source: source.ttAdapter()
+      };
+      if (valueKey) {
+        // option3.displayKey = valueKey;
+        option3.display = function (d) {
+          return _.get(d, valueKey);
+        };
+      }
+      elem.typeahead(option2, option3);
     },
     uploadImage: function uploadImage(imageContent, publicId) {
       return $.ajax({
@@ -573,6 +593,17 @@ utilModule.factory('boUtils', function ($http) {
         return res;
       }, function (err) {
         return window.alert(err);
+      });
+    }
+  };
+});
+
+utilModule.factory('convertUtil', function () {
+  return {
+    copyFieldObj: function copyFieldObj(fields, origObj) {
+      fields.forEach(function (field) {
+        if (!field.key) return;
+        _.set(origObj, field.key, field.obj);
       });
     }
   };
@@ -1179,11 +1210,31 @@ userModule.config(function ($stateProvider) {
     url: '/manage',
     templateUrl: templateRoot + '/user/manage.html',
     controller: 'UserManageController'
+  }).state('user.info', {
+    url: '/info/:userId',
+    templateUrl: templateRoot + '/user/info.html',
+    controller: 'UserInfoController',
+    resolve: {
+      user: function user($http, $stateParams) {
+        return $http.get('/api/v1/users/' + $stateParams.userId).then(function (res) {
+          return res.data;
+        });
+      }
+    }
   }).state('user.waitConfirm', {
     url: '/wait_confirm',
     templateUrl: templateRoot + '/user/wait-confirm.html',
     controller: 'UserWaitConfirmController'
   });
+});
+
+userModule.factory('userUtil', function () {
+  return {
+    getRoleName: function getRoleName(user) {
+      var role = _.get(user, 'roles[0]');
+      return role ? role.type : '';
+    }
+  };
 });
 
 // BEGIN module require js
@@ -1205,6 +1256,16 @@ module.exports = {
     "manage": {
       "title": "사용자"
     },
+    "info": {
+      "emailLabel": "이메일",
+      "gradeLabel": "회원 등급",
+      "isConfirmed": "인증 여부",
+      "title": "유저 정보",
+      "telLabel": "전화번호",
+      "userTypeLabel": "유저 종류",
+      "editRoleButton": "권한 변경",
+      "userDetailButton": "유저 상세 정보"
+    },
     "waitConfirm": {
       "title": "바이어 인증 대기"
     },
@@ -1220,7 +1281,7 @@ module.exports = {
 
 var userModule = require('./module');
 
-userModule.controller('UserManageController', function ($scope, $http, $q, $state, $rootScope, $translate) {
+userModule.controller('UserManageController', function ($scope, $http, $q, $state, $rootScope, $translate, userUtil) {
   $scope.contentTitle = $translate.instant('user.manage.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [{
@@ -1236,14 +1297,30 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     field: '',
     url: '/api/v1/users',
     columns: [{
-      data: 'id'
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+      }
     }, {
       data: 'email'
     }, {
-      data: 'roles',
-      render: function render(roles) {
-        if (!roles) return '';
-        return JSON.stringify(roles);
+      data: function data(_data) {
+        return _data;
+      },
+      render: function render(user) {
+        return userUtil.getRoleName(user);
+      }
+    }, {
+      // edit role button
+      data: 'id',
+      render: function render(id) {
+        return '<button class="btn blue" data-ng-click="openRolePopup(' + id + ')"><i class="fa fa-wrench"></i> ' + $translate.instant('user.info.editRoleButton') + '</button>';
+      }
+    }, {
+      // show user info button
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="user.info({ userId: ' + id + ' })"><button class="btn blue"><i class="fa fa-info"></i> ' + $translate.instant('user.info.userDetailButton') + '</button></a>';
       }
     }]
   };
@@ -1295,25 +1372,23 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
 
   var userIdToData = {};
 
+  $scope.openRolePopup = function (userId) {
+    var user = $scope.userIdToData[userId];
+    $scope.editRoleUser = user;
+    $scope.makeUserRolePopupData(user);
+    if (!$scope.$$phase) {
+      $scope.$apply();
+    }
+    $('#user_change_role').modal();
+  };
+
   $scope.datatablesLoaded = function () {
     var datas = $('#user_list').find('table').DataTable().rows().data();
     var children = $('#user_list').find('tbody').children();
+    $scope.userIdToData = {};
     for (var i = 0; i < datas.length; i++) {
       var data = datas[i];
-      userIdToData[data.id] = data;
-
-      var child = children[i];
-      $(child).css('cursor', 'pointer');
-      $(child).click(function (e) {
-        var userId = $(e.target).closest('tr').attr('id');
-        var user = userIdToData[userId];
-        $scope.editRoleUser = user;
-        $scope.makeUserRolePopupData(user);
-        if (!$scope.$$phase) {
-          $scope.$apply();
-        }
-        $('#user_change_role').modal();
-      });
+      $scope.userIdToData[data.id] = data;
     }
   };
 
@@ -1418,6 +1493,33 @@ userModule.controller('UserWaitConfirmController', function ($scope, $state, $ro
     name: $translate.instant('user.waitConfirm.title')
   }];
   $rootScope.initAll($scope, $state.current.name);
+});
+
+userModule.controller('UserInfoController', function ($scope, $http, $state, $rootScope, $translate, user, userUtil, convertUtil) {
+  $scope.contentTitle = $translate.instant('user.info.title');
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'user.main',
+    name: $translate.instant('user.manage.title')
+  }, {
+    sref: 'user.waitConfirm',
+    name: $translate.instant('user.info.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.user = user;
+
+  $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }];
+
+  $scope.save = function () {
+    convertUtil.copyFieldObj($scope.userFields, $scope.user);
+    $http.put('/api/v1/users/' + $scope.user.id, _.pick($scope.user, 'data')).then(function (res) {
+      console.log(res);
+    });
+  };
 });
 }, {"./module":5}],
 6: [function(require, module, exports) {
@@ -1877,6 +1979,21 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       kindsFromProductVariants($scope.product.productVariants || []);
       titleKey = 'product.edit.updateTitle';
     }
+
+    var initAutoComplete = function initAutoComplete() {
+      var autoCompleteNode = $('#brand_search_input');
+      boUtils.autoComplete(autoCompleteNode, 'product-brand-search', $scope.allBrands, 'data.name.ko');
+      autoCompleteNode.on('typeahead:selected', function (obj, datum) {
+        $scope.product.brand = datum;
+      });
+      if ($scope.product.brand) {
+        autoCompleteNode.val(_.get($scope.product.brand, 'data.name.ko'));
+      }
+    };
+    $http.get('/api/v1/brands').then(function (res) {
+      $scope.allBrands = res.data.brands || [];
+      initAutoComplete();
+    });
 
     $scope.tmpObj = {};
     $scope.productVariantsMap = {};
@@ -2401,7 +2518,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   // 2016. 03. 09. [heekyu] $('#image-upload-button') does not load on controller init or document ready
   var addMultipleUploadListener = function addMultipleUploadListener() {
     var imgExt = new Set(['jpg', 'jpeg', 'png']);
-    console.log($('#image-upload-button'));
     $('#image-upload-button').on('change', function (changeEvent) {
       var imageFiles = [];
       for (var i = 0; i < changeEvent.target.files.length; i++) {
