@@ -88,4 +88,15 @@ utilModule.factory('boUtils', ($http) => {
   };
 });
 
+utilModule.factory('convertUtil', () => {
+  return {
+    copyFieldObj: (fields, origObj) => {
+      fields.forEach((field) => {
+        if (!field.key) return;
+        _.set(origObj, field.key, field.obj);
+      });
+    },
+  };
+});
+
 module.exports = utilModule;

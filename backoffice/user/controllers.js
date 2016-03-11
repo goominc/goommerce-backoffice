@@ -1,7 +1,7 @@
 
 const userModule = require('./module');
 
-userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootScope, $translate) => {
+userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootScope, $translate, userUtil) => {
   $scope.contentTitle = $translate.instant('user.manage.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
@@ -22,16 +22,32 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
     columns: [
       {
         data: 'id',
+        render: (id) => {
+          return `<a ui-sref="user.info({ userId: ${id} })">${id}</a>`;
+        },
       },
       {
         data: 'email',
       },
       {
-        data: 'roles',
-        render: (roles) => {
-          if (!roles) return '';
-          return JSON.stringify(roles);
-        }
+        data: (data) => data,
+        render: (user) => {
+          return userUtil.getRoleName(user);
+        },
+      },
+      {
+        // edit role button
+        data: 'id',
+        render: (id) => {
+          return `<button class="btn blue" data-ng-click="openRolePopup(${id})"><i class="fa fa-wrench"></i> ${$translate.instant('user.info.editRoleButton')}</button>`;
+        },
+      },
+      {
+        // show user info button
+        data: 'id',
+        render: (id) => {
+          return `<a ui-sref="user.info({ userId: ${id} })"><button class="btn blue"><i class="fa fa-info"></i> ${$translate.instant('user.info.userDetailButton')}</button></a>`;
+        },
       },
     ],
   };
@@ -83,25 +99,23 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
 
   const userIdToData = {};
 
+  $scope.openRolePopup = (userId) => {
+    const user = $scope.userIdToData[userId];
+    $scope.editRoleUser = user;
+    $scope.makeUserRolePopupData(user);
+    if (!$scope.$$phase) {
+      $scope.$apply();
+    }
+    $('#user_change_role').modal();
+  };
+
   $scope.datatablesLoaded = () => {
     const datas = $('#user_list').find('table').DataTable().rows().data();
     const children = $('#user_list').find('tbody').children();
+    $scope.userIdToData = {};
     for (let i = 0; i < datas.length; i++) {
       const data = datas[i];
-      userIdToData[data.id] = data;
-
-      const child = children[i];
-      $(child).css('cursor', 'pointer');
-      $(child).click((e) => {
-        const userId = $(e.target).closest('tr').attr('id');
-        const user = userIdToData[userId];
-        $scope.editRoleUser = user;
-        $scope.makeUserRolePopupData(user);
-        if (!$scope.$$phase) {
-          $scope.$apply();
-        }
-        $('#user_change_role').modal();
-      });
+      $scope.userIdToData[data.id] = data;
     }
   };
 
@@ -210,4 +224,41 @@ userModule.controller('UserWaitConfirmController', ($scope, $state, $rootScope, 
     },
   ];
   $rootScope.initAll($scope, $state.current.name);
+});
+
+userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, $translate, user, userUtil, convertUtil) => {
+  $scope.contentTitle = $translate.instant('user.info.title');
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'user.main',
+      name: $translate.instant('user.manage.title'),
+    },
+    {
+      sref: 'user.waitConfirm',
+      name: $translate.instant('user.info.title'),
+    },
+  ];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.user = user;
+
+  $scope.userFields = [
+    {title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true},
+    {title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true},
+    {title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false},
+    {title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false},
+    {title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false},
+  ];
+
+  $scope.save = () => {
+    convertUtil.copyFieldObj($scope.userFields, $scope.user);
+    $http.put(`/api/v1/users/${$scope.user.id}`, _.pick($scope.user, 'data')).then((res) => {
+      console.log(res);
+    });
+  };
 });

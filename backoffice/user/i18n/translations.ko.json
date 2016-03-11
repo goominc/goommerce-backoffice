@@ -7,6 +7,16 @@
     "manage": {
       "title": "사용자"
     },
+    "info": {
+      "emailLabel": "이메일",
+      "gradeLabel": "회원 등급",
+      "isConfirmed": "인증 여부",
+      "title": "유저 정보",
+      "telLabel": "전화번호",
+      "userTypeLabel": "유저 종류",
+      "editRoleButton": "권한 변경",
+      "userDetailButton": "유저 상세 정보"
+    },
     "waitConfirm": {
       "title": "바이어 인증 대기"
     },

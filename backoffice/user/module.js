@@ -28,11 +28,30 @@ userModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/user/manage.html',
       controller: 'UserManageController',
     })
+    .state('user.info', {
+      url: '/info/:userId',
+      templateUrl: templateRoot + '/user/info.html',
+      controller: 'UserInfoController',
+      resolve: {
+        user: ($http, $stateParams) => {
+          return $http.get(`/api/v1/users/${$stateParams.userId}`).then((res) => res.data);
+        },
+      },
+    })
     .state('user.waitConfirm', {
       url: '/wait_confirm',
       templateUrl: templateRoot + '/user/wait-confirm.html',
       controller: 'UserWaitConfirmController',
     });
+});
+
+userModule.factory('userUtil', () => {
+  return {
+    getRoleName: (user) => {
+      const role = _.get(user, 'roles[0]');
+      return role ? role.type : '';
+    },
+  };
 });
 
 // BEGIN module require js
