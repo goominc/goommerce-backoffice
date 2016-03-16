@@ -39,7 +39,7 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
       state: { selected: false, opened }, /* TODO disabled: !root.isActive, */
     };
     categoryIdMap[root.id] = root;
-    if (currentCategoryId && root.id === currentCategoryId) {
+    if (currentCategoryId && +root.id === +currentCategoryId) {
       $scope.category = root;
       json.state.selected = true;
     }
@@ -53,7 +53,7 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
   };
 
   const jstreeData = getTreeData($scope.root, currentCategoryId, true);
-  $scope.category = categoryIdMap[currentCategoryId];
+  // $scope.category = categoryIdMap[currentCategoryId];
   const jstreeNode = $('#categoryTree');
   jstreeNode.jstree({
     core: {
@@ -134,10 +134,20 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
 
   // 2016. 01. 20. [heekyu] refer to https://www.jstree.com/api
   jstreeNode.on('move_node.jstree', (e, data) => {
-    // TODO update client tree after server updated
+    const { old_parent, parent } = data;
     $http.put(`/api/v1/categories/${data.node.id}`, { parentId: data.parent }).then((res) => {
       console.log(res);
     });
+    const saveChildIds = (categoryId) => {
+      const childIds = jstreeNode.jstree('get_node', categoryId).children;
+      $http.put(`/api/v1/categories/${categoryId}`, { childIds }).then((res) => {
+        console.log(res);
+      });
+    };
+    saveChildIds(parent);
+    if (old_parent !== parent) {
+      saveChildIds(old_parent);
+    }
   });
   jstreeNode.on('select_node.jstree', (e, data) => {
     $scope.category = categoryIdMap[data.node.id];
