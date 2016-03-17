@@ -13,6 +13,14 @@
     "beforePayment": {
       "title": "무통장 입금 대기",
       "subTitle": "또는 결제 전"
+    },
+    "address": {
+      "nameLabel": "이름",
+      "cityLabel": "도시",
+      "telLabel": "T",
+      "postalCodeLabel": "우편번호",
+      "countryCodeLabel": "국가",
+      "streetLabel": "도로명"
     }
   }
 }
