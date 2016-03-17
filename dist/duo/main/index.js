@@ -134,7 +134,7 @@ mainModule.config(function ($httpProvider, boConfig) {
 
 var ACCESS_TOKEN_KEY = 'GOOMMERCE-BO-TOKEN';
 
-mainModule.controller('MainController', function ($scope, $http, $rootScope, $compile, $translate, $cookies) {
+mainModule.controller('MainController', function ($scope, $http, $q, $rootScope, $compile, $translate, $cookies) {
   $rootScope.menus = [{
     key: 'product', // TODO get key from router
     name: $translate.instant('product.main.title'),
@@ -303,6 +303,33 @@ mainModule.controller('MainController', function ($scope, $http, $rootScope, $co
     batchUploadedProducts: [],
     locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
     editLocale: editLocale
+  };
+
+  // 2016. 03. 17. [heekyu] download all texts for order status
+  //                        TODO texts module use this contents
+  var downloadTexts = function downloadTexts() {
+    var promises = [];
+    $rootScope.state.locales.forEach(function (locale) {
+      promises.push($http.get('/api/v1/i18n/texts/' + locale).then(function (res) {
+        return res.data;
+      }));
+    });
+    $q.all(promises).then(function (res) {
+      $rootScope.state.texts = [];
+      for (var i = 0; i < $rootScope.state.locales.length; i++) {
+        $rootScope.state.texts.push(res[i]);
+      }
+    });
+  };
+  downloadTexts();
+
+  $rootScope.getContentsI18nText = function (key) {
+    for (var i = 0; i < $rootScope.state.locales.length; i++) {
+      var locale = $rootScope.state.locales[i];
+      if (locale === $rootScope.state.editLocale) {
+        return _.get($rootScope.state.texts[i], key);
+      }
+    }
   };
 
   // 2016. 02. 29. [heekyu] change locale in each page
@@ -1288,7 +1315,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     sref: 'dashboard',
     name: $translate.instant('dashboard.home')
   }, {
-    sref: 'user.main',
+    sref: 'user.manage',
     name: $translate.instant('user.manage.title')
   }];
   $rootScope.initAll($scope, $state.current.name);
@@ -1486,7 +1513,7 @@ userModule.controller('UserWaitConfirmController', function ($scope, $state, $ro
     sref: 'dashboard',
     name: $translate.instant('dashboard.home')
   }, {
-    sref: 'user.main',
+    sref: 'user.manage',
     name: $translate.instant('user.manage.title')
   }, {
     sref: 'user.waitConfirm',
@@ -1502,7 +1529,7 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     sref: 'dashboard',
     name: $translate.instant('dashboard.home')
   }, {
-    sref: 'user.main',
+    sref: 'user.manage',
     name: $translate.instant('user.manage.title')
   }, {
     sref: 'user.waitConfirm',
@@ -1510,14 +1537,17 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
   }];
   $rootScope.initAll($scope, $state.current.name);
 
-  $scope.user = user;
+  var init = function init(user) {
+    $scope.user = user;
 
-  $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }];
+    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }];
+  };
+  init(user);
 
   $scope.save = function () {
     convertUtil.copyFieldObj($scope.userFields, $scope.user);
     $http.put('/api/v1/users/' + $scope.user.id, _.pick($scope.user, 'data')).then(function (res) {
-      console.log(res);
+      init(res.data);
     });
   };
 });
@@ -2766,7 +2796,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
       state: { selected: false, opened: opened } };
     /* TODO disabled: !root.isActive, */
     categoryIdMap[root.id] = root;
-    if (currentCategoryId && root.id === currentCategoryId) {
+    if (currentCategoryId && +root.id === +currentCategoryId) {
       $scope.category = root;
       json.state.selected = true;
     }
@@ -2780,7 +2810,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
   };
 
   var jstreeData = getTreeData($scope.root, currentCategoryId, true);
-  $scope.category = categoryIdMap[currentCategoryId];
+  // $scope.category = categoryIdMap[currentCategoryId];
   var jstreeNode = $('#categoryTree');
   jstreeNode.jstree({
     core: {
@@ -2861,10 +2891,22 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
 
   // 2016. 01. 20. [heekyu] refer to https://www.jstree.com/api
   jstreeNode.on('move_node.jstree', function (e, data) {
-    // TODO update client tree after server updated
+    var old_parent = data.old_parent;
+    var parent = data.parent;
+
     $http.put('/api/v1/categories/' + data.node.id, { parentId: data.parent }).then(function (res) {
       console.log(res);
     });
+    var saveChildIds = function saveChildIds(categoryId) {
+      var childIds = jstreeNode.jstree('get_node', categoryId).children;
+      $http.put('/api/v1/categories/' + categoryId, { childIds: childIds }).then(function (res) {
+        console.log(res);
+      });
+    };
+    saveChildIds(parent);
+    if (old_parent !== parent) {
+      saveChildIds(old_parent);
+    }
   });
   jstreeNode.on('select_node.jstree', function (e, data) {
     $scope.category = categoryIdMap[data.node.id];
@@ -3341,8 +3383,9 @@ orderModule.config(function ($stateProvider) {
     templateUrl: templateRoot + '/order/detail.html',
     controller: 'OrderDetailController',
     resolve: {
-      order: function order($http, $stateParams) {
+      order: function order($http, $rootScope, $stateParams) {
         return $http.get('/api/v1/orders/' + $stateParams.orderId).then(function (res) {
+          res.data.status = $rootScope.getContentsI18nText('enum.order.status.' + res.data.status || res.data.status);
           return res.data;
         });
       }
@@ -3379,6 +3422,14 @@ module.exports = {
     "beforePayment": {
       "title": "무통장 입금 대기",
       "subTitle": "또는 결제 전"
+    },
+    "address": {
+      "nameLabel": "이름",
+      "cityLabel": "도시",
+      "telLabel": "T",
+      "postalCodeLabel": "우편번호",
+      "countryCodeLabel": "국가",
+      "streetLabel": "도로명"
     }
   }
 };
@@ -3438,7 +3489,7 @@ orderModule.controller('OrderListBeforePaymentController', function ($scope, $ro
   $rootScope.initAll($scope, $state.current.name);
 });
 
-orderModule.controller('OrderDetailController', function ($scope, $rootScope, $http, $state, $translate, boUtils, order) {
+orderModule.controller('OrderDetailController', function ($scope, $rootScope, $http, $state, $translate, boUtils, convertUtil, order) {
   $scope.contentTitle = $translate.instant('order.detail.title');
   $scope.contentSubTitle = 'Order Detail';
   $scope.breadcrumb = [{
@@ -3459,6 +3510,10 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   $http.get('/api/v1/users/' + order.userId).then(function (res) {
     $scope.user = res.data;
   });
+
+  if ($scope.order.address) {
+    $scope.addressFields = [{ title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name' }, { title: $translate.instant('order.address.cityLabel'), obj: _.get($scope.order.address, 'detail.city'), key: 'city' }, { title: $translate.instant('order.address.postalCodeLabel'), obj: _.get($scope.order.address, 'detail.postalCode'), key: 'postalCode' }, { title: $translate.instant('order.address.streetLabel'), obj: _.get($scope.order.address, 'detail.streetAddress'), key: 'streetAddress' }, { title: $translate.instant('order.address.countryCodeLabel'), obj: _.get($scope.order.address, 'countryCode'), key: 'countryCode' }, { title: $translate.instant('order.address.telLabel'), obj: _.get($scope.order.address, 'detail.tel'), key: 'tel' }];
+  }
 });
 }, {"./module":7}],
 8: [function(require, module, exports) {
@@ -4003,7 +4058,6 @@ var textModule = require('./module');
 
 textModule.controller('TextMainController', function ($scope, $http, $q, $state, $rootScope) {
   $scope.activeNode = null;
-  $scope.langs = ['en', 'ko', 'zh-cn', 'zh-tw'];
   var nodeToKey = {};
   var nodeNum = 0;
   var getTreeData = function getTreeData(key, obj) {
