@@ -38,8 +38,9 @@ orderModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/order/detail.html',
       controller: 'OrderDetailController',
       resolve: {
-        order: ($http, $stateParams) => {
+        order: ($http, $rootScope, $stateParams) => {
           return $http.get('/api/v1/orders/' + $stateParams.orderId).then((res) => {
+            res.data.status = $rootScope.getContentsI18nText(`enum.order.status.${res.data.status}` || res.data.status);
             return res.data;
           });
         },

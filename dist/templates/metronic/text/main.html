@@ -28,7 +28,7 @@
                   <div style="text-align: right; margin-bottom: 15px;">
                     <button class="btn blue" data-ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
                   </div>
-                  <div class="form-group" data-ng-repeat="lang in langs">
+                  <div class="form-group" data-ng-repeat="lang in state.locales">
                     <div class="col-md-2" style="text-align: right;">{{lang}} : <span class="required"> * </span></div>
                     <div class="col-md-10"><input style="padding: 5px 10px;" type="text" data-ng-model="activeNode[lang]"/></div>
                     <div style="clear: both;"></div>

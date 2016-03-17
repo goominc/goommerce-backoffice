@@ -49,7 +49,7 @@ mainModule.config(($httpProvider, boConfig) => {
 
 const ACCESS_TOKEN_KEY = 'GOOMMERCE-BO-TOKEN';
 
-mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $translate, $cookies) => {
+mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile, $translate, $cookies) => {
   $rootScope.menus = [
     {
       key: 'product', // TODO get key from router
@@ -226,6 +226,31 @@ mainModule.controller('MainController', ($scope, $http, $rootScope, $compile, $t
     batchUploadedProducts: [],
     locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
     editLocale,
+  };
+
+  // 2016. 03. 17. [heekyu] download all texts for order status
+  //                        TODO texts module use this contents
+  const downloadTexts = () => {
+    const promises = [];
+    $rootScope.state.locales.forEach((locale) => {
+      promises.push($http.get(`/api/v1/i18n/texts/${locale}`).then((res) => res.data));
+    });
+    $q.all(promises).then((res) => {
+      $rootScope.state.texts = [];
+      for (let i = 0; i < $rootScope.state.locales.length; i++) {
+        $rootScope.state.texts.push(res[i]);
+      }
+    });
+  };
+  downloadTexts();
+
+  $rootScope.getContentsI18nText = (key) => {
+    for (let i = 0; i < $rootScope.state.locales.length; i++) {
+      const locale = $rootScope.state.locales[i];
+      if (locale === $rootScope.state.editLocale) {
+        return _.get($rootScope.state.texts[i], key);
+      }
+    }
   };
 
   // 2016. 02. 29. [heekyu] change locale in each page
