@@ -138,17 +138,21 @@
                         <table class="table table-hover table-bordered table-striped">
                           <thead>
                           <tr>
-                            <th width="20%">Product</th>
-                            <th width="20%">Original Price</th>
-                            <th width="20%">Price</th>
-                            <th width="20%">Quantity</th>
-                            <th width="20%">Total</th>
+                            <th width="20%">상품ID</th>
+                            <th width="20%">상품</th>
+                            <th width="15%">Original Price</th>
+                            <th width="15%">Price</th>
+                            <th width="15%">Quantity</th>
+                            <th width="15%">Total</th>
                           </tr>
                           </thead>
                           <tbody class="cell-center">
                           <tr data-ng-repeat="row in order.orderProducts">
                             <td>
-                              <a ui-sref="product.edit({productId: row.id})">{{row.id}}</a>
+                              <a ui-sref="product.edit({productId: row.id})">{{row.product.id}}</a>
+                            </td>
+                            <td>
+                              {{row.productVariant.sku}}
                             </td>
                             <td>
                               <span>{{row.productVariant.KRW}} KRW</span>
