@@ -363,6 +363,8 @@ mainModule.controller('LoginModalController', function ($scope, $http, $cookies)
 3: [function(require, module, exports) {
 'use strict';
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var directiveModule = angular.module('backoffice.directives', [require('../utils/module').name]);
 
 module.exports = directiveModule;
@@ -450,25 +452,29 @@ directiveModule.directive('boServerDatatables', function ($http, datatableCommon
     },
     link: function link(scope, elem) {
       var urlBase = scope.url;
-      var urlParams = scope.urlParams;
-      if (!urlParams) {
-        urlParams = {};
-      }
 
       var dataTables = scope.boServerDatatables;
       var options = datatableCommons.getOptions(scope, dataTables);
       options.serverSide = true;
       options.ajax = function (data, callback, settings) {
+        // console.log(data);
+        var urlParams = _extends({}, scope.urlParams);
         urlParams.offset = data.start;
         urlParams.limit = data.length;
+        if (data.search.value) {
+          urlParams.q = data.search.value;
+        }
         var url = boUtils.encodeQueryData(urlBase, urlParams);
         $http.get(url).then(function (value) {
-          var serverData = value.data[dataTables['field']];
+          var serverData = value.data;
+          if (dataTables['field']) {
+            serverData = serverData[dataTables['field']];
+          }
           if (!serverData) {
             serverData = [];
           }
           var pageInfo = { data: serverData, draw: data.draw };
-          pageInfo.recordsTotal = serverData.total;
+          pageInfo.recordsTotal = _.get(value, 'data.pagination.total') || 0;
           // TODO really filtered data
           pageInfo.recordsFiltered = pageInfo.recordsTotal;
           callback(pageInfo);
@@ -1837,7 +1843,9 @@ module.exports = {
 module.exports = {
   "product": {
     "main": {
-      "title": "상품"
+      "title": "상품",
+      "nicknameColumn": "닉네임",
+      "brandColumn": "브랜드"
     },
     "list": {
       "columnName": "상품명"
@@ -1902,15 +1910,24 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
   $scope.productDatatables = {
     field: 'products',
     // disableFilter: true,
-    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: boConfig.apiUrl + '/api/v1/products',
+    url: boConfig.apiUrl + '/api/v1/products/search',
     columns: [{
       data: 'id',
       render: function render(id) {
         return '<a ui-sref="product.edit({productId: ' + id + '})">' + id + '</a>';
       }
     }, {
-      data: 'sku'
+      data: function data(product) {
+        return _.get(product, 'data.nickname.ko') || '';
+      }
+    }, {
+      data: function data(product) {
+        return _.get(product, 'brand.data.name.ko') || '';
+      }
+    }, {
+      data: function data(product) {
+        return product.sku || '';
+      }
     }, {
       data: 'id',
       render: function render(id) {
@@ -2122,7 +2139,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
    */
   $scope.inputFields = [
   // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
-  { title: 'nickname', key: 'data.nickname', tmpKey: 'nickname', isRequired: true }];
+  { title: 'nickname', key: 'data.nickname.ko', tmpKey: 'nickname', isRequired: true }];
 
   $scope.tmpObjToProduct = function () {
     for (var i = 0; i < $scope.inputFields.length; i++) {
