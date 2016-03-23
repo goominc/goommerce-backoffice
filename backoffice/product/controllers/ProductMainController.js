@@ -20,8 +20,7 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
   $scope.productDatatables = {
     field: 'products',
     // disableFilter: true,
-    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: boConfig.apiUrl + '/api/v1/products',
+    url: boConfig.apiUrl + '/api/v1/products/search',
     columns: [
       {
         data: 'id',
@@ -30,7 +29,13 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
         },
       },
       {
-        data: 'sku',
+        data: (product) => _.get(product, 'data.nickname.ko') || '',
+      },
+      {
+        data: (product) => _.get(product, 'brand.data.name.ko') || '',
+      },
+      {
+        data: (product) => product.sku || '',
       },
       {
         data: 'id',

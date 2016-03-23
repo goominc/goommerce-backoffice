@@ -1,7 +1,9 @@
 {
   "product": {
     "main": {
-      "title": "상품"
+      "title": "상품",
+      "nicknameColumn": "닉네임",
+      "brandColumn": "브랜드"
     },
     "list": {
       "columnName": "상품명"

@@ -92,25 +92,29 @@ directiveModule.directive('boServerDatatables', ($http, datatableCommons, boUtil
     },
     link: (scope, elem) => {
       const urlBase = scope.url;
-      let urlParams = scope.urlParams;
-      if (!urlParams) {
-        urlParams = {};
-      }
 
       const dataTables = scope.boServerDatatables;
       const options = datatableCommons.getOptions(scope, dataTables);
       options.serverSide = true;
       options.ajax = (data, callback, settings) => {
+        // console.log(data);
+        const urlParams = { ...scope.urlParams };
         urlParams.offset = data.start;
         urlParams.limit = data.length;
+        if (data.search.value) {
+          urlParams.q = data.search.value;
+        }
         const url = boUtils.encodeQueryData(urlBase, urlParams);
         $http.get(url).then((value) => {
-          let serverData = value.data[dataTables['field']];
+          let serverData = value.data;
+          if (dataTables['field']) {
+            serverData = serverData[dataTables['field']];
+          }
           if (!serverData) {
             serverData = [];
           }
           const pageInfo = {data: serverData, draw: data.draw};
-          pageInfo.recordsTotal = serverData.total;
+          pageInfo.recordsTotal = _.get(value, 'data.pagination.total') || 0;
           // TODO really filtered data
           pageInfo.recordsFiltered = pageInfo.recordsTotal;
           callback(pageInfo);

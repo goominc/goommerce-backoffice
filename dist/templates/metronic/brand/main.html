@@ -20,7 +20,7 @@
               </div>
               <div class="row">
                 <div class="col-md-12">
-                  <div bo-datatables="brandDatatables">
+                  <div bo-server-datatables="brandDatatables" url="/api/v1/brands/search" url-params="{}">
                     <table>
                       <thead>
                       <tr role="heading">
@@ -51,8 +51,11 @@
         </div>
         <div class="modal-body">
           <div class="row">
-            <div class="col-md-12">
-              <input type="text" data-ng-model="newBrand.pathname" placeholder="Brand Name" />
+            <div class="col-md-12" data-ng-repeat="locale in state.locales">
+              <label>{{locale}} : </label>
+              <input class="brand-create-form-input" type="text"
+                     data-ng-model="newBrand.data.name[locale]"
+                     placeholder="{{locale}}" />
             </div>
           </div>
         </div>

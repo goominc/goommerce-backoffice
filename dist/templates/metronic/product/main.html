@@ -17,16 +17,18 @@
                 </button>
               </div>
             </div>
-            <div bo-datatables="productDatatables">
+            <div bo-server-datatables="productDatatables" url="/api/v1/products/search">
               <table class="table table-bordered table-hover">
                 <thead>
                 <tr role="row" class="heading">
                   <th>ID</th>
+                  <th>{{'product.main.nicknameColumn' | translate}}</th>
+                  <th>{{'product.main.brandColumn' | translate}}</th>
                   <th>SKU</th>
                   <th>-</th>
                 </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody class="cell-center"></tbody>
               </table>
             </div>
           </div>
