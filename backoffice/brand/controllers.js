@@ -38,6 +38,7 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, brandCom
       },
       {
         data: 'data.name.ko',
+        orderable: false,
       },
     ],
   };

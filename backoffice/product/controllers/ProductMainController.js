@@ -30,15 +30,19 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
       },
       {
         data: (product) => _.get(product, 'data.nickname.ko') || '',
+        orderable: false,
       },
       {
         data: (product) => _.get(product, 'brand.data.name.ko') || '',
+        orderable: false,
       },
       {
         data: (product) => product.sku || '',
+        orderable: false,
       },
       {
         data: 'id',
+        orderable: false,
         render: (id) => {
           return `<button data-ng-click="deleteProduct(${id})" class="btn red"><i class="fa fa-remove"></i> ${$translate.instant('main.deleteButton')}</button>`;
         },
