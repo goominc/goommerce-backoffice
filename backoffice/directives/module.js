@@ -107,7 +107,7 @@ directiveModule.directive('boServerDatatables', ($http, datatableCommons, boUtil
         const order = _.get(data, 'order[0]');
         if (order) {
           const column = options.columns[order.column].data;
-          if (isString(column)) {
+          if (_.isString(column)) {
             urlParams.sorts = order.dir === 'desc' ? `-${column}` : column;
           } else {
             console.log('column is not String. cannot sort');
