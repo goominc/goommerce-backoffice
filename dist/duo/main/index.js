@@ -464,6 +464,15 @@ directiveModule.directive('boServerDatatables', function ($http, datatableCommon
         if (data.search.value) {
           urlParams.q = data.search.value;
         }
+        var order = _.get(data, 'order[0]');
+        if (order) {
+          var column = options.columns[order.column].data;
+          if (_.isString(column)) {
+            urlParams.sorts = order.dir === 'desc' ? '-' + column : column;
+          } else {
+            console.log('column is not String. cannot sort');
+          }
+        }
         var url = boUtils.encodeQueryData(urlBase, urlParams);
         $http.get(url).then(function (value) {
           var serverData = value.data;
@@ -1919,17 +1928,21 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
     }, {
       data: function data(product) {
         return _.get(product, 'data.nickname.ko') || '';
-      }
+      },
+      orderable: false
     }, {
       data: function data(product) {
         return _.get(product, 'brand.data.name.ko') || '';
-      }
+      },
+      orderable: false
     }, {
       data: function data(product) {
         return product.sku || '';
-      }
+      },
+      orderable: false
     }, {
       data: 'id',
+      orderable: false,
       render: function render(id) {
         return '<button data-ng-click="deleteProduct(' + id + ')" class="btn red"><i class="fa fa-remove"></i> ' + $translate.instant('main.deleteButton') + '</button>';
       }
@@ -2194,76 +2207,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
   // END Manipluate Variant attributes
 
-  // BEGIN Manipulate Variant Kinds
-  /*
-    $scope.newObjects = {
-      variantKind: '',
-      variantKindItem: '',
-    };
-  
-    $scope.addVariantKind = (name) => {
-      if (name && name.trim() !== '') {
-        $scope.newObjects.variantKind = '';
-        for (const kind of $scope.variantKinds) {
-          if (kind.name === name) {
-            $scope.hideAddItemBox();
-            window.alert('duplicate name');
-            return false;
-          }
-        }
-        $scope.variantKinds.push({name: name, kinds: []});
-        // TODO enhance hiding add item box
-        $scope.hideAddItemBox();
-      }
-    };
-    $scope.addVariantKindItem = (index, name) => {
-      if (name && name.trim() !== '') {
-        $scope.newObjects.variantKindItem = '';
-        for (const kindItem of $scope.variantKinds[index].kinds) {
-          if (kindItem === name) {
-            $scope.hideAddItemBox();
-            window.alert('duplicate name');
-            return false;
-          }
-        }
-        $scope.variantKinds[index].kinds.push(name);
-        // TODO enhance hiding add item box
-        $('.add-item-box').css('display', 'none');
-      }
-    };
-  
-    $scope.removeVariantKind = (kindIndex) => {
-      const kind = $scope.variantKinds[kindIndex];
-      if (window.confirm('Really Delete [' + kind.name + '] ?')) {
-        $scope.variantKinds.splice(kindIndex, 1);
-      }
-    };
-  
-    $scope.removeVariantKindItem = (kindIndex, itemIndex) => {
-      $scope.variantKinds[kindIndex].kinds.splice(itemIndex, 1);
-    };
-  
-    $scope.clickAddVariantOrItem = (event) => {
-      $scope.hideAddItemBox();
-      $(event.target).prev().css('display', 'inline-block');
-      $(event.target).prev().find('input').focus();
-    };
-  
-    $scope.onInputKeypress = (event) => {
-      if (event.keyCode === 13) {
-        event.preventDefault();
-        $(event.target).blur();
-        return false;
-      }
-      return true;
-    };
-  
-    $scope.hideAddItemBox = () => {
-      $('.add-item-box').css('display', 'none');
-    };
-    */
-  // END Manipulate Variant Kinds
-
   // BEGIN Manipulate Variants
   $scope.generateProductVariants = function () {
     $scope.tmpObjToProduct();
@@ -2448,7 +2391,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
             var imageSet = new Set();
             for (var j = 0; j < row.imagespan; j++) {
               var imgVariant = item.variants[i + j];
-              _.get(imgVariant, 'appImages.default').forEach(function (image) {
+              (_.get(imgVariant, 'appImages.default') || []).forEach(function (image) {
                 if (!imageSet.has(image.url)) {
                   imageSet.add(image.url);
                   row.images.push(image);
@@ -3627,7 +3570,8 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
         return '<a ui-sref="brand.info({brandId: ' + id + '})">' + id + '</a>';
       }
     }, {
-      data: 'data.name.ko'
+      data: 'data.name.ko',
+      orderable: false
     }]
   };
 
