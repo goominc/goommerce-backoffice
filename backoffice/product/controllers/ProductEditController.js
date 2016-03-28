@@ -256,13 +256,14 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   $scope.generateProductVariants();
 
   const afterSaveProduct = (product) => {
-    $http.put(`/api/v1/products/${product.id}/index`).then((res) => {
+    return $http.put(`/api/v1/products/${product.id}/index`).then((res) => {
       // ignore
     });
   };
 
   $scope.saveAndContinue = () => {
     $scope.doSave().then((product) => {
+      afterSaveProduct(product);
       if ($scope.product.id) {
         // 2016. 02. 29. [heekyu] update product variant id for deny multiple create
         $state.reload();
@@ -281,14 +282,12 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then((res) => {
-        afterSaveProduct(res.product);
         return res.product;
       }, (err) => {
         window.alert('Product Create Fail' + err.data);
       });
     } else {
       return productUtil.updateProduct($scope.product, $scope.productVariants, $scope.origVariants).then((res) => {
-        afterSaveProduct(res.product);
         $scope.origVariants.clear();
         return res.product;
       }, (err) => {
@@ -302,9 +301,11 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
 
   $scope.save = () => {
     $scope.doSave().then((product) => {
-      if (product && product.id) {
-        $state.go('product.main');
-      }
+      afterSaveProduct(product).then(() => {
+        if (product && product.id) {
+          $state.go('product.main');
+        }
+      });
     });
   };
 

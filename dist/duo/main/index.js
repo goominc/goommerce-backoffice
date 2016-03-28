@@ -2311,13 +2311,14 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   $scope.generateProductVariants();
 
   var afterSaveProduct = function afterSaveProduct(product) {
-    $http.put('/api/v1/products/' + product.id + '/index').then(function (res) {
+    return $http.put('/api/v1/products/' + product.id + '/index').then(function (res) {
       // ignore
     });
   };
 
   $scope.saveAndContinue = function () {
     $scope.doSave().then(function (product) {
+      afterSaveProduct(product);
       if ($scope.product.id) {
         // 2016. 02. 29. [heekyu] update product variant id for deny multiple create
         $state.reload();
@@ -2336,14 +2337,12 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then(function (res) {
-        afterSaveProduct(res.product);
         return res.product;
       }, function (err) {
         window.alert('Product Create Fail' + err.data);
       });
     } else {
       return productUtil.updateProduct($scope.product, $scope.productVariants, $scope.origVariants).then(function (res) {
-        afterSaveProduct(res.product);
         $scope.origVariants.clear();
         return res.product;
       }, function (err) {
@@ -2357,9 +2356,11 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
   $scope.save = function () {
     $scope.doSave().then(function (product) {
-      if (product && product.id) {
-        $state.go('product.main');
-      }
+      afterSaveProduct(product).then(function () {
+        if (product && product.id) {
+          $state.go('product.main');
+        }
+      });
     });
   };
 
