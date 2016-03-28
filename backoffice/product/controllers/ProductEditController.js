@@ -195,76 +195,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
   // END Manipluate Variant attributes
 
-  // BEGIN Manipulate Variant Kinds
-/*
-  $scope.newObjects = {
-    variantKind: '',
-    variantKindItem: '',
-  };
-
-  $scope.addVariantKind = (name) => {
-    if (name && name.trim() !== '') {
-      $scope.newObjects.variantKind = '';
-      for (const kind of $scope.variantKinds) {
-        if (kind.name === name) {
-          $scope.hideAddItemBox();
-          window.alert('duplicate name');
-          return false;
-        }
-      }
-      $scope.variantKinds.push({name: name, kinds: []});
-      // TODO enhance hiding add item box
-      $scope.hideAddItemBox();
-    }
-  };
-  $scope.addVariantKindItem = (index, name) => {
-    if (name && name.trim() !== '') {
-      $scope.newObjects.variantKindItem = '';
-      for (const kindItem of $scope.variantKinds[index].kinds) {
-        if (kindItem === name) {
-          $scope.hideAddItemBox();
-          window.alert('duplicate name');
-          return false;
-        }
-      }
-      $scope.variantKinds[index].kinds.push(name);
-      // TODO enhance hiding add item box
-      $('.add-item-box').css('display', 'none');
-    }
-  };
-
-  $scope.removeVariantKind = (kindIndex) => {
-    const kind = $scope.variantKinds[kindIndex];
-    if (window.confirm('Really Delete [' + kind.name + '] ?')) {
-      $scope.variantKinds.splice(kindIndex, 1);
-    }
-  };
-
-  $scope.removeVariantKindItem = (kindIndex, itemIndex) => {
-    $scope.variantKinds[kindIndex].kinds.splice(itemIndex, 1);
-  };
-
-  $scope.clickAddVariantOrItem = (event) => {
-    $scope.hideAddItemBox();
-    $(event.target).prev().css('display', 'inline-block');
-    $(event.target).prev().find('input').focus();
-  };
-
-  $scope.onInputKeypress = (event) => {
-    if (event.keyCode === 13) {
-      event.preventDefault();
-      $(event.target).blur();
-      return false;
-    }
-    return true;
-  };
-
-  $scope.hideAddItemBox = () => {
-    $('.add-item-box').css('display', 'none');
-  };
-  */
-  // END Manipulate Variant Kinds
-
   // BEGIN Manipulate Variants
   $scope.generateProductVariants = () => {
     $scope.tmpObjToProduct();
@@ -404,12 +334,12 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           const imageSet = new Set();
           for (let j = 0; j < row.imagespan; j++) {
             const imgVariant = item.variants[i+j];
-            (_.get(imgVariant, 'appImages.default').forEach((image) => {
+            (_.get(imgVariant, 'appImages.default') || []).forEach((image) => {
               if (!imageSet.has(image.url)) {
                 imageSet.add(image.url);
                 row.images.push(image);
               }
-            }));
+            });
           }
         }
         $scope.imageRows.push(row);
