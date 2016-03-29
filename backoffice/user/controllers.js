@@ -254,13 +254,15 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
       {title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false},
       {title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false},
       {title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false},
+      {title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false},
+      {title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false},
     ];
   };
   init(user);
 
   $scope.save = () => {
     convertUtil.copyFieldObj($scope.userFields, $scope.user);
-    $http.put(`/api/v1/users/${$scope.user.id}`, _.pick($scope.user, 'data')).then((res) => {
+    $http.put(`/api/v1/users/${$scope.user.id}`, _.pick($scope.user, 'data', 'inipay')).then((res) => {
       init(res.data);
     });
   };
