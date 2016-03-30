@@ -17,7 +17,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
   $rootScope.initAll($scope, $state.current.name);
 
   $scope.userDatatables = {
-    field: '',
+    field: 'users',
     url: '/api/v1/users',
     columns: [
       {
