@@ -1,7 +1,7 @@
 
 const userModule = require('./module');
 
-userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootScope, $translate, userUtil) => {
+userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootScope, $translate, $compile, userUtil) => {
   $scope.contentTitle = $translate.instant('user.manage.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
@@ -81,6 +81,8 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
           res.admin = true;
         } else if (role.type === 'buyer') {
           res.buyer = true;
+        } else if (role.type === 'owner') {
+          res.seller = true;
         }
       };
     }
@@ -117,6 +119,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       const data = datas[i];
       $scope.userIdToData[data.id] = data;
     }
+    $compile(angular.element($('table')))($scope);
   };
 
   // 2016. 02. 23. [heekyu] this is very limited since server cannot handle race condition properly

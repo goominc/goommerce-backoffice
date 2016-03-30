@@ -439,7 +439,7 @@ directiveModule.directive('boDatatables', function ($http, $compile, $parse, dat
   };
 });
 
-directiveModule.directive('boServerDatatables', function ($http, datatableCommons, boUtils) {
+directiveModule.directive('boServerDatatables', function ($http, $compile, datatableCommons, boUtils) {
   return {
     restrict: 'A',
     transclude: true,
@@ -490,6 +490,8 @@ directiveModule.directive('boServerDatatables', function ($http, datatableCommon
           if (scope.tableRender) {
             scope.tableRender();
           }
+          // 2016. 03. 30. [heekyu] THIS DOES NOT WORK
+          // $compile(angular.element(elem.find('table')))(scope);
         });
       };
       elem.find('table').dataTable(options);
@@ -1325,7 +1327,7 @@ module.exports = {
 
 var userModule = require('./module');
 
-userModule.controller('UserManageController', function ($scope, $http, $q, $state, $rootScope, $translate, userUtil) {
+userModule.controller('UserManageController', function ($scope, $http, $q, $state, $rootScope, $translate, $compile, userUtil) {
   $scope.contentTitle = $translate.instant('user.manage.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [{
@@ -1398,6 +1400,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
           res.admin = true;
         } else if (role.type === 'buyer') {
           res.buyer = true;
+        } else if (role.type === 'owner') {
+          res.seller = true;
         }
       };
     }
@@ -1434,6 +1438,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       var data = datas[i];
       $scope.userIdToData[data.id] = data;
     }
+    $compile(angular.element($('table')))($scope);
   };
 
   // 2016. 02. 23. [heekyu] this is very limited since server cannot handle race condition properly

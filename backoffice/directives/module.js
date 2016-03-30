@@ -79,7 +79,7 @@ directiveModule.directive('boDatatables', ($http, $compile, $parse, datatableCom
   };
 });
 
-directiveModule.directive('boServerDatatables', ($http, datatableCommons, boUtils) => {
+directiveModule.directive('boServerDatatables', ($http, $compile, datatableCommons, boUtils) => {
   return {
     restrict: 'A',
     transclude: true,
@@ -130,6 +130,8 @@ directiveModule.directive('boServerDatatables', ($http, datatableCommons, boUtil
           if (scope.tableRender) {
             scope.tableRender();
           }
+          // 2016. 03. 30. [heekyu] THIS DOES NOT WORK
+          // $compile(angular.element(elem.find('table')))(scope);
         });
       };
       elem.find('table').dataTable(options);
