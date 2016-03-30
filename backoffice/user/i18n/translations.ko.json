@@ -10,6 +10,8 @@
     "info": {
       "emailLabel": "이메일",
       "gradeLabel": "회원 등급",
+      "vbankCodeLabel": "은행코드",
+      "vbankAccountLabel": "가상계좌번호",
       "isConfirmed": "인증 여부",
       "title": "유저 정보",
       "telLabel": "전화번호",
