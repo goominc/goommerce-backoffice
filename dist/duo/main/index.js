@@ -1301,6 +1301,8 @@ module.exports = {
     "info": {
       "emailLabel": "이메일",
       "gradeLabel": "회원 등급",
+      "vbankCodeLabel": "은행코드",
+      "vbankAccountLabel": "가상계좌번호",
       "isConfirmed": "인증 여부",
       "title": "유저 정보",
       "telLabel": "전화번호",
@@ -1336,7 +1338,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
   $rootScope.initAll($scope, $state.current.name);
 
   $scope.userDatatables = {
-    field: '',
+    field: 'users',
     url: '/api/v1/users',
     columns: [{
       data: 'id',
@@ -1555,13 +1557,13 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
   var init = function init(user) {
     $scope.user = user;
 
-    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }];
+    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false }, { title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false }];
   };
   init(user);
 
   $scope.save = function () {
     convertUtil.copyFieldObj($scope.userFields, $scope.user);
-    $http.put('/api/v1/users/' + $scope.user.id, _.pick($scope.user, 'data')).then(function (res) {
+    $http.put('/api/v1/users/' + $scope.user.id, _.pick($scope.user, 'data', 'inipay')).then(function (res) {
       init(res.data);
     });
   };
