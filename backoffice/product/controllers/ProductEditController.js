@@ -403,7 +403,14 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     connectWith: '.image-container, .product-image-trash',
     placeholder: 'ui-state-highlight',
   };
+  $scope.setProductMainImage = () => {
+    if ($scope.imageRows.length > 0) {
+      // TODO
+      $scope.product.appImages = { default: [$scope.imageRows[0].images[0]] };
+    }
+  };
   $scope.imageRowsToVariant = () => {
+    $scope.setProductMainImage(); // TODO
     let i = 0;
     while (i < $scope.imageRows.length) {
       const row = $scope.imageRows[i];

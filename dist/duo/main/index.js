@@ -2472,7 +2472,14 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     connectWith: '.image-container, .product-image-trash',
     placeholder: 'ui-state-highlight'
   };
+  $scope.setProductMainImage = function () {
+    if ($scope.imageRows.length > 0) {
+      // TODO
+      $scope.product.appImages = { 'default': [$scope.imageRows[0].images[0]] };
+    }
+  };
   $scope.imageRowsToVariant = function () {
+    $scope.setProductMainImage(); // TODO
     var i = 0;
     while (i < $scope.imageRows.length) {
       var row = $scope.imageRows[i];
