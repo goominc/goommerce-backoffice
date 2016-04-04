@@ -320,7 +320,10 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     $scope.doSave().then((product) => {
       afterSaveProduct(product).then(() => {
         if (product && product.id) {
-          $state.go('product.main');
+          // 2016. 04. 04. [heekyu] elasticsearch does not return newly updated product
+          setTimeout(() => {
+            $state.go('product.main');
+          }, 1000);
         }
       });
     });
