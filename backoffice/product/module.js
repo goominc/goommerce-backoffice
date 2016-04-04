@@ -87,12 +87,29 @@ productModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/product/image-upload.html',
       controller: 'ProductImageUploadController',
       resolve: {
-        products: ($http, $q) => {
-          return $http.get('/api/v1/products').then((res) => {
+        brands: ($http, $q) => {
+          const collectByBrand = (products) => {
+            const brandMap = {};
+            products.forEach((product) => {
+              const brandId = _.get(product, 'brand.id');
+              if (!brandId) return;
+              if (!brandMap[brandId]) {
+                brandMap[brandId] = { brand: product.brand, products: [] };
+              }
+              brandMap[brandId].products.push(product);
+            });
+            return Object.keys(brandMap).map((key) => brandMap[key]);
+          };
+          const maxProductCount = 20;
+          return $http.get(`/api/v1/products?limit=${maxProductCount}`).then((res) => {
             const products = res.data.products;
-            if (products.length > 5) {
-              products.length = 5;
+            // 2016. 04. 04. [heekyu] older product is front
+            for (let i = 0; i < products.length / 2; i++) {
+              const tmp = products[i];
+              products[i] = products[products.length - 1 - i];
+              products[products.length - 1 - i] = tmp;
             }
+            // Array.reverse(products); why Array.reverse does not exist?
             const len = products.length;
             const promises = [];
             for (let i = 0; i < len; i++) {
@@ -102,8 +119,8 @@ productModule.config(($stateProvider) => {
                 product.productVariants = res2.data.productVariants.map((variant) => narrowProductVariant(variant));
               }));
             }
-            return $q.all(promises).then((res) => {
-              return products;
+            return $q.all(promises).then(() => {
+              return collectByBrand(products);;
             });
           });
         },

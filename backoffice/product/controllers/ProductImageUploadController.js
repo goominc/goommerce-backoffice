@@ -2,10 +2,13 @@
 
 const productModule = require('../module');
 
-productModule.controller('ProductImageUploadController', ($scope, $http, $q, products) => {
+productModule.controller('ProductImageUploadController', ($scope, $http, $q, brands) => {
   $scope.saveDisabled = true;
-  $scope.brands = {};
-  $scope.brandIds = [];
+  if (!brands.length) {
+    // 2016. 04. 04. [heekyu] there is nothing to do
+    return;
+  }
+  $scope.brands = brands;
   const extractDataFromVariant = (variant) => {
     const splits = variant.sku.split('-');
     if (splits.length === 3) {
@@ -57,24 +60,71 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     }
     return { rows, product };
   };
-  const productsToRows = () => {
-    // must be called once
-    // if called multiple, $scope.brands must be clear
+  const productsToRows = (products) => {
+    $scope.items = [];
     const len = products.length;
     for (let i = 0; i < len; i++) {
       const product = products[i];
-      const brandId = _.get(product, 'brand.id') || -1;
-      if (!$scope.brands[brandId]) {
-        $scope.brands[brandId] = [];
-      }
-      $scope.brands[brandId].push(productToTableData(product));
+      $scope.items.push(productToTableData(product));
     }
-    $scope.brandIds = Object.keys($scope.brands);
   };
-  productsToRows();
+
+  $scope.setActiveBrand = (brand) => {
+    $scope.activeBrand = brand;
+    $scope.saveDisabled = true;
+    productsToRows($scope.activeBrand.products);
+  };
+  $scope.setActiveBrand(brands[0]);
 
   const imgExt = new Set(['jpg', 'jpeg', 'png']);
   $('#image-upload-button').on('change', function (changeEvent) {
+    const images = [];
+    for (let i = 0; i < changeEvent.target.files.length; i++) {
+      const file = changeEvent.target.files[i];
+      const split = file.webkitRelativePath.split('.');
+      const ext = split[split.length - 1];
+      if (imgExt.has(ext)) {
+        images.push(file);
+      }
+    }
+
+    let imgIdx = 0;
+    let loadDone = 0;
+    const plusLoadDone = () => {
+      loadDone++;
+      if (loadDone == imgIdx) {
+        $scope.saveDisabled = false;
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      }
+    };
+    for (let j = 0; j < $scope.items.length; j++) {
+      const rows = $scope.items[j].rows;
+      for (let k = 0; k < rows.length; k++) {
+        const row = rows[k];
+        if (row.rowspan < 1) {
+          continue;
+        }
+        row.images.length = row.slotCount;
+        for (let k = 0; k < row.slotCount; k++) {
+          if (imgIdx == images.length) {
+            window.alert('image count mismatch');
+            row.images.length = k;
+            break;
+          }
+          const r = new FileReader();
+          r.onload = function(e) {
+            row.images[k] = { url: e.target.result };
+            plusLoadDone();
+          };
+          r.readAsDataURL(images[imgIdx++]);
+        }
+        if (imgIdx == images.length) break;
+      }
+      if (imgIdx == images.length) break;
+    }
+    /*
     const imagesByBrand = {};
     for (let i = 0; i < changeEvent.target.files.length; i++) {
       const file = changeEvent.target.files[i];
@@ -92,7 +142,6 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         imagesByBrand[brandId].push(file);
       }
     }
-    const brandIds = Object.keys(imagesByBrand);
     for (let i = 0; i < brandIds.length; i++) {
       const brandId = brandIds[i];
       if ($scope.brands[brandId]) {
@@ -135,7 +184,12 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         }
       }
     }
+     */
   });
+  $scope.imageSortable = {
+    connectWith: '.image-container',
+    placeholder: 'ui-state-highlight',
+  };
   $scope.saveImages = () => {
     let uploadedVariantCount = 0;
     let allVariantCount = 0;
@@ -191,7 +245,6 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
           promises.push($http.put(`/api/v1/products/${productId}`, productData));
         }
         $q.all(promises).then((res) => {
-          console.log(res);
           plusDoneVariant();
         });
       };
@@ -205,7 +258,22 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         saveProductVariant();
       }
     };
+    for (let j = 0; j < $scope.items.length; j++) {
+      const item = $scope.items[j];
+      let r = 0;
+      while (r < item.rows.length) {
+        const sameColor = item.rows[r].rowspan;
+        const images = item.rows[r].images;
+        for (let k = 0; k < sameColor; k++) {
+          const row = item.rows[r++];
+          if (!row.images || row.images.length < 1) continue;
 
+          allVariantCount++;
+          uploadRowImages(item.product.id, row.variantId, images, row.mainProduct);
+        }
+      }
+    }
+/*
     for (let i = 0; i < $scope.brandIds.length; i++) {
       const items = $scope.brands[$scope.brandIds[i]];
       for (let j = 0; j < items.length; j++) {
@@ -228,5 +296,6 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         }
       }
     }
+    */
   };
 });

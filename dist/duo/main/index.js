@@ -1659,12 +1659,31 @@ productModule.config(function ($stateProvider) {
     templateUrl: templateRoot + '/product/image-upload.html',
     controller: 'ProductImageUploadController',
     resolve: {
-      products: function products($http, $q) {
-        return $http.get('/api/v1/products').then(function (res) {
+      brands: function brands($http, $q) {
+        var collectByBrand = function collectByBrand(products) {
+          var brandMap = {};
+          products.forEach(function (product) {
+            var brandId = _.get(product, 'brand.id');
+            if (!brandId) return;
+            if (!brandMap[brandId]) {
+              brandMap[brandId] = { brand: product.brand, products: [] };
+            }
+            brandMap[brandId].products.push(product);
+          });
+          return Object.keys(brandMap).map(function (key) {
+            return brandMap[key];
+          });
+        };
+        var maxProductCount = 20;
+        return $http.get('/api/v1/products?limit=' + maxProductCount).then(function (res) {
           var products = res.data.products;
-          if (products.length > 5) {
-            products.length = 5;
+          // 2016. 04. 04. [heekyu] older product is front
+          for (var i = 0; i < products.length / 2; i++) {
+            var tmp = products[i];
+            products[i] = products[products.length - 1 - i];
+            products[products.length - 1 - i] = tmp;
           }
+          // Array.reverse(products); why Array.reverse does not exist?
           var len = products.length;
           var promises = [];
 
@@ -1681,8 +1700,8 @@ productModule.config(function ($stateProvider) {
           for (var i = 0; i < len; i++) {
             _loop(i);
           }
-          return $q.all(promises).then(function (res) {
-            return products;
+          return $q.all(promises).then(function () {
+            return collectByBrand(products);;
           });
         });
       }
@@ -2382,7 +2401,10 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.doSave().then(function (product) {
       afterSaveProduct(product).then(function () {
         if (product && product.id) {
-          $state.go('product.main');
+          // 2016. 04. 04. [heekyu] elasticsearch does not return newly updated product
+          setTimeout(function () {
+            $state.go('product.main');
+          }, 1000);
         }
       });
     });
@@ -3087,10 +3109,13 @@ productModule.controller('ProductBatchUploadController', function ($scope, $http
 
 var productModule = require('../module');
 
-productModule.controller('ProductImageUploadController', function ($scope, $http, $q, products) {
+productModule.controller('ProductImageUploadController', function ($scope, $http, $q, brands) {
   $scope.saveDisabled = true;
-  $scope.brands = {};
-  $scope.brandIds = [];
+  if (!brands.length) {
+    // 2016. 04. 04. [heekyu] there is nothing to do
+    return;
+  }
+  $scope.brands = brands;
   var extractDataFromVariant = function extractDataFromVariant(variant) {
     var splits = variant.sku.split('-');
     if (splits.length === 3) {
@@ -3142,106 +3167,155 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     }
     return { rows: rows, product: product };
   };
-  var productsToRows = function productsToRows() {
-    // must be called once
-    // if called multiple, $scope.brands must be clear
+  var productsToRows = function productsToRows(products) {
+    $scope.items = [];
     var len = products.length;
     for (var i = 0; i < len; i++) {
       var product = products[i];
-      var brandId = _.get(product, 'brand.id') || -1;
-      if (!$scope.brands[brandId]) {
-        $scope.brands[brandId] = [];
-      }
-      $scope.brands[brandId].push(productToTableData(product));
+      $scope.items.push(productToTableData(product));
     }
-    $scope.brandIds = Object.keys($scope.brands);
   };
-  productsToRows();
+
+  $scope.setActiveBrand = function (brand) {
+    $scope.activeBrand = brand;
+    $scope.saveDisabled = true;
+    productsToRows($scope.activeBrand.products);
+  };
+  $scope.setActiveBrand(brands[0]);
 
   var imgExt = new Set(['jpg', 'jpeg', 'png']);
   $('#image-upload-button').on('change', function (changeEvent) {
-    var imagesByBrand = {};
+    var images = [];
     for (var i = 0; i < changeEvent.target.files.length; i++) {
       var file = changeEvent.target.files[i];
       var split = file.webkitRelativePath.split('.');
       var ext = split[split.length - 1];
       if (imgExt.has(ext)) {
-        var paths = file.webkitRelativePath.split('/');
+        images.push(file);
+      }
+    }
+
+    var imgIdx = 0;
+    var loadDone = 0;
+    var plusLoadDone = function plusLoadDone() {
+      loadDone++;
+      if (loadDone == imgIdx) {
+        $scope.saveDisabled = false;
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      }
+    };
+    for (var j = 0; j < $scope.items.length; j++) {
+      var rows = $scope.items[j].rows;
+
+      var _loop = function (k) {
+        var row = rows[k];
+        if (row.rowspan < 1) {
+          return 'continue';
+        }
+        row.images.length = row.slotCount;
+
+        var _loop3 = function (_k) {
+          if (imgIdx == images.length) {
+            window.alert('image count mismatch');
+            row.images.length = _k;
+            return 'break';
+          }
+          var r = new FileReader();
+          r.onload = function (e) {
+            row.images[_k] = { url: e.target.result };
+            plusLoadDone();
+          };
+          r.readAsDataURL(images[imgIdx++]);
+        };
+
+        for (var _k = 0; _k < row.slotCount; _k++) {
+          var _ret2 = _loop3(_k);
+
+          if (_ret2 === 'break') break;
+        }
+        if (imgIdx == images.length) return 'break';
+      };
+
+      _loop2: for (var k = 0; k < rows.length; k++) {
+        var _ret = _loop(k);
+
+        switch (_ret) {
+          case 'continue':
+            continue;
+
+          case 'break':
+            break _loop2;}
+      }
+
+      if (imgIdx == images.length) break;
+    }
+    /*
+    const imagesByBrand = {};
+    for (let i = 0; i < changeEvent.target.files.length; i++) {
+      const file = changeEvent.target.files[i];
+      const split = file.webkitRelativePath.split('.');
+      const ext = split[split.length - 1];
+      if (imgExt.has(ext)) {
+        const paths = file.webkitRelativePath.split('/');
         if (paths.length < 2) {
           continue;
         }
-        var brandId = paths[paths.length - 2];
+        const brandId = paths[paths.length - 2];
         if (!imagesByBrand[brandId]) {
           imagesByBrand[brandId] = [];
         }
         imagesByBrand[brandId].push(file);
       }
     }
-    var brandIds = Object.keys(imagesByBrand);
-    for (var i = 0; i < brandIds.length; i++) {
-      var brandId = brandIds[i];
+    for (let i = 0; i < brandIds.length; i++) {
+      const brandId = brandIds[i];
       if ($scope.brands[brandId]) {
-        (function () {
-          var items = $scope.brands[brandId]; // { product: , rows: }
-          var images = imagesByBrand[brandId];
-
-          var imgIdx = 0;
-          var loadDone = 0;
-          var plusLoadDone = function plusLoadDone() {
-            loadDone++;
-            if (loadDone == imgIdx) {
-              $scope.saveDisabled = false;
-              if (!$scope.$$phase) {
-                $scope.$apply();
-              }
-            }
-          };
-          for (var j = 0; j < items.length; j++) {
-            var rows = items[j].rows;
-
-            var _loop = function (k) {
-              var row = rows[k];
-              if (row.rowspan < 1) {
-                return 'continue';
-              }
-              row.images.length = row.slotCount;
-
-              var _loop3 = function (_k) {
-                if (imgIdx == images.length) {
-                  window.alert('image count mismatch');
-                  return 'break';
-                }
-                var r = new FileReader();
-                r.onload = function (e) {
-                  row.images[_k] = { url: e.target.result };
-                  plusLoadDone();
-                };
-                r.readAsDataURL(images[imgIdx++]);
-              };
-
-              for (var _k = 0; _k < row.slotCount; _k++) {
-                var _ret3 = _loop3(_k);
-
-                if (_ret3 === 'break') break;
-              }
-              if (imgIdx == images.length) return 'break';
-            };
-
-            _loop2: for (var k = 0; k < rows.length; k++) {
-              var _ret2 = _loop(k);
-
-              switch (_ret2) {
-                case 'continue':
-                  continue;
-
-                case 'break':
-                  break _loop2;}
+        const items = $scope.brands[brandId]; // { product: , rows: }
+        const images = imagesByBrand[brandId];
+         let imgIdx = 0;
+        let loadDone = 0;
+        const plusLoadDone = () => {
+          loadDone++;
+          if (loadDone == imgIdx) {
+            $scope.saveDisabled = false;
+            if (!$scope.$$phase) {
+              $scope.$apply();
             }
           }
-        })();
+        };
+        for (let j = 0; j < items.length; j++) {
+          const rows = items[j].rows;
+          for (let k = 0; k < rows.length; k++) {
+            const row = rows[k];
+            if (row.rowspan < 1) {
+              continue;
+            }
+            row.images.length = row.slotCount;
+            for (let k = 0; k < row.slotCount; k++) {
+              if (imgIdx == images.length) {
+                window.alert('image count mismatch');
+                break;
+              }
+              const r = new FileReader();
+              r.onload = function(e) {
+                row.images[k] = { url: e.target.result };
+                plusLoadDone();
+              };
+              r.readAsDataURL(images[imgIdx++]);
+            }
+            if (imgIdx == images.length) break;
+          }
+        }
       }
     }
+     */
   });
+  $scope.imageSortable = {
+    connectWith: '.image-container',
+    placeholder: 'ui-state-highlight'
+  };
   $scope.saveImages = function () {
     var uploadedVariantCount = 0;
     var allVariantCount = 0;
@@ -3302,7 +3376,6 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
           promises.push($http.put('/api/v1/products/' + productId, productData));
         }
         $q.all(promises).then(function (res) {
-          console.log(res);
           plusDoneVariant();
         });
       };
@@ -3316,29 +3389,45 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         saveProductVariant();
       }
     };
-
-    for (var i = 0; i < $scope.brandIds.length; i++) {
-      var items = $scope.brands[$scope.brandIds[i]];
-      for (var j = 0; j < items.length; j++) {
-        var item = items[j];
-        var r = 0;
-        while (r < item.rows.length) {
-          var sameColor = item.rows[r].rowspan;
-          var images = item.rows[r].images;
-          for (var k = 0; k < sameColor; k++) {
-            var row = item.rows[r++];
-            if (!row.images || row.images.length < 1) continue;
-
-            allVariantCount++;
-            uploadRowImages(item.product.id, row.variantId, images, row.mainProduct);
-          }
-        }
-        for (var k = 0; k < item.rows.length; k++) {
-          var row = item.rows[k];
+    for (var j = 0; j < $scope.items.length; j++) {
+      var item = $scope.items[j];
+      var r = 0;
+      while (r < item.rows.length) {
+        var sameColor = item.rows[r].rowspan;
+        var images = item.rows[r].images;
+        for (var k = 0; k < sameColor; k++) {
+          var row = item.rows[r++];
           if (!row.images || row.images.length < 1) continue;
+
+          allVariantCount++;
+          uploadRowImages(item.product.id, row.variantId, images, row.mainProduct);
         }
       }
     }
+    /*
+        for (let i = 0; i < $scope.brandIds.length; i++) {
+          const items = $scope.brands[$scope.brandIds[i]];
+          for (let j = 0; j < items.length; j++) {
+            const item = items[j];
+            let r = 0;
+            while (r < item.rows.length) {
+              const sameColor = item.rows[r].rowspan;
+              const images = item.rows[r].images;
+              for (let k = 0; k < sameColor; k++) {
+                const row = item.rows[r++];
+                if (!row.images || row.images.length < 1) continue;
+    
+                allVariantCount++;
+                uploadRowImages(item.product.id, row.variantId, images, row.mainProduct);
+              }
+            }
+            for (let k = 0; k < item.rows.length; k++) {
+              const row = item.rows[k];
+              if (!row.images || row.images.length < 1) continue;
+            }
+          }
+        }
+        */
   };
 });
 }, {"../module":6}],

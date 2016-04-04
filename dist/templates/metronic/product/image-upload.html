@@ -11,13 +11,68 @@
         <div class="col-md-12">
           <div class="portlet light">
             <div class="portlet-body">
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary">{{activeBrand.brand.data.name[state.editLocale]}}</button>
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li data-ng-repeat="brand in brands">
+                    <a data-ng-click="setActiveBrand(brand)">
+                      {{brand.brand.data.name[state.editLocale]}} </a>
+                  </li>
+                </ul>
+              </div>
               <span class="btn green fileinput-button" style="margin: 15px 0;">
                 <i class="fa fa-plus"></i> Add Images
                 <input type="file" id="image-upload-button" webkitdirectory directory multiple/>
               </span>
               <button data-ng-disabled="saveDisabled" data-ng-click="saveImages()" class="btn green">Start Upload</button>
               <div class="row">
-                <div class="col-md-12" data-ng-repeat="brandId in brandIds">
+                <div class="col-md-12">
+                  <h2>Brand: {{activeBrand.brand.data.name[state.editLocale]}}</h2>
+                  <table class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                      <th width="5%">Product ID</th>
+                      <th width="15%">SKU</th>
+                      <th width="10%">Color</th>
+                      <th width="5%">SlotCount</th>
+                      <th width="5%">MainImage</th>
+                      <th width="60%">Images</th>
+                    </tr>
+                    </thead>
+                    <tbody class="cell-center" data-ng-repeat="item in items">
+                    <tr>
+                      <td><a ui-sref="product.edit({productId: item.product.id})">{{item.product.id}}</a></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr data-ng-repeat="row in item.rows">
+                      <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}"></td>
+                      <td>{{row.sku}}</td>
+                      <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">{{row.color}}</td>
+                      <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
+                        <input class="product-small-number-input" type="number" min="0" data-ng-model="row.slotCount" />
+                      </td>
+                      <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
+                        <input id="check-{{item.product.id}}-{{row.sku}}" type="checkbox"
+                               data-ng-model="row.mainProduct"
+                               data-ng-change="row.slotCount = row.mainProduct ? 6 : 2"/>
+                        <label style="margin: 0;" for="check-{{item.product.id}}-{{row.sku}}"></label>
+                      </td>
+                      <td style="text-align: left !important;" data-ng-if="row.rowspan > 0"
+                        rowspan="{{row.rowspan}}"
+                        class="image-container" ui-sortable="imageSortable" data-ng-model="row.images"
+                      >
+                        <img data-ng-repeat="image in row.images" width="80px" height="120px" data-ng-src="{{image.url}}" />
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <!--div class="col-md-12" data-ng-repeat="brandId in brandIds">
                   <h2>Brand: {{brandId > 0 ? brandId : 'NotAssigned'}}</h2>
                   <table class="table table-bordered table-hover">
                     <thead>
@@ -57,7 +112,7 @@
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </div-->
             </div>
           </div>
         </div>
