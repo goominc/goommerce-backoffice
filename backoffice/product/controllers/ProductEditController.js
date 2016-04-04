@@ -80,6 +80,14 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       $scope.allBrands = res.data.brands || [];
       initAutoComplete();
     });
+    $scope.handleBrandKeyPress = (e) => {
+      if (e.which === 13) {
+        // Enter key
+        e.preventDefault();
+        // http://stackoverflow.com/questions/26785109/select-first-suggestion-from-typeahead-js-when-hit-enter-key-in-the-field#answer-26785802
+        $(".tt-suggestion:first-child", this).trigger('click');
+      }
+    };
 
     $scope.tmpObj = {};
     $scope.productVariantsMap = {};
