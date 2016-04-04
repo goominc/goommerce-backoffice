@@ -192,6 +192,15 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     const removed = variantKind.kinds.splice(itemIndex, 1);
     variantKind.selected.delete(removed[0]);
     variantKind.kinds = Array.from(variantKind.selected);
+    const newVariants = [];
+    ($scope.productVariants || []).forEach((variant) => {
+      if (variant.data[variantKind.key] !== removed[0]) {
+        newVariants.push(variant);
+      } else {
+        delete $scope.productVariantsMap[variant.sku];
+      }
+    });
+    $scope.productVariants = newVariants;
   };
   // END Manipluate Variant attributes
 
