@@ -1400,19 +1400,27 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     $('#user_manage_create_user').removeClass('in');
     $('.modal-backdrop').remove();
   };
-  $scope.editRole = { admin: false, buyer: false, seller: false };
+
+  $scope.editRole = { admin: false, buyer: false, bigBuyer: false, seller: false };
+  // former item has more priority
+  var roles = ['admin', 'bigBuyer', 'buyer'];
   $scope.makeUserRolePopupData = function (user) {
-    var res = { admin: false, buyer: false, seller: false };
+    var res = { admin: false, buyer: false, bigBuyer: false, seller: false };
     if (user.roles) {
-      for (var i = 0; i < user.roles.length; i++) {
+      var _loop = function (i) {
         var role = user.roles[i];
-        if (role.type === 'admin') {
-          res.admin = true;
-        } else if (role.type === 'buyer') {
-          res.buyer = true;
-        } else if (role.type === 'owner') {
+        roles.forEach(function (item) {
+          if (role.type === item) {
+            res[item] = true;
+          }
+        });
+        if (role.type === 'owner') {
           res.seller = true;
         }
+      };
+
+      for (var i = 0; i < user.roles.length; i++) {
+        _loop(i);
       };
     }
     $scope.editRole = res;
@@ -1454,10 +1462,11 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
   // 2016. 02. 23. [heekyu] this is very limited since server cannot handle race condition properly
   $scope.saveRole = function () {
     var editRoleToData = function editRoleToData() {
-      if ($scope.editRole.admin) {
-        return [{ type: 'admin' }];
-      } else if ($scope.editRole.buyer) {
-        return [{ type: 'buyer' }];
+      for (var i = 0; i < roles.length; i++) {
+        var role = roles[i];
+        if ($scope.editRole[role]) {
+          return [{ type: role }];
+        }
       }
       return null;
     };
@@ -1468,8 +1477,11 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     var addOrDelete = {};
 
     var isChangable = function isChangable(roleType) {
-      if (roleType === 'admin' || roleType === 'buyer') {
-        return true;
+      for (var i = 0; i < roles.length; i++) {
+        var role = roles[i];
+        if (role === roleType) {
+          return true;
+        }
       }
       return false;
     };
@@ -3145,12 +3157,15 @@ productModule.controller('ProductBatchUploadController', function ($scope, $http
 
 var productModule = require('../module');
 
-productModule.controller('ProductImageUploadController', function ($scope, $http, $q, brands) {
+productModule.controller('ProductImageUploadController', function ($scope, $http, $q, boUtils, brands) {
   $scope.saveDisabled = true;
   if (!brands.length) {
     // 2016. 04. 04. [heekyu] there is nothing to do
     return;
   }
+  brands.forEach(function (brand) {
+    brand.brand.displayName = boUtils.getNameWithAllBuildingInfo(brand.brand);
+  });
   $scope.brands = brands;
   var extractDataFromVariant = function extractDataFromVariant(variant) {
     var color = _.get(variant, 'data.color');

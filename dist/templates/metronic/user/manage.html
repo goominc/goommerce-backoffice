@@ -92,6 +92,7 @@
           <thead>
           <tr>
             <th>Admin</th>
+            <th>BigBuyer</th>
             <th>Buyer</th>
             <th>Seller</th>
           </tr>
@@ -101,6 +102,10 @@
             <td style="text-align: center;">
               <input id="edit_role_admin" type="checkbox" data-ng-model="editRole.admin" />
               <label for="edit_role_admin"></label>
+            </td>
+            <td style="text-align: center;">
+              <input data-ng-if="!editRole.admin && !editRole.seller" id="edit_role_bigBuyer" type="checkbox" data-ng-model="editRole.bigBuyer" />
+              <label for="edit_role_bigBuyer"></label>
             </td>
             <td style="text-align: center;">
               <input data-ng-if="!editRole.admin && !editRole.seller" id="edit_role_buyer" type="checkbox" data-ng-model="editRole.buyer" />

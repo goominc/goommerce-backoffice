@@ -71,17 +71,21 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
     $('#user_manage_create_user').removeClass('in');
     $('.modal-backdrop').remove();
   };
-  $scope.editRole = { admin: false, buyer: false, seller: false };
+
+  $scope.editRole = { admin: false, buyer: false, bigBuyer: false, seller: false };
+  // former item has more priority
+  const roles = ['admin', 'bigBuyer', 'buyer'];
   $scope.makeUserRolePopupData = (user) => {
-    const res = { admin: false, buyer: false, seller: false };
+    const res = { admin: false, buyer: false, bigBuyer: false, seller: false };
     if (user.roles) {
       for (let i = 0; i < user.roles.length; i++) {
         const role = user.roles[i];
-        if (role.type === 'admin') {
-          res.admin = true;
-        } else if (role.type === 'buyer') {
-          res.buyer = true;
-        } else if (role.type === 'owner') {
+        roles.forEach((item) => {
+          if (role.type === item) {
+            res[item] = true;
+          }
+        });
+        if (role.type === 'owner') {
           res.seller = true;
         }
       };
@@ -125,10 +129,11 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
   // 2016. 02. 23. [heekyu] this is very limited since server cannot handle race condition properly
   $scope.saveRole = () => {
     const editRoleToData = () => {
-      if ($scope.editRole.admin) {
-        return [{ type: 'admin' }];
-      } else if ($scope.editRole.buyer) {
-        return [{ type: 'buyer' }];
+      for (let i = 0; i < roles.length; i++) {
+        const role = roles[i];
+        if ($scope.editRole[role]) {
+          return [ { type: role }];
+        }
       }
       return null;
     };
@@ -139,8 +144,11 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
     const addOrDelete = {};
 
     const isChangable = (roleType) => {
-      if (roleType === 'admin' || roleType === 'buyer') {
-        return true;
+      for (let i = 0; i < roles.length; i++) {
+        const role = roles[i];
+        if (role === roleType) {
+          return true;
+        }
       }
       return false;
     };
