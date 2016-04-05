@@ -2,12 +2,15 @@
 
 const productModule = require('../module');
 
-productModule.controller('ProductImageUploadController', ($scope, $http, $q, brands) => {
+productModule.controller('ProductImageUploadController', ($scope, $http, $q, boUtils, brands) => {
   $scope.saveDisabled = true;
   if (!brands.length) {
     // 2016. 04. 04. [heekyu] there is nothing to do
     return;
   }
+  brands.forEach((brand) => {
+    brand.brand.displayName = boUtils.getNameWithAllBuildingInfo(brand.brand);
+  });
   $scope.brands = brands;
   const extractDataFromVariant = (variant) => {
     const color = _.get(variant, 'data.color');

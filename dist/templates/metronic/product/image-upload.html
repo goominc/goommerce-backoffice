@@ -12,12 +12,12 @@
           <div class="portlet light">
             <div class="portlet-body">
               <div class="btn-group">
-                <button type="button" class="btn btn-primary">{{activeBrand.brand.name[state.editLocale]}}</button>
+                <button type="button" class="btn btn-primary">{{activeBrand.brand.displayName}}</button>
                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></button>
                 <ul class="dropdown-menu" role="menu">
                   <li data-ng-repeat="brand in brands">
                     <a data-ng-click="setActiveBrand(brand)">
-                      {{brand.brand.name[state.editLocale]}} </a>
+                      {{brand.brand.displayName}} </a>
                   </li>
                 </ul>
               </div>
@@ -28,7 +28,7 @@
               <button data-ng-disabled="saveDisabled" data-ng-click="saveImages()" class="btn green">Start Upload</button>
               <div class="row">
                 <div class="col-md-12">
-                  <h2>Brand: {{activeBrand.brand.name[state.editLocale]}}</h2>
+                  <h2>Brand: {{activeBrand.brand.displayName}}</h2>
                   <table class="table table-bordered table-hover">
                     <thead>
                     <tr>
@@ -46,11 +46,9 @@
                       <td></td>
                       <td></td>
                       <td></td>
-                      <td></td>
                     </tr>
                     <tr data-ng-repeat="row in item.rows">
                       <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}"></td>
-                      <td>{{row.sku}}</td>
                       <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">{{row.color}}</td>
                       <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
                         <input class="product-small-number-input" type="number" min="0" data-ng-model="row.slotCount" />
@@ -119,20 +117,3 @@
     </div>
   </div>
 </div>
-<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
-<div class="modal fade">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-
-      </div>
-      <div class="modal-body">
-
-      </div>
-      <div class="modal-footer">
-
-      </div>
-    </div>
-  </div>
-</div>
--->
