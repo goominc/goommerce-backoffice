@@ -29,7 +29,7 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
         },
       },
       {
-        data: (product) => _.get(product, 'data.nickname.ko') || '',
+        data: (product) => _.get(product, 'name.ko') || '',
         orderable: false,
       },
       {

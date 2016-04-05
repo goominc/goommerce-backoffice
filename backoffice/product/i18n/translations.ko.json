@@ -2,7 +2,7 @@
   "product": {
     "main": {
       "title": "상품",
-      "nicknameColumn": "닉네임",
+      "nameColumn": "이름",
       "brandColumn": "브랜드"
     },
     "list": {

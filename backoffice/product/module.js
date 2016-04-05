@@ -16,7 +16,7 @@ productModule.config(($stateProvider) => {
   // 2016. 01. 04. [heekyu] how can I configure this outside of config?
   const templateRoot = 'templates/metronic';
 
-  const narrowProduct = (product) => _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages']);
+  const narrowProduct = (product) => _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages', 'name']);
   const narrowProductVariant = (variant) => _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages']);
 
   $stateProvider

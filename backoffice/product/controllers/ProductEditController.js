@@ -147,7 +147,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
    */
   $scope.inputFields = [
     // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
-    {title: 'nickname', key: 'data.nickname.ko', tmpKey: 'nickname', isRequired: true},
+    {title: 'name', key: 'name.ko', tmpKey: 'name', isRequired: true},
   ];
 
   $scope.tmpObjToProduct = () => {
