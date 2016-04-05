@@ -53,7 +53,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     const currencies = ['KRW', 'USD', 'CNY'];
     if (!product) {
       $scope.product = { sku: 'autogen', KRW: 0, data: {} };
-      $scope.variantKinds[0].kinds = ['Black', 'White'];
+      $scope.variantKinds[0].kinds = [];
       $scope.variantKinds[1].kinds = ['Free'];
       $scope.variantKinds.forEach((kind) => kind.selected = new Set(kind.kinds));
     } else {
@@ -68,7 +68,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
 
     const initAutoComplete = () => {
       const autoCompleteNode = $('#brand_search_input');
-      boUtils.autoComplete(autoCompleteNode, 'product-brand-search', $scope.allBrands, 'data.name.ko');
+      boUtils.autoComplete(autoCompleteNode, 'product-brand-search', $scope.allBrands, boUtils.getNameWithAllBuildingInfo);
       autoCompleteNode.on('typeahead:selected', (obj, datum) => {
         $scope.product.brand = datum;
       });

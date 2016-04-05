@@ -40,12 +40,12 @@ utilModule.factory('boUtils', ($http) => {
       const SS = appendLeadingZeroIfNeeded(date.getSeconds().toString());
       return yyyy + '-' + mm + '-' + dd + ' ' + HH + ':' + MM + ':' + SS;
     },
-    autoComplete: (elem, name, data, valueKey) => {
+    autoComplete: (elem, name, data, fnGetDisplay) => {
       const Bloodhound = window.Bloodhound;
       let tokenizer = Bloodhound.tokenizers.whitespace;
-      if (valueKey) {
+      if (fnGetDisplay) {
         tokenizer = (datum) => {
-          return Bloodhound.tokenizers.whitespace(_.get(datum, valueKey));
+          return Bloodhound.tokenizers.whitespace(fnGetDisplay(datum));
         };
       }
       const option1 = {
@@ -65,9 +65,9 @@ utilModule.factory('boUtils', ($http) => {
         name,
         source: source.ttAdapter(),
       };
-      if (valueKey) {
+      if (fnGetDisplay) {
         // option3.displayKey = valueKey;
-        option3.display = (d) => _.get(d, valueKey);
+        option3.display = (d) => fnGetDisplay(d);
       }
       elem.typeahead(
         option2,
@@ -84,6 +84,19 @@ utilModule.factory('boUtils', ($http) => {
         (res) => res,
         (err) => window.alert(err)
       );
+    },
+    getNameWithAllBuildingInfo: (brand) => {
+      // format: 'Name (Building Floor FlatNumber)'
+      const data = brand && brand.data;
+      if (!data) {
+        return '';
+      }
+
+      const name = data.name.ko; // TODO i18n
+      if (!name) {
+        return '';
+      }
+      return `${name} ( ${_.get(brand, 'data.building.name')} ${_.get(brand, 'data.building.floor')} ${_.get(brand, 'data.building.flatNumber')}호 )`; // eslint-disable-line
     },
   };
 });
