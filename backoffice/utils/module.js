@@ -88,15 +88,12 @@ utilModule.factory('boUtils', ($http) => {
     getNameWithAllBuildingInfo: (brand) => {
       // format: 'Name (Building Floor FlatNumber)'
       const data = brand && brand.data;
-      if (!data) {
+      const name = brand && brand.name;
+      if (!data || !name || !name.ko) {
         return '';
       }
 
-      const name = data.name.ko; // TODO i18n
-      if (!name) {
-        return '';
-      }
-      return `${name} ( ${_.get(brand, 'data.building.name')} ${_.get(brand, 'data.building.floor')} ${_.get(brand, 'data.building.flatNumber')}호 )`; // eslint-disable-line
+      return `${name.ko} ( ${_.get(brand, 'data.building.name')} ${_.get(brand, 'data.building.floor')} ${_.get(brand, 'data.building.flatNumber')}호 )`; // eslint-disable-line
     },
   };
 });

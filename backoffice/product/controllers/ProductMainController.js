@@ -33,7 +33,7 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
         orderable: false,
       },
       {
-        data: (product) => _.get(product, 'brand.data.name.ko') || '',
+        data: (product) => _.get(product, 'brand.name.ko') || '',
         orderable: false,
       },
       {

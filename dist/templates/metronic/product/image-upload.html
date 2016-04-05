@@ -12,12 +12,12 @@
           <div class="portlet light">
             <div class="portlet-body">
               <div class="btn-group">
-                <button type="button" class="btn btn-primary">{{activeBrand.brand.data.name[state.editLocale]}}</button>
+                <button type="button" class="btn btn-primary">{{activeBrand.brand.name[state.editLocale]}}</button>
                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></button>
                 <ul class="dropdown-menu" role="menu">
                   <li data-ng-repeat="brand in brands">
                     <a data-ng-click="setActiveBrand(brand)">
-                      {{brand.brand.data.name[state.editLocale]}} </a>
+                      {{brand.brand.name[state.editLocale]}} </a>
                   </li>
                 </ul>
               </div>
@@ -28,7 +28,7 @@
               <button data-ng-disabled="saveDisabled" data-ng-click="saveImages()" class="btn green">Start Upload</button>
               <div class="row">
                 <div class="col-md-12">
-                  <h2>Brand: {{activeBrand.brand.data.name[state.editLocale]}}</h2>
+                  <h2>Brand: {{activeBrand.brand.name[state.editLocale]}}</h2>
                   <table class="table table-bordered table-hover">
                     <thead>
                     <tr>

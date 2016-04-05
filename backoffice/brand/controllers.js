@@ -7,7 +7,7 @@ brandModule.factory('brandCommons', ($http) => {
     saveBrand: (brand) => {
       const brandsUrl = '/api/v1/brands';
       let promise = null;
-      const brandFields = ['pathname', 'data'];
+      const brandFields = ['pathname', 'name'];
       if (brand.id) {
         promise = $http.put(`brandsUrl/${brand.id}`, _.pick(brand, brandFields));
       } else {
@@ -37,7 +37,7 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, brandCom
         },
       },
       {
-        data: 'data.name.ko',
+        data: 'name.ko',
         orderable: false,
       },
     ],
@@ -46,7 +46,7 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, brandCom
   $scope.createBrand = (brand) => {
     brandCommons.saveBrand(brand).then(() => {
       $scope.closeBrandPopup();
-      $scope.newBrand.data.name = {};
+      $scope.newBrand.name = {};
       boUtils.refreshDatatableAjax(brandsUrl, $($element), fieldName);
     }).catch((err) => {
       let message = err.data.message;
@@ -58,7 +58,7 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, brandCom
   };
 
   $scope.newBrand = {
-    data: { name: {} },
+    name: {},
   };
 
   $scope.closeBrandPopup = () => {

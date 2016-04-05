@@ -642,15 +642,12 @@ utilModule.factory('boUtils', function ($http) {
     getNameWithAllBuildingInfo: function getNameWithAllBuildingInfo(brand) {
       // format: 'Name (Building Floor FlatNumber)'
       var data = brand && brand.data;
-      if (!data) {
+      var name = brand && brand.name;
+      if (!data || !name || !name.ko) {
         return '';
       }
 
-      var name = data.name.ko; // TODO i18n
-      if (!name) {
-        return '';
-      }
-      return name + ' ( ' + _.get(brand, 'data.building.name') + ' ' + _.get(brand, 'data.building.floor') + ' ' + _.get(brand, 'data.building.flatNumber') + '호 )'; // eslint-disable-line
+      return name.ko + ' ( ' + _.get(brand, 'data.building.name') + ' ' + _.get(brand, 'data.building.floor') + ' ' + _.get(brand, 'data.building.flatNumber') + '호 )'; // eslint-disable-line
     }
   };
 });
@@ -1973,7 +1970,7 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       orderable: false
     }, {
       data: function data(product) {
-        return _.get(product, 'brand.data.name.ko') || '';
+        return _.get(product, 'brand.name.ko') || '';
       },
       orderable: false
     }, {
@@ -2088,7 +2085,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         $scope.product.brand = datum;
       });
       if ($scope.product.brand) {
-        autoCompleteNode.val(_.get($scope.product.brand, 'data.name.ko'));
+        autoCompleteNode.val(_.get($scope.product.brand, 'name.ko'));
       }
     };
     $scope.fieldIdPrefix = 'ProductField';
@@ -3707,7 +3704,7 @@ brandModule.factory('brandCommons', function ($http) {
     saveBrand: function saveBrand(brand) {
       var brandsUrl = '/api/v1/brands';
       var promise = null;
-      var brandFields = ['pathname', 'data'];
+      var brandFields = ['pathname', 'name'];
       if (brand.id) {
         promise = $http.put('brandsUrl/' + brand.id, _.pick(brand, brandFields));
       } else {
@@ -3735,7 +3732,7 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
         return '<a ui-sref="brand.info({brandId: ' + id + '})">' + id + '</a>';
       }
     }, {
-      data: 'data.name.ko',
+      data: 'name.ko',
       orderable: false
     }]
   };
@@ -3743,7 +3740,7 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
   $scope.createBrand = function (brand) {
     brandCommons.saveBrand(brand).then(function () {
       $scope.closeBrandPopup();
-      $scope.newBrand.data.name = {};
+      $scope.newBrand.name = {};
       boUtils.refreshDatatableAjax(brandsUrl, $($element), fieldName);
     })['catch'](function (err) {
       var message = err.data.message;
@@ -3755,7 +3752,7 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
   };
 
   $scope.newBrand = {
-    data: { name: {} }
+    name: {}
   };
 
   $scope.closeBrandPopup = function () {
