@@ -32,9 +32,8 @@
                   <table class="table table-bordered table-hover">
                     <thead>
                     <tr>
-                      <th width="5%">Product ID</th>
-                      <th width="15%">SKU</th>
-                      <th width="10%">Color</th>
+                      <th width="15%">Product</th>
+                      <th width="15%">Color</th>
                       <th width="5%">SlotCount</th>
                       <th width="5%">MainImage</th>
                       <th width="60%">Images</th>
@@ -42,7 +41,7 @@
                     </thead>
                     <tbody class="cell-center" data-ng-repeat="item in items">
                     <tr>
-                      <td><a ui-sref="product.edit({productId: item.product.id})">{{item.product.id}}</a></td>
+                      <td><a ui-sref="product.edit({productId: item.product.id})">{{item.product.name.ko}}</a></td>
                       <td></td>
                       <td></td>
                       <td></td>

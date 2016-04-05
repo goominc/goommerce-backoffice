@@ -10,6 +10,11 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, bra
   }
   $scope.brands = brands;
   const extractDataFromVariant = (variant) => {
+    const color = _.get(variant, 'data.color');
+    const size = _.get(variant, 'data.size');
+    if (color && size) {
+      return { color, size };
+    }
     const splits = variant.sku.split('-');
     if (splits.length === 3) {
       return {

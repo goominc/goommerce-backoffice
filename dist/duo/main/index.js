@@ -3156,6 +3156,11 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
   }
   $scope.brands = brands;
   var extractDataFromVariant = function extractDataFromVariant(variant) {
+    var color = _.get(variant, 'data.color');
+    var size = _.get(variant, 'data.size');
+    if (color && size) {
+      return { color: color, size: size };
+    }
     var splits = variant.sku.split('-');
     if (splits.length === 3) {
       return {
