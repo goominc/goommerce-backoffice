@@ -1,5 +1,6 @@
 {
   "product": {
+    "saveAndNewButton": "저장하고 새 상품 만들기",
     "main": {
       "title": "상품",
       "nameColumn": "이름",

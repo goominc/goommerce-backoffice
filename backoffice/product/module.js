@@ -31,7 +31,7 @@ productModule.config(($stateProvider) => {
       controller: 'ProductMainController',
     })
     .state('product.add', {
-      url: '/add',
+      url: '/add?brandId',
       templateUrl: templateRoot + '/product/edit.html',
       controller: 'ProductEditController',
       resolve: {

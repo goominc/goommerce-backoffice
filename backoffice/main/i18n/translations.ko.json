@@ -5,7 +5,7 @@
     "closeButton": "닫기",
     "deleteButton": "삭제",
     "saveButton": "저장",
-    "saveAndContinueButton": "저장 후 계속",
+    "saveAndMainButton": "저장하고 메인으로 이동",
     "addImageButton": "이미지 추가",
     "login": {
       "title": "로그인",

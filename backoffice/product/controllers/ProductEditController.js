@@ -76,8 +76,19 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         autoCompleteNode.val(_.get($scope.product.brand, 'data.name.ko'));
       }
     };
+    $scope.fieldIdPrefix = 'ProductField';
     $http.get('/api/v1/brands').then((res) => {
       $scope.allBrands = res.data.brands || [];
+      if ($state.params.brandId) {
+        for (let i = 0; i < $scope.allBrands.length; i++) {
+          const brand = $scope.allBrands[i];
+          if (+brand.id === +$state.params.brandId) {
+            $scope.product.brand = brand;
+            $('#ProductFieldnickname').focus();
+            break;
+          }
+        }
+      }
       initAutoComplete();
     });
     $scope.handleBrandKeyPress = (e) => {
@@ -215,17 +226,12 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   // BEGIN Manipulate Variants
   $scope.generateProductVariants = () => {
     $scope.tmpObjToProduct();
-    /*
-    if (!$scope.product.sku || $scope.product.sku === '') {
-      window.alert('insert SKU first.'); // TODO message
-      return false;
-    }
-    */
     const newVariantSKUs = [];
     let idx = 0;
     for (const variantKind of $scope.variantKinds) {
       if (variantKind.kinds.length < 1) {
-        continue;
+        // 2016. 04. 05. [heekyu] there is no combinations
+        return;
       }
       if (newVariantSKUs.length < 1) {
         newVariantSKUs.push($scope.product.sku);
@@ -279,13 +285,14 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
 
   $scope.saveAndContinue = () => {
+    const isNewProduct = !$scope.product.id;
     $scope.doSave().then((product) => {
       afterSaveProduct(product);
-      if ($scope.product.id) {
+      if (isNewProduct) {
+        $state.go('product.edit', { productId: product.id });
+      } else {
         // 2016. 02. 29. [heekyu] update product variant id for deny multiple create
         $state.reload();
-      } else {
-        $state.go('product.edit', { productId: product.id });
       }
       window.alert('Saved Successfully');
     });
@@ -293,6 +300,10 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
 
   $scope.doSave = () => {
     // 2016. 01. 18. [heekyu] save images
+    if (!_.get($scope.product, 'brand.id')) {
+      window.alert('select brand!');
+      return new Promise((resolve, reject) => {});
+    }
     $scope.tmpObjToProduct();
     // $scope.imageToProduct();
     $scope.imageRowsToVariant();
@@ -326,6 +337,19 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           }, 1000);
         }
       });
+    });
+  };
+
+  $scope.saveAndNew = () => {
+    $scope.doSave().then((product) => {
+      afterSaveProduct(product);
+      if (!product.brand || !product.brand.id) {
+        // Code Error
+        console.log('code error. newly created product does not have brand');
+        console.log(product);
+        return;
+      }
+      $state.go('product.add', { brandId: product.brand.id });
     });
   };
 
