@@ -594,12 +594,12 @@ utilModule.factory('boUtils', function ($http) {
       var SS = appendLeadingZeroIfNeeded(date.getSeconds().toString());
       return yyyy + '-' + mm + '-' + dd + ' ' + HH + ':' + MM + ':' + SS;
     },
-    autoComplete: function autoComplete(elem, name, data, valueKey) {
+    autoComplete: function autoComplete(elem, name, data, fnGetDisplay) {
       var Bloodhound = window.Bloodhound;
       var tokenizer = Bloodhound.tokenizers.whitespace;
-      if (valueKey) {
+      if (fnGetDisplay) {
         tokenizer = function (datum) {
-          return Bloodhound.tokenizers.whitespace(_.get(datum, valueKey));
+          return Bloodhound.tokenizers.whitespace(fnGetDisplay(datum));
         };
       }
       var option1 = {
@@ -619,10 +619,10 @@ utilModule.factory('boUtils', function ($http) {
         name: name,
         source: source.ttAdapter()
       };
-      if (valueKey) {
+      if (fnGetDisplay) {
         // option3.displayKey = valueKey;
         option3.display = function (d) {
-          return _.get(d, valueKey);
+          return fnGetDisplay(d);
         };
       }
       elem.typeahead(option2, option3);
@@ -638,6 +638,19 @@ utilModule.factory('boUtils', function ($http) {
       }, function (err) {
         return window.alert(err);
       });
+    },
+    getNameWithAllBuildingInfo: function getNameWithAllBuildingInfo(brand) {
+      // format: 'Name (Building Floor FlatNumber)'
+      var data = brand && brand.data;
+      if (!data) {
+        return '';
+      }
+
+      var name = data.name.ko; // TODO i18n
+      if (!name) {
+        return '';
+      }
+      return name + ' ( ' + _.get(brand, 'data.building.name') + ' ' + _.get(brand, 'data.building.floor') + ' ' + _.get(brand, 'data.building.flatNumber') + '호 )'; // eslint-disable-line
     }
   };
 });
@@ -1589,7 +1602,7 @@ productModule.config(function ($stateProvider) {
   var templateRoot = 'templates/metronic';
 
   var narrowProduct = function narrowProduct(product) {
-    return _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages']);
+    return _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages', 'name']);
   };
   var narrowProductVariant = function narrowProductVariant(variant) {
     return _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages']);
@@ -1604,7 +1617,7 @@ productModule.config(function ($stateProvider) {
     templateUrl: templateRoot + '/product/main.html',
     controller: 'ProductMainController'
   }).state('product.add', {
-    url: '/add',
+    url: '/add?brandId',
     templateUrl: templateRoot + '/product/edit.html',
     controller: 'ProductEditController',
     resolve: {
@@ -1877,9 +1890,10 @@ module.exports = {
 24: [function(require, module, exports) {
 module.exports = {
   "product": {
+    "saveAndNewButton": "저장하고 새 상품 만들기",
     "main": {
       "title": "상품",
-      "nicknameColumn": "닉네임",
+      "nameColumn": "이름",
       "brandColumn": "브랜드"
     },
     "list": {
@@ -1921,7 +1935,8 @@ module.exports = {
       "title": "이미지 일괄 등록"
     }
   }
-};
+}
+;
 }, {}],
 25: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
@@ -1953,7 +1968,7 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       }
     }, {
       data: function data(product) {
-        return _.get(product, 'data.nickname.ko') || '';
+        return _.get(product, 'name.ko') || '';
       },
       orderable: false
     }, {
@@ -2047,7 +2062,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     var currencies = ['KRW', 'USD', 'CNY'];
     if (!product) {
       $scope.product = { sku: 'autogen', KRW: 0, data: {} };
-      $scope.variantKinds[0].kinds = ['Black', 'White'];
+      $scope.variantKinds[0].kinds = [];
       $scope.variantKinds[1].kinds = ['Free'];
       $scope.variantKinds.forEach(function (kind) {
         return kind.selected = new Set(kind.kinds);
@@ -2068,7 +2083,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
     var initAutoComplete = function initAutoComplete() {
       var autoCompleteNode = $('#brand_search_input');
-      boUtils.autoComplete(autoCompleteNode, 'product-brand-search', $scope.allBrands, 'data.name.ko');
+      boUtils.autoComplete(autoCompleteNode, 'product-brand-search', $scope.allBrands, boUtils.getNameWithAllBuildingInfo);
       autoCompleteNode.on('typeahead:selected', function (obj, datum) {
         $scope.product.brand = datum;
       });
@@ -2076,8 +2091,19 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         autoCompleteNode.val(_.get($scope.product.brand, 'data.name.ko'));
       }
     };
+    $scope.fieldIdPrefix = 'ProductField';
     $http.get('/api/v1/brands').then(function (res) {
       $scope.allBrands = res.data.brands || [];
+      if ($state.params.brandId) {
+        for (var i = 0; i < $scope.allBrands.length; i++) {
+          var brand = $scope.allBrands[i];
+          if (+brand.id === +$state.params.brandId) {
+            $scope.product.brand = brand;
+            $('#ProductFieldname').focus();
+            break;
+          }
+        }
+      }
       initAutoComplete();
     });
     $scope.handleBrandKeyPress = function (e) {
@@ -2186,7 +2212,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
    */
   $scope.inputFields = [
   // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
-  { title: 'nickname', key: 'data.nickname.ko', tmpKey: 'nickname', isRequired: true }];
+  { title: 'name', key: 'name.ko', tmpKey: 'name', isRequired: true }];
 
   $scope.tmpObjToProduct = function () {
     for (var i = 0; i < $scope.inputFields.length; i++) {
@@ -2253,12 +2279,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   // BEGIN Manipulate Variants
   $scope.generateProductVariants = function () {
     $scope.tmpObjToProduct();
-    /*
-    if (!$scope.product.sku || $scope.product.sku === '') {
-      window.alert('insert SKU first.'); // TODO message
-      return false;
-    }
-    */
     var newVariantSKUs = [];
     var idx = 0;
     var _iteratorNormalCompletion3 = true;
@@ -2270,7 +2290,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         var variantKind = _step3.value;
 
         if (variantKind.kinds.length < 1) {
-          continue;
+          // 2016. 04. 05. [heekyu] there is no combinations
+          return;
         }
         if (newVariantSKUs.length < 1) {
           newVariantSKUs.push($scope.product.sku);
@@ -2360,13 +2381,14 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
 
   $scope.saveAndContinue = function () {
+    var isNewProduct = !$scope.product.id;
     $scope.doSave().then(function (product) {
       afterSaveProduct(product);
-      if ($scope.product.id) {
+      if (isNewProduct) {
+        $state.go('product.edit', { productId: product.id });
+      } else {
         // 2016. 02. 29. [heekyu] update product variant id for deny multiple create
         $state.reload();
-      } else {
-        $state.go('product.edit', { productId: product.id });
       }
       window.alert('Saved Successfully');
     });
@@ -2374,6 +2396,10 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
   $scope.doSave = function () {
     // 2016. 01. 18. [heekyu] save images
+    if (!_.get($scope.product, 'brand.id')) {
+      window.alert('select brand!');
+      return new Promise(function (resolve, reject) {});
+    }
     $scope.tmpObjToProduct();
     // $scope.imageToProduct();
     $scope.imageRowsToVariant();
@@ -2407,6 +2433,19 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
           }, 1000);
         }
       });
+    });
+  };
+
+  $scope.saveAndNew = function () {
+    $scope.doSave().then(function (product) {
+      afterSaveProduct(product);
+      if (!product.brand || !product.brand.id) {
+        // Code Error
+        console.log('code error. newly created product does not have brand');
+        console.log(product);
+        return;
+      }
+      $state.go('product.add', { brandId: product.brand.id });
     });
   };
 
@@ -2992,7 +3031,7 @@ productModule.controller('ProductBatchUploadController', function ($scope, $http
 
   var fields = [{ columnName: 'sku', apiName: 'sku' }, { columnName: 'price', apiName: 'KRW', onlyProductVariant: true, convert: function convert(value) {
       return Number(value);
-    } }, { columnName: 'qty', apiName: 'stock', onlyProductVariant: true }, { columnName: 'product_nickname', apiName: 'data.nickname' }, { columnName: 'category_ids', apiName: 'categories', onlyProduct: true, convert: function convert(value) {
+    } }, { columnName: 'qty', apiName: 'stock', onlyProductVariant: true }, { columnName: 'name', apiName: 'name' }, { columnName: 'category_ids', apiName: 'categories', onlyProduct: true, convert: function convert(value) {
       return value.split(',').map(function (v) {
         return Number(v);
       });
@@ -4265,7 +4304,7 @@ module.exports = {
     "closeButton": "닫기",
     "deleteButton": "삭제",
     "saveButton": "저장",
-    "saveAndContinueButton": "저장 후 계속",
+    "saveAndMainButton": "저장하고 메인으로 이동",
     "addImageButton": "이미지 추가",
     "login": {
       "title": "로그인",

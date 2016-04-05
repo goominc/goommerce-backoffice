@@ -84,7 +84,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           const brand = $scope.allBrands[i];
           if (+brand.id === +$state.params.brandId) {
             $scope.product.brand = brand;
-            $('#ProductFieldnickname').focus();
+            $('#ProductFieldname').focus();
             break;
           }
         }
