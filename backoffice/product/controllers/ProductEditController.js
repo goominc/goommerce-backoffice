@@ -369,7 +369,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           rowspan,
           imagespan: imagespan,
           mainProduct: firstVariant,
-          slotCount: firstVariant ? 6 : 2, // TODO,
+          slotCount: 2, // TODO,
           images: [],
         };
         firstVariant = false;
@@ -386,6 +386,9 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
               }
             });
           }
+        }
+        if (row.images.length > 0) {
+          row.slotCount = row.images.length;
         }
         $scope.imageRows.push(row);
       }

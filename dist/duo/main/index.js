@@ -1954,7 +1954,7 @@ module.exports = {
 
 var productModule = require('../module.js');
 
-productModule.controller('ProductMainController', function ($scope, $http, $state, $rootScope, $translate, boConfig) {
+productModule.controller('ProductMainController', function ($scope, $http, $state, $rootScope, $translate, $compile, boConfig) {
   $scope.contentTitle = $translate.instant('product.main.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [{
@@ -1998,13 +1998,19 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       }
     }]
   };
+  $scope.datatablesLoaded = function () {
+    $compile(angular.element($('table')))($scope);
+  };
   $scope.fileContents = 'before';
 
   $scope.deleteProduct = function (productId) {
     if (window.confirm('Really delete product (' + productId + ')?')) {
       $http['delete']('/api/v1/products/' + productId).then(function () {
-        // reload
-        $state.reload(true);
+        $http.put('/api/v1/products/' + productId + '/index').then(function () {
+          setTimeout(function () {
+            $state.reload();
+          }, 1000); // wait 1 sec for elasticsearch update
+        });
       })['catch'](function (err) {
         window.alert(err);
       });
@@ -2475,7 +2481,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
           rowspan: rowspan,
           imagespan: imagespan,
           mainProduct: firstVariant,
-          slotCount: firstVariant ? 6 : 2, // TODO,
+          slotCount: 2, // TODO,
           images: []
         };
         firstVariant = false;
@@ -2494,6 +2500,9 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
               });
             }
           })();
+        }
+        if (row.images.length > 0) {
+          row.slotCount = row.images.length;
         }
         $scope.imageRows.push(row);
       };
