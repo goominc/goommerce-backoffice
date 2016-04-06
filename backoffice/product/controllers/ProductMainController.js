@@ -2,7 +2,7 @@
 
 const productModule = require('../module.js');
 
-productModule.controller('ProductMainController', ($scope, $http, $state, $rootScope, $translate, boConfig) => {
+productModule.controller('ProductMainController', ($scope, $http, $state, $rootScope, $translate, $compile, boConfig) => {
   $scope.contentTitle = $translate.instant('product.main.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
@@ -49,13 +49,19 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
       },
     ],
   };
+  $scope.datatablesLoaded = () => {
+    $compile(angular.element($('table')))($scope);
+  };
   $scope.fileContents = 'before';
 
   $scope.deleteProduct = (productId) => {
     if (window.confirm(`Really delete product (${productId})?`)) {
       $http.delete(`/api/v1/products/${productId}`).then(() => {
-        // reload
-        $state.reload(true);
+        $http.put(`/api/v1/products/${productId}/index`).then(() => {
+          setTimeout(() => {
+            $state.reload();
+          }, 1000); // wait 1 sec for elasticsearch update
+        });
       }).catch((err) => {
         window.alert(err);
       });
