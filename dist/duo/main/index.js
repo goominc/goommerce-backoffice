@@ -1610,13 +1610,6 @@ productModule.config(function ($stateProvider) {
   // 2016. 01. 04. [heekyu] how can I configure this outside of config?
   var templateRoot = 'templates/metronic';
 
-  var narrowProduct = function narrowProduct(product) {
-    return _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages', 'name']);
-  };
-  var narrowProductVariant = function narrowProductVariant(variant) {
-    return _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages']);
-  };
-
   $stateProvider.state('product', {
     abstract: true,
     url: '/product',
@@ -1644,11 +1637,11 @@ productModule.config(function ($stateProvider) {
     templateUrl: templateRoot + '/product/edit.html',
     controller: 'ProductEditController',
     resolve: {
-      product: function product($http, $stateParams) {
+      product: function product($http, $stateParams, productUtil) {
         return $http.get('/api/v1/products/' + $stateParams.productId).then(function (res) {
-          var product = narrowProduct(res.data);
+          var product = productUtil.narrowProduct(res.data);
           product.productVariants = res.data.productVariants.map(function (variant) {
-            return narrowProductVariant(variant);
+            return productUtil.narrowProductVariant(variant);
           });
           return product;
         });
@@ -1679,55 +1672,7 @@ productModule.config(function ($stateProvider) {
   }).state('product.imageUpload', {
     url: '/image-upload',
     templateUrl: templateRoot + '/product/image-upload.html',
-    controller: 'ProductImageUploadController',
-    resolve: {
-      brands: function brands($http, $q) {
-        var collectByBrand = function collectByBrand(products) {
-          var brandMap = {};
-          products.forEach(function (product) {
-            var brandId = _.get(product, 'brand.id');
-            if (!brandId) return;
-            if (!brandMap[brandId]) {
-              brandMap[brandId] = { brand: product.brand, products: [] };
-            }
-            brandMap[brandId].products.push(product);
-          });
-          return Object.keys(brandMap).map(function (key) {
-            return brandMap[key];
-          });
-        };
-        var maxProductCount = 20;
-        return $http.get('/api/v1/products?limit=' + maxProductCount).then(function (res) {
-          var products = res.data.products;
-          // 2016. 04. 04. [heekyu] older product is front
-          for (var i = 0; i < products.length / 2; i++) {
-            var tmp = products[i];
-            products[i] = products[products.length - 1 - i];
-            products[products.length - 1 - i] = tmp;
-          }
-          // Array.reverse(products); why Array.reverse does not exist?
-          var len = products.length;
-          var promises = [];
-
-          var _loop = function (i) {
-            var product = narrowProduct(products[i]);
-            products[i] = product;
-            promises.push($http.get('/api/v1/products/' + product.id + '/product_variants').then(function (res2) {
-              product.productVariants = res2.data.productVariants.map(function (variant) {
-                return narrowProductVariant(variant);
-              });
-            }));
-          };
-
-          for (var i = 0; i < len; i++) {
-            _loop(i);
-          }
-          return $q.all(promises).then(function () {
-            return collectByBrand(products);;
-          });
-        });
-      }
-    }
+    controller: 'ProductImageUploadController'
   });
 });
 
@@ -1872,6 +1817,12 @@ productModule.factory('productUtil', function ($http, $q) {
           curObj = curObj[path];
         }
       });
+    },
+    narrowProduct: function narrowProduct(product) {
+      return _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages', 'name']);
+    },
+    narrowProductVariant: function narrowProductVariant(variant) {
+      return _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages']);
     }
   };
 });
@@ -3166,16 +3117,60 @@ productModule.controller('ProductBatchUploadController', function ($scope, $http
 
 var productModule = require('../module');
 
-productModule.controller('ProductImageUploadController', function ($scope, $http, $q, boUtils, brands) {
+productModule.controller('ProductImageUploadController', function ($scope, $http, $q, productUtil, boUtils) {
   $scope.saveDisabled = true;
-  if (!brands.length) {
-    // 2016. 04. 04. [heekyu] there is nothing to do
-    return;
+  var today = moment();
+  var maxDays = 10;
+  $scope.dates = [];
+  for (var i = 0; i < maxDays; i++) {
+    $scope.dates.push(today.format('YYYY-MM-DD'));
+    today.subtract(1, 'd');
   }
-  brands.forEach(function (brand) {
-    brand.brand.displayName = boUtils.getNameWithAllBuildingInfo(brand.brand);
-  });
-  $scope.brands = brands;
+  $scope.activeDate = $scope.dates[0];
+  var initializeDate = function initializeDate() {
+    var collectByBrand = function collectByBrand(products) {
+      var brandMap = {};
+      products.forEach(function (product) {
+        var brandId = _.get(product, 'brand.id');
+        if (!brandId) return;
+        if (!brandMap[brandId]) {
+          brandMap[brandId] = { brand: product.brand, products: [] };
+        }
+        brandMap[brandId].products.push(product);
+      });
+      return Object.keys(brandMap).map(function (key) {
+        return brandMap[key];
+      });
+    };
+    $http.get('/api/v1/products?start=' + $scope.activeDate + '&end=' + $scope.activeDate).then(function (res) {
+      var products = res.data.products.map(productUtil.narrowProduct);
+      if (products.length < 1) {
+        window.alert('There is no products on ' + $scope.activeDate);
+        $scope.activeBrand = {};
+        $scope.brands = [];
+        productsToRows([]);
+        return;
+      }
+      // 2016. 04. 04. [heekyu] older product is former
+      for (var i = 0; i < products.length / 2; i++) {
+        var tmp = products[i];
+        products[i] = products[products.length - 1 - i];
+        products[products.length - 1 - i] = tmp;
+      }
+      // Array.reverse(products); why Array.reverse does not exist?
+      $scope.brands = collectByBrand(products);
+      $scope.brands.forEach(function (brand) {
+        brand.brand.displayName = boUtils.getNameWithAllBuildingInfo(brand.brand);
+      });
+      $scope.setActiveBrand($scope.brands[0]);
+    });
+  };
+  $scope.setDate = function (date) {
+    $scope.activeDate = date;
+    initializeDate();
+  };
+  initializeDate();
+
   var extractDataFromVariant = function extractDataFromVariant(variant) {
     var color = _.get(variant, 'data.color');
     var size = _.get(variant, 'data.size');
@@ -3219,14 +3214,16 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     for (var i = 0; i < colors.length; i++) {
       var variants = colorMap[colors[i]];
       for (var j = 0; j < variants.length; j++) {
+        var variant = variants[j];
+        var images = _.get(variant, 'appImages.default') || [];
         rows.push({
           color: colors[i],
           rowspan: j === 0 ? variants.length : 0,
-          sku: variants[j].sku,
-          mainProduct: i === 0,
-          slotCount: j > 0 ? 0 : i === 0 ? 6 : 2,
-          images: [],
-          variantId: variants[j].id
+          sku: variant.sku,
+          mainProduct: false, // TODO
+          slotCount: images.length || 2,
+          images: images || [],
+          variantId: variant.id
         });
       }
     }
@@ -3242,11 +3239,28 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
   };
 
   $scope.setActiveBrand = function (brand) {
-    $scope.activeBrand = brand;
-    $scope.saveDisabled = true;
-    productsToRows($scope.activeBrand.products);
+    var products = brand.products;
+    var len = products.length;
+    var promises = [];
+
+    var _loop = function (i) {
+      var product = products[i];
+      if (!product.productVariants) {
+        promises.push($http.get('/api/v1/products/' + product.id + '/product_variants').then(function (res2) {
+          product.productVariants = res2.data.productVariants.map(productUtil.narrowProductVariant);
+        }));
+      }
+    };
+
+    for (var i = 0; i < len; i++) {
+      _loop(i);
+    }
+    return $q.all(promises).then(function () {
+      $scope.activeBrand = brand;
+      $scope.saveDisabled = true;
+      productsToRows($scope.activeBrand.products);
+    });
   };
-  $scope.setActiveBrand(brands[0]);
 
   var imgExt = new Set(['jpg', 'jpeg', 'png']);
   $('#image-upload-button').on('change', function (changeEvent) {
@@ -3274,14 +3288,19 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     for (var j = 0; j < $scope.items.length; j++) {
       var rows = $scope.items[j].rows;
 
-      var _loop = function (k) {
+      var _loop2 = function (k) {
         var row = rows[k];
         if (row.rowspan < 1) {
           return 'continue';
         }
-        row.images.length = row.slotCount;
+        // 2016. 04. 06. [heekyu] do not override existing images
+        var current = row.images.length;
+        var more = row.slotCount - current;
+        if (more < 1) {
+          return 'continue';
+        }
 
-        var _loop3 = function (_k) {
+        var _loop4 = function (_k) {
           if (imgIdx == images.length) {
             window.alert('image count mismatch');
             row.images.length = _k;
@@ -3289,29 +3308,29 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
           }
           var r = new FileReader();
           r.onload = function (e) {
-            row.images[_k] = { url: e.target.result };
+            row.images[current + _k] = { url: e.target.result };
             plusLoadDone();
           };
           r.readAsDataURL(images[imgIdx++]);
         };
 
-        for (var _k = 0; _k < row.slotCount; _k++) {
-          var _ret2 = _loop3(_k);
+        for (var _k = 0; _k < more; _k++) {
+          var _ret3 = _loop4(_k);
 
-          if (_ret2 === 'break') break;
+          if (_ret3 === 'break') break;
         }
         if (imgIdx == images.length) return 'break';
       };
 
-      _loop2: for (var k = 0; k < rows.length; k++) {
-        var _ret = _loop(k);
+      _loop3: for (var k = 0; k < rows.length; k++) {
+        var _ret2 = _loop2(k);
 
-        switch (_ret) {
+        switch (_ret2) {
           case 'continue':
             continue;
 
           case 'break':
-            break _loop2;}
+            break _loop3;}
       }
 
       if (imgIdx == images.length) break;
@@ -3396,7 +3415,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       var uploadCount = 0;
       var done = 0;
 
-      var _loop4 = function (i) {
+      var _loop5 = function (i) {
         var imageUrl = images[i].url;
         if (imageUrl.length > 2 && imageUrl.substring(0, 2) === '//') {
           appImages[i] = images[i];
@@ -3426,7 +3445,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       };
 
       for (var i = 0; i < images.length; i++) {
-        _loop4(i);
+        _loop5(i);
       }
       var saveProductVariant = function saveProductVariant() {
         var promises = [];

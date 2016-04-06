@@ -16,9 +16,6 @@ productModule.config(($stateProvider) => {
   // 2016. 01. 04. [heekyu] how can I configure this outside of config?
   const templateRoot = 'templates/metronic';
 
-  const narrowProduct = (product) => _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages', 'name']);
-  const narrowProductVariant = (variant) => _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages']);
-
   $stateProvider
     .state('product', {
       abstract: true,
@@ -48,10 +45,10 @@ productModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/product/edit.html',
       controller: 'ProductEditController',
       resolve: {
-        product: ($http, $stateParams) => {
+        product: ($http, $stateParams, productUtil) => {
           return $http.get('/api/v1/products/' + $stateParams.productId).then((res) => {
-            const product = narrowProduct(res.data);
-            product.productVariants = res.data.productVariants.map((variant) => narrowProductVariant(variant));
+            const product = productUtil.narrowProduct(res.data);
+            product.productVariants = res.data.productVariants.map((variant) => productUtil.narrowProductVariant(variant));
             return product;
           });
         },
@@ -86,45 +83,6 @@ productModule.config(($stateProvider) => {
       url: '/image-upload',
       templateUrl: templateRoot + '/product/image-upload.html',
       controller: 'ProductImageUploadController',
-      resolve: {
-        brands: ($http, $q) => {
-          const collectByBrand = (products) => {
-            const brandMap = {};
-            products.forEach((product) => {
-              const brandId = _.get(product, 'brand.id');
-              if (!brandId) return;
-              if (!brandMap[brandId]) {
-                brandMap[brandId] = { brand: product.brand, products: [] };
-              }
-              brandMap[brandId].products.push(product);
-            });
-            return Object.keys(brandMap).map((key) => brandMap[key]);
-          };
-          const maxProductCount = 20;
-          return $http.get(`/api/v1/products?limit=${maxProductCount}`).then((res) => {
-            const products = res.data.products;
-            // 2016. 04. 04. [heekyu] older product is front
-            for (let i = 0; i < products.length / 2; i++) {
-              const tmp = products[i];
-              products[i] = products[products.length - 1 - i];
-              products[products.length - 1 - i] = tmp;
-            }
-            // Array.reverse(products); why Array.reverse does not exist?
-            const len = products.length;
-            const promises = [];
-            for (let i = 0; i < len; i++) {
-              const product = narrowProduct(products[i]);
-              products[i] = product;
-              promises.push($http.get(`/api/v1/products/${product.id}/product_variants`).then((res2) => {
-                product.productVariants = res2.data.productVariants.map((variant) => narrowProductVariant(variant));
-              }));
-            }
-            return $q.all(promises).then(() => {
-              return collectByBrand(products);;
-            });
-          });
-        },
-      },
     });
 });
 
@@ -201,6 +159,8 @@ productModule.factory('productUtil', ($http, $q) => {
         }
       })
     },
+    narrowProduct: (product) => _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages', 'name']),
+    narrowProductVariant: (variant) => _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages']),
   };
 });
 

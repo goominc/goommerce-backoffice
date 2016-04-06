@@ -12,12 +12,22 @@
           <div class="portlet light">
             <div class="portlet-body">
               <div class="btn-group">
+                <button type="button" class="btn btn-default">{{activeDate}}</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li data-ng-repeat="date in dates">
+                    <a data-ng-click="setDate(date)">{{date}}</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="btn-group">
                 <button type="button" class="btn btn-primary">{{activeBrand.brand.displayName}}</button>
                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></button>
                 <ul class="dropdown-menu" role="menu">
                   <li data-ng-repeat="brand in brands">
                     <a data-ng-click="setActiveBrand(brand)">
-                      {{brand.brand.displayName}} </a>
+                      {{brand.brand.displayName}}
+                    </a>
                   </li>
                 </ul>
               </div>
@@ -28,7 +38,7 @@
               <button data-ng-disabled="saveDisabled" data-ng-click="saveImages()" class="btn green">Start Upload</button>
               <div class="row">
                 <div class="col-md-12">
-                  <h2>Brand: {{activeBrand.brand.displayName}}</h2>
+                  <h2>{{activeBrand.brand.displayName}}</h2>
                   <table class="table table-bordered table-hover">
                     <thead>
                     <tr>
@@ -55,8 +65,7 @@
                       </td>
                       <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
                         <input id="check-{{item.product.id}}-{{row.sku}}" type="checkbox"
-                               data-ng-model="row.mainProduct"
-                               data-ng-change="row.slotCount = row.mainProduct ? 6 : 2"/>
+                               data-ng-model="row.mainProduct"/>
                         <label style="margin: 0;" for="check-{{item.product.id}}-{{row.sku}}"></label>
                       </td>
                       <td style="text-align: left !important;" data-ng-if="row.rowspan > 0"
@@ -69,47 +78,6 @@
                     </tbody>
                   </table>
                 </div>
-                <!--div class="col-md-12" data-ng-repeat="brandId in brandIds">
-                  <h2>Brand: {{brandId > 0 ? brandId : 'NotAssigned'}}</h2>
-                  <table class="table table-bordered table-hover">
-                    <thead>
-                    <tr>
-                      <th width="5%">Product ID</th>
-                      <th width="20%">SKU</th>
-                      <th width="10%">Color</th>
-                      <th width="5%">SlotCount</th>
-                      <th width="5%">MainImage</th>
-                      <th width="55%">Images</th>
-                    </tr>
-                    </thead>
-                    <tbody class="cell-center" data-ng-repeat="item in brands[brandId]">
-                    <tr>
-                      <td><a ui-sref="product.edit({productId: item.product.id})">{{item.product.id}}</a></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                    </tr>
-                    <tr data-ng-repeat="row in item.rows">
-                      <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}"></td>
-                      <td>{{row.sku}}</td>
-                      <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">{{row.color}}</td>
-                      <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}"><input class="product-small-number-input" type="number" min="0" data-ng-model="row.slotCount" /></td>
-                      <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
-                        <input id="check-{{item.product.id}}-{{row.sku}}" type="checkbox"
-                               data-ng-model="row.mainProduct"
-                               data-ng-change="row.slotCount = row.mainProduct ? 6 : 2"/>
-                        <label style="margin: 0;" for="check-{{item.product.id}}-{{row.sku}}"></label>
-                      </td>
-                      <td style="text-align: left !important;" data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
-                        <img class="image-inline" data-ng-repeat="image in row.images" width="80px" height="120px" data-ng-src="{{image.url}}" />
-                      </td>
-                    </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div-->
             </div>
           </div>
         </div>
