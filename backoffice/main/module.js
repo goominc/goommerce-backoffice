@@ -47,6 +47,20 @@ mainModule.config(($httpProvider, boConfig) => {
   }
 });
 
+// http://stackoverflow.com/questions/21714655/reloading-current-state-refresh-data#answer-23198743
+mainModule.config(function($provide) {
+  $provide.decorator('$state', function($delegate, $stateParams) {
+    $delegate.forceReload = function() {
+      return $delegate.go($delegate.current, $stateParams, {
+        reload: true,
+        inherit: false,
+        notify: true
+      });
+    };
+    return $delegate;
+  });
+});
+
 const ACCESS_TOKEN_KEY = 'GOOMMERCE-BO-TOKEN';
 
 mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile, $translate, $cookies) => {
