@@ -73,7 +73,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         $scope.product.brand = datum;
       });
       if ($scope.product.brand) {
-        autoCompleteNode.val(_.get($scope.product.brand, 'name.ko'));
+        autoCompleteNode.val(boUtils.getNameWithAllBuildingInfo($scope.product.brand));
       }
     };
     $scope.fieldIdPrefix = 'ProductField';

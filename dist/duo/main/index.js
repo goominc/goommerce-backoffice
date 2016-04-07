@@ -95,7 +95,7 @@
 var mainModule = require('./module');
 
 mainModule.constant('boConfig', {
-  apiUrl: 'http://localhost:8080'
+  apiUrl: ''
 });
 }, {"./module":2}],
 2: [function(require, module, exports) {
@@ -569,7 +569,7 @@ directiveModule.directive('boFileReader', function () {
 
 var utilModule = angular.module('backoffice.utils', []);
 
-utilModule.factory('boUtils', function ($http) {
+utilModule.factory('boUtils', function ($http, $q) {
   return {
     // http://stackoverflow.com/questions/111529/create-query-parameters-in-javascript
     encodeQueryData: function encodeQueryData(url, data) {
@@ -1702,17 +1702,26 @@ productModule.factory('productUtil', function ($http, $q) {
           product.id = res.data.id; // need if create
           // $state.go('product.edit', {productId: $scope.product.id});
         }
-        var promises = [];
         var pvUrl = '/api/v1/products/' + product.id + '/product_variants';
+        var promise = $q.when();
+        var result = { product: res.data, productVariants: [] };
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
         var _iteratorError = undefined;
 
         try {
-          for (var _iterator = productVariants[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var _loop = function () {
             var productVariant = _step.value;
 
-            promises.push($http.post(pvUrl, productVariant));
+            promise = promise.then(function () {
+              return $http.post(pvUrl, productVariant).then(function (res2) {
+                result.productVariants.push(res2.data);
+              });
+            });
+          };
+
+          for (var _iterator = productVariants[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            _loop();
           }
         } catch (err) {
           _didIteratorError = true;
@@ -1729,10 +1738,8 @@ productModule.factory('productUtil', function ($http, $q) {
           }
         }
 
-        return $q.all(promises).then(function (res2) {
-          return { product: res.data, productVariants: res2.map(function (item) {
-              return item.data;
-            }) };
+        return promise.then(function () {
+          return result;
         }, function (err) {
           window.alert(err.data);
         });
@@ -1744,22 +1751,33 @@ productModule.factory('productUtil', function ($http, $q) {
       var url = '/api/v1/products/' + product.id;
 
       return $http.put(url, _.omit(product, ['id', 'productVariants'])).then(function (res) {
-        var promises = [];
+        var promise = $q.when();
+        var result = { product: res.data, productVariants: [] };
         var pvUrl = '/api/v1/products/' + product.id + '/product_variants';
         var _iteratorNormalCompletion2 = true;
         var _didIteratorError2 = false;
         var _iteratorError2 = undefined;
 
         try {
-          for (var _iterator2 = productVariants[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var _loop2 = function () {
             var productVariant = _step2.value;
 
             oldProductVariants['delete'](productVariant.id);
             if (!productVariant.id) {
-              promises.push($http.post(pvUrl, productVariant));
+              promise = promise.then(function (res2) {
+                result.productVariants.push(res2.data);
+                return $http.post(pvUrl, productVariant);
+              });
             } else {
-              promises.push($http.put(pvUrl + '/' + productVariant.id, _.omit(productVariant, 'id')));
+              promise = promise.then(function () {
+                result.productVariants.push(res2.data);
+                return $http.put(pvUrl + '/' + productVariant.id, _.omit(productVariant, 'id'));
+              });
             }
+          };
+
+          for (var _iterator2 = productVariants[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            _loop2();
           }
           // 2016. 01. 18. [heekyu] delete removed variants
         } catch (err) {
@@ -1783,10 +1801,16 @@ productModule.factory('productUtil', function ($http, $q) {
           var _iteratorError3 = undefined;
 
           try {
-            for (var _iterator3 = oldProductVariants.values()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+            var _loop3 = function () {
               var deletedVariant = _step3.value;
 
-              promises.push($http({ method: 'DELETE', url: pvUrl + '/' + deletedVariant }));
+              promise = promise.then(function () {
+                return $http({ method: 'DELETE', url: pvUrl + '/' + deletedVariant });
+              });
+            };
+
+            for (var _iterator3 = oldProductVariants.values()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+              _loop3();
             }
           } catch (err) {
             _didIteratorError3 = true;
@@ -1804,10 +1828,8 @@ productModule.factory('productUtil', function ($http, $q) {
           }
         }
 
-        return $q.all(promises).then(function (res2) {
-          return { product: res.data, productVariants: res2.map(function (item) {
-              return item.data;
-            }) };
+        return promise.then(function () {
+          return result;
         }, function (err) {
           window.alert(err.data);
         });
@@ -2068,7 +2090,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         $scope.product.brand = datum;
       });
       if ($scope.product.brand) {
-        autoCompleteNode.val(_.get($scope.product.brand, 'name.ko'));
+        autoCompleteNode.val(boUtils.getNameWithAllBuildingInfo($scope.product.brand));
       }
     };
     $scope.fieldIdPrefix = 'ProductField';
@@ -2425,12 +2447,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
           console.log(product);
           return;
         }
-        console.log($state.params.brandId);
-        if ($state.params.brandId === $scope.product.brand.id) {
-          $state.forceReload();
-        } else {
-          $state.go('product.add', { brandId: product.brand.id }, { reload: true });
-        }
+        $state.go('product.add', { brandId: product.brand.id }, { reload: true });
       });
     });
   };

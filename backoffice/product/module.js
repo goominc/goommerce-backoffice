@@ -98,13 +98,18 @@ productModule.factory('productUtil', ($http, $q) => {
           product.id = res.data.id; // need if create
           // $state.go('product.edit', {productId: $scope.product.id});
         }
-        const promises = [];
         const pvUrl = '/api/v1/products/' + product.id + '/product_variants';
+        let promise = $q.when();
+        const result = { product: res.data, productVariants: [] };
         for (const productVariant of productVariants) {
-          promises.push($http.post(pvUrl, productVariant));
+          promise = promise.then(() => {
+            return $http.post(pvUrl, productVariant).then((res2) => {
+              result.productVariants.push(res2.data);
+            })
+          });
         }
-        return $q.all(promises).then((res2) => {
-          return { product: res.data, productVariants: res2.map((item) => item.data) }
+        return promise.then(() => {
+          return result;
         }, (err) => {
           window.alert(err.data);
         });
@@ -116,25 +121,34 @@ productModule.factory('productUtil', ($http, $q) => {
       const url = '/api/v1/products/' + product.id;
 
       return $http.put(url, _.omit(product, ['id', 'productVariants'])).then((res) => {
-        const promises = [];
+        let promise = $q.when();
+        const result = { product: res.data, productVariants: [] };
         const pvUrl = '/api/v1/products/' + product.id + '/product_variants';
         for (const productVariant of productVariants) {
           oldProductVariants.delete(productVariant.id);
           if (!productVariant.id) {
-            promises.push($http.post(pvUrl, productVariant));
+            promise = promise.then((res2) => {
+              result.productVariants.push(res2.data);
+              return $http.post(pvUrl, productVariant);
+            });
           } else {
-            promises.push($http.put(pvUrl + '/' + productVariant.id, _.omit(productVariant, 'id')));
+            promise = promise.then(() => {
+              result.productVariants.push(res2.data);
+              return $http.put(pvUrl + '/' + productVariant.id, _.omit(productVariant, 'id'));
+            });
           }
         }
         // 2016. 01. 18. [heekyu] delete removed variants
         if (oldProductVariants.size > 0) {
           for (const deletedVariant of oldProductVariants.values()) {
-            promises.push($http({method: 'DELETE', url: pvUrl + '/' + deletedVariant}));
+            promise = promise.then(() => {
+              return $http({method: 'DELETE', url: pvUrl + '/' + deletedVariant});
+            });
           }
         }
 
-        return $q.all(promises).then((res2) => {
-          return { product: res.data, productVariants: res2.map((item) => item.data) }
+        return promise.then(() => {
+          return result;
         }, (err) => {
           window.alert(err.data);
         });
