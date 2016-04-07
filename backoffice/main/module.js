@@ -199,6 +199,13 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
       }
     }
   };
+  // 2016. 02. 15. [heekyu] app-wide state
+  $rootScope.state = {
+    auth: {},
+    batchUploadedProducts: [],
+    locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
+    editLocale,
+  };
   $rootScope.$on('$stateChangeSuccess', (event, toState) => {
     handleMenus(toState.name);
   });
@@ -211,21 +218,31 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
   $rootScope.doLogout = () => {
     // TODO server logout
     $cookies.remove(ACCESS_TOKEN_KEY);
+    delete $http.defaults.headers.common.Authorization;
     checkLogin();
   };
 
   const checkLogin = () => {
     const token = $cookies.get(ACCESS_TOKEN_KEY);
-    // TODO check if token is valid
-    if (!token) {
+    if (token) {
+      $http.defaults.headers.common.Authorization = token;
+    }
+    $http.get('/api/v1/login').then((res) => {
+      $rootScope.state.auth = res.data;
+    }, () => {
+      if (token) {
+        $cookies.remove(ACCESS_TOKEN_KEY);
+      }
       $rootScope.modalBox = 'login';
       $('#login_modal').modal({
         backdrop: 'static',
         keyboard: false,
       });
-    } else {
-      $http.defaults.headers.common.Authorization = token;
-    }
+      setTimeout(() => {
+        console.log($('.login-form .form-control').eq(0));
+        $('.login-form .form-control').eq(0).focus();
+      }, 1000); // 1000 is magic number... T.T
+    });
   };
   checkLogin();
 
@@ -234,13 +251,6 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
   if ($cookies.get(editLocaleKey)) {
     editLocale = $cookies.get(editLocaleKey);
   }
-
-  // 2016. 02. 15. [heekyu] app-wide state
-  $rootScope.state = {
-    batchUploadedProducts: [],
-    locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
-    editLocale,
-  };
 
   // 2016. 03. 17. [heekyu] download all texts for order status
   //                        TODO texts module use this contents
@@ -274,7 +284,7 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
   };
 });
 
-mainModule.controller('LoginModalController', ($scope, $http, $cookies) => {
+mainModule.controller('LoginModalController', ($scope, $rootScope, $http, $cookies) => {
   $scope.credential = {};
 
   $scope.doLogin = () => {
@@ -282,9 +292,11 @@ mainModule.controller('LoginModalController', ($scope, $http, $cookies) => {
     $http.post('/api/v1/login', data).then((res) => {
       // TODO better way
       $('#login_modal').modal('hide');
+      $scope.credential = {};
 
       const token = 'Bearer ' + res.data.bearer;
       $http.defaults.headers.common.Authorization = token;
+      $rootScope.state.auth = res.data;
       $cookies.put(ACCESS_TOKEN_KEY, token);
 
       $http.get('/api/v1/login');

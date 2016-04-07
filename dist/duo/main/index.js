@@ -276,6 +276,13 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       }
     }
   };
+  // 2016. 02. 15. [heekyu] app-wide state
+  $rootScope.state = {
+    auth: {},
+    batchUploadedProducts: [],
+    locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
+    editLocale: editLocale
+  };
   $rootScope.$on('$stateChangeSuccess', function (event, toState) {
     handleMenus(toState.name);
   });
@@ -288,21 +295,31 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
   $rootScope.doLogout = function () {
     // TODO server logout
     $cookies.remove(ACCESS_TOKEN_KEY);
+    delete $http.defaults.headers.common.Authorization;
     checkLogin();
   };
 
   var checkLogin = function checkLogin() {
     var token = $cookies.get(ACCESS_TOKEN_KEY);
-    // TODO check if token is valid
-    if (!token) {
+    if (token) {
+      $http.defaults.headers.common.Authorization = token;
+    }
+    $http.get('/api/v1/login').then(function (res) {
+      $rootScope.state.auth = res.data;
+    }, function () {
+      if (token) {
+        $cookies.remove(ACCESS_TOKEN_KEY);
+      }
       $rootScope.modalBox = 'login';
       $('#login_modal').modal({
         backdrop: 'static',
         keyboard: false
       });
-    } else {
-      $http.defaults.headers.common.Authorization = token;
-    }
+      setTimeout(function () {
+        console.log($('.login-form .form-control').eq(0));
+        $('.login-form .form-control').eq(0).focus();
+      }, 1000); // 1000 is magic number... T.T
+    });
   };
   checkLogin();
 
@@ -311,13 +328,6 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
   if ($cookies.get(editLocaleKey)) {
     editLocale = $cookies.get(editLocaleKey);
   }
-
-  // 2016. 02. 15. [heekyu] app-wide state
-  $rootScope.state = {
-    batchUploadedProducts: [],
-    locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
-    editLocale: editLocale
-  };
 
   // 2016. 03. 17. [heekyu] download all texts for order status
   //                        TODO texts module use this contents
@@ -353,7 +363,7 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
   };
 });
 
-mainModule.controller('LoginModalController', function ($scope, $http, $cookies) {
+mainModule.controller('LoginModalController', function ($scope, $rootScope, $http, $cookies) {
   $scope.credential = {};
 
   $scope.doLogin = function () {
@@ -361,9 +371,11 @@ mainModule.controller('LoginModalController', function ($scope, $http, $cookies)
     $http.post('/api/v1/login', data).then(function (res) {
       // TODO better way
       $('#login_modal').modal('hide');
+      $scope.credential = {};
 
       var token = 'Bearer ' + res.data.bearer;
       $http.defaults.headers.common.Authorization = token;
+      $rootScope.state.auth = res.data;
       $cookies.put(ACCESS_TOKEN_KEY, token);
 
       $http.get('/api/v1/login');
