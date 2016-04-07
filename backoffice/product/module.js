@@ -127,14 +127,16 @@ productModule.factory('productUtil', ($http, $q) => {
         for (const productVariant of productVariants) {
           oldProductVariants.delete(productVariant.id);
           if (!productVariant.id) {
-            promise = promise.then((res2) => {
-              result.productVariants.push(res2.data);
-              return $http.post(pvUrl, productVariant);
+            promise = promise.then(() => {
+              return $http.post(pvUrl, productVariant).then((res2) => {
+                result.productVariants.push(res2.data);
+              });
             });
           } else {
             promise = promise.then(() => {
-              result.productVariants.push(res2.data);
-              return $http.put(pvUrl + '/' + productVariant.id, _.omit(productVariant, 'id'));
+              return $http.put(pvUrl + '/' + productVariant.id, _.omit(productVariant, 'id')).then((res2) => {
+                result.productVariants.push(res2.data);
+              });
             });
           }
         }

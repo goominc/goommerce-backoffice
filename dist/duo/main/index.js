@@ -662,6 +662,12 @@ utilModule.factory('boUtils', function ($http) {
       }
 
       return name.ko + ' ( ' + _.get(brand, 'data.building.name') + ' ' + _.get(brand, 'data.building.floor') + ' ' + _.get(brand, 'data.building.flatNumber') + '호 )'; // eslint-disable-line
+    },
+    startProgressBar: function startProgressBar() {
+      Metronic.blockUI({ target: '#bo-content-container', boxed: true });
+    },
+    stopProgressBar: function stopProgressBar() {
+      Metronic.unblockUI('#bo-content-container');
     }
   };
 });
@@ -1765,14 +1771,16 @@ productModule.factory('productUtil', function ($http, $q) {
 
             oldProductVariants['delete'](productVariant.id);
             if (!productVariant.id) {
-              promise = promise.then(function (res2) {
-                result.productVariants.push(res2.data);
-                return $http.post(pvUrl, productVariant);
+              promise = promise.then(function () {
+                return $http.post(pvUrl, productVariant).then(function (res2) {
+                  result.productVariants.push(res2.data);
+                });
               });
             } else {
               promise = promise.then(function () {
-                result.productVariants.push(res2.data);
-                return $http.put(pvUrl + '/' + productVariant.id, _.omit(productVariant, 'id'));
+                return $http.put(pvUrl + '/' + productVariant.id, _.omit(productVariant, 'id')).then(function (res2) {
+                  result.productVariants.push(res2.data);
+                });
               });
             }
           };
@@ -2393,7 +2401,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         // 2016. 02. 29. [heekyu] update product variant id for deny multiple create
         $state.reload();
       }
-      window.alert('Saved Successfully');
     });
   };
 
@@ -2403,21 +2410,27 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       window.alert('select brand!');
       return new Promise(function (resolve, reject) {});
     }
+    boUtils.startProgressBar();
+
     $scope.tmpObjToProduct();
     // $scope.imageToProduct();
     $scope.imageRowsToVariant();
     $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then(function (res) {
+        boUtils.stopProgressBar();
         return res.product;
       }, function (err) {
+        boUtils.stopProgressBar();
         window.alert('Product Create Fail' + err.data);
       });
     } else {
       return productUtil.updateProduct($scope.product, $scope.productVariants, $scope.origVariants).then(function (res) {
+        boUtils.stopProgressBar();
         $scope.origVariants.clear();
         return res.product;
       }, function (err) {
+        boUtils.stopProgressBar();
         console.log(err);
         window.alert('Product Update Fail' + err.data);
         $scope.origVariants.clear();
@@ -2431,7 +2444,9 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       afterSaveProduct(product).then(function () {
         if (product && product.id) {
           // 2016. 04. 04. [heekyu] elasticsearch does not return newly updated product
+          boUtils.startProgressBar();
           setTimeout(function () {
+            boUtils.stopProgressBar();
             $state.go('product.main');
           }, 1000);
         }
