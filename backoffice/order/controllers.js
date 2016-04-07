@@ -36,7 +36,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         data: 'status',
       },
       {
-        data: 'totalEstimationKRW',
+        data: 'totalKRW',
       },
     ],
   };

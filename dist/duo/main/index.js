@@ -2709,7 +2709,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   // 2016. 02. 29. [heekyu] update image selecting UI
   /*
     $scope.images = [];
-  
+
     $scope.generateImages = () => {
       $scope.images.length = 0;
       if ($scope.product.appImages && $scope.product.appImages.default && $scope.product.appImages.default.length > 0) {
@@ -2737,7 +2737,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         image.product.appImages.default.push(_.omit(image, 'product'));
       });
     };
-  
+
     $scope.imageUploaded = (result) => {
       $scope.images.push({
         url: result.url.slice(5),
@@ -3619,7 +3619,7 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
     }, {
       data: 'status'
     }, {
-      data: 'totalEstimationKRW'
+      data: 'totalKRW'
     }]
   };
 });

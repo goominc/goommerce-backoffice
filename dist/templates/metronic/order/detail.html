@@ -52,9 +52,9 @@
                           Total:
                         </div>
                         <div class="col-md-7 value">
-                          KRW {{order.totalEstimationKRW}} <br/>
-                          USD {{order.totalEstimationUSD}} <br/>
-                          CNY {{order.totalEstimationCNY}}
+                          KRW {{order.totalKRW}} <br/>
+                          USD {{order.totalUSD}} <br/>
+                          CNY {{order.totalCNY}}
                         </div>
                       </div>
                       <div class="row static-info">
@@ -161,7 +161,7 @@
                               <span>{{row.productVariant.KRW}} KRW</span>
                             </td>
                             <td>
-                              {{row.orderedCount}}
+                              {{row.quantity}}
                             </td>
                             <td>
                               {{row.totalKRW}}
