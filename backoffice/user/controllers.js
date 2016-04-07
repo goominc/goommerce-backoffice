@@ -274,7 +274,8 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
   $scope.save = () => {
     convertUtil.copyFieldObj($scope.userFields, $scope.user);
     $http.put(`/api/v1/users/${$scope.user.id}`, _.pick($scope.user, 'data', 'inipay')).then((res) => {
-      init(res.data);
+      // init(res.data);
+      $state.go('user.manage');
     });
   };
 });

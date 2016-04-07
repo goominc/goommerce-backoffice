@@ -569,7 +569,7 @@ directiveModule.directive('boFileReader', function () {
 
 var utilModule = angular.module('backoffice.utils', []);
 
-utilModule.factory('boUtils', function ($http, $q) {
+utilModule.factory('boUtils', function ($http) {
   return {
     // http://stackoverflow.com/questions/111529/create-query-parameters-in-javascript
     encodeQueryData: function encodeQueryData(url, data) {
@@ -1605,7 +1605,8 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
   $scope.save = function () {
     convertUtil.copyFieldObj($scope.userFields, $scope.user);
     $http.put('/api/v1/users/' + $scope.user.id, _.pick($scope.user, 'data', 'inipay')).then(function (res) {
-      init(res.data);
+      // init(res.data);
+      $state.go('user.manage');
     });
   };
 });
