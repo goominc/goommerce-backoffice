@@ -342,14 +342,15 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
 
   $scope.saveAndNew = () => {
     $scope.doSave().then((product) => {
-      afterSaveProduct(product);
-      if (!product.brand || !product.brand.id) {
-        // Code Error
-        console.log('code error. newly created product does not have brand');
-        console.log(product);
-        return;
-      }
-      $state.go('product.add', { brandId: product.brand.id });
+      afterSaveProduct(product).then(() => {
+        if (!product.brand || !product.brand.id) {
+          // Code Error
+          console.log('code error. newly created product does not have brand');
+          console.log(product);
+          return;
+        }
+        $state.go('product.add', { brandId: product.brand.id }, { reload: true });
+      });
     });
   };
 
@@ -446,8 +447,11 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   $scope.toggleShare = () => {
     makeImageRows();
   };
+  $scope.deleteImage = (row, index) => {
+    row.images.splice(index, 1);
+  };
   $scope.imageSortable = {
-    connectWith: '.image-container, .product-image-trash',
+    connectWith: '.image-container',
     placeholder: 'ui-state-highlight',
   };
   $scope.setProductMainImage = () => {
@@ -550,6 +554,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   setTimeout(() => {
     addMultipleUploadListener();
     // 2016. 02. 29. [heekyu] I cannot find on load event doing this
+    /*
     $('.product-image-trash').droppable({
       accept:'.image-container img',
       drop: function( event, ui ) {
@@ -561,6 +566,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         }
       }
     });
+    */
   }, 1000);
   // 2016. 02. 29. [heekyu] update image selecting UI
 /*

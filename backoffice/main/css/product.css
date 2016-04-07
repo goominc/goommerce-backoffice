@@ -18,9 +18,29 @@
 }
 
 .image-inline {
+  height: 120px;
   margin: 0 10px;
   width: 80px;
+}
+.product-image-wrap {
+  display: inline-block;
   height: 120px;
+  position: relative;
+  width: 80px;
+}
+.product-image-wrap img {
+  height: 100%;
+  width: 100%;
+}
+.product-image-wrap .delete-button {
+  cursor: pointer;
+  display: none;
+  position: absolute;
+  top: 2px;
+  right: 2px;
+}
+.product-image-wrap:hover .delete-button {
+  display: block;
 }
 
 .product-variant-table td {

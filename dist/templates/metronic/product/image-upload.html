@@ -32,10 +32,10 @@
                 </ul>
               </div>
               <span class="btn green fileinput-button" style="margin: 15px 0;">
-                <i class="fa fa-plus"></i> Add Images
+                <i class="fa fa-plus"></i> {{'main.addImageButton' | translate}}
                 <input type="file" id="image-upload-button" webkitdirectory directory multiple/>
               </span>
-              <button data-ng-disabled="saveDisabled" data-ng-click="saveImages()" class="btn green">Start Upload</button>
+              <button data-ng-click="saveImages()" class="btn green">{{'main.saveButton' | translate}}</button>
               <div class="row">
                 <div class="col-md-12">
                   <h2>{{activeBrand.brand.displayName}}</h2>
@@ -72,7 +72,10 @@
                         rowspan="{{row.rowspan}}"
                         class="image-container" ui-sortable="imageSortable" data-ng-model="row.images"
                       >
-                        <img data-ng-repeat="image in row.images" width="80px" height="120px" data-ng-src="{{image.url}}" />
+                        <div class="product-image-wrap" data-ng-repeat="image in row.images">
+                          <img data-ng-src="{{image.url}}" />
+                          <div class="delete-button" data-ng-click="deleteImage(row, $index)"><i class="fa fa-remove"></i></div>
+                        </div>
                       </td>
                     </tr>
                     </tbody>

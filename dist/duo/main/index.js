@@ -95,7 +95,7 @@
 var mainModule = require('./module');
 
 mainModule.constant('boConfig', {
-  apiUrl: ''
+  apiUrl: 'http://localhost:8080'
 });
 }, {"./module":2}],
 2: [function(require, module, exports) {
@@ -130,6 +130,20 @@ mainModule.config(function ($httpProvider, boConfig) {
       };
     });
   }
+});
+
+// http://stackoverflow.com/questions/21714655/reloading-current-state-refresh-data#answer-23198743
+mainModule.config(function ($provide) {
+  $provide.decorator('$state', function ($delegate, $stateParams) {
+    $delegate.forceReload = function () {
+      return $delegate.go($delegate.current, $stateParams, {
+        reload: true,
+        inherit: false,
+        notify: true
+      });
+    };
+    return $delegate;
+  });
 });
 
 var ACCESS_TOKEN_KEY = 'GOOMMERCE-BO-TOKEN';
@@ -2404,14 +2418,20 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
   $scope.saveAndNew = function () {
     $scope.doSave().then(function (product) {
-      afterSaveProduct(product);
-      if (!product.brand || !product.brand.id) {
-        // Code Error
-        console.log('code error. newly created product does not have brand');
-        console.log(product);
-        return;
-      }
-      $state.go('product.add', { brandId: product.brand.id });
+      afterSaveProduct(product).then(function () {
+        if (!product.brand || !product.brand.id) {
+          // Code Error
+          console.log('code error. newly created product does not have brand');
+          console.log(product);
+          return;
+        }
+        console.log($state.params.brandId);
+        if ($state.params.brandId === $scope.product.brand.id) {
+          $state.forceReload();
+        } else {
+          $state.go('product.add', { brandId: product.brand.id }, { reload: true });
+        }
+      });
     });
   };
 
@@ -2515,8 +2535,11 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   $scope.toggleShare = function () {
     makeImageRows();
   };
+  $scope.deleteImage = function (row, index) {
+    row.images.splice(index, 1);
+  };
   $scope.imageSortable = {
-    connectWith: '.image-container, .product-image-trash',
+    connectWith: '.image-container',
     placeholder: 'ui-state-highlight'
   };
   $scope.setProductMainImage = function () {
@@ -2624,17 +2647,19 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   setTimeout(function () {
     addMultipleUploadListener();
     // 2016. 02. 29. [heekyu] I cannot find on load event doing this
+    /*
     $('.product-image-trash').droppable({
-      accept: '.image-container img',
-      drop: function drop(event, ui) {
-        var row = $(event.srcElement).attr('row-index');
-        var imgIndex = $(event.srcElement).attr('img-index');
+      accept:'.image-container img',
+      drop: function( event, ui ) {
+        const row = $(event.srcElement).attr('row-index');
+        const imgIndex = $(event.srcElement).attr('img-index');
         $scope.imageRows[row].images.splice(imgIndex, 1);
         if (!$scope.$$phase) {
           $scope.$apply();
         }
       }
     });
+    */
   }, 1000);
   // 2016. 02. 29. [heekyu] update image selecting UI
   /*
@@ -3118,7 +3143,6 @@ productModule.controller('ProductBatchUploadController', function ($scope, $http
 var productModule = require('../module');
 
 productModule.controller('ProductImageUploadController', function ($scope, $http, $q, productUtil, boUtils) {
-  $scope.saveDisabled = true;
   var today = moment();
   var maxDays = 10;
   $scope.dates = [];
@@ -3257,7 +3281,6 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     }
     return $q.all(promises).then(function () {
       $scope.activeBrand = brand;
-      $scope.saveDisabled = true;
       productsToRows($scope.activeBrand.products);
     });
   };
@@ -3279,7 +3302,6 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     var plusLoadDone = function plusLoadDone() {
       loadDone++;
       if (loadDone == imgIdx) {
-        $scope.saveDisabled = false;
         if (!$scope.$$phase) {
           $scope.$apply();
         }
@@ -3335,67 +3357,10 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
 
       if (imgIdx == images.length) break;
     }
-    /*
-    const imagesByBrand = {};
-    for (let i = 0; i < changeEvent.target.files.length; i++) {
-      const file = changeEvent.target.files[i];
-      const split = file.webkitRelativePath.split('.');
-      const ext = split[split.length - 1];
-      if (imgExt.has(ext)) {
-        const paths = file.webkitRelativePath.split('/');
-        if (paths.length < 2) {
-          continue;
-        }
-        const brandId = paths[paths.length - 2];
-        if (!imagesByBrand[brandId]) {
-          imagesByBrand[brandId] = [];
-        }
-        imagesByBrand[brandId].push(file);
-      }
-    }
-    for (let i = 0; i < brandIds.length; i++) {
-      const brandId = brandIds[i];
-      if ($scope.brands[brandId]) {
-        const items = $scope.brands[brandId]; // { product: , rows: }
-        const images = imagesByBrand[brandId];
-         let imgIdx = 0;
-        let loadDone = 0;
-        const plusLoadDone = () => {
-          loadDone++;
-          if (loadDone == imgIdx) {
-            $scope.saveDisabled = false;
-            if (!$scope.$$phase) {
-              $scope.$apply();
-            }
-          }
-        };
-        for (let j = 0; j < items.length; j++) {
-          const rows = items[j].rows;
-          for (let k = 0; k < rows.length; k++) {
-            const row = rows[k];
-            if (row.rowspan < 1) {
-              continue;
-            }
-            row.images.length = row.slotCount;
-            for (let k = 0; k < row.slotCount; k++) {
-              if (imgIdx == images.length) {
-                window.alert('image count mismatch');
-                break;
-              }
-              const r = new FileReader();
-              r.onload = function(e) {
-                row.images[k] = { url: e.target.result };
-                plusLoadDone();
-              };
-              r.readAsDataURL(images[imgIdx++]);
-            }
-            if (imgIdx == images.length) break;
-          }
-        }
-      }
-    }
-     */
   });
+  $scope.deleteImage = function (row, index) {
+    row.images.splice(index, 1);
+  };
   $scope.imageSortable = {
     connectWith: '.image-container',
     placeholder: 'ui-state-highlight'
@@ -3488,30 +3453,6 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         }
       }
     }
-    /*
-        for (let i = 0; i < $scope.brandIds.length; i++) {
-          const items = $scope.brands[$scope.brandIds[i]];
-          for (let j = 0; j < items.length; j++) {
-            const item = items[j];
-            let r = 0;
-            while (r < item.rows.length) {
-              const sameColor = item.rows[r].rowspan;
-              const images = item.rows[r].images;
-              for (let k = 0; k < sameColor; k++) {
-                const row = item.rows[r++];
-                if (!row.images || row.images.length < 1) continue;
-    
-                allVariantCount++;
-                uploadRowImages(item.product.id, row.variantId, images, row.mainProduct);
-              }
-            }
-            for (let k = 0; k < item.rows.length; k++) {
-              const row = item.rows[k];
-              if (!row.images || row.images.length < 1) continue;
-            }
-          }
-        }
-        */
   };
 });
 }, {"../module":6}],

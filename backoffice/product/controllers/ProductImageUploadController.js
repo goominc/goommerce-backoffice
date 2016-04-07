@@ -3,7 +3,6 @@
 const productModule = require('../module');
 
 productModule.controller('ProductImageUploadController', ($scope, $http, $q, productUtil, boUtils) => {
-  $scope.saveDisabled = true;
   const today = moment();
   const maxDays = 10;
   $scope.dates = [];
@@ -135,7 +134,6 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     }
     return $q.all(promises).then(() => {
       $scope.activeBrand = brand;
-      $scope.saveDisabled = true;
       productsToRows($scope.activeBrand.products);
     });
   };
@@ -157,7 +155,6 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     const plusLoadDone = () => {
       loadDone++;
       if (loadDone == imgIdx) {
-        $scope.saveDisabled = false;
         if (!$scope.$$phase) {
           $scope.$apply();
         }
@@ -193,68 +190,10 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
       }
       if (imgIdx == images.length) break;
     }
-    /*
-    const imagesByBrand = {};
-    for (let i = 0; i < changeEvent.target.files.length; i++) {
-      const file = changeEvent.target.files[i];
-      const split = file.webkitRelativePath.split('.');
-      const ext = split[split.length - 1];
-      if (imgExt.has(ext)) {
-        const paths = file.webkitRelativePath.split('/');
-        if (paths.length < 2) {
-          continue;
-        }
-        const brandId = paths[paths.length - 2];
-        if (!imagesByBrand[brandId]) {
-          imagesByBrand[brandId] = [];
-        }
-        imagesByBrand[brandId].push(file);
-      }
-    }
-    for (let i = 0; i < brandIds.length; i++) {
-      const brandId = brandIds[i];
-      if ($scope.brands[brandId]) {
-        const items = $scope.brands[brandId]; // { product: , rows: }
-        const images = imagesByBrand[brandId];
-
-        let imgIdx = 0;
-        let loadDone = 0;
-        const plusLoadDone = () => {
-          loadDone++;
-          if (loadDone == imgIdx) {
-            $scope.saveDisabled = false;
-            if (!$scope.$$phase) {
-              $scope.$apply();
-            }
-          }
-        };
-        for (let j = 0; j < items.length; j++) {
-          const rows = items[j].rows;
-          for (let k = 0; k < rows.length; k++) {
-            const row = rows[k];
-            if (row.rowspan < 1) {
-              continue;
-            }
-            row.images.length = row.slotCount;
-            for (let k = 0; k < row.slotCount; k++) {
-              if (imgIdx == images.length) {
-                window.alert('image count mismatch');
-                break;
-              }
-              const r = new FileReader();
-              r.onload = function(e) {
-                row.images[k] = { url: e.target.result };
-                plusLoadDone();
-              };
-              r.readAsDataURL(images[imgIdx++]);
-            }
-            if (imgIdx == images.length) break;
-          }
-        }
-      }
-    }
-     */
   });
+  $scope.deleteImage = (row, index) => {
+    row.images.splice(index, 1);
+  };
   $scope.imageSortable = {
     connectWith: '.image-container',
     placeholder: 'ui-state-highlight',
@@ -342,29 +281,5 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         }
       }
     }
-/*
-    for (let i = 0; i < $scope.brandIds.length; i++) {
-      const items = $scope.brands[$scope.brandIds[i]];
-      for (let j = 0; j < items.length; j++) {
-        const item = items[j];
-        let r = 0;
-        while (r < item.rows.length) {
-          const sameColor = item.rows[r].rowspan;
-          const images = item.rows[r].images;
-          for (let k = 0; k < sameColor; k++) {
-            const row = item.rows[r++];
-            if (!row.images || row.images.length < 1) continue;
-
-            allVariantCount++;
-            uploadRowImages(item.product.id, row.variantId, images, row.mainProduct);
-          }
-        }
-        for (let k = 0; k < item.rows.length; k++) {
-          const row = item.rows[k];
-          if (!row.images || row.images.length < 1) continue;
-        }
-      }
-    }
-    */
   };
 });
