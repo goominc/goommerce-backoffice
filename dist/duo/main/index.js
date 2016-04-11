@@ -3835,6 +3835,12 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
 });
 
 brandModule.controller('BrandEditController', function ($scope, $http, $state, $rootScope, $translate, boUtils, convertUtil) {
+  var initFields = function initFields() {
+    if (!$scope.brand.data) {
+      $scope.brand.data = {};
+    }
+    $scope.brandFields = [{ title: 'ID', key: 'id', obj: $scope.brand.id, isReadOnly: true }, { title: $translate.instant('brand.edit.nameLabel'), obj: _.get($scope.brand, 'name.ko'), key: 'name.ko' }, { title: $translate.instant('brand.edit.bizNameLabel'), obj: _.get($scope.brand, 'data.businessRegistration.name'), key: 'data.businessRegistration.name' }, { title: $translate.instant('brand.edit.bizNumberLabel'), obj: _.get($scope.brand, 'data.businessRegistration.number'), key: 'data.businessRegistration.number' }, { title: $translate.instant('brand.edit.accountBankLabel'), obj: _.get($scope.brand, 'data.bank.name'), key: 'data.bank.name' }, { title: $translate.instant('brand.edit.accountOwnerLabel'), obj: _.get($scope.brand, 'data.bank.accountHolder'), key: 'data.bank.accountHolder' }, { title: $translate.instant('brand.edit.accountNumberLabel'), obj: _.get($scope.brand, 'data.bank.accountNumber'), key: 'data.bank.accountNumber' }, { title: $translate.instant('brand.edit.buildingNameLabel'), obj: _.get($scope.brand, 'data.building.name'), key: 'data.building.name' }, { title: $translate.instant('brand.edit.buildingFloorLabel'), obj: _.get($scope.brand, 'data.building.floor'), key: 'data.building.floor' }, { title: $translate.instant('brand.edit.buildingFlatNumberLabel'), obj: _.get($scope.brand, 'data.building.flatNumber'), key: 'data.building.flatNumber' }, { title: $translate.instant('brand.edit.telLabel'), obj: _.get($scope.brand, 'data.tel'), key: 'data.tel' }, { title: $translate.instant('brand.edit.mobileLabel'), obj: _.get($scope.brand, 'data.mobile'), key: 'data.mobile' }];
+  };
   if ($state.params.brandId) {
     boUtils.startProgressBar();
     $http.get('/api/v1/brands/' + $state.params.brandId + '/unmodified').then(function (res) {
@@ -3849,13 +3855,8 @@ brandModule.controller('BrandEditController', function ($scope, $http, $state, $
     $scope.brand = { id: 'NEW', name: {}, data: {} };
     initFields();
   }
-  var initFields = function initFields() {
-    if (!$scope.brand.data) {
-      $scope.brand.data = {};
-    }
-    $scope.brandFields = [{ title: 'ID', key: 'id', obj: $scope.brand.id, isReadOnly: true }, { title: $translate.instant('brand.edit.nameLabel'), obj: _.get($scope.brand, 'name.ko'), key: 'name.ko' }, { title: $translate.instant('brand.edit.bizNameLabel'), obj: _.get($scope.brand, 'data.businessRegistration.name'), key: 'data.businessRegistration.name' }, { title: $translate.instant('brand.edit.bizNumberLabel'), obj: _.get($scope.brand, 'data.businessRegistration.number'), key: 'data.businessRegistration.number' }, { title: $translate.instant('brand.edit.accountBankLabel'), obj: _.get($scope.brand, 'data.bank.name'), key: 'data.bank.name' }, { title: $translate.instant('brand.edit.accountOwnerLabel'), obj: _.get($scope.brand, 'data.bank.accountHolder'), key: 'data.bank.accountHolder' }, { title: $translate.instant('brand.edit.accountNumberLabel'), obj: _.get($scope.brand, 'data.bank.accountNumber'), key: 'data.bank.accountNumber' }, { title: $translate.instant('brand.edit.buildingNameLabel'), obj: _.get($scope.brand, 'data.building.name'), key: 'data.building.name' }, { title: $translate.instant('brand.edit.buildingFloorLabel'), obj: _.get($scope.brand, 'data.building.floor'), key: 'data.building.floor' }, { title: $translate.instant('brand.edit.buildingFlatNumberLabel'), obj: _.get($scope.brand, 'data.building.flatNumber'), key: 'data.building.flatNumber' }, { title: $translate.instant('brand.edit.telLabel'), obj: _.get($scope.brand, 'data.tel'), key: 'data.tel' }, { title: $translate.instant('brand.edit.mobileLabel'), obj: _.get($scope.brand, 'data.mobile'), key: 'data.mobile' }];
-  };
   $scope.save = function () {
+    boUtils.startProgressBar();
     convertUtil.copyFieldObj($scope.brandFields, $scope.brand);
     $rootScope.state.locales.forEach(function (locale) {
       $scope.brand.name[locale] = $scope.brand.name.ko;
@@ -3869,7 +3870,17 @@ brandModule.controller('BrandEditController', function ($scope, $http, $state, $
       promise = $http.post('/api/v1/brands', requestBrand);
     }
     promise.then(function (res) {
-      $state.go('brand.main');
+      boUtils.stopProgressBar();
+      return $http.put('/api/v1/brands/' + res.data.id + '/index');
+    }, function () {
+      window.alert('failed to save brand');
+      boUtils.stopProgressBar();
+    }).then(function () {
+      boUtils.startProgressBar();
+      setTimeout(function () {
+        boUtils.stopProgressBar();
+        $state.go('brand.main');
+      }, 1000);
     });
   };
 });

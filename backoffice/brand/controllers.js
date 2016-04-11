@@ -67,20 +67,6 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, brandCom
 });
 
 brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope, $translate, boUtils, convertUtil) => {
-  if ($state.params.brandId) {
-    boUtils.startProgressBar();
-    $http.get(`/api/v1/brands/${$state.params.brandId}/unmodified`).then((res) => {
-      $scope.brand = res.data;
-      initFields();
-      boUtils.stopProgressBar();
-    }, () => {
-      window.alert(`failed to get brand (${$state.params.brandId})`);
-      boUtils.stopProgressBar();
-    });
-  } else {
-    $scope.brand = { id: 'NEW', name: {}, data: {} };
-    initFields();
-  }
   const initFields = () => {
     if (!$scope.brand.data) {
       $scope.brand.data = {};
@@ -100,7 +86,22 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
       {title: $translate.instant('brand.edit.mobileLabel'), obj: _.get($scope.brand, 'data.mobile'), key: 'data.mobile'},
     ];
   };
+  if ($state.params.brandId) {
+    boUtils.startProgressBar();
+    $http.get(`/api/v1/brands/${$state.params.brandId}/unmodified`).then((res) => {
+      $scope.brand = res.data;
+      initFields();
+      boUtils.stopProgressBar();
+    }, () => {
+      window.alert(`failed to get brand (${$state.params.brandId})`);
+      boUtils.stopProgressBar();
+    });
+  } else {
+    $scope.brand = { id: 'NEW', name: {}, data: {} };
+    initFields();
+  }
   $scope.save = () => {
+    boUtils.startProgressBar();
     convertUtil.copyFieldObj($scope.brandFields, $scope.brand);
     $rootScope.state.locales.forEach((locale) => {
       $scope.brand.name[locale] = $scope.brand.name.ko;
@@ -114,7 +115,17 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
       promise = $http.post('/api/v1/brands', requestBrand);
     }
     promise.then((res) => {
-      $state.go('brand.main');
+      boUtils.stopProgressBar();
+      return $http.put(`/api/v1/brands/${res.data.id}/index`);
+    }, () => {
+      window.alert('failed to save brand');
+      boUtils.stopProgressBar();
+    }).then(() => {
+      boUtils.startProgressBar();
+      setTimeout(() => {
+        boUtils.stopProgressBar();
+        $state.go('brand.main');
+      }, 1000);
     });
   };
 });
