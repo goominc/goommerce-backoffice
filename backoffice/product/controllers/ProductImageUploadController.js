@@ -219,14 +219,20 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     boUtils.startProgressBar();
     let uploadedVariantCount = 0;
     let allVariantCount = 0;
+    const changedProducts = new Set();
     const plusDoneVariant = () => {
       uploadedVariantCount++;
       if (allVariantCount === uploadedVariantCount) {
         window.alert('all images uploaded and product informations saved');
+        for (let changedProduct of changedProducts.values()) {
+          // silently indexing
+          $http.put(`/api/v1/products/${changedProduct.id}/index`);
+        }
         boUtils.stopProgressBar();
       }
     };
     const uploadRowImages = (productId, productVariantId, images, isMainProduct) => {
+      changedProducts.add(productId);
       const appImages = new Array(images.length);
       let uploadCount = 0;
       let done = 0;
@@ -239,7 +245,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
           $.ajax({
             url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
             type: 'POST',
-            data: {file: imageUrl, upload_preset: 'nd9k8295', public_id: `tmp/batch_image/${productId}-${productVariantId || ''}-${i}`},
+            data: {file: imageUrl, upload_preset: 'nd9k8295'},
             success: (res) => {
               appImages[i] = {
                 url: res.url.substring(5),

@@ -3433,14 +3433,42 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     boUtils.startProgressBar();
     var uploadedVariantCount = 0;
     var allVariantCount = 0;
+    var changedProducts = new Set();
     var plusDoneVariant = function plusDoneVariant() {
       uploadedVariantCount++;
       if (allVariantCount === uploadedVariantCount) {
         window.alert('all images uploaded and product informations saved');
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = changedProducts.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var changedProduct = _step.value;
+
+            // silently indexing
+            $http.put('/api/v1/products/' + changedProduct.id + '/index');
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator['return']) {
+              _iterator['return']();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+
         boUtils.stopProgressBar();
       }
     };
     var uploadRowImages = function uploadRowImages(productId, productVariantId, images, isMainProduct) {
+      changedProducts.add(productId);
       var appImages = new Array(images.length);
       var uploadCount = 0;
       var done = 0;
@@ -3454,7 +3482,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
           $.ajax({
             url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
             type: 'POST',
-            data: { file: imageUrl, upload_preset: 'nd9k8295', public_id: 'tmp/batch_image/' + productId + '-' + (productVariantId || '') + '-' + i },
+            data: { file: imageUrl, upload_preset: 'nd9k8295' },
             success: function success(res) {
               appImages[i] = {
                 url: res.url.substring(5),
