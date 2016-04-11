@@ -3447,7 +3447,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
             var changedProduct = _step.value;
 
             // silently indexing
-            $http.put('/api/v1/products/' + changedProduct.id + '/index');
+            $http.put('/api/v1/products/' + changedProduct + '/index');
           }
         } catch (err) {
           _didIteratorError = true;

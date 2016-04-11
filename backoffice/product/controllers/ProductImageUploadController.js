@@ -226,7 +226,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         window.alert('all images uploaded and product informations saved');
         for (let changedProduct of changedProducts.values()) {
           // silently indexing
-          $http.put(`/api/v1/products/${changedProduct.id}/index`);
+          $http.put(`/api/v1/products/${changedProduct}/index`);
         }
         boUtils.stopProgressBar();
       }
