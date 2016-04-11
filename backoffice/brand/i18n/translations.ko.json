@@ -4,6 +4,19 @@
     "createButton": "브랜드 생성",
     "main": {
       "createBrandTitle": "브랜드 생성"
+    },
+    "edit": {
+      "nameLabel": "브랜드명",
+      "bizNameLabel": "사업자명",
+      "bizNumberLabel": "사업자 번호",
+      "accountBankLabel": "은행",
+      "accountOwnerLabel": "예금주",
+      "accountNumberLabel": "계좌번호",
+      "buildingNameLabel": "빌딩 이름",
+      "buildingFloorLabel": "빌딩 층",
+      "buildingFlatNumberLabel": "빌딩 호수",
+      "telLabel": "전화 번호",
+      "mobileLabel": "핸드폰 번호"
     }
   }
 }

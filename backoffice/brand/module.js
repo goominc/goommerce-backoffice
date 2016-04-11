@@ -33,6 +33,16 @@ brandModule.config(($stateProvider) => {
       url: '/main',
       templateUrl: templateRoot + '/brand/main.html',
       controller: 'BrandMainController',
+    })
+    .state('brand.add', {
+      url: '/add',
+      templateUrl: templateRoot + '/brand/edit.html',
+      controller: 'BrandEditController',
+    })
+    .state('brand.edit', {
+      url: '/edit/:brandId',
+      templateUrl: templateRoot + '/brand/edit.html',
+      controller: 'BrandEditController',
     });
 });
 

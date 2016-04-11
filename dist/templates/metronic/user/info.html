@@ -21,10 +21,12 @@
             </div>
             <div class="portlet-body">
               <form class="row form-horizontal">
-                <div class="form-group" data-ng-repeat="field in userFields">
-                  <label class="col-md-2 control-label">{{field.title}} <span data-ng-if="field.isRequired" class="required"> * </span> </label>
-                  <div class="col-md-10">
-                    <input data-ng-readonly="field.isReadOnly" type="text" class="form-control" placeholder="{{field.placeholder}}" ng-model="field.obj">
+                <div class="col-md-12">
+                  <div class="form-group" data-ng-repeat="field in userFields">
+                    <label class="col-md-2 control-label">{{field.title}} <span data-ng-if="field.isRequired" class="required"> * </span> </label>
+                    <div class="col-md-10">
+                      <input data-ng-readonly="field.isReadOnly" type="text" class="form-control" placeholder="{{field.placeholder}}" ng-model="field.obj">
+                    </div>
                   </div>
                 </div>
               </form>
