@@ -6,7 +6,8 @@
       "createdAtColumn": "주문 생성 시각",
       "statusColumn": "주문 상태",
       "paymentStatusColumn": "결제 상태",
-      "priceColumn": "주문가격"
+      "priceColumn": "주문가격",
+      "startProcessing": "주문처리"
     },
     "detail": {
       "title": "주문상세"

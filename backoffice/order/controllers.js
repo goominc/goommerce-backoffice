@@ -41,7 +41,20 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
       {
         data: 'totalKRW',
       },
+      {
+        // edit role button
+        data: 'id',
+        render: (id) => {
+          return `<button class="btn blue" data-ng-click="startProcessing(${id})"><i class="fa fa-play"></i> ${$translate.instant('order.main.startProcessing')}</button>`;
+        },
+      },
     ],
+  };
+
+  $scope.startProcessing = (orderId) => {
+    $http.post(`/api/v1/orders/${orderId}/start_processing`).then((res) => {
+      // TODO: Update datatables row data.
+    });
   };
 });
 
