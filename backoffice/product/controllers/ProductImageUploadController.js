@@ -12,6 +12,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
   }
   $scope.activeDate = $scope.dates[0];
   const initializeDate = () => {
+    boUtils.startProgressBar();
     const collectByBrand = (products) => {
       const brandMap = {};
       products.forEach((product) => {
@@ -45,6 +46,10 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         brand.brand.displayName = boUtils.getNameWithAllBuildingInfo(brand.brand);
       });
       $scope.setActiveBrand($scope.brands[0]);
+    }, () => {
+      window.alert('Failed to get products before Image Upload');
+    }).then(() => {
+      boUtils.stopProgressBar();
     });
   };
   $scope.setDate = (date) => {
@@ -211,12 +216,14 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     placeholder: 'ui-state-highlight',
   };
   $scope.saveImages = () => {
+    boUtils.startProgressBar();
     let uploadedVariantCount = 0;
     let allVariantCount = 0;
     const plusDoneVariant = () => {
       uploadedVariantCount++;
       if (allVariantCount === uploadedVariantCount) {
         window.alert('all images uploaded and product informations saved');
+        boUtils.stopProgressBar();
       }
     };
     const uploadRowImages = (productId, productVariantId, images, isMainProduct) => {

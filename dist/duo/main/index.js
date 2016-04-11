@@ -2588,9 +2588,9 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     placeholder: 'ui-state-highlight'
   };
   $scope.setProductMainImage = function () {
-    if ($scope.imageRows.length > 0) {
+    if (!_.get($scope.product, 'appImages.default[0]') && _.get($scope, 'imageRows[0].images[0]')) {
       // TODO
-      $scope.product.appImages = { 'default': [$scope.imageRows[0].images[0]] };
+      $scope.product.appImages = { 'default': [_.get($scope, 'imageRows[0].images[0]')] };
     }
   };
   $scope.imageRowsToVariant = function () {
@@ -2655,6 +2655,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       if (!window.confirm(len + ' 개의 이미지가 있습니다. 업로드 할까요?')) {
         return;
       }
+      boUtils.startProgressBar();
       var imageContents = new Array(len);
       var uploaded = new Array(len);
       var done = 0;
@@ -2677,6 +2678,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
               if (!$scope.$$phase) {
                 $scope.$apply();
               }
+              boUtils.stopProgressBar();
             }
           });
         };
@@ -3197,6 +3199,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
   }
   $scope.activeDate = $scope.dates[0];
   var initializeDate = function initializeDate() {
+    boUtils.startProgressBar();
     var collectByBrand = function collectByBrand(products) {
       var brandMap = {};
       products.forEach(function (product) {
@@ -3232,6 +3235,10 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         brand.brand.displayName = boUtils.getNameWithAllBuildingInfo(brand.brand);
       });
       $scope.setActiveBrand($scope.brands[0]);
+    }, function () {
+      window.alert('Failed to get products before Image Upload');
+    }).then(function () {
+      boUtils.stopProgressBar();
     });
   };
   $scope.setDate = function (date) {
@@ -3423,12 +3430,14 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     placeholder: 'ui-state-highlight'
   };
   $scope.saveImages = function () {
+    boUtils.startProgressBar();
     var uploadedVariantCount = 0;
     var allVariantCount = 0;
     var plusDoneVariant = function plusDoneVariant() {
       uploadedVariantCount++;
       if (allVariantCount === uploadedVariantCount) {
         window.alert('all images uploaded and product informations saved');
+        boUtils.stopProgressBar();
       }
     };
     var uploadRowImages = function uploadRowImages(productId, productVariantId, images, isMainProduct) {

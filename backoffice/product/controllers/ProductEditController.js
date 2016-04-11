@@ -462,9 +462,9 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     placeholder: 'ui-state-highlight',
   };
   $scope.setProductMainImage = () => {
-    if ($scope.imageRows.length > 0) {
+    if (!_.get($scope.product, 'appImages.default[0]') && _.get($scope, 'imageRows[0].images[0]')) {
       // TODO
-      $scope.product.appImages = { default: [$scope.imageRows[0].images[0]] };
+      $scope.product.appImages = { default: [_.get($scope, 'imageRows[0].images[0]')] };
     }
   };
   $scope.imageRowsToVariant = () => {
@@ -529,6 +529,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       if (!window.confirm(`${len} 개의 이미지가 있습니다. 업로드 할까요?`)) {
         return;
       }
+      boUtils.startProgressBar();
       const imageContents = new Array(len);
       const uploaded = new Array(len);
       let done = 0;
@@ -550,6 +551,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
               if (!$scope.$$phase) {
                 $scope.$apply();
               }
+              boUtils.stopProgressBar();
             }
           });
         };
