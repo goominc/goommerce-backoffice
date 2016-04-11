@@ -84,7 +84,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   order.createdAt = boUtils.formatDate(order.createdAt);
   $scope.order = order;
   $scope.user = {};
-  $http.get(`/api/v1/users/${order.userId}`).then((res) => {
+  $http.get(`/api/v1/users/${order.buyerId}`).then((res) => {
     $scope.user = res.data;
   });
 
