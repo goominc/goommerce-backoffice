@@ -1934,6 +1934,7 @@ module.exports = {
       "labelActive": "활성화",
       "labelCombination": "상품 속성",
       "labelVariant": "상품 규격",
+      "labelFavoriteCategories": "자주쓰는 카테고리",
       "addVariantKind": "종류 추가",
       "removeVariantKind": "종류 삭제"
     },
@@ -2061,6 +2062,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     Feet: getFeetSizes(225, 5, 290)
   };
   $scope.variantKinds = [{ name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors }, { name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes }];
+  $scope.favoriteCategories = [{ name: '여성', categories: [{ name: '티셔츠', id: 53 }, { name: '원피스', id: 109 }, { name: '니트웨어', id: 77 }, { name: '스커트', id: 47 }, { name: '코트', id: 58 }] }, { name: '남성', categories: [{ name: '티셔츠', id: 184 }, { name: '셔츠', id: 185 }, { name: '바지', id: 187 }, { name: '자켓', id: 196 }, { name: '점퍼', id: 197 }] }];
   var kindsFromProductVariants = function kindsFromProductVariants(productVariants) {
     $scope.variantKinds.forEach(function (kind) {
       return kind.selected = new Set();
@@ -3616,8 +3618,10 @@ module.exports = {
     "main": {
       "title": "주문현황",
       "createdAtColumn": "주문 생성 시각",
+      "statusColumn": "주문 상태",
       "paymentStatusColumn": "결제 상태",
-      "priceColumn": "주문가격"
+      "priceColumn": "주문가격",
+      "startProcessing": "주문처리"
     },
     "detail": {
       "title": "주문상세"
@@ -3635,7 +3639,8 @@ module.exports = {
       "streetLabel": "도로명"
     }
   }
-};
+}
+;
 }, {}],
 32: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
@@ -3671,8 +3676,22 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
     }, {
       data: 'status'
     }, {
+      data: 'paymentStatus'
+    }, {
       data: 'totalKRW'
+    }, {
+      // edit role button
+      data: 'id',
+      render: function render(id) {
+        return '<button class="btn blue" data-ng-click="startProcessing(' + id + ')"><i class="fa fa-play"></i> ' + $translate.instant('order.main.startProcessing') + '</button>';
+      }
     }]
+  };
+
+  $scope.startProcessing = function (orderId) {
+    $http.post('/api/v1/orders/' + orderId + '/start_processing').then(function (res) {
+      // TODO: Update datatables row data.
+    });
   };
 });
 
@@ -3710,7 +3729,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   order.createdAt = boUtils.formatDate(order.createdAt);
   $scope.order = order;
   $scope.user = {};
-  $http.get('/api/v1/users/' + order.userId).then(function (res) {
+  $http.get('/api/v1/users/' + order.buyerId).then(function (res) {
     $scope.user = res.data;
   });
 

@@ -33,6 +33,10 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     {name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors},
     {name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes},
   ];
+  $scope.favoriteCategories = [
+    { name: '여성', categories: [{ name: '티셔츠', id: 53 }, { name: '원피스', id: 109 }, { name: '니트웨어', id: 77 }, { name: '스커트', id: 47 }, { name: '코트', id: 58 }] },
+    { name: '남성', categories: [{ name: '티셔츠', id: 184 }, { name: '셔츠', id: 185 }, { name: '바지', id: 187 }, { name: '자켓', id: 196 }, { name: '점퍼', id: 197 }] },
+  ];
   const kindsFromProductVariants = (productVariants) => {
     $scope.variantKinds.forEach((kind) => kind.selected = new Set());
     productVariants.forEach((variant) => {

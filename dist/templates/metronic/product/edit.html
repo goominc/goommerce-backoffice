@@ -59,6 +59,23 @@
                         </div>
                       </div>
                     </div>
+                    <div class="form-group">
+                      <label class="col-md-2 control-label">{{'product.edit.labelFavoriteCategories' | translate}}</label>
+                      <div class="col-md-10">
+                        <div class="col-md-12" data-ng-repeat="fc in favoriteCategories">
+                          <div class="col-md-1 control-lebl">{{fc.name}}</div>
+                          <div class="col-md-11">
+                            <button class="btn default"
+                              data-ng-repeat="c in fc.categories"
+                              data-ng-click="toggleCategory(c.id)"
+                              data-ng-class="{'blue' : productCategorySet.has(c.id)}"
+                            >
+                              {{c.name}}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     <div class="form-group" data-ng-if="variantKinds">
                       <label class="col-md-2 control-label">{{'product.edit.labelCombination' | translate}}</label>
                       <div class="col-md-10">

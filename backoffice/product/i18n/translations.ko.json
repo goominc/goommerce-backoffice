@@ -27,6 +27,7 @@
       "labelActive": "활성화",
       "labelCombination": "상품 속성",
       "labelVariant": "상품 규격",
+      "labelFavoriteCategories": "자주쓰는 카테고리",
       "addVariantKind": "종류 추가",
       "removeVariantKind": "종류 삭제"
     },
