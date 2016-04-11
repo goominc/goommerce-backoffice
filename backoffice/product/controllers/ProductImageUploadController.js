@@ -100,14 +100,25 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         const images = _.get(variant, 'appImages.default') || [];
         rows.push({
           color: colors[i],
+          images: images || [],
+          mainProduct: false, // TODO
           rowspan: j === 0 ? variants.length : 0,
           sku: variant.sku,
-          mainProduct: false, // TODO
           slotCount: images.length || 2,
-          images: images || [],
           variantId: variant.id,
         });
       }
+    }
+    if (product.hasImage) {
+      rows.push({
+        color: 'Main',
+        images: _.get(product, 'appImages.default') || [],
+        mainProduct: false, // TODO
+        rowspan: 1,
+        sku: _.get(product, 'name.ko'),
+        slotCount: 5,
+        variantId: null,
+      });
     }
     return { rows, product };
   };
@@ -116,6 +127,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     const len = products.length;
     for (let i = 0; i < len; i++) {
       const product = products[i];
+      product.hasImage = true;
       $scope.items.push(productToTableData(product));
     }
   };
@@ -208,7 +220,6 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
       }
     };
     const uploadRowImages = (productId, productVariantId, images, isMainProduct) => {
-      // TODO append exist images
       const appImages = new Array(images.length);
       let uploadCount = 0;
       let done = 0;
@@ -221,7 +232,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
           $.ajax({
             url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
             type: 'POST',
-            data: {file: imageUrl, upload_preset: 'nd9k8295', public_id: `tmp/batch_image/${productId}-${productVariantId}-${i}`},
+            data: {file: imageUrl, upload_preset: 'nd9k8295', public_id: `tmp/batch_image/${productId}-${productVariantId || ''}-${i}`},
             success: (res) => {
               appImages[i] = {
                 url: res.url.substring(5),
@@ -245,12 +256,16 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         const data = {
           appImages: { default: appImages },
         };
-        promises.push($http.put(`/api/v1/products/${productId}/product_variants/${productVariantId}`, data));
-        if (isMainProduct) {
-          const productData = {
-            appImages: { default: [_.assign({}, appImages[0], { mainImage: true })] },
-          };
-          promises.push($http.put(`/api/v1/products/${productId}`, productData));
+        if (productVariantId) {
+          promises.push($http.put(`/api/v1/products/${productId}/product_variants/${productVariantId}`, data));
+          if (isMainProduct) {
+            const productData = {
+              appImages: { default: [_.assign({}, appImages[0], { mainImage: true })] },
+            };
+            promises.push($http.put(`/api/v1/products/${productId}`, productData));
+          }
+        } else {
+          promises.push($http.put(`/api/v1/products/${productId}`, data));
         }
         $q.all(promises).then((res) => {
           plusDoneVariant();
@@ -277,7 +292,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
           if (!row.images || row.images.length < 1) continue;
 
           allVariantCount++;
-          uploadRowImages(item.product.id, row.variantId, images, row.mainProduct);
+          uploadRowImages(item.product.id, row.variantId, images, !item.product.hasImage && row.mainProduct);
         }
       }
     }
