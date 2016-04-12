@@ -2298,6 +2298,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       }
     });
     $scope.productVariants = newVariants;
+    $scope.initImages();
   };
   // END Manipluate Variant attributes
 

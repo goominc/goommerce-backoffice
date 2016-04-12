@@ -224,6 +224,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       }
     });
     $scope.productVariants = newVariants;
+    $scope.initImages();
   };
   // END Manipluate Variant attributes
 
