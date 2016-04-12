@@ -157,6 +157,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
 
   const imgExt = new Set(['jpg', 'jpeg', 'png']);
   $('#image-upload-button').on('change', function (changeEvent) {
+    boUtils.startProgressBar();
     const images = [];
     for (let i = 0; i < changeEvent.target.files.length; i++) {
       const file = changeEvent.target.files[i];
@@ -172,6 +173,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     const plusLoadDone = () => {
       loadDone++;
       if (loadDone == imgIdx) {
+        boUtils.stopProgressBar();
         if (!$scope.$$phase) {
           $scope.$apply();
         }
@@ -201,7 +203,15 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
             row.images[current + k] = { url: e.target.result };
             plusLoadDone();
           };
-          r.readAsDataURL(images[imgIdx++]);
+          if (imgIdx >= 10) {
+            const idx = imgIdx++;
+            console.log(idx);
+            setTimeout(() => {
+              r.readAsDataURL(images[idx]);
+            }, idx * 10);
+          } else {
+            r.readAsDataURL(images[imgIdx++]);
+          }
         }
         if (imgIdx == images.length) break;
       }

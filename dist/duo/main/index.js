@@ -3354,6 +3354,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
 
   var imgExt = new Set(['jpg', 'jpeg', 'png']);
   $('#image-upload-button').on('change', function (changeEvent) {
+    boUtils.startProgressBar();
     var images = [];
     for (var i = 0; i < changeEvent.target.files.length; i++) {
       var file = changeEvent.target.files[i];
@@ -3369,6 +3370,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     var plusLoadDone = function plusLoadDone() {
       loadDone++;
       if (loadDone == imgIdx) {
+        boUtils.stopProgressBar();
         if (!$scope.$$phase) {
           $scope.$apply();
         }
@@ -3400,7 +3402,17 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
             row.images[current + _k] = { url: e.target.result };
             plusLoadDone();
           };
-          r.readAsDataURL(images[imgIdx++]);
+          if (imgIdx >= 10) {
+            (function () {
+              var idx = imgIdx++;
+              console.log(idx);
+              setTimeout(function () {
+                r.readAsDataURL(images[idx]);
+              }, idx * 10);
+            })();
+          } else {
+            r.readAsDataURL(images[imgIdx++]);
+          }
         };
 
         for (var _k = 0; _k < more; _k++) {
