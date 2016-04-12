@@ -255,6 +255,18 @@
                                                    data-ng-change="toggleCategory(child2.id)"/>
                                             <label for="category-{{child2.id}}" data-ng-class="{'checkbox-active': child2.isChecked}"></label>
                                             {{ child2.name.ko }}
+                                            <ul class="list-unstyled">
+                                              <li data-ng-repeat="child3 in child2.children">
+                                                <input type="checkbox" id="category-{{child3.id}}"
+                                                       data-ng-init="child3.isChecked = productCategorySet.has(child3.id)"
+                                                       data-ng-model="child3.isChecked"
+                                                       data-ng-checked="productCategorySet.has(child3.id)"
+                                                       data-ng-change="toggleCategory(child3.id)"
+                                                       />
+                                                <label for="category-{{child3.id}}" data-ng-class="{'checkbox-active': child3.isChecked}"></label>
+                                                {{ child3.name.ko}}
+                                              </li>
+                                            </ul>
                                           </li>
                                         </ul>
                                       </li>
