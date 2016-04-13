@@ -240,11 +240,12 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     const plusDoneVariant = () => {
       uploadedVariantCount++;
       if (allVariantCount === uploadedVariantCount) {
-        window.alert('all images uploaded and product informations saved');
         for (let changedProduct of changedProducts.values()) {
           // silently indexing
+          $http.put(`/api/v1/products/${changedProduct}`, { isActive: true });
           $http.put(`/api/v1/products/${changedProduct}/index`);
         }
+        window.alert('all images uploaded and product informations saved');
         boUtils.stopProgressBar();
       }
     };

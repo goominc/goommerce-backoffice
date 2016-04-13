@@ -3453,7 +3453,6 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     var plusDoneVariant = function plusDoneVariant() {
       uploadedVariantCount++;
       if (allVariantCount === uploadedVariantCount) {
-        window.alert('all images uploaded and product informations saved');
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
         var _iteratorError = undefined;
@@ -3463,6 +3462,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
             var changedProduct = _step.value;
 
             // silently indexing
+            $http.put('/api/v1/products/' + changedProduct, { isActive: true });
             $http.put('/api/v1/products/' + changedProduct + '/index');
           }
         } catch (err) {
@@ -3480,6 +3480,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
           }
         }
 
+        window.alert('all images uploaded and product informations saved');
         boUtils.stopProgressBar();
       }
     };
