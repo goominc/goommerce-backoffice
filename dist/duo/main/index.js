@@ -294,9 +294,11 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
 
   $rootScope.doLogout = function () {
     // TODO server logout
-    $cookies.remove(ACCESS_TOKEN_KEY);
-    delete $http.defaults.headers.common.Authorization;
-    checkLogin();
+    $http['delete']('/api/v1/login').then(function () {
+      $cookies.remove(ACCESS_TOKEN_KEY);
+      delete $http.defaults.headers.common.Authorization;
+      checkLogin();
+    });
   };
 
   var checkLogin = function checkLogin() {
