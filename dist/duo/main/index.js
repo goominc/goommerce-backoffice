@@ -3366,76 +3366,75 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     }
 
     var imgIdx = 0;
-    var loadDone = 0;
-    var plusLoadDone = function plusLoadDone() {
-      loadDone++;
-      if (loadDone == imgIdx) {
-        boUtils.stopProgressBar();
-        if (!$scope.$$phase) {
-          $scope.$apply();
-        }
-      }
-    };
-    for (var j = 0; j < $scope.items.length; j++) {
-      var rows = $scope.items[j].rows;
-
-      var _loop2 = function (k) {
-        var row = rows[k];
-        if (row.rowspan < 1) {
-          return 'continue';
-        }
-        // 2016. 04. 06. [heekyu] do not override existing images
-        var current = row.images.length;
-        var more = row.slotCount - current;
-        if (more < 1) {
-          return 'continue';
-        }
-
-        var _loop4 = function (_k) {
-          if (imgIdx == images.length) {
-            window.alert('image count mismatch');
-            row.images.length = _k;
-            return 'break';
+    var promise = $q.when();
+    var loadImages = function loadImages(item) {
+      var loadDone = 0;
+      var plusLoadDone = function plusLoadDone() {
+        loadDone++;
+        if (loadDone == imgIdx) {
+          boUtils.stopProgressBar();
+          if (!$scope.$$phase) {
+            $scope.$apply();
           }
-          var r = new FileReader();
-          r.onload = function (e) {
-            row.images[current + _k] = { url: e.target.result };
-            plusLoadDone();
+        }
+      };
+      return new Promise(function (resolve, reject) {
+        var rows = item.rows;
+        var loadPromises = [];
+
+        var _loop2 = function (k) {
+          var row = rows[k];
+          if (row.rowspan < 1) {
+            return 'continue';
+          }
+          // 2016. 04. 06. [heekyu] do not override existing images
+          var current = row.images.length;
+          var more = row.slotCount - current;
+          if (more < 1) {
+            return 'continue';
+          }
+
+          var _loop3 = function (_k) {
+            if (imgIdx == images.length) {
+              window.alert('이미지 개수가 부족합니다');
+              row.images.length = _k;
+              return 'break';
+            }
+            loadPromises.push(new Promise(function (resolve2, reject2) {
+              var r = new FileReader();
+              r.onload = function (e) {
+                row.images[current + _k] = { url: e.target.result };
+                resolve2();
+              };
+              r.readAsDataURL(images[imgIdx++]);
+            }));
           };
-          if (imgIdx >= 10) {
-            (function () {
-              var idx = imgIdx++;
-              console.log(idx);
-              setTimeout(function () {
-                r.readAsDataURL(images[idx]);
-              }, idx * 10);
-            })();
-          } else {
-            r.readAsDataURL(images[imgIdx++]);
+
+          for (var _k = 0; _k < more; _k++) {
+            var _ret3 = _loop3(_k);
+
+            if (_ret3 === 'break') break;
           }
+          $q.all(loadPromises).then(resolve);
         };
 
-        for (var _k = 0; _k < more; _k++) {
-          var _ret3 = _loop4(_k);
+        for (var k = 0; k < rows.length; k++) {
+          var _ret2 = _loop2(k);
 
-          if (_ret3 === 'break') break;
+          if (_ret2 === 'continue') continue;
         }
-        if (imgIdx == images.length) return 'break';
-      };
-
-      _loop3: for (var k = 0; k < rows.length; k++) {
-        var _ret2 = _loop2(k);
-
-        switch (_ret2) {
-          case 'continue':
-            continue;
-
-          case 'break':
-            break _loop3;}
-      }
-
+      });
+    };
+    for (var j = 0; j < $scope.items.length; j++) {
+      promise = promise.then(loadImages($scope.items[j]));
       if (imgIdx == images.length) break;
     }
+    promise.then(function () {
+      boUtils.stopProgressBar();
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+    });
   });
   $scope.deleteImage = function (row, index) {
     row.images.splice(index, 1);
@@ -3488,7 +3487,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       var uploadCount = 0;
       var done = 0;
 
-      var _loop5 = function (i) {
+      var _loop4 = function (i) {
         var imageUrl = images[i].url;
         if (imageUrl.length > 2 && imageUrl.substring(0, 2) === '//') {
           appImages[i] = images[i];
@@ -3518,7 +3517,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       };
 
       for (var i = 0; i < images.length; i++) {
-        _loop5(i);
+        _loop4(i);
       }
       var saveProductVariant = function saveProductVariant() {
         var promises = [];

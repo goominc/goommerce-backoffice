@@ -169,54 +169,61 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     }
 
     let imgIdx = 0;
-    let loadDone = 0;
-    const plusLoadDone = () => {
-      loadDone++;
-      if (loadDone == imgIdx) {
-        boUtils.stopProgressBar();
-        if (!$scope.$$phase) {
-          $scope.$apply();
+    let promise = $q.when();
+    const loadImages = (item) => {
+      let loadDone = 0;
+      const plusLoadDone = () => {
+        loadDone++;
+        if (loadDone == imgIdx) {
+          boUtils.stopProgressBar();
+          if (!$scope.$$phase) {
+            $scope.$apply();
+          }
         }
-      }
+      };
+      return new Promise((resolve, reject) => {
+        const rows = item.rows;
+        const loadPromises = [];
+        for (let k = 0; k < rows.length; k++) {
+          const row = rows[k];
+          if (row.rowspan < 1) {
+            continue;
+          }
+          // 2016. 04. 06. [heekyu] do not override existing images
+          const current = row.images.length;
+          const more = row.slotCount - current;
+          if (more < 1) {
+            continue;
+          }
+          for (let k = 0; k < more; k++) {
+            if (imgIdx == images.length) {
+              window.alert('이미지 개수가 부족합니다');
+              row.images.length = k;
+              break;
+            }
+            loadPromises.push(new Promise((resolve2, reject2) => {
+              const r = new FileReader();
+              r.onload = function(e) {
+                row.images[current + k] = { url: e.target.result };
+                resolve2();
+              };
+              r.readAsDataURL(images[imgIdx++]);
+            }));
+          }
+          $q.all(loadPromises).then(resolve);
+        }
+      });
     };
     for (let j = 0; j < $scope.items.length; j++) {
-      const rows = $scope.items[j].rows;
-      for (let k = 0; k < rows.length; k++) {
-        const row = rows[k];
-        if (row.rowspan < 1) {
-          continue;
-        }
-        // 2016. 04. 06. [heekyu] do not override existing images
-        const current = row.images.length;
-        const more = row.slotCount - current;
-        if (more < 1) {
-          continue;
-        }
-        for (let k = 0; k < more; k++) {
-          if (imgIdx == images.length) {
-            window.alert('image count mismatch');
-            row.images.length = k;
-            break;
-          }
-          const r = new FileReader();
-          r.onload = function(e) {
-            row.images[current + k] = { url: e.target.result };
-            plusLoadDone();
-          };
-          if (imgIdx >= 10) {
-            const idx = imgIdx++;
-            console.log(idx);
-            setTimeout(() => {
-              r.readAsDataURL(images[idx]);
-            }, idx * 10);
-          } else {
-            r.readAsDataURL(images[imgIdx++]);
-          }
-        }
-        if (imgIdx == images.length) break;
-      }
+      promise = promise.then(loadImages($scope.items[j]));
       if (imgIdx == images.length) break;
     }
+    promise.then(() => {
+      boUtils.stopProgressBar();
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+    });
   });
   $scope.deleteImage = (row, index) => {
     row.images.splice(index, 1);
