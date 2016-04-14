@@ -3219,7 +3219,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         return brandMap[key];
       });
     };
-    $http.get('/api/v1/products?start=' + $scope.activeDate + '&end=' + $scope.activeDate).then(function (res) {
+    $http.get('/api/v1/products?start=' + $scope.activeDate + '&end=' + $scope.activeDate + '&limit=100').then(function (res) {
       var products = res.data.products.map(productUtil.narrowProduct);
       if (products.length < 1) {
         window.alert('There is no products on ' + $scope.activeDate);

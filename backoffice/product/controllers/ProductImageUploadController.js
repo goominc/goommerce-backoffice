@@ -25,7 +25,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
       });
       return Object.keys(brandMap).map((key) => brandMap[key]);
     };
-    $http.get(`/api/v1/products?start=${$scope.activeDate}&end=${$scope.activeDate}`).then((res) => {
+    $http.get(`/api/v1/products?start=${$scope.activeDate}&end=${$scope.activeDate}&limit=100`).then((res) => {
       const products = res.data.products.map(productUtil.narrowProduct);
       if (products.length < 1) {
         window.alert(`There is no products on ${$scope.activeDate}`);
