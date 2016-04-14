@@ -28,6 +28,8 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   $scope.allSizes = {
     XXX: ['Free', 'XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL'],
     Feet: getFeetSizes(225, 5, 290),
+    '허리': getFeetSizes(25, 1, 32),
+    '여자옷': getFeetSizes(44, 11, 88),
   };
   $scope.variantKinds = [
     {name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors},

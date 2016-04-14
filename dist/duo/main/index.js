@@ -2061,7 +2061,9 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
   $scope.allSizes = {
     XXX: ['Free', 'XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL'],
-    Feet: getFeetSizes(225, 5, 290)
+    Feet: getFeetSizes(225, 5, 290),
+    '허리': getFeetSizes(25, 1, 32),
+    '여자옷': getFeetSizes(44, 11, 88)
   };
   $scope.variantKinds = [{ name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors }, { name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes }];
   $scope.favoriteCategories = [{ name: '여성', categories: [{ name: '티셔츠', id: 53 }, { name: '원피스', id: 109 }, { name: '니트웨어', id: 77 }, { name: '스커트', id: 47 }, { name: '코트', id: 58 }] }, { name: '남성', categories: [{ name: '티셔츠', id: 184 }, { name: '셔츠', id: 185 }, { name: '바지', id: 187 }, { name: '자켓', id: 196 }, { name: '점퍼', id: 197 }] }];
