@@ -3486,7 +3486,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         boUtils.stopProgressBar();
       }
     };
-    var uploadRowImages = function uploadRowImages(productId, productVariantId, images, isMainProduct) {
+    var uploadRowImages = function uploadRowImages(productId, productVariantIds, images, isMainProduct) {
       changedProducts.add(productId);
       var appImages = new Array(images.length);
       var uploadCount = 0;
@@ -3529,14 +3529,16 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         var data = {
           appImages: { 'default': appImages }
         };
-        if (productVariantId) {
-          promises.push($http.put('/api/v1/products/' + productId + '/product_variants/' + productVariantId, data));
-          if (isMainProduct) {
-            var productData = {
-              appImages: { 'default': [_.assign({}, appImages[0], { mainImage: true })] }
-            };
-            promises.push($http.put('/api/v1/products/' + productId, productData));
-          }
+        if (productVariantIds && productVariantIds.length) {
+          productVariantIds.forEach(function (productVariantId, index) {
+            promises.push($http.put('/api/v1/products/' + productId + '/product_variants/' + productVariantId, data));
+            if (isMainProduct && index === 0) {
+              var productData = {
+                appImages: { 'default': [_.assign({}, appImages[0], { mainImage: true })] }
+              };
+              promises.push($http.put('/api/v1/products/' + productId, productData));
+            }
+          });
         } else {
           promises.push($http.put('/api/v1/products/' + productId, data));
         }
@@ -3560,13 +3562,15 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       while (r < item.rows.length) {
         var sameColor = item.rows[r].rowspan;
         var images = item.rows[r].images;
+        var variantIds = [];
         for (var k = 0; k < sameColor; k++) {
           var row = item.rows[r++];
-          if (!row.images || row.images.length < 1) continue;
-
-          allVariantCount++;
-          uploadRowImages(item.product.id, row.variantId, images, !item.product.hasImage && row.mainProduct);
+          if (row.variantId) {
+            variantIds.push(row.variantId);
+          }
         }
+        allVariantCount++;
+        uploadRowImages(item.product.id, variantIds, images, false);
       }
     }
   };

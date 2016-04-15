@@ -249,7 +249,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         boUtils.stopProgressBar();
       }
     };
-    const uploadRowImages = (productId, productVariantId, images, isMainProduct) => {
+    const uploadRowImages = (productId, productVariantIds, images, isMainProduct) => {
       changedProducts.add(productId);
       const appImages = new Array(images.length);
       let uploadCount = 0;
@@ -287,14 +287,16 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         const data = {
           appImages: { default: appImages },
         };
-        if (productVariantId) {
-          promises.push($http.put(`/api/v1/products/${productId}/product_variants/${productVariantId}`, data));
-          if (isMainProduct) {
-            const productData = {
-              appImages: { default: [_.assign({}, appImages[0], { mainImage: true })] },
-            };
-            promises.push($http.put(`/api/v1/products/${productId}`, productData));
-          }
+        if (productVariantIds && productVariantIds.length) {
+          productVariantIds.forEach((productVariantId, index) => {
+            promises.push($http.put(`/api/v1/products/${productId}/product_variants/${productVariantId}`, data));
+            if (isMainProduct && index === 0) {
+              const productData = {
+                appImages: { default: [_.assign({}, appImages[0], { mainImage: true })] },
+              };
+              promises.push($http.put(`/api/v1/products/${productId}`, productData));
+            }
+          });
         } else {
           promises.push($http.put(`/api/v1/products/${productId}`, data));
         }
@@ -318,13 +320,15 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
       while (r < item.rows.length) {
         const sameColor = item.rows[r].rowspan;
         const images = item.rows[r].images;
+        const variantIds = [];
         for (let k = 0; k < sameColor; k++) {
           const row = item.rows[r++];
-          if (!row.images || row.images.length < 1) continue;
-
-          allVariantCount++;
-          uploadRowImages(item.product.id, row.variantId, images, !item.product.hasImage && row.mainProduct);
+          if (row.variantId) {
+            variantIds.push(row.variantId);
+          }
         }
+        allVariantCount++;
+        uploadRowImages(item.product.id, variantIds, images, false);
       }
     }
   };
