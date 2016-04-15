@@ -3206,18 +3206,28 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
   }
   $scope.activeDate = $scope.dates[0];
   var initializeDate = function initializeDate() {
+    var reverse = function reverse(arr) {
+      for (var i = 0; i < arr.length / 2; i++) {
+        var tmp = arr[i];
+        arr[i] = arr[arr.length - 1 - i];
+        arr[arr.length - 1 - i] = tmp;
+      }
+      return arr;
+    };
     boUtils.startProgressBar();
     var collectByBrand = function collectByBrand(products) {
       var brandMap = {};
+      var brandIds = [];
       products.forEach(function (product) {
         var brandId = _.get(product, 'brand.id');
         if (!brandId) return;
         if (!brandMap[brandId]) {
           brandMap[brandId] = { brand: product.brand, products: [] };
+          brandIds.push(brandId);
         }
         brandMap[brandId].products.push(product);
       });
-      return Object.keys(brandMap).map(function (key) {
+      return reverse(brandIds).map(function (key) {
         return brandMap[key];
       });
     };
@@ -3231,12 +3241,8 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         return;
       }
       // 2016. 04. 04. [heekyu] older product is former
-      for (var i = 0; i < products.length / 2; i++) {
-        var tmp = products[i];
-        products[i] = products[products.length - 1 - i];
-        products[products.length - 1 - i] = tmp;
-      }
       // Array.reverse(products); why Array.reverse does not exist?
+      products = reverse(products);
       $scope.brands = collectByBrand(products);
       $scope.brands.forEach(function (brand) {
         brand.brand.displayName = boUtils.getNameWithAllBuildingInfo(brand.brand);

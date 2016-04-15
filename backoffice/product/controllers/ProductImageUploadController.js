@@ -12,21 +12,31 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
   }
   $scope.activeDate = $scope.dates[0];
   const initializeDate = () => {
+    const reverse = (arr) => {
+      for (let i = 0; i < arr.length / 2; i++) {
+        const tmp = arr[i];
+        arr[i] = arr[arr.length - 1 - i];
+        arr[arr.length - 1 - i] = tmp;
+      }
+      return arr;
+    };
     boUtils.startProgressBar();
     const collectByBrand = (products) => {
       const brandMap = {};
+      const brandIds = [];
       products.forEach((product) => {
         const brandId = _.get(product, 'brand.id');
         if (!brandId) return;
         if (!brandMap[brandId]) {
           brandMap[brandId] = { brand: product.brand, products: [] };
+          brandIds.push(brandId);
         }
         brandMap[brandId].products.push(product);
       });
-      return Object.keys(brandMap).map((key) => brandMap[key]);
+      return reverse(brandIds).map((key) => brandMap[key]);
     };
     $http.get(`/api/v1/products?start=${$scope.activeDate}&end=${$scope.activeDate}&limit=100`).then((res) => {
-      const products = res.data.products.map(productUtil.narrowProduct);
+      let products = res.data.products.map(productUtil.narrowProduct);
       if (products.length < 1) {
         window.alert(`There is no products on ${$scope.activeDate}`);
         $scope.activeBrand = {};
@@ -35,12 +45,8 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         return;
       }
       // 2016. 04. 04. [heekyu] older product is former
-      for (let i = 0; i < products.length / 2; i++) {
-        const tmp = products[i];
-        products[i] = products[products.length - 1 - i];
-        products[products.length - 1 - i] = tmp;
-      }
       // Array.reverse(products); why Array.reverse does not exist?
+      products = reverse(products);
       $scope.brands = collectByBrand(products);
       $scope.brands.forEach((brand) => {
         brand.brand.displayName = boUtils.getNameWithAllBuildingInfo(brand.brand);
