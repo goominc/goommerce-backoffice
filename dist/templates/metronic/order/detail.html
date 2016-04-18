@@ -183,7 +183,7 @@
                             </td>
                             <td>
                               <div ng-if="row.type === 0">
-                                <button class="btn blue" data-ng-click="refund(row)">
+                                <button class="btn blue" data-ng-click="popupRefund(row)">
                                   <i class="fa fa-eject"></i> Refund
                                 </button>
                               </div>
@@ -251,6 +251,30 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="order_refund_modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form data-ng-submit="refund(refundAmount)">
+        <div class="modal-header">
+          {{'order.detail.refundTitle' | translate}}
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12 form-group">
+              <label class="control-label">환불 가능 금액: {{refundPayment.data.TotPrice}} </label>
+              <input class="form-control" type="number" min="1" max="{{refundPayment.data.TotPrice || 1}}" data-ng-model="refundAmount" placeholder="환불 금액을 입력하세요" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn default" type="reset" data-ng-click="closePopup()">{{'main.closeButton' | translate}}</button>
+          <button class="btn blue" type="submit"><i class="fa fa-plus"></i> {{'main.saveButton' | translate}}</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

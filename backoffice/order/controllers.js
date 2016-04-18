@@ -104,17 +104,30 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $scope.user = res.data;
   });
 
-  $scope.refund = function(payment) {
-    console.log('refund', payment);
+  $scope.popupRefund = (payment) => {
+    $scope.refundPayment = payment;
+    $('#order_refund_modal').modal();
+  };
+
+  $scope.refund = (amount) => {
+    const payment = $scope.refundPayment;
+    $scope.closePopup();
     $http.post(`/api/v1/orders/${order.id}/refund`, {
       paymentId: payment.id,
-      amount: payment.data.TotPrice, // FIXME: from user input
+      // amount: payment.data.TotPrice, // FIXME: from user input
+      amount: +amount,
       msg: 'admin refund',
     }).then((res) => {
       // TODO: refresh order.
-      console.log(res);
+      $state.reload();
     });
-  }
+  };
+
+  $scope.closePopup = () => {
+    $('#order_refund_modal').modal('hide');
+    $('#order_refund_modal').removeClass('in');
+    $('.modal-backdrop').remove();
+  };
 
   if ($scope.order.address) {
     $scope.addressFields = [

@@ -10,7 +10,8 @@
       "startProcessing": "주문처리"
     },
     "detail": {
-      "title": "주문상세"
+      "title": "주문상세",
+      "refundTitle": "환불"
     },
     "beforePayment": {
       "title": "무통장 입금 대기",

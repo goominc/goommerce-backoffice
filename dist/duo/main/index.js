@@ -3664,7 +3664,8 @@ module.exports = {
       "startProcessing": "주문처리"
     },
     "detail": {
-      "title": "주문상세"
+      "title": "주문상세",
+      "refundTitle": "환불"
     },
     "beforePayment": {
       "title": "무통장 입금 대기",
@@ -3773,16 +3774,29 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     $scope.user = res.data;
   });
 
-  $scope.refund = function (payment) {
-    console.log('refund', payment);
+  $scope.popupRefund = function (payment) {
+    $scope.refundPayment = payment;
+    $('#order_refund_modal').modal();
+  };
+
+  $scope.refund = function (amount) {
+    var payment = $scope.refundPayment;
+    $scope.closePopup();
     $http.post('/api/v1/orders/' + order.id + '/refund', {
       paymentId: payment.id,
-      amount: payment.data.TotPrice, // FIXME: from user input
+      // amount: payment.data.TotPrice, // FIXME: from user input
+      amount: +amount,
       msg: 'admin refund'
     }).then(function (res) {
       // TODO: refresh order.
-      console.log(res);
+      $state.reload();
     });
+  };
+
+  $scope.closePopup = function () {
+    $('#order_refund_modal').modal('hide');
+    $('#order_refund_modal').removeClass('in');
+    $('.modal-backdrop').remove();
   };
 
   if ($scope.order.address) {
