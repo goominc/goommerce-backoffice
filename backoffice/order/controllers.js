@@ -104,6 +104,18 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $scope.user = res.data;
   });
 
+  $scope.refund = function(payment) {
+    console.log('refund', payment);
+    $http.post(`/api/v1/orders/${order.id}/refund`, {
+      paymentId: payment.id,
+      amount: payment.data.TotPrice, // FIXME: from user input
+      msg: 'admin refund',
+    }).then((res) => {
+      // TODO: refresh order.
+      console.log(res);
+    });
+  }
+
   if ($scope.order.address) {
     $scope.addressFields = [
       {title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name'},

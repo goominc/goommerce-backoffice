@@ -131,6 +131,74 @@
                   <div class="portlet grey-cascade box">
                     <div class="portlet-title">
                       <div class="caption">
+                        <i class="fa fa-cogs"></i>Payments
+                      </div>
+                    </div>
+                    <div class="portlet-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover table-bordered table-striped">
+                          <thead>
+                          <tr>
+                            <th width="10%">ID</th>
+                            <th width="10%">Parent ID</th>
+                            <th width="30%">TID</th>
+                            <th width="10%">Type</th>
+                            <th width="10%">Total</th>
+                            <th width="10%">Currency</th>
+                            <th width="5%">Method</th>
+                            <th width="5%">Status</th>
+                            <th width="10%"></th>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center">
+                          <tr data-ng-repeat="row in order.payments">
+                            <td>
+                              {{row.id}}
+                            </td>
+                            <td>
+                              {{row.parentId}}
+                            </td>
+                            <td>
+                              {{row.tid}}
+                            </td>
+                            <td>
+                              {{row.type}}
+                            </td>
+                            <td>
+                              <div ng-if="row.type === 0">
+                                {{row.data.TotPrice}}
+                              </div>
+                              <div ng-if="row.type === 2">
+                                {{row.data.PRTC_Price}}
+                              </div>
+                            </td>
+                            <td>
+                              {{row.data.currency}}
+                            </td>
+                            <td>
+                              {{row.data.payMethod}}
+                            </td>
+                            <td>
+                              {{row.status}}
+                            </td>
+                            <td>
+                              <div ng-if="row.type === 0">
+                                <button class="btn blue" data-ng-click="refund(row)">
+                                  <i class="fa fa-eject"></i> Refund
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="portlet grey-cascade box">
+                    <div class="portlet-title">
+                      <div class="caption">
                         <i class="fa fa-cogs"></i>Shopping Cart
                       </div>
                     </div>

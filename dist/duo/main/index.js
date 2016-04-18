@@ -3773,6 +3773,18 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     $scope.user = res.data;
   });
 
+  $scope.refund = function (payment) {
+    console.log('refund', payment);
+    $http.post('/api/v1/orders/' + order.id + '/refund', {
+      paymentId: payment.id,
+      amount: payment.data.TotPrice, // FIXME: from user input
+      msg: 'admin refund'
+    }).then(function (res) {
+      // TODO: refresh order.
+      console.log(res);
+    });
+  };
+
   if ($scope.order.address) {
     $scope.addressFields = [{ title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name' }, { title: $translate.instant('order.address.cityLabel'), obj: _.get($scope.order.address, 'detail.city'), key: 'city' }, { title: $translate.instant('order.address.postalCodeLabel'), obj: _.get($scope.order.address, 'detail.postalCode'), key: 'postalCode' }, { title: $translate.instant('order.address.streetLabel'), obj: _.get($scope.order.address, 'detail.streetAddress'), key: 'streetAddress' }, { title: $translate.instant('order.address.countryCodeLabel'), obj: _.get($scope.order.address, 'countryCode'), key: 'countryCode' }, { title: $translate.instant('order.address.telLabel'), obj: _.get($scope.order.address, 'detail.tel'), key: 'tel' }];
   }
