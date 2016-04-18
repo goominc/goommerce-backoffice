@@ -3585,6 +3585,14 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       }
     }
   };
+
+  $scope.clearImages = function () {
+    ($scope.items || []).forEach(function (item) {
+      (item.rows || []).forEach(function (row) {
+        row.images = [];
+      });
+    });
+  };
 });
 }, {"../module":6}],
 7: [function(require, module, exports) {

@@ -338,4 +338,12 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
       }
     }
   };
+
+  $scope.clearImages = () => {
+    ($scope.items || []).forEach((item) => {
+      (item.rows || []).forEach((row) => {
+        row.images = [];
+      });
+    });
+  };
 });
