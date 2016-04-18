@@ -308,6 +308,11 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
     }
     $http.get('/api/v1/login').then(function (res) {
       $rootScope.state.auth = res.data;
+      var newToken = 'Bearer ' + res.data.bearer;
+      if (token !== newToken) {
+        $http.defaults.headers.common.Authorization = newToken;
+        $cookies.put(ACCESS_TOKEN_KEY, newToken);
+      }
     }, function () {
       if (token) {
         $cookies.remove(ACCESS_TOKEN_KEY);
