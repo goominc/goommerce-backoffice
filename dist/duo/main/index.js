@@ -3321,7 +3321,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         });
       }
     }
-    if (product.hasImage) {
+    if ($scope.uploadTypes[$scope.uploadTypeIndex].productHasImage) {
       rows.push({
         color: 'Main',
         images: _.get(product, 'appImages.default') || [],
@@ -3497,7 +3497,8 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         boUtils.stopProgressBar();
       }
     };
-    var uploadRowImages = function uploadRowImages(productId, productVariantIds, images, isMainProduct) {
+    var isAddProductImage = !$scope.uploadTypes[$scope.uploadTypeIndex].productHasImage;
+    var uploadRowImages = function uploadRowImages(productId, productVariantIds, images, isSaveProduct) {
       changedProducts.add(productId);
       var appImages = new Array(images.length);
       var uploadCount = 0;
@@ -3518,7 +3519,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
                 url: res.url.substring(5),
                 publicId: res.public_id,
                 version: res.version,
-                mainImage: false
+                mainImage: isSaveProduct
               };
               plusDone();
               if (res) return res;
@@ -3541,15 +3542,12 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
           appImages: { 'default': appImages }
         };
         if (productVariantIds && productVariantIds.length) {
-          productVariantIds.forEach(function (productVariantId, index) {
+          productVariantIds.forEach(function (productVariantId) {
             promises.push($http.put('/api/v1/products/' + productId + '/product_variants/' + productVariantId, data));
-            if (isMainProduct && index === 0) {
-              var productData = {
-                appImages: { 'default': [_.assign({}, appImages[0], { mainImage: true })] }
-              };
-              promises.push($http.put('/api/v1/products/' + productId, productData));
-            }
           });
+          if (isSaveProduct) {
+            promises.push($http.put('/api/v1/products/' + productId, data));
+          }
         } else {
           promises.push($http.put('/api/v1/products/' + productId, data));
         }
@@ -3574,14 +3572,18 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         var sameColor = item.rows[r].rowspan;
         var images = item.rows[r].images;
         var variantIds = [];
+        var isUploadProduct = false;
         for (var k = 0; k < sameColor; k++) {
           var row = item.rows[r++];
           if (row.variantId) {
             variantIds.push(row.variantId);
+            if (row.mainProduct && images.length) {
+              isUploadProduct = true;
+            }
           }
         }
         allVariantCount++;
-        uploadRowImages(item.product.id, variantIds, images, false);
+        uploadRowImages(item.product.id, variantIds, images, isAddProductImage && isUploadProduct);
       }
     }
   };
@@ -3592,6 +3594,14 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         row.images = [];
       });
     });
+  };
+
+  $scope.uploadTypes = [{ name: '기본 업로드', productHasImage: true }, { name: '잡화 업로드', productHasImage: false }];
+  $scope.uploadTypeIndex = 0;
+  $scope.changeUploadType = function (index) {
+    $scope.uploadTypeIndex = index;
+    productsToRows($scope.activeBrand.products);
+    $scope.clearImages();
   };
 });
 }, {"../module":6}],

@@ -120,7 +120,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         });
       }
     }
-    if (product.hasImage) {
+    if ($scope.uploadTypes[$scope.uploadTypeIndex].productHasImage) {
       rows.push({
         color: 'Main',
         images: _.get(product, 'appImages.default') || [],
@@ -255,7 +255,8 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         boUtils.stopProgressBar();
       }
     };
-    const uploadRowImages = (productId, productVariantIds, images, isMainProduct) => {
+    const isAddProductImage = !$scope.uploadTypes[$scope.uploadTypeIndex].productHasImage;
+    const uploadRowImages = (productId, productVariantIds, images, isSaveProduct) => {
       changedProducts.add(productId);
       const appImages = new Array(images.length);
       let uploadCount = 0;
@@ -275,7 +276,7 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
                 url: res.url.substring(5),
                 publicId: res.public_id,
                 version: res.version,
-                mainImage: false,
+                mainImage: isSaveProduct,
               };
               plusDone();
               if (res) return res;
@@ -294,15 +295,12 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
           appImages: { default: appImages },
         };
         if (productVariantIds && productVariantIds.length) {
-          productVariantIds.forEach((productVariantId, index) => {
+          productVariantIds.forEach((productVariantId) => {
             promises.push($http.put(`/api/v1/products/${productId}/product_variants/${productVariantId}`, data));
-            if (isMainProduct && index === 0) {
-              const productData = {
-                appImages: { default: [_.assign({}, appImages[0], { mainImage: true })] },
-              };
-              promises.push($http.put(`/api/v1/products/${productId}`, productData));
-            }
           });
+          if (isSaveProduct) {
+            promises.push($http.put(`/api/v1/products/${productId}`, data));
+          }
         } else {
           promises.push($http.put(`/api/v1/products/${productId}`, data));
         }
@@ -327,14 +325,18 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         const sameColor = item.rows[r].rowspan;
         const images = item.rows[r].images;
         const variantIds = [];
+        let isUploadProduct = false;
         for (let k = 0; k < sameColor; k++) {
           const row = item.rows[r++];
           if (row.variantId) {
             variantIds.push(row.variantId);
+            if (row.mainProduct && images.length) {
+              isUploadProduct = true;
+            }
           }
         }
         allVariantCount++;
-        uploadRowImages(item.product.id, variantIds, images, false);
+        uploadRowImages(item.product.id, variantIds, images, isAddProductImage && isUploadProduct);
       }
     }
   };
@@ -345,5 +347,16 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         row.images = [];
       });
     });
+  };
+
+  $scope.uploadTypes = [
+    { name: '기본 업로드', productHasImage: true, },
+    { name: '잡화 업로드', productHasImage: false },
+  ];
+  $scope.uploadTypeIndex = 0;
+  $scope.changeUploadType = (index) => {
+    $scope.uploadTypeIndex = index;
+    productsToRows($scope.activeBrand.products);
+    $scope.clearImages();
   };
 });

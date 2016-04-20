@@ -31,6 +31,17 @@
                   </li>
                 </ul>
               </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary">{{uploadTypes[uploadTypeIndex].name}}</button>
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li data-ng-repeat="uploadType in uploadTypes">
+                    <a data-ng-click="changeUploadType($index)">
+                      {{uploadType.name}}
+                    </a>
+                  </li>
+                </ul>
+              </div>
               <button data-ng-click="clearImages()" class="btn red">이미지 삭제</button>
               <span class="btn green fileinput-button" style="margin: 15px 0;">
                 <i class="fa fa-plus"></i> {{'main.addImageButton' | translate}}
