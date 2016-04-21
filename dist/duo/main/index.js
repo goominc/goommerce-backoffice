@@ -3715,7 +3715,8 @@ module.exports = {
       "productNameColumn": "상품약어",
       "colorColumn": "색상",
       "sizeColumn": "사이즈",
-      "quantityColumn": "주문수량"
+      "quantityColumn": "주문수량",
+      "download": "CSV 다운로드"
     }
   }
 }
