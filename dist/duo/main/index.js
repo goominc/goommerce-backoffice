@@ -1358,6 +1358,7 @@ module.exports = {
       "gradeLabel": "회원 등급",
       "vbankCodeLabel": "은행코드",
       "vbankAccountLabel": "가상계좌번호",
+      "changePasswordButton": "비밀번호 변경",
       "isConfirmed": "인증 여부",
       "title": "유저 정보",
       "telLabel": "전화번호",
@@ -1420,6 +1421,11 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       data: 'id',
       render: function render(id) {
         return '<a ui-sref="user.info({ userId: ' + id + ' })"><button class="btn blue"><i class="fa fa-info"></i> ' + $translate.instant('user.info.userDetailButton') + '</button></a>';
+      }
+    }, {
+      data: 'id',
+      render: function render(id) {
+        return '<button class="btn blue" data-ng-click="openPasswordPopup(' + id + ')"><i class="fa fa-password"></i> ' + $translate.instant('user.info.changePasswordButton') + '</button>';
       }
     }]
   };
@@ -1489,6 +1495,31 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       $scope.$apply();
     }
     $('#user_change_role').modal();
+  };
+
+  $scope.changePasswordUser = null;
+  $scope.openPasswordPopup = function (userId) {
+    var user = $scope.userIdToData[userId];
+    $scope.changePasswordUser = user;
+    $('#user_change_password').modal();
+  };
+  $scope.closePasswordPopup = function () {
+    $('#user_change_password').modal('hide');
+  };
+  $scope.savePassword = function () {
+    var user = $scope.changePasswordUser;
+    if (!user.password) {
+      window.alert('비밀번호를 입력하세요');
+      return;
+    }
+    var password = user.password;
+    delete user.password;
+    $http.put('/api/v1/users/' + user.id + '/reset_password', { password: password }).then(function () {
+      window.alert('비밀번호 저장되었습니다');
+      $scope.closePasswordPopup();
+    }, function () {
+      window.alert('비밀번호 저장이 실패하였습니다.');
+    });
   };
 
   $scope.datatablesLoaded = function () {
