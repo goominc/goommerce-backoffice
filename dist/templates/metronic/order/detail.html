@@ -49,20 +49,50 @@
                       </div>
                       <div class="row static-info">
                         <div class="col-md-5 name">
-                          Total:
+                          Payment Status:
                         </div>
                         <div class="col-md-7 value">
-                          KRW {{order.totalKRW}} <br/>
-                          USD {{order.totalUSD}} <br/>
-                          CNY {{order.totalCNY}}
+                          <span class="label label-success">{{order.paymentStatus}}</span>
                         </div>
                       </div>
                       <div class="row static-info">
                         <div class="col-md-5 name">
-                          Payment:
+                          subtotal:
                         </div>
                         <div class="col-md-7 value">
-                          <span class="label label-success">{{order.paymentStatus}}</span>
+                          KRW {{order.subtotalKRW}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          tax:
+                        </div>
+                        <div class="col-md-7 value">
+                          KRW {{order.taxKRW}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          handling fee:
+                        </div>
+                        <div class="col-md-7 value">
+                          KRW {{order.handlingFeeKRW}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          shipping cost:
+                        </div>
+                        <div class="col-md-7 value">
+                          KRW {{order.shippingCostKRW}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          total:
+                        </div>
+                        <div class="col-md-7 value">
+                          KRW {{order.totalKRW}}
                         </div>
                       </div>
                     </div>
