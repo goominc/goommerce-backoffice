@@ -2,7 +2,7 @@
 
 const orderModule = require('./module');
 
-orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state, $translate) => {
+orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state, $translate, boUtils) => {
   $scope.contentTitle = $translate.instant('order.main.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
@@ -30,16 +30,17 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         },
       },
       {
-        data: 'createdAt',
-      },
-      {
         data: 'status',
       },
       {
-        data: 'paymentStatus',
+        data: 'createdAt',
+        render: (data) => boUtils.formatDate(data),
       },
       {
         data: 'totalKRW',
+      },
+      {
+        data: 'paymentStatus',
       },
       {
         // edit role button
@@ -132,9 +133,9 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   if ($scope.order.address) {
     $scope.addressFields = [
       {title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name'},
-      {title: $translate.instant('order.address.cityLabel'), obj: _.get($scope.order.address, 'detail.city'), key: 'city'},
       {title: $translate.instant('order.address.postalCodeLabel'), obj: _.get($scope.order.address, 'detail.postalCode'), key: 'postalCode'},
-      {title: $translate.instant('order.address.streetLabel'), obj: _.get($scope.order.address, 'detail.streetAddress'), key: 'streetAddress'},
+      {title: $translate.instant('order.address.addressLabel'), obj: _.get($scope.order.address, 'detail.address.base'), key: 'addressBase'},
+      {title: $translate.instant('order.address.addressDetailLabel'), obj: _.get($scope.order.address, 'detail.address.detail'), key: 'addressDetail'},
       {title: $translate.instant('order.address.countryCodeLabel'), obj: _.get($scope.order.address, 'countryCode'), key: 'countryCode'},
       {title: $translate.instant('order.address.telLabel'), obj: _.get($scope.order.address, 'detail.tel'), key: 'tel'},
     ];

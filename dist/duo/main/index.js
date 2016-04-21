@@ -3729,7 +3729,8 @@ module.exports = {
     },
     "address": {
       "nameLabel": "이름",
-      "cityLabel": "도시",
+      "addressLabel": "주소",
+      "addressDetailLabel": "상세주소",
       "telLabel": "T",
       "postalCodeLabel": "우편번호",
       "countryCodeLabel": "국가",
@@ -3760,7 +3761,7 @@ module.exports = {
 
 var orderModule = require('./module');
 
-orderModule.controller('OrderMainController', function ($scope, $rootScope, $http, $state, $translate) {
+orderModule.controller('OrderMainController', function ($scope, $rootScope, $http, $state, $translate, boUtils) {
   $scope.contentTitle = $translate.instant('order.main.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [{
@@ -3783,13 +3784,16 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
         return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
       }
     }, {
-      data: 'createdAt'
-    }, {
       data: 'status'
     }, {
-      data: 'paymentStatus'
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
     }, {
       data: 'totalKRW'
+    }, {
+      data: 'paymentStatus'
     }, {
       // edit role button
       data: 'id',
@@ -3870,7 +3874,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   };
 
   if ($scope.order.address) {
-    $scope.addressFields = [{ title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name' }, { title: $translate.instant('order.address.cityLabel'), obj: _.get($scope.order.address, 'detail.city'), key: 'city' }, { title: $translate.instant('order.address.postalCodeLabel'), obj: _.get($scope.order.address, 'detail.postalCode'), key: 'postalCode' }, { title: $translate.instant('order.address.streetLabel'), obj: _.get($scope.order.address, 'detail.streetAddress'), key: 'streetAddress' }, { title: $translate.instant('order.address.countryCodeLabel'), obj: _.get($scope.order.address, 'countryCode'), key: 'countryCode' }, { title: $translate.instant('order.address.telLabel'), obj: _.get($scope.order.address, 'detail.tel'), key: 'tel' }];
+    $scope.addressFields = [{ title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name' }, { title: $translate.instant('order.address.postalCodeLabel'), obj: _.get($scope.order.address, 'detail.postalCode'), key: 'postalCode' }, { title: $translate.instant('order.address.addressLabel'), obj: _.get($scope.order.address, 'detail.address.base'), key: 'addressBase' }, { title: $translate.instant('order.address.addressDetailLabel'), obj: _.get($scope.order.address, 'detail.address.detail'), key: 'addressDetail' }, { title: $translate.instant('order.address.countryCodeLabel'), obj: _.get($scope.order.address, 'countryCode'), key: 'countryCode' }, { title: $translate.instant('order.address.telLabel'), obj: _.get($scope.order.address, 'detail.tel'), key: 'tel' }];
   }
 });
 

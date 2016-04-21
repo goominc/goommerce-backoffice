@@ -19,7 +19,8 @@
     },
     "address": {
       "nameLabel": "이름",
-      "cityLabel": "도시",
+      "addressLabel": "주소",
+      "addressDetailLabel": "상세주소",
       "telLabel": "T",
       "postalCodeLabel": "우편번호",
       "countryCodeLabel": "국가",
