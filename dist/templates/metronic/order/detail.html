@@ -219,7 +219,7 @@
                           <tbody class="cell-center">
                           <tr data-ng-repeat="row in order.orderProducts">
                             <td>
-                              <a ui-sref="product.edit({productId: row.id})">{{row.product.id}}</a>
+                              <a href="/products/{{row.product.id}}" target="_blank">{{row.product.id}}</a>
                             </td>
                             <td>
                               {{row.productVariant.sku}}
