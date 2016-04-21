@@ -140,3 +140,32 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     ];
   }
 });
+
+orderModule.controller('OrderUncleController', ($scope, $rootScope, $http, $state, $translate, orderProducts) => {
+  $scope.contentTitle = $translate.instant('order.uncle.title');
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'order.main',
+      name: $translate.instant('order.main.title'),
+    },
+    {
+      sref: 'order.uncle',
+      name: $translate.instant('order.uncle.title'),
+    },
+  ];
+  $scope.orderProducts = orderProducts;
+  $scope.download = () => {
+    $http.get('/api/v1/uncle/order_products?format=csv').then((res) => {
+			var blob = new Blob([res.data]);
+			var downloadLink = angular.element('<a></a>');
+                        downloadLink.attr('href',window.URL.createObjectURL(blob));
+                        downloadLink.attr('download', 'uncle.csv');
+			downloadLink[0].click();
+    });
+  };
+  $rootScope.initAll($scope, $state.current.name);
+});

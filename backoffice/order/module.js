@@ -33,6 +33,18 @@ orderModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/order/step0-before-payment.html',
       controller: 'OrderListBeforePaymentController',
     })
+    .state('order.uncle', {
+      url: '/uncle',
+      templateUrl: templateRoot + '/order/uncle.html',
+      controller: 'OrderUncleController',
+      resolve: {
+        orderProducts: ($http, $rootScope, $stateParams) => {
+          return $http.get('/api/v1/uncle/order_products').then((res) => {
+            return res.data;
+          });
+        },
+      },
+    })
     .state('order.detail', {
       url: '/detail/:orderId',
       templateUrl: templateRoot + '/order/detail.html',

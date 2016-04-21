@@ -186,6 +186,10 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       key: 'order.beforePayment',
       name: $translate.instant('order.beforePayment.title'),
       sref: 'order.beforePayment'
+    }, {
+      key: 'order.uncle',
+      name: $translate.instant('order.uncle.title'),
+      sref: 'order.uncle'
     }]
   }, {
     key: 'user', // TODO get key from router
@@ -3633,6 +3637,17 @@ orderModule.config(function ($stateProvider) {
     url: '/before_payment',
     templateUrl: templateRoot + '/order/step0-before-payment.html',
     controller: 'OrderListBeforePaymentController'
+  }).state('order.uncle', {
+    url: '/uncle',
+    templateUrl: templateRoot + '/order/uncle.html',
+    controller: 'OrderUncleController',
+    resolve: {
+      orderProducts: function orderProducts($http, $rootScope, $stateParams) {
+        return $http.get('/api/v1/uncle/order_products').then(function (res) {
+          return res.data;
+        });
+      }
+    }
   }).state('order.detail', {
     url: '/detail/:orderId',
     templateUrl: templateRoot + '/order/detail.html',
@@ -3688,6 +3703,19 @@ module.exports = {
       "postalCodeLabel": "우편번호",
       "countryCodeLabel": "국가",
       "streetLabel": "도로명"
+    },
+    "uncle": {
+      "title": "삼촌주문목록",
+      "orderIdColumn": "주문번호",
+      "brandNameColumn": "브랜드명",
+      "buildingNameColumn": "건물",
+      "floorColumn": "층",
+      "flatNumberColumn": "호수",
+      "telColumn": "전화번호",
+      "productNameColumn": "상품약어",
+      "colorColumn": "색상",
+      "sizeColumn": "사이즈",
+      "quantityColumn": "주문수량"
     }
   }
 }
@@ -3812,6 +3840,31 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   if ($scope.order.address) {
     $scope.addressFields = [{ title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name' }, { title: $translate.instant('order.address.cityLabel'), obj: _.get($scope.order.address, 'detail.city'), key: 'city' }, { title: $translate.instant('order.address.postalCodeLabel'), obj: _.get($scope.order.address, 'detail.postalCode'), key: 'postalCode' }, { title: $translate.instant('order.address.streetLabel'), obj: _.get($scope.order.address, 'detail.streetAddress'), key: 'streetAddress' }, { title: $translate.instant('order.address.countryCodeLabel'), obj: _.get($scope.order.address, 'countryCode'), key: 'countryCode' }, { title: $translate.instant('order.address.telLabel'), obj: _.get($scope.order.address, 'detail.tel'), key: 'tel' }];
   }
+});
+
+orderModule.controller('OrderUncleController', function ($scope, $rootScope, $http, $state, $translate, orderProducts) {
+  $scope.contentTitle = $translate.instant('order.uncle.title');
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
+    sref: 'order.uncle',
+    name: $translate.instant('order.uncle.title')
+  }];
+  $scope.orderProducts = orderProducts;
+  $scope.download = function () {
+    $http.get('/api/v1/uncle/order_products?format=csv').then(function (res) {
+      var blob = new Blob([res.data]);
+      var downloadLink = angular.element('<a></a>');
+      downloadLink.attr('href', window.URL.createObjectURL(blob));
+      downloadLink.attr('download', 'uncle.csv');
+      downloadLink[0].click();
+    });
+  };
+  $rootScope.initAll($scope, $state.current.name);
 });
 }, {"./module":7}],
 8: [function(require, module, exports) {

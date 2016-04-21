@@ -112,6 +112,11 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: $translate.instant('order.beforePayment.title'),
           sref: 'order.beforePayment',
         },
+        {
+          key: 'order.uncle',
+          name: $translate.instant('order.uncle.title'),
+          sref: 'order.uncle',
+        },
       ],
     },
     {

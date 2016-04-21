@@ -1,0 +1,78 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet">
+            <div class="portlet-title">
+              <div class="actions btn-set">
+                <button class="btn blue" ng-click="download()"><i class="fa fa-check"></i> {{'order.uncle.download' | translate}}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="portlet-body">
+              <div>
+                <table class="table table-bordered table-hover">
+                  <thead>
+                  <tr role="row" class="heading">
+                    <td>{{'order.uncle.orderIdColumn' | translate}}</td>
+                    <td>{{'order.uncle.brandNameColumn' | translate}}</td>
+                    <td>{{'order.uncle.buildingNameColumn' | translate}}</td>
+                    <td>{{'order.uncle.floorColumn' | translate}}</td>
+                    <td>{{'order.uncle.flatNumberColumn' | translate}}</td>
+                    <td>{{'order.uncle.telColumn' | translate}}</td>
+                    <td>{{'order.uncle.productNameColumn' | translate}}</td>
+                    <td>{{'order.uncle.colorColumn' | translate}}</td>
+                    <td>{{'order.uncle.sizeColumn' | translate}}</td>
+                    <td>{{'order.uncle.quantityColumn' | translate}}</td>
+                  </tr>
+                  </thead>
+                  <tbody>
+                    <tr data-ng-repeat="row in orderProducts">
+                      <td>{{row.orderId}}</td>
+                      <td>{{row.brand.name.ko}}</td>
+                      <td>{{row.brand.data.location.building.name.ko}}</td>
+                      <td>{{row.brand.data.location.floor}}</td>
+                      <td>{{row.brand.data.location.flatNumber}}</td>
+                      <td>{{row.brand.data.tel}}</td>
+                      <td>{{row.product.name.ko}}</td>
+                      <td>{{row.productVariant.data.color}}</td>
+                      <td>{{row.productVariant.data.size}}</td>
+                      <td>{{row.quantity}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->
