@@ -11,7 +11,8 @@
     },
     "detail": {
       "title": "주문상세",
-      "refundTitle": "환불"
+      "refundTitle": "환불",
+      "saveButton": "저장"
     },
     "beforePayment": {
       "title": "무통장 입금 대기",

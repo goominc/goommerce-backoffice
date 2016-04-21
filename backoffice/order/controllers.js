@@ -99,6 +99,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   $rootScope.initAll($scope, $state.current.name);
 
   order.createdAt = boUtils.formatDate(order.createdAt);
+  order.finalShippingCostKRW = order.finalShippingCostKRW && Number(order.finalShippingCostKRW);
   $scope.order = order;
   $scope.user = {};
   $http.get(`/api/v1/users/${order.buyerId}`).then((res) => {
@@ -122,6 +123,15 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
       // TODO: refresh order.
       $state.reload();
     });
+  };
+
+  $scope.finalize = () => {
+    const data = _.pick(order, 'finalShippingCostKRW');
+    data.orderProducts = order.orderProducts.map(
+      (o) => _.pick(o, 'id', 'finalQuantity'));
+    $http.put(`/api/v1/orders/${order.id}/finalize`, data).then((res) => {
+      $state.reload();
+    }, (err) => alert(err.data.message));
   };
 
   $scope.closePopup = () => {

@@ -3721,7 +3721,8 @@ module.exports = {
     },
     "detail": {
       "title": "주문상세",
-      "refundTitle": "환불"
+      "refundTitle": "환불",
+      "saveButton": "저장"
     },
     "beforePayment": {
       "title": "무통장 입금 대기",
@@ -3842,6 +3843,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   $rootScope.initAll($scope, $state.current.name);
 
   order.createdAt = boUtils.formatDate(order.createdAt);
+  order.finalShippingCostKRW = order.finalShippingCostKRW && Number(order.finalShippingCostKRW);
   $scope.order = order;
   $scope.user = {};
   $http.get('/api/v1/users/' + order.buyerId).then(function (res) {
@@ -3864,6 +3866,18 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     }).then(function (res) {
       // TODO: refresh order.
       $state.reload();
+    });
+  };
+
+  $scope.finalize = function () {
+    var data = _.pick(order, 'finalShippingCostKRW');
+    data.orderProducts = order.orderProducts.map(function (o) {
+      return _.pick(o, 'id', 'finalQuantity');
+    });
+    $http.put('/api/v1/orders/' + order.id + '/finalize', data).then(function (res) {
+      $state.reload();
+    }, function (err) {
+      return alert(err.data.message);
     });
   };
 

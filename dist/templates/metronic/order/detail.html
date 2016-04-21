@@ -55,54 +55,6 @@
                           <span class="label label-success">{{order.paymentStatus}}</span>
                         </div>
                       </div>
-                      <div class="row static-info">
-                        <div class="col-md-5 name">
-                          subtotal:
-                        </div>
-                        <div class="col-md-7 value">
-                          KRW {{order.subtotalKRW}}
-                        </div>
-                      </div>
-                      <div class="row static-info">
-                        <div class="col-md-5 name">
-                          tax:
-                        </div>
-                        <div class="col-md-7 value">
-                          KRW {{order.taxKRW}}
-                        </div>
-                      </div>
-                      <div class="row static-info">
-                        <div class="col-md-5 name">
-                          handling fee:
-                        </div>
-                        <div class="col-md-7 value">
-                          KRW {{order.handlingFeeKRW}}
-                        </div>
-                      </div>
-                      <div class="row static-info">
-                        <div class="col-md-5 name">
-                          shipping cost:
-                        </div>
-                        <div class="col-md-7 value">
-                          KRW {{order.shippingCostKRW}}
-                        </div>
-                      </div>
-                      <div class="row static-info">
-                        <div class="col-md-5 name">
-                          total:
-                        </div>
-                        <div class="col-md-7 value">
-                          KRW {{order.totalKRW}}
-                        </div>
-                      </div>
-                      <div class="row static-info">
-                        <div class="col-md-5 name">
-                          totalPaid:
-                        </div>
-                        <div class="col-md-7 value">
-                          KRW {{order.totalPaid.amount}}
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -161,6 +113,188 @@
                         <div class="col-md-12 value">
                           <div data-ng-repeat="field in addressFields">{{field.title}}: {{field.obj}}</div>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="portlet yellow-crusta box">
+                    <div class="portlet-title">
+                      <div class="caption">
+                        <i class="fa fa-cogs"></i>Total Details
+                      </div>
+                    </div>
+                    <div class="portlet-body">
+                      <div class="row static-info">
+                        <div class="col-md-3 name">
+                        </div>
+                        <div class="col-md-3 value">
+                          original
+                        </div>
+                        <div class="col-md-3 value">
+                          final
+                        </div>
+                        <div class="col-md-3 value">
+                          diff
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-3 name">
+                          subtotal:
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.subtotalKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.finalSubtotalKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.subtotalKRW - order.finalSubtotalKRW}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-3 name">
+                          tax:
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.taxKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.finalTaxKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.taxKRW - order.finalTaxKRW}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-3 name">
+                          handling fee:
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.handlingFeeKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.finalHandlingFeeKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.handlingFeeKRW - order.finalHandlingFeeKRW}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-3 name">
+                          shipping cost:
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.shippingCostKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.finalShippingCostKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.shippingCostKRW - order.finalShippingCostKRW}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-3 name">
+                          total:
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.totalKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.finalTotalKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.totalKRW - order.finalTotalKRW}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-3 name">
+                          Payment:
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.totalPaid.amount}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.totalPaid.amount - order.totalRefuned.amount}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.totalPaid.amount - order.finalTotalKRW - order.totalRefuned.amount}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-9">
+                        </div>
+                        <div class="col-md-3 value">
+                          <button class="btn blue" data-ng-click="">
+                            <i class="fa fa-eject"></i> Refund
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="portlet grey-cascade box">
+                    <div class="portlet-title">
+                      <div class="caption">
+                        <i class="fa fa-cogs"></i>Shopping Cart
+                      </div>
+                      <div class="actions btn-set">
+                        <button class="btn blue" ng-click="finalize()"><i class="fa fa-check"></i> {{'order.detail.saveButton' | translate}}</button>
+                      </div>
+                    </div>
+                    <div class="portlet-body">
+                      <span>예상 배송비: {{order.shippingCostKRW}}, </span>
+                      <label class="control-label">최종 배송비</label>
+                      <input type="number" data-ng-model="order.finalShippingCostKRW" />
+                      <div class="table-responsive">
+                        <table class="table table-hover table-bordered table-striped">
+                          <thead>
+                          <tr>
+                            <th width="15%">상품ID</th>
+                            <th width="15%">상품</th>
+                            <th width="10%">Original Price</th>
+                            <th width="10%">Price</th>
+                            <th width="10%">Quantity</th>
+                            <th width="10%">Total</th>
+                            <th width="10%">Final Quantity</th>
+                            <th width="10%">Final Total</th>
+                            <th width="10%">Status</th>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center">
+                          <tr data-ng-repeat="row in order.orderProducts">
+                            <td>
+                              <a href="/products/{{row.product.id}}" target="_blank">{{row.product.id}}</a>
+                            </td>
+                            <td>
+                              {{row.productVariant.sku}}
+                            </td>
+                            <td>
+                              <span>{{row.productVariant.KRW}} KRW</span>
+                            </td>
+                            <td>
+                              <span>{{row.productVariant.KRW}} KRW</span>
+                            </td>
+                            <td>
+                              {{row.quantity}}
+                            </td>
+                            <td>
+                              {{row.totalKRW}}
+                            </td>
+                            <td>
+                              <input type="number" data-ng-model="row.finalQuantity">
+                            </td>
+                            <td>
+                              {{row.finalTotalKRW}}
+                            </td>
+                            <td>
+                              {{row.status}}
+                            </td>
+                          </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   </div>
@@ -225,57 +359,6 @@
                                   <i class="fa fa-eject"></i> Refund
                                 </button>
                               </div>
-                            </td>
-                          </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-12">
-                  <div class="portlet grey-cascade box">
-                    <div class="portlet-title">
-                      <div class="caption">
-                        <i class="fa fa-cogs"></i>Shopping Cart
-                      </div>
-                    </div>
-                    <div class="portlet-body">
-                      <div class="table-responsive">
-                        <table class="table table-hover table-bordered table-striped">
-                          <thead>
-                          <tr>
-                            <th width="20%">상품ID</th>
-                            <th width="20%">상품</th>
-                            <th width="15%">Original Price</th>
-                            <th width="15%">Price</th>
-                            <th width="10%">Quantity</th>
-                            <th width="10%">Total</th>
-                            <th width="10%">Status</th>
-                          </tr>
-                          </thead>
-                          <tbody class="cell-center">
-                          <tr data-ng-repeat="row in order.orderProducts">
-                            <td>
-                              <a href="/products/{{row.product.id}}" target="_blank">{{row.product.id}}</a>
-                            </td>
-                            <td>
-                              {{row.productVariant.sku}}
-                            </td>
-                            <td>
-                              <span>{{row.productVariant.KRW}} KRW</span>
-                            </td>
-                            <td>
-                              <span>{{row.productVariant.KRW}} KRW</span>
-                            </td>
-                            <td>
-                              {{row.quantity}}
-                            </td>
-                            <td>
-                              {{row.totalKRW}}
-                            </td>
-                            <td>
-                              {{row.status}}
                             </td>
                           </tr>
                           </tbody>
