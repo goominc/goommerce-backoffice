@@ -117,6 +117,11 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: $translate.instant('order.uncle.title'),
           sref: 'order.uncle',
         },
+        {
+          key: 'order.cs',
+          name: $translate.instant('order.cs.title'),
+          sref: 'order.cs',
+        },
       ],
     },
     {

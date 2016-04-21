@@ -25,29 +25,39 @@
                   <thead>
                   <tr role="row" class="heading">
                     <td>{{'order.orderProduct.orderIdColumn' | translate}}</td>
+                    <td>{{'order.orderProduct.brandIdColumn' | translate}}</td>
                     <td>{{'order.orderProduct.brandNameColumn' | translate}}</td>
-                    <td>{{'order.orderProduct.buildingNameColumn' | translate}}</td>
-                    <td>{{'order.orderProduct.floorColumn' | translate}}</td>
-                    <td>{{'order.orderProduct.flatNumberColumn' | translate}}</td>
                     <td>{{'order.orderProduct.telColumn' | translate}}</td>
+                    <td>{{'order.orderProduct.bank.name' | translate}}</td>
+                    <td>{{'order.orderProduct.bank.accountHolder' | translate}}</td>
+                    <td>{{'order.orderProduct.bank.accountNumber' | translate}}</td>
+                    <td>{{'order.orderProduct.productIdColumn' | translate}}</td>
                     <td>{{'order.orderProduct.productNameColumn' | translate}}</td>
                     <td>{{'order.orderProduct.colorColumn' | translate}}</td>
                     <td>{{'order.orderProduct.sizeColumn' | translate}}</td>
                     <td>{{'order.orderProduct.quantityColumn' | translate}}</td>
+                    <td>{{'order.orderProduct.totalColumn' | translate}}</td>
+                    <td>{{'order.orderProduct.dateColumn' | translate}}</td>
+                    <td>{{'order.orderProduct.buyerIdColumn' | translate}}</td>
                   </tr>
                   </thead>
                   <tbody>
                     <tr data-ng-repeat="row in orderProducts">
                       <td>{{row.orderId}}</td>
+                      <td>{{row.brand.id}}</td>
                       <td>{{row.brand.name.ko}}</td>
-                      <td>{{row.brand.data.location.building.name.ko}}</td>
-                      <td>{{row.brand.data.location.floor}}</td>
-                      <td>{{row.brand.data.location.flatNumber}}</td>
                       <td>{{row.brand.data.tel}}</td>
+                      <td>{{row.brand.data.bank.name}}</td>
+                      <td>{{row.brand.data.bank.accountHolder}}</td>
+                      <td>{{row.brand.data.bank.accountNumber}}</td>
+                      <td>{{row.product.id}}</td>
                       <td>{{row.product.name.ko}}</td>
                       <td>{{row.productVariant.data.color}}</td>
                       <td>{{row.productVariant.data.size}}</td>
                       <td>{{row.quantity}}</td>
+                      <td>{{row.totalKRW}}</td>
+                      <td>{{row.processedDate.substr(0, 10)}}</td>
+                      <td>{{row.buyerId}}</td>
                     </tr>
                   </tbody>
                 </table>

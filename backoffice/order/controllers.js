@@ -180,3 +180,23 @@ orderModule.controller('OrderUncleController', ($scope, $rootScope, $http, $stat
   };
   $rootScope.initAll($scope, $state.current.name);
 });
+
+orderModule.controller('OrderCsController', ($scope, $rootScope, $http, $state, $translate, orderProducts) => {
+  $scope.contentTitle = $translate.instant('order.cs.title');
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'order.main',
+      name: $translate.instant('order.main.title'),
+    },
+    {
+      sref: 'order.cs',
+      name: $translate.instant('order.cs.title'),
+    },
+  ];
+  $scope.orderProducts = orderProducts;
+  $rootScope.initAll($scope, $state.current.name);
+});

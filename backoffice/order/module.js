@@ -45,6 +45,18 @@ orderModule.config(($stateProvider) => {
         },
       },
     })
+    .state('order.cs', {
+      url: '/cs',
+      templateUrl: templateRoot + '/order/cs.html',
+      controller: 'OrderCsController',
+      resolve: {
+        orderProducts: ($http, $rootScope, $stateParams) => {
+          return $http.get('/api/v1/order_products?status=100:400&sorts=orderId,id&limit=1000').then((res) => {
+            return res.data.orderProducts;
+          });
+        },
+      },
+    })
     .state('order.detail', {
       url: '/detail/:orderId',
       templateUrl: templateRoot + '/order/detail.html',

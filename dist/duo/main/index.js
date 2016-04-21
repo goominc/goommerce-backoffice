@@ -190,6 +190,10 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       key: 'order.uncle',
       name: $translate.instant('order.uncle.title'),
       sref: 'order.uncle'
+    }, {
+      key: 'order.cs',
+      name: $translate.instant('order.cs.title'),
+      sref: 'order.cs'
     }]
   }, {
     key: 'user', // TODO get key from router
@@ -3679,6 +3683,17 @@ orderModule.config(function ($stateProvider) {
         });
       }
     }
+  }).state('order.cs', {
+    url: '/cs',
+    templateUrl: templateRoot + '/order/cs.html',
+    controller: 'OrderCsController',
+    resolve: {
+      orderProducts: function orderProducts($http, $rootScope, $stateParams) {
+        return $http.get('/api/v1/order_products?status=100:400&sorts=orderId,id&limit=1000').then(function (res) {
+          return res.data.orderProducts;
+        });
+      }
+    }
   }).state('order.detail', {
     url: '/detail/:orderId',
     templateUrl: templateRoot + '/order/detail.html',
@@ -3737,19 +3752,34 @@ module.exports = {
       "countryCodeLabel": "국가",
       "streetLabel": "도로명"
     },
-    "uncle": {
-      "title": "삼촌주문목록",
+    "orderProduct": {
       "orderIdColumn": "주문번호",
+      "brandIdColumn": "브랜드번호",
       "brandNameColumn": "브랜드명",
       "buildingNameColumn": "건물",
       "floorColumn": "층",
       "flatNumberColumn": "호수",
       "telColumn": "전화번호",
+      "productIdColumn": "상품번호",
       "productNameColumn": "상품약어",
       "colorColumn": "색상",
       "sizeColumn": "사이즈",
       "quantityColumn": "주문수량",
+      "bank": {
+        "name": "은행",
+        "accountHolder": "예금주",
+        "accountNumber": "계좌번호",
+      },
+      "totalColumn": "금액",
+      "dateColumn": "주문날짜",
+      "buyerIdColumn": "바이어ID",
+    },
+    "uncle": {
+      "title": "삼촌주문목록",
       "download": "CSV 다운로드"
+    },
+    "cs": {
+      "title": "운영팀주문목록"
     }
   }
 }
@@ -3914,6 +3944,22 @@ orderModule.controller('OrderUncleController', function ($scope, $rootScope, $ht
       downloadLink[0].click();
     });
   };
+  $rootScope.initAll($scope, $state.current.name);
+});
+
+orderModule.controller('OrderCsController', function ($scope, $rootScope, $http, $state, $translate, orderProducts) {
+  $scope.contentTitle = $translate.instant('order.cs.title');
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
+    sref: 'order.cs',
+    name: $translate.instant('order.cs.title')
+  }];
+  $scope.orderProducts = orderProducts;
   $rootScope.initAll($scope, $state.current.name);
 });
 }, {"./module":7}],
