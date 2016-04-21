@@ -32,6 +32,7 @@
                         <td>Roles</td>
                         <td></td>
                         <td></td>
+                        <td></td>
                       </tr>
                       </thead>
                       <tbody class="cell-center"></tbody>
@@ -122,6 +123,22 @@
       <div class="modal-footer">
         <button class="btn default" type="reset" data-ng-click="closeRolePopup()">{{'main.closeButton' | translate}}</button>
         <button class="btn blue" data-ng-click="saveRole()"><i class="fa fa-plus"></i> {{'main.saveButton' | translate}}</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="user_change_password">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        비밀번호 변경
+      </div>
+      <div class="modal-body">
+        <input type="text" data-ng-model="changePasswordUser.password" placeholder="새 비밀번호" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn default" type="reset" data-ng-click="closePasswordPopup()">{{'main.closeButton' | translate}}</button>
+        <button class="btn blue" data-ng-click="savePassword()"><i class="fa fa-plus"></i> {{'main.saveButton' | translate}}</button>
       </div>
     </div>
   </div>

@@ -49,6 +49,10 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
           return `<a ui-sref="user.info({ userId: ${id} })"><button class="btn blue"><i class="fa fa-info"></i> ${$translate.instant('user.info.userDetailButton')}</button></a>`;
         },
       },
+      {
+        data: 'id',
+        render: (id) => `<button class="btn blue" data-ng-click="openPasswordPopup(${id})"><i class="fa fa-password"></i> ${$translate.instant('user.info.changePasswordButton')}</button>`,
+      },
     ],
   };
 
@@ -113,6 +117,31 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       $scope.$apply();
     }
     $('#user_change_role').modal();
+  };
+
+  $scope.changePasswordUser = null;
+  $scope.openPasswordPopup = (userId) => {
+    const user = $scope.userIdToData[userId];
+    $scope.changePasswordUser = user;
+    $('#user_change_password').modal();
+  };
+  $scope.closePasswordPopup = () => {
+    $('#user_change_password').modal('hide');
+  };
+  $scope.savePassword = () => {
+    const user = $scope.changePasswordUser;
+    if (!user.password) {
+      window.alert('비밀번호를 입력하세요');
+      return;
+    }
+    const password = user.password;
+    delete user.password;
+    $http.put(`/api/v1/users/${user.id}/reset_password`, { password }).then(() => {
+      window.alert('비밀번호 저장되었습니다');
+      $scope.closePasswordPopup();
+    }, () => {
+      window.alert('비밀번호 저장이 실패하였습니다.')
+    });
   };
 
   $scope.datatablesLoaded = () => {
