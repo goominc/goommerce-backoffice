@@ -288,7 +288,7 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
   $rootScope.getContentsI18nText = (key) => {
     for (let i = 0; i < $rootScope.state.locales.length; i++) {
       const locale = $rootScope.state.locales[i];
-      if (locale === $rootScope.state.editLocale) {
+      if (locale === $rootScope.state.editLocale || 'ko') {
         return _.get($rootScope.state.texts[i], key);
       }
     }

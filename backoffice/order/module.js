@@ -64,7 +64,6 @@ orderModule.config(($stateProvider) => {
       resolve: {
         order: ($http, $rootScope, $stateParams) => {
           return $http.get('/api/v1/orders/' + $stateParams.orderId).then((res) => {
-            res.data.status = $rootScope.getContentsI18nText(`enum.order.status.${res.data.status}` || res.data.status);
             return res.data;
           });
         },

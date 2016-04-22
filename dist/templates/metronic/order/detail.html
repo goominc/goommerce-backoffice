@@ -44,7 +44,7 @@
                           Order Status:
                         </div>
                         <div class="col-md-7 value">
-                          <span class="label label-success">{{order.status}}</span>
+                          <span class="label label-success">{{translateStatus(order.status)}}</span>
                         </div>
                       </div>
                       <div class="row static-info">
@@ -52,7 +52,7 @@
                           Payment Status:
                         </div>
                         <div class="col-md-7 value">
-                          <span class="label label-success">{{order.paymentStatus}}</span>
+                          <span class="label label-success">{{translatePaymentStatus(order.paymentStatus)}}</span>
                         </div>
                       </div>
                     </div>
@@ -298,7 +298,7 @@
                               {{row.finalTotalKRW}}
                             </td>
                             <td>
-                              {{row.status}}
+                              {{translateOrderProductStatus(row.status)}}
                             </td>
                           </tr>
                           </tbody>

@@ -31,6 +31,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
       },
       {
         data: 'status',
+        render: (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`),
       },
       {
         data: 'createdAt',
@@ -41,6 +42,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
       },
       {
         data: 'paymentStatus',
+        render: (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`),
       },
       {
         // edit role button
@@ -112,6 +114,10 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   $http.get(`/api/v1/users/${order.buyerId}`).then((res) => {
     $scope.user = res.data;
   });
+
+  $scope.translateStatus = (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`);
+  $scope.translatePaymentStatus = (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`);
+  $scope.translateOrderProductStatus = (status) => $rootScope.getContentsI18nText(`enum.orderProduct.status.${status}`);
 
   $scope.popupRefund = (payment) => {
     $scope.refundPayment = payment;

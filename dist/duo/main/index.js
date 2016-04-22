@@ -365,7 +365,7 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
   $rootScope.getContentsI18nText = function (key) {
     for (var i = 0; i < $rootScope.state.locales.length; i++) {
       var locale = $rootScope.state.locales[i];
-      if (locale === $rootScope.state.editLocale) {
+      if (locale === $rootScope.state.editLocale || 'ko') {
         return _.get($rootScope.state.texts[i], key);
       }
     }
@@ -3722,7 +3722,6 @@ orderModule.config(function ($stateProvider) {
     resolve: {
       order: function order($http, $rootScope, $stateParams) {
         return $http.get('/api/v1/orders/' + $stateParams.orderId).then(function (res) {
-          res.data.status = $rootScope.getContentsI18nText('enum.order.status.' + res.data.status || res.data.status);
           return res.data;
         });
       }
@@ -3836,7 +3835,10 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
         return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
       }
     }, {
-      data: 'status'
+      data: 'status',
+      render: function render(status) {
+        return $rootScope.getContentsI18nText('enum.order.status.' + status);
+      }
     }, {
       data: 'createdAt',
       render: function render(data) {
@@ -3845,7 +3847,10 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
     }, {
       data: 'totalKRW'
     }, {
-      data: 'paymentStatus'
+      data: 'paymentStatus',
+      render: function render(status) {
+        return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
+      }
     }, {
       // edit role button
       data: 'id',
@@ -3907,6 +3912,16 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   $http.get('/api/v1/users/' + order.buyerId).then(function (res) {
     $scope.user = res.data;
   });
+
+  $scope.translateStatus = function (status) {
+    return $rootScope.getContentsI18nText('enum.order.status.' + status);
+  };
+  $scope.translatePaymentStatus = function (status) {
+    return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
+  };
+  $scope.translateOrderProductStatus = function (status) {
+    return $rootScope.getContentsI18nText('enum.orderProduct.status.' + status);
+  };
 
   $scope.popupRefund = function (payment) {
     $scope.refundPayment = payment;
