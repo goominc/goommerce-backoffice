@@ -28,12 +28,25 @@
                       <input data-ng-readonly="field.isReadOnly" type="text" class="form-control" placeholder="{{field.placeholder}}" ng-model="field.obj">
                     </div>
                   </div>
+                  <div class="form-group">
+                    <label class="col-md-2 control-label">사업자 등록증</label>
+                    <div class="col-md-10">
+                      <button class="btn blue" data-ng-click="openBizImage()">사업자 등록증 보기</button>
+                    </div>
+                  </div>
                 </div>
               </form>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="user_biz_image">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <img width="700" data-ng-src="{{user.data.bizImage.url}}" />
     </div>
   </div>
 </div>

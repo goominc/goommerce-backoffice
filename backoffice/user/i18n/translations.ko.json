@@ -8,6 +8,8 @@
       "title": "사용자"
     },
     "info": {
+      "bizNameLabel": "사업자명",
+      "bizNumberLabel": "사업자 번호",
       "emailLabel": "이메일",
       "gradeLabel": "회원 등급",
       "vbankCodeLabel": "은행코드",
