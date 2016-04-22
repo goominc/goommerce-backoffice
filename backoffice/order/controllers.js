@@ -100,6 +100,13 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
 
   order.createdAt = boUtils.formatDate(order.createdAt);
   order.finalShippingCostKRW = order.finalShippingCostKRW && Number(order.finalShippingCostKRW);
+  (order.orderProducts || []).forEach((p) => {
+    if (boUtils.isString(p.product.id)) {
+      p.product.shortId = boUtils.shorten(p.product.id, 8);
+    } else {
+      p.product.shortId = p.id;
+    }
+  });
   $scope.order = order;
   $scope.user = {};
   $http.get(`/api/v1/users/${order.buyerId}`).then((res) => {

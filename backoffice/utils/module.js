@@ -2,6 +2,9 @@
 const utilModule = angular.module('backoffice.utils', []);
 
 utilModule.factory('boUtils', ($http) => {
+  const isString = (v) => {
+    return typeof v === 'string' || v instanceof String;
+  };
   return {
     // http://stackoverflow.com/questions/111529/create-query-parameters-in-javascript
     encodeQueryData : (url, data) => {
@@ -100,6 +103,16 @@ utilModule.factory('boUtils', ($http) => {
     },
     stopProgressBar: () => {
       Metronic.unblockUI('#bo-content-container');
+    },
+    isString,
+    shorten: (str, maxLen = 15) => {
+      if (!isString(str)) {
+        str = new String(str);
+      }
+      if (str.length > maxLen) {
+        return `${str.substring(0, maxLen)}...`;
+      }
+      return str;
     },
   };
 });
