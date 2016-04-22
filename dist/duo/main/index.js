@@ -3713,7 +3713,7 @@ orderModule.config(function ($stateProvider) {
         var result = [];
         var limit = 1000;
         function recursive(offset) {
-          return $http.get('/api/v1/order_products?status=100:400&sorts=orderId,id&limit=' + limit + '&offset=' + offset).then(function (res) {
+          return $http.get('/api/v1/order_products?status=100:400&sorts=-orderId,-id&limit=' + limit + '&offset=' + offset).then(function (res) {
             var pagination = res.data.pagination;
 
             Array.prototype.push.apply(result, res.data.orderProducts);

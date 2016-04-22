@@ -54,7 +54,7 @@ orderModule.config(($stateProvider) => {
           const result = [];
           const limit = 1000;
           function recursive(offset) {
-            return $http.get(`/api/v1/order_products?status=100:400&sorts=orderId,id&limit=${limit}&offset=${offset}`).then((res) => {
+            return $http.get(`/api/v1/order_products?status=100:400&sorts=-orderId,-id&limit=${limit}&offset=${offset}`).then((res) => {
               const { pagination } = res.data;
               Array.prototype.push.apply(result, res.data.orderProducts);
               if (pagination.offset + pagination.limit < pagination.total) {
