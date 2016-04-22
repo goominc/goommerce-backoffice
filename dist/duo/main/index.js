@@ -3710,8 +3710,22 @@ orderModule.config(function ($stateProvider) {
     controller: 'OrderCsController',
     resolve: {
       orderProducts: function orderProducts($http, $rootScope, $stateParams) {
-        return $http.get('/api/v1/order_products?status=100:400&sorts=orderId,id&limit=1000').then(function (res) {
-          return res.data.orderProducts;
+        var result = [];
+        var limit = 1000;
+        function recursive(offset) {
+          return $http.get('/api/v1/order_products?status=100:400&sorts=orderId,id&limit=' + limit + '&offset=' + offset).then(function (res) {
+            var pagination = res.data.pagination;
+
+            Array.prototype.push.apply(result, res.data.orderProducts);
+            if (pagination.offset + pagination.limit < pagination.total) {
+              return recursive(pagination.offset + pagination.limit);
+            }
+            console.log(result);
+            return result;
+          });
+        }
+        return recursive(0).then(function (res) {
+          return res;
         });
       }
     }

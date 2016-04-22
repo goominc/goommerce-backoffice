@@ -51,8 +51,21 @@ orderModule.config(($stateProvider) => {
       controller: 'OrderCsController',
       resolve: {
         orderProducts: ($http, $rootScope, $stateParams) => {
-          return $http.get('/api/v1/order_products?status=100:400&sorts=orderId,id&limit=1000').then((res) => {
-            return res.data.orderProducts;
+          const result = [];
+          const limit = 1000;
+          function recursive(offset) {
+            return $http.get(`/api/v1/order_products?status=100:400&sorts=orderId,id&limit=${limit}&offset=${offset}`).then((res) => {
+              const { pagination } = res.data;
+              Array.prototype.push.apply(result, res.data.orderProducts);
+              if (pagination.offset + pagination.limit < pagination.total) {
+                return recursive(pagination.offset + pagination.limit);
+              }
+              console.log(result);
+              return result;
+            });
+          }
+          return recursive(0).then((res) => {
+            return res;
           });
         },
       },
