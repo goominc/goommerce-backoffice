@@ -253,7 +253,9 @@
                           <thead>
                           <tr>
                             <th width="15%">상품ID</th>
-                            <th width="15%">상품</th>
+                            <th width="15%">상품명</th>
+                            <th width="15%">색상</th>
+                            <th width="15%">크기</th>
                             <th width="10%">Original Price</th>
                             <th width="10%">Price</th>
                             <th width="10%">Quantity</th>
@@ -269,7 +271,13 @@
                               <a href="/products/{{row.product.id}}" target="_blank">{{row.product.id}}</a>
                             </td>
                             <td>
-                              {{row.productVariant.sku}}
+                              {{row.product.name.ko}}
+                            </td>
+                            <td>
+                              {{row.productVariant.data.color}}
+                            </td>
+                            <td>
+                              {{row.productVariant.data.size}}
                             </td>
                             <td>
                               <span>{{row.productVariant.KRW}} KRW</span>
