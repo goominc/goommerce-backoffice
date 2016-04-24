@@ -3761,12 +3761,15 @@ module.exports = {
   "order": {
     "title": "주문",
     "main": {
-      "title": "주문현황",
+      "buyerEmailColumn": "주문자 이메일",
+      "buyerNameColumn": "주문자 이름",
+      "buyerTelColumn": "주문자 전화번호",
       "createdAtColumn": "주문 생성 시각",
-      "statusColumn": "주문 상태",
       "paymentStatusColumn": "결제 상태",
       "priceColumn": "주문가격",
-      "startProcessing": "주문처리"
+      "startProcessing": "주문처리",
+      "statusColumn": "주문 상태",
+      "title": "주문현황"
     },
     "detail": {
       "title": "주문상세",
@@ -3842,7 +3845,7 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
     field: 'orders',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: '/api/v1/orders',
+    url: '/api/v1/orders?q=status:!0,paymentStatus:!0',
     columns: [{
       data: 'id',
       render: function render(id) {
@@ -3866,22 +3869,20 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
         return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
       }
     }, {
-      // edit role button
-      data: 'id',
-      render: function render(id) {
-        return '<button class="btn blue" data-ng-click="startProcessing(' + id + ')"><i class="fa fa-play"></i> ' + $translate.instant('order.main.startProcessing') + '</button>';
+      data: function data(_data) {
+        return _.get(_data, 'name') || '';
       }
+    }, {
+      data: function data(_data2) {
+        return _.get(_data2, 'data.tel') || '';
+      }
+    }, {
+      data: 'email'
     }]
-  };
-
-  $scope.startProcessing = function (orderId) {
-    $http.post('/api/v1/orders/' + orderId + '/start_processing').then(function (res) {
-      // TODO: Update datatables row data.
-    });
   };
 });
 
-orderModule.controller('OrderListBeforePaymentController', function ($scope, $rootScope, $http, $state, $translate) {
+orderModule.controller('OrderListBeforePaymentController', function ($scope, $rootScope, $http, $state, $translate, boUtils) {
   $scope.contentTitle = $translate.instant('order.beforePayment.title');
   $scope.contentSubTitle = $translate.instant('order.beforePayment.subTitle');
   $scope.breadcrumb = [{
@@ -3895,6 +3896,47 @@ orderModule.controller('OrderListBeforePaymentController', function ($scope, $ro
     name: $translate.instant('order.beforePayment.title')
   }];
   $rootScope.initAll($scope, $state.current.name);
+
+  // $scope.orderDatatables = OrderCommons.getDatatables('/api/v1/orders?q=status:!0,paymentStatus:0');
+  $scope.orderDatatables = {
+    field: 'orders',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: '/api/v1/orders?q=status:0,paymentStatus:200',
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }, {
+      data: 'totalKRW'
+    }, {
+      data: function data(_data3) {
+        return _.get(_data3, 'name') || '';
+      }
+    }, {
+      data: function data(_data4) {
+        return _.get(_data4, 'data.tel') || '';
+      }
+    }, {
+      data: 'email'
+    }, {
+      data: 'id',
+      render: function render(id) {
+        return '<button class="btn blue" data-ng-click="startProcessing(' + id + ')"><i class="fa fa-play"></i> ' + $translate.instant('order.main.startProcessing') + '</button>';
+      }
+    }]
+  };
+  $scope.startProcessing = function (orderId) {
+    $http.post('/api/v1/orders/' + orderId + '/start_processing').then(function (res) {
+      // TODO: Update datatables row data.
+    });
+  };
 });
 
 orderModule.controller('OrderDetailController', function ($scope, $rootScope, $http, $state, $translate, boUtils, convertUtil, order) {

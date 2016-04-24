@@ -11,14 +11,17 @@
         <div class="col-md-12">
           <div class="portlet light">
             <div class="portlet-body">
-              <div>
+              <div bo-datatables="orderDatatables">
                 <table class="table table-bordered table-hover">
                   <thead>
                   <tr role="row" class="heading">
                     <td>ID</td>
                     <td>{{'order.main.createdAtColumn' | translate}}</td>
-                    <td>{{'order.main.paymentStatusColumn' | translate}}</td>
                     <td>{{'order.main.priceColumn' | translate}}</td>
+                    <td>{{'order.main.buyerNameColumn' | translate}}</td>
+                    <td>{{'order.main.buyerTelColumn' | translate}}</td>
+                    <td>{{'order.main.buyerEmailColumn' | translate}}</td>
+                    <td></td>
                   </tr>
                   </thead>
                   <tbody></tbody>

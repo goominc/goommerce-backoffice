@@ -21,7 +21,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
     field: 'orders',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: '/api/v1/orders',
+    url: '/api/v1/orders?q=status:!0,paymentStatus:!0',
     columns: [
       {
         data: 'id',
@@ -45,23 +45,19 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         render: (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`),
       },
       {
-        // edit role button
-        data: 'id',
-        render: (id) => {
-          return `<button class="btn blue" data-ng-click="startProcessing(${id})"><i class="fa fa-play"></i> ${$translate.instant('order.main.startProcessing')}</button>`;
-        },
+        data: (data) => _.get(data, 'name') || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.tel') || '',
+      },
+      {
+        data: 'email',
       },
     ],
   };
-
-  $scope.startProcessing = (orderId) => {
-    $http.post(`/api/v1/orders/${orderId}/start_processing`).then((res) => {
-      // TODO: Update datatables row data.
-    });
-  };
 });
 
-orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, $http, $state, $translate) => {
+orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, $http, $state, $translate, boUtils) => {
   $scope.contentTitle = $translate.instant('order.beforePayment.title');
   $scope.contentSubTitle = $translate.instant('order.beforePayment.subTitle');
   $scope.breadcrumb = [
@@ -79,6 +75,49 @@ orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, 
     },
   ];
   $rootScope.initAll($scope, $state.current.name);
+
+  // $scope.orderDatatables = OrderCommons.getDatatables('/api/v1/orders?q=status:!0,paymentStatus:0');
+  $scope.orderDatatables = {
+    field: 'orders',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: '/api/v1/orders?q=status:0,paymentStatus:200',
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>'
+        },
+      },
+      {
+        data: 'createdAt',
+        render: (data) => boUtils.formatDate(data),
+      },
+      {
+        data: 'totalKRW',
+      },
+      {
+        data: (data) => _.get(data, 'name') || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.tel') || '',
+      },
+      {
+        data: 'email',
+      },
+      {
+        data: 'id',
+        render: (id) => {
+          return `<button class="btn blue" data-ng-click="startProcessing(${id})"><i class="fa fa-play"></i> ${$translate.instant('order.main.startProcessing')}</button>`;
+        },
+      },
+    ],
+  };
+  $scope.startProcessing = (orderId) => {
+    $http.post(`/api/v1/orders/${orderId}/start_processing`).then((res) => {
+      // TODO: Update datatables row data.
+    });
+  };
 });
 
 orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $state, $translate, boUtils, convertUtil, order) => {
