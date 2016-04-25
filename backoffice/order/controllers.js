@@ -160,9 +160,11 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $scope.user = res.data;
   });
 
-  $scope.translateStatus = (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`);
-  $scope.translatePaymentStatus = (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`);
+  $scope.translateOrderStatus = (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`);
+  $scope.translateOrderPaymentStatus = (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`);
   $scope.translateOrderProductStatus = (status) => $rootScope.getContentsI18nText(`enum.orderProduct.status.${status}`);
+  $scope.translatePaymentStatus = (status) => $rootScope.getContentsI18nText(`enum.payment.status.${status}`);
+  $scope.translatePaymentType = (type) => $rootScope.getContentsI18nText(`enum.payment.type.${type}`);
 
   $scope.refundOrder = () => {
     if (order.finalTotalKRW === undefined) {

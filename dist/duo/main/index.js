@@ -3975,14 +3975,20 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     $scope.user = res.data;
   });
 
-  $scope.translateStatus = function (status) {
+  $scope.translateOrderStatus = function (status) {
     return $rootScope.getContentsI18nText('enum.order.status.' + status);
   };
-  $scope.translatePaymentStatus = function (status) {
+  $scope.translateOrderPaymentStatus = function (status) {
     return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
   };
   $scope.translateOrderProductStatus = function (status) {
     return $rootScope.getContentsI18nText('enum.orderProduct.status.' + status);
+  };
+  $scope.translatePaymentStatus = function (status) {
+    return $rootScope.getContentsI18nText('enum.payment.status.' + status);
+  };
+  $scope.translatePaymentType = function (type) {
+    return $rootScope.getContentsI18nText('enum.payment.type.' + type);
   };
 
   $scope.refundOrder = function () {

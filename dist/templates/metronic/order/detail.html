@@ -44,7 +44,7 @@
                           Order Status:
                         </div>
                         <div class="col-md-7 value">
-                          <span class="label label-success">{{translateStatus(order.status)}}</span>
+                          <span class="label label-success">{{translateOrderStatus(order.status)}}</span>
                         </div>
                       </div>
                       <div class="row static-info">
@@ -52,7 +52,7 @@
                           Payment Status:
                         </div>
                         <div class="col-md-7 value">
-                          <span class="label label-success">{{translatePaymentStatus(order.paymentStatus)}}</span>
+                          <span class="label label-success">{{translateOrderPaymentStatus(order.paymentStatus)}}</span>
                         </div>
                       </div>
                     </div>
@@ -342,7 +342,7 @@
                               {{row.tid}}
                             </td>
                             <td>
-                              {{row.type}}
+                              {{translatePaymentType(row.type)}}
                             </td>
                             <td>
                               <div ng-if="row.type === 0">
@@ -359,7 +359,7 @@
                               {{row.data.payMethod}}
                             </td>
                             <td>
-                              {{row.status}}
+                              {{translatePaymentStatus(row.status)}}
                             </td>
                             <td>
                               <div ng-if="row.type === 0">
