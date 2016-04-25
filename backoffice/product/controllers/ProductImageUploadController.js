@@ -109,13 +109,23 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
       for (let j = 0; j < variants.length; j++) {
         const variant = variants[j];
         const images = _.get(variant, 'appImages.default') || [];
+        let slotCount = images.length;
+        let mainProduct = false;
+        if (!slotCount) {
+          if (i === 0 && !$scope.uploadTypes[$scope.uploadTypeIndex].productHasImage) {
+            mainProduct = true;
+            slotCount = 6;
+          } else {
+            slotCount = 2;
+          }
+        }
         rows.push({
           color: colors[i],
           images: images || [],
-          mainProduct: false, // TODO
+          mainProduct,
           rowspan: j === 0 ? variants.length : 0,
           sku: variant.sku,
-          slotCount: images.length || 2,
+          slotCount,
           variantId: variant.id,
         });
       }
