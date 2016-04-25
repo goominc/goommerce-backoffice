@@ -176,7 +176,7 @@ productModule.factory('productUtil', ($http, $q) => {
       })
     },
     narrowProduct: (product) => _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages', 'name']),
-    narrowProductVariant: (variant) => _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages']),
+    narrowProductVariant: (variant) => _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages', 'status']),
   };
 });
 

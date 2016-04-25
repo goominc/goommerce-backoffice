@@ -724,4 +724,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     }
     $scope.product.data.categoryPath = paths;
   };
+
+  $scope.translateStatus = (status) => $rootScope.getContentsI18nText(`enum.productVariant.status.${status}`);
 });

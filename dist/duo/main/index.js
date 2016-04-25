@@ -1960,7 +1960,7 @@ productModule.factory('productUtil', function ($http, $q) {
       return _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages', 'name']);
     },
     narrowProductVariant: function narrowProductVariant(variant) {
-      return _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages']);
+      return _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages', 'status']);
     }
   };
 });
@@ -2933,6 +2933,10 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       $scope.product.data = {};
     }
     $scope.product.data.categoryPath = paths;
+  };
+
+  $scope.translateStatus = function (status) {
+    return $rootScope.getContentsI18nText('enum.productVariant.status.' + status);
   };
 });
 }, {"../module.js":6}],
