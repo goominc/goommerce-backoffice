@@ -148,6 +148,12 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
       p.product.shortId = p.id;
     }
   });
+  order.totalRefuned = 0;
+  (order.payments || []).forEach((p) => {
+    if (p.type === 2 && p.status === 0) {
+      order.totalRefuned += +p.data.PRTC_Price;
+    }
+  });
   $scope.order = order;
   $scope.user = {};
   $http.get(`/api/v1/users/${order.buyerId}`).then((res) => {
@@ -158,13 +164,27 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   $scope.translatePaymentStatus = (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`);
   $scope.translateOrderProductStatus = (status) => $rootScope.getContentsI18nText(`enum.orderProduct.status.${status}`);
 
+  $scope.refundOrder = () => {
+    if (order.finalTotalKRW === undefined) {
+      alert('Plese save final order counts');
+      return;
+    }
+    const amount = +order.totalPaid.amount - +order.finalTotalKRW - order.totalRefuned;
+    console.log(amount);
+    const payments = _.filter(order.payments, (p) => (p.type === 0 && p.status === 0));
+    if (payments.length === 1) {
+      $scope.refund(payments[0], amount);
+    } else {
+      alert('multiple payment transaction');
+    }
+  };
+
   $scope.popupRefund = (payment) => {
     $scope.refundPayment = payment;
     $('#order_refund_modal').modal();
   };
 
-  $scope.refund = (amount) => {
-    const payment = $scope.refundPayment;
+  $scope.refund = (payment, amount) => {
     $scope.closePopup();
     $http.post(`/api/v1/orders/${order.id}/refund`, {
       paymentId: payment.id,

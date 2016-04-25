@@ -3963,6 +3963,12 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
       p.product.shortId = p.id;
     }
   });
+  order.totalRefuned = 0;
+  (order.payments || []).forEach(function (p) {
+    if (p.type === 2 && p.status === 0) {
+      order.totalRefuned += +p.data.PRTC_Price;
+    }
+  });
   $scope.order = order;
   $scope.user = {};
   $http.get('/api/v1/users/' + order.buyerId).then(function (res) {
@@ -3979,13 +3985,29 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     return $rootScope.getContentsI18nText('enum.orderProduct.status.' + status);
   };
 
+  $scope.refundOrder = function () {
+    if (order.finalTotalKRW === undefined) {
+      alert('Plese save final order counts');
+      return;
+    }
+    var amount = +order.totalPaid.amount - +order.finalTotalKRW - order.totalRefuned;
+    console.log(amount);
+    var payments = _.filter(order.payments, function (p) {
+      return p.type === 0 && p.status === 0;
+    });
+    if (payments.length === 1) {
+      $scope.refund(payments[0], amount);
+    } else {
+      alert('multiple payment transaction');
+    }
+  };
+
   $scope.popupRefund = function (payment) {
     $scope.refundPayment = payment;
     $('#order_refund_modal').modal();
   };
 
-  $scope.refund = function (amount) {
-    var payment = $scope.refundPayment;
+  $scope.refund = function (payment, amount) {
     $scope.closePopup();
     $http.post('/api/v1/orders/' + order.id + '/refund', {
       paymentId: payment.id,

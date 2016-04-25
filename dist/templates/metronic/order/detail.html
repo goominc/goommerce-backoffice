@@ -216,17 +216,17 @@
                           KRW {{order.totalPaid.amount}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.totalPaid.amount - order.totalRefuned.amount}}
+                          KRW {{order.finalTotalKRW}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.totalPaid.amount - order.finalTotalKRW - order.totalRefuned.amount}}
+                          KRW {{order.totalPaid.amount - order.finalTotalKRW - order.totalRefuned}} ({{order.totalRefuned}})
                         </div>
                       </div>
                       <div class="row static-info">
                         <div class="col-md-9">
                         </div>
                         <div class="col-md-3 value">
-                          <button class="btn blue" data-ng-click="">
+                          <button class="btn blue" data-ng-click="refundOrder()">
                             <i class="fa fa-eject"></i> Refund
                           </button>
                         </div>
@@ -387,7 +387,7 @@
 <div class="modal fade" id="order_refund_modal">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form data-ng-submit="refund(refundAmount)">
+      <form data-ng-submit="refund(refundPayment, refundAmount)">
         <div class="modal-header">
           {{'order.detail.refundTitle' | translate}}
         </div>
