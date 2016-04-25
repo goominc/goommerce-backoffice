@@ -214,6 +214,13 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $('.modal-backdrop').remove();
   };
 
+  $scope.saveStatus = () => {
+    const data = _.pick(order, 'status');
+    $http.put(`/api/v1/orders/${order.id}/status`, data).then((res) => {
+      $state.reload();
+    }, (err) => alert(err.data.message));
+  };
+
   if ($scope.order.address) {
     $scope.addressFields = [
       {title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name'},

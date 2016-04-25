@@ -21,6 +21,9 @@
                       <div class="caption">
                         <i class="fa fa-cogs"></i>주문 상세 정보
                       </div>
+                      <div class="actions btn-set">
+                        <button class="btn blue" ng-click="saveStatus()"><i class="fa fa-check"></i> {{'order.detail.saveButton' | translate}}</button>
+                      </div>
                     </div>
                     <div class="portlet-body">
                       <div class="row static-info">
@@ -44,7 +47,20 @@
                           Order Status:
                         </div>
                         <div class="col-md-7 value">
-                          <span class="label label-success">{{translateOrderStatus(order.status)}}</span>
+                          <div class="form-group">
+                            <select class="form-control" id="sel1" data-ng-model="order.status" convert-to-number>
+                              <option value="0">{{translateOrderStatus(0)}}</option>
+                              <option value="100">{{translateOrderStatus(100)}}</option>
+                              <option value="101">{{translateOrderStatus(101)}}</option>
+                              <option value="102">{{translateOrderStatus(102)}}</option>
+                              <option value="200">{{translateOrderStatus(200)}}</option>
+                              <option value="201">{{translateOrderStatus(201)}}</option>
+                              <option value="202">{{translateOrderStatus(202)}}</option>
+                              <option value="203">{{translateOrderStatus(203)}}</option>
+                              <option value="300">{{translateOrderStatus(300)}}</option>
+                              <option value="400">{{translateOrderStatus(400)}}</option>
+                            </select>
+                          </div>
                         </div>
                       </div>
                       <div class="row static-info">
@@ -106,6 +122,9 @@
                     <div class="portlet-title">
                       <div class="caption">
                         <i class="fa fa-cogs"></i>Shipping Address
+                      </div>
+                      <div class="actions btn-set">
+                        <button class="btn blue" ng-click="saveAddress()"><i class="fa fa-check"></i> {{'order.detail.saveButton' | translate}}</button>
                       </div>
                     </div>
                     <div class="portlet-body">

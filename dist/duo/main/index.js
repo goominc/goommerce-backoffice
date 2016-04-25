@@ -590,6 +590,20 @@ directiveModule.directive('boFileReader', function () {
     }
   };
 });
+
+directiveModule.directive('convertToNumber', function () {
+  return {
+    require: 'ngModel',
+    link: function link(scope, element, attrs, ngModel) {
+      ngModel.$parsers.push(function (val) {
+        return parseInt(val, 10);
+      });
+      ngModel.$formatters.push(function (val) {
+        return '' + val;
+      });
+    }
+  };
+});
 }, {"../utils/module":15}],
 15: [function(require, module, exports) {
 'use strict';
@@ -4042,6 +4056,15 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     $('#order_refund_modal').modal('hide');
     $('#order_refund_modal').removeClass('in');
     $('.modal-backdrop').remove();
+  };
+
+  $scope.saveStatus = function () {
+    var data = _.pick(order, 'status');
+    $http.put('/api/v1/orders/' + order.id + '/status', data).then(function (res) {
+      $state.reload();
+    }, function (err) {
+      return alert(err.data.message);
+    });
   };
 
   if ($scope.order.address) {
