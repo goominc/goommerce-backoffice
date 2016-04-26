@@ -60,7 +60,6 @@ orderModule.config(($stateProvider) => {
               if (pagination.offset + pagination.limit < pagination.total) {
                 return recursive(pagination.offset + pagination.limit);
               }
-              console.log(result);
               return result;
             });
           }
