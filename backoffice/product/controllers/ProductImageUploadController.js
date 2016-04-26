@@ -258,8 +258,10 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
       if (allVariantCount === uploadedVariantCount) {
         for (let changedProduct of changedProducts.values()) {
           // silently indexing
-          $http.put(`/api/v1/products/${changedProduct}`, { isActive: true });
-          $http.put(`/api/v1/products/${changedProduct}/index`);
+          $http.put(`/api/v1/products/${changedProduct}`, { isActive: true }).then(() => {
+            // 2016. 04. 26. [heekyu] index after isActive updated
+            $http.put(`/api/v1/products/${changedProduct}/index`);
+          });
         }
         window.alert('all images uploaded and product informations saved');
         boUtils.stopProgressBar();
