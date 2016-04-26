@@ -3559,12 +3559,18 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         var _iteratorError = undefined;
 
         try {
-          for (var _iterator = changedProducts.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var _loop4 = function () {
             var changedProduct = _step.value;
 
             // silently indexing
-            $http.put('/api/v1/products/' + changedProduct, { isActive: true });
-            $http.put('/api/v1/products/' + changedProduct + '/index');
+            $http.put('/api/v1/products/' + changedProduct, { isActive: true }).then(function () {
+              // 2016. 04. 26. [heekyu] index after isActive updated
+              $http.put('/api/v1/products/' + changedProduct + '/index');
+            });
+          };
+
+          for (var _iterator = changedProducts.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            _loop4();
           }
         } catch (err) {
           _didIteratorError = true;
@@ -3592,7 +3598,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       var uploadCount = 0;
       var done = 0;
 
-      var _loop4 = function (i) {
+      var _loop5 = function (i) {
         var imageUrl = images[i].url;
         if (imageUrl.length > 2 && imageUrl.substring(0, 2) === '//') {
           appImages[i] = images[i];
@@ -3622,7 +3628,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
       };
 
       for (var i = 0; i < images.length; i++) {
-        _loop4(i);
+        _loop5(i);
       }
       var saveProductVariant = function saveProductVariant() {
         var promises = [];
