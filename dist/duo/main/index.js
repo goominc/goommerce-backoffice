@@ -1385,6 +1385,7 @@ module.exports = {
     },
     "manage": {
       "adminTab": "어드민",
+      "bigBuyerTab": "빅바이어",
       "buyerTab": "바이어",
       "noRoleTab": "미인증",
       "sellerTab": "셀러",
@@ -1493,22 +1494,15 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       }
     }, {
       data: function data(_data3) {
-        return _data3;
-      },
-      render: function render(user) {
-        return userUtil.getRoleName(user);
+        return _.get(_data3, 'data.tel') || '';
       }
     }, {
       data: function data(_data4) {
-        return _.get(_data4, 'data.tel') || '';
+        return _.get(_data4, 'data.bizName') || '';
       }
     }, {
       data: function data(_data5) {
-        return _.get(_data5, 'data.bizName') || '';
-      }
-    }, {
-      data: function data(_data6) {
-        return _.get(_data6, 'data.bizNumber') || '';
+        return _.get(_data5, 'data.bizNumber') || '';
       }
     }]
   };
@@ -1522,8 +1516,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: function data(_data7) {
-        return _.get(_data7, 'roles[0].brand.id') || '';
+      data: function data(_data6) {
+        return _.get(_data6, 'roles[0].brand.id') || '';
       },
       render: function render(brandId) {
         return '<a ui-sref="brand.edit({ brandId: ' + brandId + ' })">' + brandId + '</a>';
@@ -1531,12 +1525,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data8) {
-        return _data8.name || '';
+      data: function data(_data7) {
+        return _data7.name || '';
       }
     }, {
-      data: function data(_data9) {
-        return _.get(_data9, 'data.tel') || '';
+      data: function data(_data8) {
+        return _.get(_data8, 'data.tel') || '';
       }
     }]
   };
