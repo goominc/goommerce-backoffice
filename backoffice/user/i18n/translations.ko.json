@@ -5,6 +5,10 @@
       "seller": "셀러 생성"
     },
     "manage": {
+      "adminTab": "어드민",
+      "buyerTab": "바이어",
+      "noRoleTab": "미인증",
+      "sellerTab": "셀러",
       "title": "사용자"
     },
     "info": {

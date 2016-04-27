@@ -16,9 +16,17 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
   ];
   $rootScope.initAll($scope, $state.current.name);
 
+  $scope.tabName = $state.params.tabName || '';
+  $scope.changeTab = (tabName) => {
+    if (!tabName) {
+      $state.go('user.manage', {}, { reload: true });
+      return;
+    }
+    $state.go('user.manage.tab', { tabName }, { reload: true });
+  };
+
   $scope.userDatatables = {
     field: 'users',
-    url: '/api/v1/users',
     columns: [
       {
         data: 'id',
@@ -52,6 +60,66 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       {
         data: 'id',
         render: (id) => `<button class="btn blue" data-ng-click="openPasswordPopup(${id})"><i class="fa fa-password"></i> ${$translate.instant('user.info.changePasswordButton')}</button>`,
+      },
+    ],
+  };
+
+  $scope.buyerDatatables = {
+    field: 'users',
+    // ID, Email, Name, roles, tel, bizName, bizNumber
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return `<a ui-sref="user.info({ userId: ${id} })">${id}</a>`;
+        },
+      },
+      {
+        data: 'email',
+      },
+      {
+        data: (data) => data.name || '',
+      },
+      {
+        data: (data) => data,
+        render: (user) => {
+          return userUtil.getRoleName(user);
+        },
+      },
+      {
+        data: (data) => _.get(data, 'data.tel') || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.bizName') || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.bizNumber') || '',
+      },
+    ],
+  };
+
+  $scope.sellerDatatables = {
+    field: 'users',
+    // ID, Email, Name, tel
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return `<a ui-sref="user.info({ userId: ${id} })">${id}</a>`;
+        },
+      },
+      {
+        data: (data) => _.get(data, 'roles[0].brand.id') || '',
+        render: (brandId) => `<a ui-sref="brand.edit({ brandId: ${brandId} })">${brandId}</a>`,
+      },
+      {
+        data: 'email',
+      },
+      {
+        data: (data) => data.name || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.tel') || '',
       },
     ],
   };
@@ -161,7 +229,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       for (let i = 0; i < roles.length; i++) {
         const role = roles[i];
         if ($scope.editRole[role]) {
-          return [ { type: role }];
+          return [ { type: role } ];
         }
       }
       return null;

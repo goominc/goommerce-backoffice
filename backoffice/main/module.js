@@ -134,11 +134,6 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: $translate.instant('main.mainMenu'),
           sref: 'user.manage',
         },
-        {
-          key: 'user.waitConfirm',
-          name: $translate.instant('user.waitConfirm.title'),
-          sref: 'user.waitConfirm',
-        },
       ],
     },
     {

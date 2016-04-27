@@ -23,21 +23,95 @@
             <div class="portlet-body">
               <div class="row">
                 <div class="col-md-12">
-                  <div id="user_list" bo-server-datatables="userDatatables" url="/api/v1/users" url-params="{}" table-render="datatablesLoaded()">
-                    <table class="table table-bordered table-hover">
-                      <thead>
-                      <tr role="row" class="heading">
-                        <td>ID</td>
-                        <td>Email</td>
-                        <td>Roles</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                      </tr>
-                      </thead>
-                      <tbody class="cell-center"></tbody>
-                    </table>
-                  </div>
+                  <uib-tabset class="tabbable-bordered">
+                    <uib-tab heading="{{'main.word.all' | translate}}" active="tabName === ''" data-ng-click="changeTab('')">
+                      <div id="user_list" bo-server-datatables="userDatatables" url="/api/v1/users" url-params="{}" table-render="datatablesLoaded()">
+                        <table class="table table-bordered table-hover" style="width: 100%;">
+                          <thead>
+                          <tr role="row" class="heading">
+                            <td>ID</td>
+                            <td>{{'main.word.email' | translate}}</td>
+                            <td>Roles</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center"></tbody>
+                        </table>
+                      </div>
+                    </uib-tab>
+                    <uib-tab heading="{{'user.manage.noRoleTab' | translate}}" active="tabName === 'noRole'" data-ng-click="changeTab('noRole')">
+                      <div bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'none' }">
+                        <table class="table table-bordered table-hover" style="width: 100%;">
+                          <thead>
+                          <tr role="row" class="heading">
+                            <td>ID</td>
+                            <td>{{'main.word.email' | translate}}</td>
+                            <td>{{'main.word.name' | translate}}</td>
+                            <td>회원 구분</td>
+                            <td>{{'main.word.tel' | translate}}</td>
+                            <td>{{'user.info.bizNameLabel' | translate}}</td>
+                            <td>{{'user.info.bizNumberLabel' | translate}}</td>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center"></tbody>
+                        </table>
+                      </div>
+                    </uib-tab>
+                    <uib-tab heading="{{'user.manage.buyerTab' | translate}}" active="tabName === 'buyer'" data-ng-click="changeTab('buyer')">
+                      <div bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'buyer,bigBuyer' }">
+                        <table class="table table-bordered table-hover" style="width: 100%;">
+                          <thead>
+                          <tr role="row" class="heading">
+                            <td>ID</td>
+                            <td>{{'main.word.email' | translate}}</td>
+                            <td>{{'main.word.name' | translate}}</td>
+                            <td>회원 구분</td>
+                            <td>{{'main.word.tel' | translate}}</td>
+                            <td>{{'user.info.bizNameLabel' | translate}}</td>
+                            <td>{{'user.info.bizNumberLabel' | translate}}</td>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center"></tbody>
+                        </table>
+                      </div>
+                    </uib-tab>
+                    <uib-tab heading="{{'user.manage.sellerTab' | translate}}" active="tabName === 'seller'" data-ng-click="changeTab('seller')">
+                      <div bo-server-datatables="sellerDatatables" url="/api/v1/users" url-params="{ roles: 'owner' }">
+                        <table class="table table-bordered table-hover" style="width: 100%;">
+                          <thead>
+                          <tr role="row" class="heading">
+                            <td>ID</td>
+                            <td>{{'brand.title' | translate}}</td>
+                            <td>{{'main.word.email' | translate}}</td>
+                            <td>{{'main.word.name' | translate}}</td>
+                            <td>{{'main.word.tel' | translate}}</td>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center"></tbody>
+                        </table>
+                      </div>
+                    </uib-tab>
+                    <uib-tab heading="{{'user.manage.adminTab' | translate}}" active="tabName === 'admin'" data-ng-click="changeTab('admin')">
+                      <div bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'admin' }">
+                        <table class="table table-bordered table-hover" style="width: 100%;">
+                          <thead>
+                          <tr role="row" class="heading">
+                            <td>ID</td>
+                            <td>{{'main.word.email' | translate}}</td>
+                            <td>{{'main.word.name' | translate}}</td>
+                            <td>회원 구분</td>
+                            <td>{{'main.word.tel' | translate}}</td>
+                            <td>{{'user.info.bizNameLabel' | translate}}</td>
+                            <td>{{'user.info.bizNumberLabel' | translate}}</td>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center"></tbody>
+                        </table>
+                      </div>
+                    </uib-tab>
+                  </uib-tabset>
                 </div>
               </div>
             </div>

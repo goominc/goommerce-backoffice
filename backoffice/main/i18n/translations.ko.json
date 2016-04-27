@@ -13,6 +13,12 @@
       "forgetPasswordBtn": "비밀번호를 잊으셨나요?",
       "resetPasswordTitle": "비밀번호 재설정",
       "resetPasswordBtn": "비밀번호 재설정 이메일 발송"
+    },
+    "word": {
+      "all": "전체",
+      "email": "이메일",
+      "name": "이름",
+      "tel": "전화번호"
     }
   }
 }

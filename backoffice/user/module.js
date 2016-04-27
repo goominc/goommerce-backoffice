@@ -28,6 +28,11 @@ userModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/user/manage.html',
       controller: 'UserManageController',
     })
+    .state('user.manage.tab', {
+      url: '/:tabName',
+      templateUrl: templateRoot + '/user/manage.html',
+      controller: 'UserManageController',
+    })
     .state('user.info', {
       url: '/info/:userId',
       templateUrl: templateRoot + '/user/info.html',
