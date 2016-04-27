@@ -20,8 +20,8 @@
         <div class="col-md-12">
           <div class="portlet light">
             <div class="portlet-body">
-              <div>
-                <table class="table table-bordered table-hover">
+              <div id="order_list" bo-server-datatables="orderDatatables" url="/api/v1/order_products" url-params="{status: '100:400', sorts: '-orderId,-id'}" table-render="datatablesLoaded()">
+                <table class="table table-bordered table-hover" style="width: 100%;">
                   <thead>
                   <tr role="row" class="heading">
                     <td>{{'order.orderProduct.orderIdColumn' | translate}}</td>
@@ -41,25 +41,7 @@
                     <td>{{'order.orderProduct.buyerIdColumn' | translate}}</td>
                   </tr>
                   </thead>
-                  <tbody>
-                    <tr data-ng-repeat="row in orderProducts">
-                      <td>{{row.orderId}}</td>
-                      <td>{{row.brand.id}}</td>
-                      <td>{{row.brand.name.ko}}</td>
-                      <td>{{row.brand.data.tel}}</td>
-                      <td>{{row.brand.data.bank.name}}</td>
-                      <td>{{row.brand.data.bank.accountHolder}}</td>
-                      <td>{{row.brand.data.bank.accountNumber}}</td>
-                      <td>{{row.product.id}}</td>
-                      <td>{{row.product.name.ko}}</td>
-                      <td>{{row.productVariant.data.color}}</td>
-                      <td>{{row.productVariant.data.size}}</td>
-                      <td>{{row.quantity}}</td>
-                      <td>{{row.totalKRW}}</td>
-                      <td>{{row.processedDate.substr(0, 10)}}</td>
-                      <td>{{row.buyerId}}</td>
-                    </tr>
-                  </tbody>
+                  <tbody class="cell-center"></tbody>
                 </table>
               </div>
             </div>

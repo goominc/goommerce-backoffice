@@ -20,8 +20,8 @@
         <div class="col-md-12">
           <div class="portlet light">
             <div class="portlet-body">
-              <div>
-                <table class="table table-bordered table-hover">
+              <div id="order_list" bo-server-datatables="orderDatatables" url="/api/v1/uncle/order_products" url-params="{}" table-render="datatablesLoaded()">
+                <table class="table table-bordered table-hover" style="width: 100%;">
                   <thead>
                   <tr role="row" class="heading">
                     <td>{{'order.orderProduct.orderIdColumn' | translate}}</td>
@@ -36,20 +36,7 @@
                     <td>{{'order.orderProduct.quantityColumn' | translate}}</td>
                   </tr>
                   </thead>
-                  <tbody>
-                    <tr data-ng-repeat="row in orderProducts">
-                      <td>{{row.orderId}}</td>
-                      <td>{{row.brand.name.ko}}</td>
-                      <td>{{row.brand.data.location.building.name.ko}}</td>
-                      <td>{{row.brand.data.location.floor}}</td>
-                      <td>{{row.brand.data.location.flatNumber}}</td>
-                      <td>{{row.brand.data.tel}}</td>
-                      <td>{{row.product.name.ko}}</td>
-                      <td>{{row.productVariant.data.color}}</td>
-                      <td>{{row.productVariant.data.size}}</td>
-                      <td>{{row.quantity}}</td>
-                    </tr>
-                  </tbody>
+                  <tbody class="cell-center"></tbody>
                 </table>
               </div>
             </div>

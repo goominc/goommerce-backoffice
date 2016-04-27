@@ -3806,38 +3806,11 @@ orderModule.config(function ($stateProvider) {
   }).state('order.uncle', {
     url: '/uncle',
     templateUrl: templateRoot + '/order/uncle.html',
-    controller: 'OrderUncleController',
-    resolve: {
-      orderProducts: function orderProducts($http, $rootScope, $stateParams) {
-        return $http.get('/api/v1/uncle/order_products').then(function (res) {
-          return res.data;
-        });
-      }
-    }
+    controller: 'OrderUncleController'
   }).state('order.cs', {
     url: '/cs',
     templateUrl: templateRoot + '/order/cs.html',
-    controller: 'OrderCsController',
-    resolve: {
-      orderProducts: function orderProducts($http, $rootScope, $stateParams) {
-        var result = [];
-        var limit = 1000;
-        function recursive(offset) {
-          return $http.get('/api/v1/order_products?status=100:400&sorts=-orderId,-id&limit=' + limit + '&offset=' + offset).then(function (res) {
-            var pagination = res.data.pagination;
-
-            Array.prototype.push.apply(result, res.data.orderProducts);
-            if (pagination.offset + pagination.limit < pagination.total) {
-              return recursive(pagination.offset + pagination.limit);
-            }
-            return result;
-          });
-        }
-        return recursive(0).then(function (res) {
-          return res;
-        });
-      }
-    }
+    controller: 'OrderCsController'
   }).state('order.detail', {
     url: '/detail/:orderId',
     templateUrl: templateRoot + '/order/detail.html',
@@ -4167,7 +4140,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   }
 });
 
-orderModule.controller('OrderUncleController', function ($scope, $rootScope, $http, $state, $translate, orderProducts) {
+orderModule.controller('OrderUncleController', function ($scope, $rootScope, $http, $state, $translate) {
   $scope.contentTitle = $translate.instant('order.uncle.title');
   $scope.breadcrumb = [{
     sref: 'dashboard',
@@ -4179,7 +4152,61 @@ orderModule.controller('OrderUncleController', function ($scope, $rootScope, $ht
     sref: 'order.uncle',
     name: $translate.instant('order.uncle.title')
   }];
-  $scope.orderProducts = orderProducts;
+
+  $scope.orderDatatables = {
+    field: 'orderProducts',
+    disableFilter: true,
+    url: '/api/v1/uncle/order_products',
+    order: [],
+    columns: [{
+      data: 'orderId',
+      bSortable: false
+    }, {
+      data: function data(_data5) {
+        return _.get(_data5, 'brand.name.ko', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data6) {
+        return _.get(_data6, 'brand.data.location.building.name.ko', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data7) {
+        return _.get(_data7, 'brand.data.location.floor', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data8) {
+        return _.get(_data8, 'brand.data.location.flatNumber', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data9) {
+        return _.get(_data9, 'brand.data.tel', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data10) {
+        return _.get(_data10, 'product.name.ko', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data11) {
+        return _.get(_data11, 'productVariant.data.color', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data12) {
+        return _.get(_data12, 'productVariant.data.size', '');
+      },
+      bSortable: false
+    }, {
+      data: 'quantity',
+      bSortable: false
+    }]
+  };
+
   $scope.download = function () {
     $http.get('/api/v1/uncle/order_products?format=csv').then(function (res) {
       var blob = new Blob([res.data]);
@@ -4192,7 +4219,7 @@ orderModule.controller('OrderUncleController', function ($scope, $rootScope, $ht
   $rootScope.initAll($scope, $state.current.name);
 });
 
-orderModule.controller('OrderCsController', function ($scope, $rootScope, $http, $state, $translate, orderProducts) {
+orderModule.controller('OrderCsController', function ($scope, $rootScope, $http, $state, $translate) {
   $scope.contentTitle = $translate.instant('order.cs.title');
   $scope.breadcrumb = [{
     sref: 'dashboard',
@@ -4204,7 +4231,82 @@ orderModule.controller('OrderCsController', function ($scope, $rootScope, $http,
     sref: 'order.cs',
     name: $translate.instant('order.cs.title')
   }];
-  $scope.orderProducts = orderProducts;
+
+  $scope.orderDatatables = {
+    field: 'orderProducts',
+    disableFilter: true,
+    url: '/api/v1/order_products',
+    order: [],
+    columns: [{
+      data: 'orderId',
+      bSortable: false
+    }, {
+      data: function data(_data13) {
+        return _.get(_data13, 'brand.name.id', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data14) {
+        return _.get(_data14, 'brand.name.ko', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data15) {
+        return _.get(_data15, 'brand.data.tel', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data16) {
+        return _.get(_data16, 'brand.data.bank.name', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data17) {
+        return _.get(_data17, 'brand.data.bank.accountHolder', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data18) {
+        return _.get(_data18, 'brand.data.bank.accountNumber', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data19) {
+        return _.get(_data19, 'product.id', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data20) {
+        return _.get(_data20, 'product.name.ko', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data21) {
+        return _.get(_data21, 'productVariant.data.color', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data22) {
+        return _.get(_data22, 'productVariant.data.size', '');
+      },
+      bSortable: false
+    }, {
+      data: 'quantity',
+      bSortable: false
+    }, {
+      data: 'totalKRW',
+      bSortable: false
+    }, {
+      data: function data(_data23) {
+        return _.get(_data23, 'processedDate', '').substr(0, 10);
+      },
+      bSortable: false
+    }, {
+      data: 'buyerId',
+      bSortable: false
+    }]
+  };
+
   $rootScope.initAll($scope, $state.current.name);
 });
 }, {"./module":7}],
