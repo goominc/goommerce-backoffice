@@ -4236,7 +4236,7 @@ orderModule.controller('OrderCsController', function ($scope, $rootScope, $http,
       bSortable: false
     }, {
       data: function data(_data13) {
-        return _.get(_data13, 'brand.name.id', '');
+        return _.get(_data13, 'brand.id', '');
       },
       bSortable: false
     }, {

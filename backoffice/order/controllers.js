@@ -339,7 +339,7 @@ orderModule.controller('OrderCsController', ($scope, $rootScope, $http, $state, 
         bSortable: false,
       },
       {
-        data: (data) => _.get(data, 'brand.name.id', ''),
+        data: (data) => _.get(data, 'brand.id', ''),
         bSortable: false,
       },
       {
