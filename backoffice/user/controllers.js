@@ -81,12 +81,6 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
         data: (data) => data.name || '',
       },
       {
-        data: (data) => data,
-        render: (user) => {
-          return userUtil.getRoleName(user);
-        },
-      },
-      {
         data: (data) => _.get(data, 'data.tel') || '',
       },
       {

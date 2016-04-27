@@ -49,7 +49,6 @@
                             <td>ID</td>
                             <td>{{'main.word.email' | translate}}</td>
                             <td>{{'main.word.name' | translate}}</td>
-                            <td>회원 구분</td>
                             <td>{{'main.word.tel' | translate}}</td>
                             <td>{{'user.info.bizNameLabel' | translate}}</td>
                             <td>{{'user.info.bizNumberLabel' | translate}}</td>
@@ -60,14 +59,13 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.buyerTab' | translate}}" active="tabName === 'buyer'" data-ng-click="changeTab('buyer')">
-                      <div bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'buyer,bigBuyer' }">
+                      <div bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'buyer' }">
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
                             <td>ID</td>
                             <td>{{'main.word.email' | translate}}</td>
                             <td>{{'main.word.name' | translate}}</td>
-                            <td>회원 구분</td>
                             <td>{{'main.word.tel' | translate}}</td>
                             <td>{{'user.info.bizNameLabel' | translate}}</td>
                             <td>{{'user.info.bizNumberLabel' | translate}}</td>
@@ -93,6 +91,23 @@
                         </table>
                       </div>
                     </uib-tab>
+                    <uib-tab heading="{{'user.manage.bigBuyerTab' | translate}}" active="tabName === 'bigBuyer'" data-ng-click="changeTab('bigBuyer')">
+                      <div bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'bigBuyer' }">
+                        <table class="table table-bordered table-hover" style="width: 100%;">
+                          <thead>
+                          <tr role="row" class="heading">
+                            <td>ID</td>
+                            <td>{{'main.word.email' | translate}}</td>
+                            <td>{{'main.word.name' | translate}}</td>
+                            <td>{{'main.word.tel' | translate}}</td>
+                            <td>{{'user.info.bizNameLabel' | translate}}</td>
+                            <td>{{'user.info.bizNumberLabel' | translate}}</td>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center"></tbody>
+                        </table>
+                      </div>
+                    </uib-tab>
                     <uib-tab heading="{{'user.manage.adminTab' | translate}}" active="tabName === 'admin'" data-ng-click="changeTab('admin')">
                       <div bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'admin' }">
                         <table class="table table-bordered table-hover" style="width: 100%;">
@@ -101,7 +116,6 @@
                             <td>ID</td>
                             <td>{{'main.word.email' | translate}}</td>
                             <td>{{'main.word.name' | translate}}</td>
-                            <td>회원 구분</td>
                             <td>{{'main.word.tel' | translate}}</td>
                             <td>{{'user.info.bizNameLabel' | translate}}</td>
                             <td>{{'user.info.bizNumberLabel' | translate}}</td>
