@@ -16,7 +16,8 @@
       "buildingFloorLabel": "빌딩 층",
       "buildingFlatNumberLabel": "빌딩 호수",
       "telLabel": "전화 번호",
-      "mobileLabel": "핸드폰 번호"
+      "mobileLabel": "핸드폰 번호",
+      "aliasLabel": "약어"
     }
   }
 }

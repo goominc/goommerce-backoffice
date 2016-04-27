@@ -71,9 +71,11 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
     if (!$scope.brand.data) {
       $scope.brand.data = {};
     }
-    $scope.brandFields = [
+    $scope.brandFields1 = [
       {title: 'ID', key: 'id', obj: $scope.brand.id, isReadOnly: true},
       {title: $translate.instant('brand.edit.nameLabel'), obj: _.get($scope.brand, 'name.ko'), key: 'name.ko'},
+    ];
+    $scope.brandFields2 = [
       {title: $translate.instant('brand.edit.bizNameLabel'), obj: _.get($scope.brand, 'data.businessRegistration.name'), key: 'data.businessRegistration.name'},
       {title: $translate.instant('brand.edit.bizNumberLabel'), obj: _.get($scope.brand, 'data.businessRegistration.number'), key: 'data.businessRegistration.number'},
       {title: $translate.instant('brand.edit.accountBankLabel'), obj: _.get($scope.brand, 'data.bank.name'), key: 'data.bank.name'},
@@ -102,7 +104,8 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
   }
   $scope.save = () => {
     boUtils.startProgressBar();
-    convertUtil.copyFieldObj($scope.brandFields, $scope.brand);
+    convertUtil.copyFieldObj($scope.brandFields1, $scope.brand);
+    convertUtil.copyFieldObj($scope.brandFields2, $scope.brand);
     $rootScope.state.locales.forEach((locale) => {
       $scope.brand.name[locale] = $scope.brand.name.ko;
     });
@@ -127,5 +130,24 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
         $state.go('brand.main');
       }, 1000);
     });
+  };
+
+  $scope.removeAlias = (idx) => {
+    $scope.brand.data.alias.splice(idx, 1);
+  };
+  $scope.onAliasInput = (e) => {
+    const keyCode = e.keyCode;
+    if (keyCode === 13 || keyCode === 32) {
+      // Enter
+      e.preventDefault();
+      const newAlias = e.target.value;
+      for (let i = 0; i < ($scope.brand.data.alias || []).length; i++) {
+        if ($scope.brand.data.alias[i] === newAlias) {
+          return;
+        }
+      }
+      $scope.brand.data.alias.push(newAlias);
+      $(e.target).val('');
+    }
   };
 });
