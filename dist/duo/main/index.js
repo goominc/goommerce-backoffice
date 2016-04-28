@@ -4525,6 +4525,17 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
 
   udpateDatatables();
 
+  $scope.download = function () {
+    var date = $scope.activeDate;
+    $http.get('/api/v1/order_products/settlement/' + date + '?format=csv').then(function (res) {
+      var blob = new Blob([res.data]);
+      var downloadLink = angular.element('<a></a>');
+      downloadLink.attr('href', window.URL.createObjectURL(blob));
+      downloadLink.attr('download', 'settlement-' + date + '.csv');
+      downloadLink[0].click();
+    });
+  };
+
   $rootScope.initAll($scope, $state.current.name);
 });
 }, {"./module":7}],
