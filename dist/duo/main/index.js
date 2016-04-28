@@ -4514,6 +4514,9 @@ brandModule.controller('BrandEditController', function ($scope, $http, $state, $
           return;
         }
       }
+      if (!$scope.brand.data.alias) {
+        $scope.brand.data.alias = [];
+      }
       $scope.brand.data.alias.push(newAlias);
       $(e.target).val('');
     }
