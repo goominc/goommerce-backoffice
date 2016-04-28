@@ -118,9 +118,9 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           sref: 'order.uncle',
         },
         {
-          key: 'order.cs',
-          name: $translate.instant('order.cs.title'),
-          sref: 'order.cs',
+          key: 'order.settlement',
+          name: $translate.instant('order.settlement.title'),
+          sref: 'order.settlement',
         },
         {
           key: 'order.listBigBuyer',

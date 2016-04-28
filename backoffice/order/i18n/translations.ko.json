@@ -59,6 +59,9 @@
     "cs": {
       "title": "운영팀주문목록"
     },
+    "settlement": {
+      "title": "회계팀 대량이체"
+    },
     "listBigBuyer": {
       "title": "빅바이어주문목록"
     }

@@ -44,8 +44,7 @@ directiveModule.directive('boDatatables', ($http, $compile, $parse, datatableCom
     transclude: true,
     template: '<div ng-transclude></div>',
     link: (scope, elem, attr) => {
-      const dataTables = $parse(attr.boDatatables)(scope);
-      const handleData = (realData) => {
+      const init = (dataTables, realData) => {
         if (realData) {
           realData.forEach(function (elem, index) {
             elem._index = index;
@@ -64,17 +63,21 @@ directiveModule.directive('boDatatables', ($http, $compile, $parse, datatableCom
           scope[attr.directiveLoad]();
         }
       };
-      if (dataTables.data) {
-        handleData(dataTables.data);
-      } else {
-        $http.get(dataTables.url).then((res) => {
-          if (dataTables.field && dataTables.field !== '') {
-            handleData(res.data[dataTables.field]);
-          } else {
-            handleData(res.data);
-          }
-        });
-      }
+      scope.$watch(attr.boDatatables, (dataTables) => {
+        const table = new $.fn.dataTable.Api(elem.find('table'));
+        table.destroy();
+        if (dataTables.data) {
+          init(dataTables.data);
+        } else {
+          $http.get(dataTables.url).then((res) => {
+            if (dataTables.field && dataTables.field !== '') {
+              init(dataTables, res.data[dataTables.field]);
+            } else {
+              init(dataTables, res.data);
+            }
+          });
+        }
+      });
     },
   };
 });

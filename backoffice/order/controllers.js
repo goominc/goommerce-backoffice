@@ -467,3 +467,85 @@ orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $r
     ],
   };
 });
+
+orderModule.controller('OrderSettlementController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
+  $scope.contentTitle = $translate.instant('order.settlement.title');
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'order.main',
+      name: $translate.instant('order.main.title'),
+    },
+    {
+      sref: 'order.settlement',
+      name: $translate.instant('order.settlement.title'),
+    },
+  ];
+
+  const today = moment();
+  const maxDays = 10;
+  $scope.dates = [];
+  for (let i = 0; i < maxDays; i++) {
+    $scope.dates.push(today.format('YYYY-MM-DD'));
+    today.subtract(1, 'd');
+  }
+  $scope.activeDate = $scope.dates[0];
+  $scope.setDate = (date) => {
+    $scope.activeDate = date;
+    udpateDatatables();
+  };
+
+  function udpateDatatables() {
+    $scope.orderDatatables = {
+      field: 'orders',
+      // disableFilter: true,
+      // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+      url: '/api/v1/order_products/settlement/' + $scope.activeDate,
+      columns: [
+        {
+          data: 'orderId',
+          render: (orderId) => {
+            return '<a ui-sref="order.detail({orderId: ' + orderId + '})">' + orderId + '</a>'
+          },
+        },
+        {
+          data: (data) => _.get(data, 'brand.id', ''),
+          render: (brandId) => {
+            return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandId + '</a>'
+          },
+        },
+        {
+          data: (data) => _.get(data, 'brand.name.ko', ''),
+        },
+        {
+          data: (data) => _.get(data, 'brand.data.tel', ''),
+        },
+        {
+          data: (data) => _.get(data, 'brand.data.bank.name', ''),
+        },
+        {
+          data: (data) => _.get(data, 'brand.data.bank.accountNumber', ''),
+        },
+        {
+          data: (data) => _.get(data, 'finalTotalKRW', ''),
+        },
+        {
+          data: (data) => _.get(data, 'brand.data.bank.accountHolder', ''),
+        },
+        {
+          data: 'buyerId',
+          render: (buyerId) => {
+            return '<a ui-sref="user.info({userId: ' + buyerId + '})">' + buyerId + '</a>'
+          },
+        },
+      ],
+    };
+  }
+
+  udpateDatatables();
+
+  $rootScope.initAll($scope, $state.current.name);
+});

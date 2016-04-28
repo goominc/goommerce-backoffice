@@ -43,6 +43,11 @@ orderModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/order/uncle.html',
       controller: 'OrderUncleController',
     })
+    .state('order.settlement', {
+      url: '/settlement',
+      templateUrl: templateRoot + '/order/settlement.html',
+      controller: 'OrderSettlementController',
+    })
     .state('order.cs', {
       url: '/cs',
       templateUrl: templateRoot + '/order/cs.html',

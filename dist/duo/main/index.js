@@ -191,9 +191,13 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       name: $translate.instant('order.uncle.title'),
       sref: 'order.uncle'
     }, {
-      key: 'order.cs',
-      name: $translate.instant('order.cs.title'),
-      sref: 'order.cs'
+      key: 'order.settlement',
+      name: $translate.instant('order.settlement.title'),
+      sref: 'order.settlement'
+    }, {
+      key: 'order.listBigBuyer',
+      name: $translate.instant('order.listBigBuyer.title'),
+      sref: 'order.listBigBuyer'
     }]
   }, {
     key: 'user', // TODO get key from router
@@ -441,8 +445,7 @@ directiveModule.directive('boDatatables', function ($http, $compile, $parse, dat
     transclude: true,
     template: '<div ng-transclude></div>',
     link: function link(scope, elem, attr) {
-      var dataTables = $parse(attr.boDatatables)(scope);
-      var handleData = function handleData(realData) {
+      var init = function init(dataTables, realData) {
         if (realData) {
           realData.forEach(function (elem, index) {
             elem._index = index;
@@ -461,17 +464,21 @@ directiveModule.directive('boDatatables', function ($http, $compile, $parse, dat
           scope[attr.directiveLoad]();
         }
       };
-      if (dataTables.data) {
-        handleData(dataTables.data);
-      } else {
-        $http.get(dataTables.url).then(function (res) {
-          if (dataTables.field && dataTables.field !== '') {
-            handleData(res.data[dataTables.field]);
-          } else {
-            handleData(res.data);
-          }
-        });
-      }
+      scope.$watch(attr.boDatatables, function (dataTables) {
+        var table = new $.fn.dataTable.Api(elem.find('table'));
+        table.destroy();
+        if (dataTables.data) {
+          init(dataTables.data);
+        } else {
+          $http.get(dataTables.url).then(function (res) {
+            if (dataTables.field && dataTables.field !== '') {
+              init(dataTables, res.data[dataTables.field]);
+            } else {
+              init(dataTables, res.data);
+            }
+          });
+        }
+      });
     }
   };
 });
@@ -1480,7 +1487,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
 
   $scope.buyerDatatables = {
     field: 'users',
-    // ID, Email, Name, roles, tel, bizName, bizNumber
+    // ID, Email, Name, tel, bizName, bizNumber
     columns: [{
       data: 'id',
       render: function render(id) {
@@ -1533,6 +1540,61 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return _.get(_data8, 'data.tel') || '';
       }
     }]
+  };
+
+  $scope.noRoleDatatables = {
+    field: 'users',
+    // ID, Email, Name, tel, bizName, bizNumber, bizImage, changeToBuyer(action)
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+      }
+    }, {
+      data: 'email'
+    }, {
+      data: function data(_data9) {
+        return _data9.name || '';
+      }
+    }, {
+      data: function data(_data10) {
+        return _.get(_data10, 'data.tel') || '';
+      }
+    }, {
+      data: function data(_data11) {
+        return _.get(_data11, 'data.bizName') || '';
+      }
+    }, {
+      data: function data(_data12) {
+        return _.get(_data12, 'data.bizNumber') || '';
+      }
+    }, {
+      data: function data(_data13) {
+        return _data13;
+      },
+      render: function render(user) {
+        return _.get(user, 'data.bizImage') ? '<button class="btn blue" data-ng-click="openBizImage(' + user.id + ')">사업자 등록증 보기</button>' : '';
+      }
+    }, {
+      data: function data(_data14) {
+        return _data14;
+      },
+      render: function render(user) {
+        return '<button class="btn blue" data-ng-click="changeToBuyer(' + user.id + ')">바이어 인증</button>';
+      }
+    }]
+  };
+
+  $scope.openBizImage = function (userId) {
+    $scope.activeUser = $scope.userIdToData[userId];
+    $('#user_biz_image').modal();
+  };
+
+  $scope.changeToBuyer = function (userId) {
+    $http.post('/api/v1/users/' + userId + '/roles', { roleType: 'buyer' }).then(function () {
+      window.alert('바이어 인증이 완료되었습니다');
+      $state.reload();
+    });
   };
 
   $scope.newUser = {};
@@ -1628,9 +1690,10 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
   };
 
   $scope.datatablesLoaded = function () {
-    var datas = $('#user_list').find('table').DataTable().rows().data();
-    var children = $('#user_list').find('tbody').children();
-    $scope.userIdToData = {};
+    var datas = $('.tabbable-bordered').find('table').DataTable().rows().data();
+    if (!$scope.userIdToData) {
+      $scope.userIdToData = {};
+    }
     for (var i = 0; i < datas.length; i++) {
       var data = datas[i];
       $scope.userIdToData[data.id] = data;
@@ -3793,6 +3856,10 @@ orderModule.config(function ($stateProvider) {
     url: '/main',
     templateUrl: templateRoot + '/order/main.html',
     controller: 'OrderMainController'
+  }).state('order.listBigBuyer', {
+    url: 'listBigBuyer',
+    templateUrl: templateRoot + '/order/listBigBuyer.html',
+    controller: 'OrderListBigBuyerController'
   }).state('order.beforePayment', {
     url: '/before_payment',
     templateUrl: templateRoot + '/order/step0-before-payment.html',
@@ -3801,6 +3868,10 @@ orderModule.config(function ($stateProvider) {
     url: '/uncle',
     templateUrl: templateRoot + '/order/uncle.html',
     controller: 'OrderUncleController'
+  }).state('order.settlement', {
+    url: '/settlement',
+    templateUrl: templateRoot + '/order/settlement.html',
+    controller: 'OrderSettlementController'
   }).state('order.cs', {
     url: '/cs',
     templateUrl: templateRoot + '/order/cs.html',
@@ -3893,6 +3964,12 @@ module.exports = {
     },
     "cs": {
       "title": "운영팀주문목록"
+    },
+    "settlement": {
+      "title": "회계팀 대량이체"
+    },
+    "listBigBuyer": {
+      "title": "빅바이어주문목록"
     }
   }
 }
@@ -3956,6 +4033,16 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
       data: 'email'
     }]
   };
+
+  /*
+    $(document).ready(() => {
+      $('#tt2').datepicker({
+        onSelect: function (a,b) { console.log(a); },
+        onClose: () => console.log(1),
+        autoclose: true,
+      });
+    });
+    */
 });
 
 orderModule.controller('OrderListBeforePaymentController', function ($scope, $rootScope, $http, $state, $translate, boUtils) {
@@ -4300,6 +4387,143 @@ orderModule.controller('OrderCsController', function ($scope, $rootScope, $http,
       bSortable: false
     }]
   };
+
+  $rootScope.initAll($scope, $state.current.name);
+});
+
+orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+  $scope.contentTitle = $translate.instant('order.listBigBuyer.title');
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
+    sref: 'order.listBigBuyer',
+    name: $translate.instant('order.listBigBuyer.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.orderDatatables = {
+    field: 'orders',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: '/api/v1/orders/big',
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
+      }
+    }, {
+      data: 'status',
+      render: function render(status) {
+        return $rootScope.getContentsI18nText('enum.order.status.' + status);
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }, {
+      data: 'totalKRW'
+    }, {
+      data: 'paymentStatus',
+      render: function render(status) {
+        return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
+      }
+    }, {
+      data: function data(_data24) {
+        return _.get(_data24, 'name') || '';
+      }
+    }, {
+      data: function data(_data25) {
+        return _.get(_data25, 'data.tel') || '';
+      }
+    }, {
+      data: 'email'
+    }]
+  };
+});
+
+orderModule.controller('OrderSettlementController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+  $scope.contentTitle = $translate.instant('order.settlement.title');
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
+    sref: 'order.settlement',
+    name: $translate.instant('order.settlement.title')
+  }];
+
+  var today = moment();
+  var maxDays = 10;
+  $scope.dates = [];
+  for (var i = 0; i < maxDays; i++) {
+    $scope.dates.push(today.format('YYYY-MM-DD'));
+    today.subtract(1, 'd');
+  }
+  $scope.activeDate = $scope.dates[0];
+  $scope.setDate = function (date) {
+    $scope.activeDate = date;
+    udpateDatatables();
+  };
+
+  function udpateDatatables() {
+    $scope.orderDatatables = {
+      field: 'orders',
+      // disableFilter: true,
+      // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+      url: '/api/v1/order_products/settlement/' + $scope.activeDate,
+      columns: [{
+        data: 'orderId',
+        render: function render(orderId) {
+          return '<a ui-sref="order.detail({orderId: ' + orderId + '})">' + orderId + '</a>';
+        }
+      }, {
+        data: function data(_data26) {
+          return _.get(_data26, 'brand.id', '');
+        },
+        render: function render(brandId) {
+          return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandId + '</a>';
+        }
+      }, {
+        data: function data(_data27) {
+          return _.get(_data27, 'brand.name.ko', '');
+        }
+      }, {
+        data: function data(_data28) {
+          return _.get(_data28, 'brand.data.tel', '');
+        }
+      }, {
+        data: function data(_data29) {
+          return _.get(_data29, 'brand.data.bank.name', '');
+        }
+      }, {
+        data: function data(_data30) {
+          return _.get(_data30, 'brand.data.bank.accountNumber', '');
+        }
+      }, {
+        data: function data(_data31) {
+          return _.get(_data31, 'finalTotalKRW', '');
+        }
+      }, {
+        data: function data(_data32) {
+          return _.get(_data32, 'brand.data.bank.accountHolder', '');
+        }
+      }, {
+        data: 'buyerId',
+        render: function render(buyerId) {
+          return '<a ui-sref="user.info({userId: ' + buyerId + '})">' + buyerId + '</a>';
+        }
+      }]
+    };
+  }
+
+  udpateDatatables();
 
   $rootScope.initAll($scope, $state.current.name);
 });
