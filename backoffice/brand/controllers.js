@@ -146,6 +146,9 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
           return;
         }
       }
+      if (!$scope.brand.data.alias) {
+        $scope.brand.data.alias = [];
+      }
       $scope.brand.data.alias.push(newAlias);
       $(e.target).val('');
     }
