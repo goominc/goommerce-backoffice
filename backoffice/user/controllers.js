@@ -66,7 +66,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
 
   $scope.buyerDatatables = {
     field: 'users',
-    // ID, Email, Name, roles, tel, bizName, bizNumber
+    // ID, Email, Name, tel, bizName, bizNumber
     columns: [
       {
         data: 'id',
@@ -116,6 +116,55 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
         data: (data) => _.get(data, 'data.tel') || '',
       },
     ],
+  };
+
+  $scope.noRoleDatatables = {
+    field: 'users',
+    // ID, Email, Name, tel, bizName, bizNumber, bizImage, changeToBuyer(action)
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return `<a ui-sref="user.info({ userId: ${id} })">${id}</a>`;
+        },
+      },
+      {
+        data: 'email',
+      },
+      {
+        data: (data) => data.name || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.tel') || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.bizName') || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.bizNumber') || '',
+      },
+      {
+        data: (data) => data,
+        render: (user) => _.get(user, 'data.bizImage')
+          ? `<button class="btn blue" data-ng-click="openBizImage(${user.id})">사업자 등록증 보기</button>` : '',
+      },
+      {
+        data: (data) => data,
+        render: (user) => `<button class="btn blue" data-ng-click="changeToBuyer(${user.id})">바이어 인증</button>`,
+      },
+    ],
+  };
+
+  $scope.openBizImage = (userId) => {
+    $scope.activeUser = $scope.userIdToData[userId];
+    $('#user_biz_image').modal();
+  };
+
+  $scope.changeToBuyer = (userId) => {
+    $http.post(`/api/v1/users/${userId}/roles`, { roleType: 'buyer' }).then(() => {
+      window.alert('바이어 인증이 완료되었습니다');
+      $state.reload();
+    });
   };
 
   $scope.newUser = {};
@@ -207,9 +256,10 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
   };
 
   $scope.datatablesLoaded = () => {
-    const datas = $('#user_list').find('table').DataTable().rows().data();
-    const children = $('#user_list').find('tbody').children();
-    $scope.userIdToData = {};
+    const datas = $('.tabbable-bordered').find('table').DataTable().rows().data();
+    if (!$scope.userIdToData) {
+      $scope.userIdToData = {};
+    }
     for (let i = 0; i < datas.length; i++) {
       const data = datas[i];
       $scope.userIdToData[data.id] = data;

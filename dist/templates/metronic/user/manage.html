@@ -25,7 +25,7 @@
                 <div class="col-md-12">
                   <uib-tabset class="tabbable-bordered">
                     <uib-tab heading="{{'main.word.all' | translate}}" active="tabName === ''" data-ng-click="changeTab('')">
-                      <div id="user_list" bo-server-datatables="userDatatables" url="/api/v1/users" url-params="{}" table-render="datatablesLoaded()">
+                      <div data-ng-if="tabName === ''" bo-server-datatables="userDatatables" url="/api/v1/users" url-params="{}" table-render="datatablesLoaded()">
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -42,7 +42,7 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.noRoleTab' | translate}}" active="tabName === 'noRole'" data-ng-click="changeTab('noRole')">
-                      <div bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'none' }">
+                      <div data-ng-if="tabName === 'noRole'" bo-server-datatables="noRoleDatatables" url="/api/v1/users" url-params="{ roles: 'none' }" table-render="datatablesLoaded()">
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -52,6 +52,8 @@
                             <td>{{'main.word.tel' | translate}}</td>
                             <td>{{'user.info.bizNameLabel' | translate}}</td>
                             <td>{{'user.info.bizNumberLabel' | translate}}</td>
+                            <td></td>
+                            <td></td>
                           </tr>
                           </thead>
                           <tbody class="cell-center"></tbody>
@@ -59,7 +61,7 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.buyerTab' | translate}}" active="tabName === 'buyer'" data-ng-click="changeTab('buyer')">
-                      <div bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'buyer' }">
+                      <div data-ng-if="tabName === 'buyer'" bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'buyer' }">
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -76,7 +78,7 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.sellerTab' | translate}}" active="tabName === 'seller'" data-ng-click="changeTab('seller')">
-                      <div bo-server-datatables="sellerDatatables" url="/api/v1/users" url-params="{ roles: 'owner' }">
+                      <div data-ng-if="tabName === 'seller'" bo-server-datatables="sellerDatatables" url="/api/v1/users" url-params="{ roles: 'owner' }">
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -92,7 +94,7 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.bigBuyerTab' | translate}}" active="tabName === 'bigBuyer'" data-ng-click="changeTab('bigBuyer')">
-                      <div bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'bigBuyer' }">
+                      <div data-ng-if="tabName === 'bigBuyer'" bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'bigBuyer' }">
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -109,7 +111,7 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.adminTab' | translate}}" active="tabName === 'admin'" data-ng-click="changeTab('admin')">
-                      <div bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'admin' }">
+                      <div data-ng-if="tabName === 'admin'" bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'admin' }">
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -228,6 +230,13 @@
         <button class="btn default" type="reset" data-ng-click="closePasswordPopup()">{{'main.closeButton' | translate}}</button>
         <button class="btn blue" data-ng-click="savePassword()"><i class="fa fa-plus"></i> {{'main.saveButton' | translate}}</button>
       </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="user_biz_image">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <img width="600" data-ng-src="{{activeUser.data.bizImage.url}}" />
     </div>
   </div>
 </div>
