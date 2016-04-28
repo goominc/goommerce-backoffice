@@ -55,6 +55,16 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
       },
     ],
   };
+
+/*
+  $(document).ready(() => {
+    $('#tt2').datepicker({
+      onSelect: function (a,b) { console.log(a); },
+      onClose: () => console.log(1),
+      autoclose: true,
+    });
+  });
+  */
 });
 
 orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, $http, $state, $translate, boUtils) => {
@@ -398,4 +408,62 @@ orderModule.controller('OrderCsController', ($scope, $rootScope, $http, $state, 
   };
 
   $rootScope.initAll($scope, $state.current.name);
+});
+
+orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
+  $scope.contentTitle = $translate.instant('order.listBigBuyer.title');
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'order.main',
+      name: $translate.instant('order.main.title'),
+    },
+    {
+      sref: 'order.listBigBuyer',
+      name: $translate.instant('order.listBigBuyer.title'),
+    },
+  ];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.orderDatatables = {
+    field: 'orders',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: '/api/v1/orders/big',
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>'
+        },
+      },
+      {
+        data: 'status',
+        render: (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`),
+      },
+      {
+        data: 'createdAt',
+        render: (data) => boUtils.formatDate(data),
+      },
+      {
+        data: 'totalKRW',
+      },
+      {
+        data: 'paymentStatus',
+        render: (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`),
+      },
+      {
+        data: (data) => _.get(data, 'name') || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.tel') || '',
+      },
+      {
+        data: 'email',
+      },
+    ],
+  };
 });

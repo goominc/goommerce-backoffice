@@ -1,0 +1,54 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="portlet-body">
+              <div bo-datatables="orderDatatables">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                  <tr role="row" class="heading">
+                    <td>ID</td>
+                    <td>{{'order.main.statusColumn' | translate}}</td>
+                    <td>{{'order.main.createdAtColumn' | translate}}</td>
+                    <td>{{'order.main.priceColumn' | translate}}</td>
+                    <td>{{'order.main.paymentStatusColumn' | translate}}</td>
+                    <td>{{'order.main.buyerNameColumn' | translate}}</td>
+                    <td>{{'order.main.buyerTelColumn' | translate}}</td>
+                    <td>{{'order.main.buyerEmailColumn' | translate}}</td>
+                  </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->
