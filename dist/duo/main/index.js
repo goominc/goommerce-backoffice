@@ -4207,6 +4207,13 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     $('.modal-backdrop').remove();
   };
 
+  var brands = _.groupBy(order.orderProducts.map(function (o) {
+    return o.brand;
+  }), 'id');
+  $scope.getBrandName = function (brandId) {
+    return _.get(brands, [brandId, 0, 'name', 'ko'], brandId);
+  };
+
   $scope.saveStatus = function () {
     var data = _.pick(order, 'status');
     $http.put('/api/v1/orders/' + order.id + '/status', data).then(function (res) {

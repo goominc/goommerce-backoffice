@@ -215,6 +215,20 @@
                       </div>
                       <div class="row static-info">
                         <div class="col-md-3 name">
+                          adjustment:
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.adjustmentTotalKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.finalAdjustmentTotalKRW}}
+                        </div>
+                        <div class="col-md-3 value">
+                          KRW {{order.adjustmentTotalKRW - order.finalAdjustmentTotalKRW}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-3 name">
                           total:
                         </div>
                         <div class="col-md-3 value">
@@ -257,7 +271,7 @@
                   <div class="portlet grey-cascade box">
                     <div class="portlet-title">
                       <div class="caption">
-                        <i class="fa fa-cogs"></i>주문 상품 목록
+                        <i class="fa fa-cogs"></i>주문 수정
                       </div>
                       <div class="actions btn-set">
                         <button class="btn blue" ng-click="finalize()"><i class="fa fa-check"></i> {{'order.detail.saveButton' | translate}}</button>
@@ -267,6 +281,34 @@
                       <span>예상 배송비: {{order.shippingCostKRW}}, </span>
                       <label class="control-label">최종 배송비</label>
                       <input type="number" data-ng-model="order.finalShippingCostKRW" />
+                      <p>가격 조정 목록</p>
+                      <div class="table-responsive">
+                        <table class="table table-hover table-bordered table-striped">
+                          <thead>
+                            <th width="30%">브랜드 명</th>
+                            <th width="10%">Type</th>
+                            <th width="30%">Original</th>
+                            <th width="30%">Final</th>
+                          </thead>
+                          <tbody class="cell-center">
+                            <tr data-ng-repeat="row in order.adjustments">
+                              <td>
+                                {{getBrandName(row.brandId)}}
+                              </td>
+                              <td>
+                                {{row.type}}
+                              </td>
+                              <td>
+                                {{row.KRW}}
+                              </td>
+                              <td>
+                                {{row.finalKRW}}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <p>상품 목록</p>
                       <div class="table-responsive">
                         <table class="table table-hover table-bordered table-striped">
                           <thead>
