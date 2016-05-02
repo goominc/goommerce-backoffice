@@ -1,7 +1,7 @@
 
 const userModule = require('./module');
 
-userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootScope, $translate, $compile, userUtil) => {
+userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootScope, $translate, $compile, userUtil, boUtils) => {
   $scope.contentTitle = $translate.instant('user.manage.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
@@ -61,6 +61,10 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
         data: 'id',
         render: (id) => `<button class="btn blue" data-ng-click="openPasswordPopup(${id})"><i class="fa fa-password"></i> ${$translate.instant('user.info.changePasswordButton')}</button>`,
       },
+      {
+        data: 'createdAt',
+        render: (data) => boUtils.formatDate(data),
+      },
     ],
   };
 
@@ -89,6 +93,10 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       {
         data: (data) => _.get(data, 'data.bizNumber') || '',
       },
+      {
+        data: 'createdAt',
+        render: (data) => boUtils.formatDate(data),
+      },
     ],
   };
 
@@ -114,6 +122,10 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       },
       {
         data: (data) => _.get(data, 'data.tel') || '',
+      },
+      {
+        data: 'createdAt',
+        render: (data) => boUtils.formatDate(data),
       },
     ],
   };
@@ -151,6 +163,10 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       {
         data: (data) => data,
         render: (user) => `<button class="btn blue" data-ng-click="changeToBuyer(${user.id})">바이어 인증</button>`,
+      },
+      {
+        data: 'createdAt',
+        render: (data) => boUtils.formatDate(data),
       },
     ],
   };
