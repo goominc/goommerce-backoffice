@@ -1428,7 +1428,7 @@ module.exports = {
 
 var userModule = require('./module');
 
-userModule.controller('UserManageController', function ($scope, $http, $q, $state, $rootScope, $translate, $compile, userUtil) {
+userModule.controller('UserManageController', function ($scope, $http, $q, $state, $rootScope, $translate, $compile, userUtil, boUtils) {
   $scope.contentTitle = $translate.instant('user.manage.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [{
@@ -1482,6 +1482,11 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       render: function render(id) {
         return '<button class="btn blue" data-ng-click="openPasswordPopup(' + id + ')"><i class="fa fa-password"></i> ' + $translate.instant('user.info.changePasswordButton') + '</button>';
       }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
     }]
   };
 
@@ -1511,6 +1516,11 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       data: function data(_data5) {
         return _.get(_data5, 'data.bizNumber') || '';
       }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
     }]
   };
 
@@ -1538,6 +1548,11 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: function data(_data8) {
         return _.get(_data8, 'data.tel') || '';
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
       }
     }]
   };
@@ -1581,6 +1596,11 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       },
       render: function render(user) {
         return '<button class="btn blue" data-ng-click="changeToBuyer(' + user.id + ')">바이어 인증</button>';
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
       }
     }]
   };
@@ -5324,7 +5344,8 @@ module.exports = {
       "all": "전체",
       "email": "이메일",
       "name": "이름",
-      "tel": "전화번호"
+      "tel": "전화번호",
+      "createdAt": "생성일자"
     }
   }
 };
