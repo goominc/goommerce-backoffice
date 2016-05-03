@@ -88,10 +88,11 @@
                               </button>
                             </div>
                             <div class="product-variant-attr-selected-wrap">
-                              <button class="btn btn-circle default"
-                                      data-ng-class="{'active': kind.currentGroup === group}"
-                                      data-ng-repeat="group in kind.groups"
-                                      data-ng-click="clickGroupButton($parent.$index, group)"
+                              <button
+                                class="btn btn-circle default"
+                                data-ng-class="{'active': kind.currentGroup === group}"
+                                data-ng-repeat="group in kind.groups"
+                                data-ng-click="clickGroupButton($parent.$index, group)"
                               >
                                 {{group}}
                               </button>
@@ -181,6 +182,24 @@
                           </tr>
                           </tbody>
                         </table>
+                      </div>
+                    </div>
+                    <div class="form-group" data-ng-repeat="field in moreFields">
+                      <label class="col-md-2 control-label">{{field.title}} <span data-ng-if="field.isRequired" class="required"> * </span> </label>
+                      <div class="col-md-10">
+                        <button
+                          class="btn btn-circle default"
+                          data-ng-repeat="value in field.enums"
+                          data-ng-class="{'active': tmpObj[field.tmpKey] === value}"
+                          data-ng-click="tmpObj[field.tmpKey] = value"
+                        >
+                          {{value}}
+                        </button>
+                        <input
+                          data-ng-if="!field.enums" type="text" class="form-control" placeholder="{{field.placeholder}}"
+                          ng-model="tmpObj[field.tmpKey]"
+                          ng-attr-id="{{fieldIdPrefix + field.tmpKey}}"
+                        />
                       </div>
                     </div>
                   </uib-tab>
