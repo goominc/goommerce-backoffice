@@ -103,7 +103,7 @@ mainModule.constant('boConfig', {
 
 'use strict';
 
-var mainModule = angular.module('backoffice.main', ['ui.router', 'ngCookies', require('../directives/module.js').name, require('../dashboard/module').name, require('../user/module').name, require('../product/module').name, require('../order/module').name, require('../brand/module').name, require('../currency/module').name, require('../cms/module').name, require('../text/module').name, require('../third_party/angular-translate')]).config(function ($translateProvider) {
+var mainModule = angular.module('backoffice.main', ['ui.router', 'ngCookies', require('../brand/module').name, require('../building/module').name, require('../cms/module').name, require('../currency/module').name, require('../dashboard/module').name, require('../directives/module.js').name, require('../order/module').name, require('../product/module').name, require('../text/module').name, require('../third_party/angular-translate'), require('../user/module').name]).config(function ($translateProvider) {
   $translateProvider.registerAvailableLanguageKeys(['en', 'ko'], {
     'en_US': 'en',
     'en_UK': 'en',
@@ -400,215 +400,53 @@ mainModule.controller('LoginModalController', function ($scope, $rootScope, $htt
     });
   };
 });
-}, {"../directives/module.js":3,"../dashboard/module":4,"../user/module":5,"../product/module":6,"../order/module":7,"../brand/module":8,"../currency/module":9,"../cms/module":10,"../text/module":11,"../third_party/angular-translate":12,"./i18n/translations.en.json":13,"./i18n/translations.ko.json":14}],
+}, {"../brand/module":3,"../building/module":4,"../cms/module":5,"../currency/module":6,"../dashboard/module":7,"../directives/module.js":8,"../order/module":9,"../product/module":10,"../text/module":11,"../third_party/angular-translate":12,"../user/module":13,"./i18n/translations.en.json":14,"./i18n/translations.ko.json":15}],
 3: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
 'use strict';
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+var brandModule = angular.module('backoffice.brand', ['ui.router', require('../utils/module').name, require('../third_party/angular-translate')]);
 
-var directiveModule = angular.module('backoffice.directives', [require('../utils/module').name]);
+brandModule.config(function ($translateProvider) {
+  $translateProvider.registerAvailableLanguageKeys(['en', 'ko'], {
+    'en_US': 'en',
+    'en_UK': 'en',
+    'ko_KR': 'ko'
+  }).determinePreferredLanguage();
 
-module.exports = directiveModule;
-
-directiveModule.factory('datatableCommons', function ($compile) {
-  return {
-    getOptions: function getOptions(scope, dataTables) {
-      var options = {
-        lengthMenu: [[10, 20, 50, 100, 150], [10, 20, 50, 100, 150]],
-        // change per page values here
-        pageLength: 50, // default record count per page
-        // data: realData, need implement
-        columns: dataTables.columns,
-        order: dataTables.order || [[0, 'desc']], // set first column as a default sort by desc
-        fnCreatedRow: function fnCreatedRow(nRow) {
-          $compile(nRow)(scope);
-        },
-        fnRowCallback: function fnRowCallback(nRow, aData) {
-          $(nRow).attr("id", aData.id);
-        },
-        orderCellsTop: true
-      };
-      if (dataTables.data) {
-        options.data = dataTables.data;
-      }
-      if (dataTables.disableFilter) {
-        options.bFilter = false;
-      }
-      return options;
-    }
-  };
+  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
 });
 
-directiveModule.directive('boDatatables', function ($http, $compile, $parse, datatableCommons) {
-  return {
-    restrict: 'A',
-    transclude: true,
-    template: '<div ng-transclude></div>',
-    link: function link(scope, elem, attr) {
-      var init = function init(dataTables, realData) {
-        if (realData) {
-          realData.forEach(function (elem, index) {
-            elem._index = index;
-          });
-        }
-        dataTables.data = realData;
-        var options = datatableCommons.getOptions(scope, dataTables);
-        if (dataTables.hasOwnProperty('bSort')) {
-          options.bSort = dataTables.bSort;
-        }
-        elem.find('table').dataTable(options);
-        if (dataTables.rowReorder) {
-          table.rowReordering();
-        }
-        if (attr.directiveLoad && scope[attr.directiveLoad]) {
-          scope[attr.directiveLoad]();
-        }
-      };
-      scope.$watch(attr.boDatatables, function (dataTables) {
-        var table = new $.fn.dataTable.Api(elem.find('table'));
-        table.destroy();
-        if (dataTables.data) {
-          init(dataTables.data);
-        } else {
-          $http.get(dataTables.url).then(function (res) {
-            if (dataTables.field && dataTables.field !== '') {
-              init(dataTables, res.data[dataTables.field]);
-            } else {
-              init(dataTables, res.data);
-            }
-          });
-        }
-      });
-    }
-  };
+brandModule.config(function ($stateProvider) {
+  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
+  var templateRoot = 'templates/metronic';
+  $stateProvider.state('brand', {
+    url: '/brand',
+    abstract: 'true',
+    template: '<ui-view/>'
+  }).state('brand.main', {
+    url: '/main',
+    templateUrl: templateRoot + '/brand/main.html',
+    controller: 'BrandMainController'
+  }).state('brand.add', {
+    url: '/add',
+    templateUrl: templateRoot + '/brand/edit.html',
+    controller: 'BrandEditController'
+  }).state('brand.edit', {
+    url: '/edit/:brandId',
+    templateUrl: templateRoot + '/brand/edit.html',
+    controller: 'BrandEditController'
+  });
 });
 
-directiveModule.directive('boServerDatatables', function ($http, $compile, datatableCommons, boUtils) {
-  return {
-    restrict: 'A',
-    transclude: true,
-    template: '<div ng-transclude></div>',
-    scope: {
-      url: '@',
-      urlParams: '=',
-      boServerDatatables: '=',
-      tableRender: '&'
-    },
-    link: function link(scope, elem) {
-      var urlBase = scope.url;
+module.exports = brandModule;
 
-      var dataTables = scope.boServerDatatables;
-      var options = datatableCommons.getOptions(scope, dataTables);
-      options.serverSide = true;
-      options.ajax = function (data, callback, settings) {
-        // console.log(data);
-        var urlParams = _extends({}, scope.urlParams);
-        urlParams.offset = data.start;
-        urlParams.limit = data.length;
-        if (data.search.value) {
-          urlParams.q = data.search.value;
-        }
-        var order = _.get(data, 'order[0]');
-        if (order) {
-          var column = options.columns[order.column].data;
-          if (_.isString(column)) {
-            urlParams.sorts = order.dir === 'desc' ? '-' + column : column;
-          } else {
-            console.log('column is not String. cannot sort');
-          }
-        }
-        var url = boUtils.encodeQueryData(urlBase, urlParams);
-        $http.get(url).then(function (value) {
-          var serverData = value.data;
-          if (dataTables['field']) {
-            serverData = serverData[dataTables['field']];
-          }
-          if (!serverData) {
-            serverData = [];
-          }
-          var pageInfo = { data: serverData, draw: data.draw };
-          pageInfo.recordsTotal = _.get(value, 'data.pagination.total') || 0;
-          // TODO really filtered data
-          pageInfo.recordsFiltered = pageInfo.recordsTotal;
-          callback(pageInfo);
-          if (scope.tableRender) {
-            scope.tableRender();
-          }
-          // 2016. 03. 30. [heekyu] THIS DOES NOT WORK
-          // $compile(angular.element(elem.find('table')))(scope);
-        });
-      };
-      elem.find('table').dataTable(options);
-    }
-  };
-});
-
-directiveModule.directive('clUploadWidget', function () {
-  return {
-    restrict: 'A',
-    scope: {
-      callback: '&callback'
-    },
-    link: function link(scope, elem) {
-      elem.click(function () {
-        cloudinary.openUploadWidget({
-          cloud_name: 'linkshops',
-          upload_preset: 'nd9k8295',
-          multiple: false
-        }, function (error, result) {
-          if (!error) {
-            if (scope.callback) {
-              scope.callback({ result: result[0] });
-            }
-            scope.$apply();
-          }
-        });
-      });
-    }
-  };
-});
-
-directiveModule.directive('boFileReader', function () {
-  return {
-    restrict: 'A',
-    scope: {
-      onRead: '&onRead'
-    },
-    link: function link(scope, element) {
-      $(element).on('change', function (changeEvent) {
-        var files = changeEvent.target.files;
-        if (files.length) {
-          var r = new FileReader();
-          r.onload = function (e) {
-            var contents = e.target.result;
-            if (scope.onRead) {
-              scope.onRead({ contents: contents });
-            }
-            scope.$apply();
-          };
-
-          r.readAsText(files[0], 'EUC-KR'); // 2016. 01. 28. [heekyu] april send me EUC-KR encoded files
-        }
-      });
-    }
-  };
-});
-
-directiveModule.directive('convertToNumber', function () {
-  return {
-    require: 'ngModel',
-    link: function link(scope, element, attrs, ngModel) {
-      ngModel.$parsers.push(function (val) {
-        return parseInt(val, 10);
-      });
-      ngModel.$formatters.push(function (val) {
-        return '' + val;
-      });
-    }
-  };
-});
-}, {"../utils/module":15}],
-15: [function(require, module, exports) {
+// BEGIN module require js
+require('./controllers.js');
+// END module require js
+}, {"../utils/module":16,"../third_party/angular-translate":12,"./i18n/translations.en.json":17,"./i18n/translations.ko.json":18,"./controllers.js":19}],
+16: [function(require, module, exports) {
 'use strict';
 
 var utilModule = angular.module('backoffice.utils', []);
@@ -744,39 +582,12 @@ utilModule.factory('convertUtil', function () {
 
 module.exports = utilModule;
 }, {}],
-4: [function(require, module, exports) {
-'use strict';
-
-var dashboardModule = angular.module('backoffice.dashboard', ['ui.router', require('../third_party/angular-translate')]);
-
-dashboardModule.config(function ($translateProvider) {
-  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
-  $translateProvider.preferredLanguage('ko');
-});
-
-dashboardModule.config(function ($stateProvider) {
-  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
-  var templateRoot = 'templates/metronic';
-
-  $stateProvider.state('dashboard', {
-    url: '/dashboard',
-    templateUrl: templateRoot + '/dashboard/main.html',
-    controller: 'DashboardController'
-  });
-});
-
-module.exports = dashboardModule;
-
-// BEGIN module require js
-require('./controllers.js');
-// END module require js
-}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":16,"./i18n/translations.ko.json":17,"./controllers.js":18}],
 12: [function(require, module, exports) {
 'use strict';
 
 module.exports = require('angular-translate/bower-angular-translate@2.7.2:angular-translate.min.js');
-}, {"angular-translate/bower-angular-translate@2.7.2:angular-translate.min.js":19}],
-19: [function(require, module, exports) {
+}, {"angular-translate/bower-angular-translate@2.7.2:angular-translate.min.js":20}],
+20: [function(require, module, exports) {
 /*!
  * angular-translate - v2.7.2 - 2015-06-01
  * http://github.com/angular-translate/angular-translate
@@ -1284,14 +1095,703 @@ module.exports = require('angular-translate/bower-angular-translate@2.7.2:angula
   }return angular.module("pascalprecht.translate", ["ng"]).run(a), a.$inject = ["$translate"], a.displayName = "runTranslate", angular.module("pascalprecht.translate").provider("$translateSanitization", b), angular.module("pascalprecht.translate").constant("pascalprechtTranslateOverrider", {}).provider("$translate", c), c.$inject = ["$STORAGE_KEY", "$windowProvider", "$translateSanitizationProvider", "pascalprechtTranslateOverrider"], c.displayName = "displayName", angular.module("pascalprecht.translate").factory("$translateDefaultInterpolation", d), d.$inject = ["$interpolate", "$translateSanitization"], d.displayName = "$translateDefaultInterpolation", angular.module("pascalprecht.translate").constant("$STORAGE_KEY", "NG_TRANSLATE_LANG_KEY"), angular.module("pascalprecht.translate").directive("translate", e), e.$inject = ["$translate", "$q", "$interpolate", "$compile", "$parse", "$rootScope"], e.displayName = "translateDirective", angular.module("pascalprecht.translate").directive("translateCloak", f), f.$inject = ["$rootScope", "$translate"], f.displayName = "translateCloakDirective", angular.module("pascalprecht.translate").filter("translate", g), g.$inject = ["$parse", "$translate"], g.displayName = "translateFilterFactory", angular.module("pascalprecht.translate").factory("$translationCache", h), h.$inject = ["$cacheFactory"], h.displayName = "$translationCache", "pascalprecht.translate";
 });
 }, {}],
-16: [function(require, module, exports) {
+17: [function(require, module, exports) {
+module.exports = {
+
+};
+}, {}],
+18: [function(require, module, exports) {
+module.exports = {
+  "brand": {
+    "title": "브랜드",
+    "createButton": "브랜드 생성",
+    "main": {
+      "createBrandTitle": "브랜드 생성"
+    },
+    "edit": {
+      "nameLabel": "브랜드명",
+      "bizNameLabel": "사업자명",
+      "bizNumberLabel": "사업자 번호",
+      "accountBankLabel": "은행",
+      "accountOwnerLabel": "예금주",
+      "accountNumberLabel": "계좌번호",
+      "buildingNameLabel": "빌딩 이름",
+      "buildingFloorLabel": "빌딩 층",
+      "buildingFlatNumberLabel": "빌딩 호수",
+      "telLabel": "전화 번호",
+      "mobileLabel": "핸드폰 번호",
+      "aliasLabel": "약어"
+    }
+  }
+}
+;
+}, {}],
+19: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var brandModule = require('./module');
+
+brandModule.factory('brandCommons', function ($http) {
+  return {
+    saveBrand: function saveBrand(brand) {
+      var brandsUrl = '/api/v1/brands';
+      var promise = null;
+      var brandFields = ['pathname', 'name'];
+      if (brand.id) {
+        promise = $http.put('brandsUrl/' + brand.id, _.pick(brand, brandFields));
+      } else {
+        promise = $http.post(brandsUrl, _.pick(brand, brandFields));
+      }
+      return promise.then(function (res) {
+        $http.put('/api/v1/brands/' + res.data.id + '/index').then(function () {
+          // ignore
+        });
+        return res;
+      });
+    }
+  };
+});
+
+brandModule.controller('BrandMainController', function ($scope, $http, $element, brandCommons, boUtils) {
+  var brandsUrl = '/api/v1/brands';
+  var fieldName = 'brands';
+  $scope.brandDatatables = {
+    field: fieldName,
+    url: brandsUrl,
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="brand.edit({brandId: ' + id + '})">' + id + '</a>';
+      }
+    }, {
+      data: 'name.ko',
+      orderable: false
+    }]
+  };
+
+  $scope.createBrand = function (brand) {
+    brandCommons.saveBrand(brand).then(function () {
+      $scope.closeBrandPopup();
+      $scope.newBrand.name = {};
+      boUtils.refreshDatatableAjax(brandsUrl, $($element), fieldName);
+    })['catch'](function (err) {
+      var message = err.data.message;
+      if (!message) {
+        message = 'ERROR Occurred';
+      }
+      window.alert(message);
+    });
+  };
+
+  $scope.newBrand = {
+    name: {}
+  };
+
+  $scope.closeBrandPopup = function () {
+    $('#new_brand_modal').modal('hide');
+  };
+});
+
+brandModule.controller('BrandEditController', function ($scope, $http, $state, $rootScope, $translate, boUtils, convertUtil) {
+  var initFields = function initFields() {
+    if (!$scope.brand.data) {
+      $scope.brand.data = {};
+    }
+    $scope.brandFields1 = [{ title: 'ID', key: 'id', obj: $scope.brand.id, isReadOnly: true }, { title: $translate.instant('brand.edit.nameLabel'), obj: _.get($scope.brand, 'name.ko'), key: 'name.ko' }];
+    $scope.brandFields2 = [{ title: $translate.instant('brand.edit.bizNameLabel'), obj: _.get($scope.brand, 'data.businessRegistration.name'), key: 'data.businessRegistration.name' }, { title: $translate.instant('brand.edit.bizNumberLabel'), obj: _.get($scope.brand, 'data.businessRegistration.number'), key: 'data.businessRegistration.number' }, { title: $translate.instant('brand.edit.accountBankLabel'), obj: _.get($scope.brand, 'data.bank.name'), key: 'data.bank.name' }, { title: $translate.instant('brand.edit.accountOwnerLabel'), obj: _.get($scope.brand, 'data.bank.accountHolder'), key: 'data.bank.accountHolder' }, { title: $translate.instant('brand.edit.accountNumberLabel'), obj: _.get($scope.brand, 'data.bank.accountNumber'), key: 'data.bank.accountNumber' }, { title: $translate.instant('brand.edit.buildingNameLabel'), obj: _.get($scope.brand, 'data.building.name'), key: 'data.building.name' }, { title: $translate.instant('brand.edit.buildingFloorLabel'), obj: _.get($scope.brand, 'data.building.floor'), key: 'data.building.floor' }, { title: $translate.instant('brand.edit.buildingFlatNumberLabel'), obj: _.get($scope.brand, 'data.building.flatNumber'), key: 'data.building.flatNumber' }, { title: $translate.instant('brand.edit.telLabel'), obj: _.get($scope.brand, 'data.tel'), key: 'data.tel' }, { title: $translate.instant('brand.edit.mobileLabel'), obj: _.get($scope.brand, 'data.mobile'), key: 'data.mobile' }];
+  };
+  if ($state.params.brandId) {
+    boUtils.startProgressBar();
+    $http.get('/api/v1/brands/' + $state.params.brandId + '/unmodified').then(function (res) {
+      $scope.brand = res.data;
+      initFields();
+      boUtils.stopProgressBar();
+    }, function () {
+      window.alert('failed to get brand (' + $state.params.brandId + ')');
+      boUtils.stopProgressBar();
+    });
+  } else {
+    $scope.brand = { id: 'NEW', name: {}, data: {} };
+    initFields();
+  }
+  $scope.save = function () {
+    boUtils.startProgressBar();
+    convertUtil.copyFieldObj($scope.brandFields1, $scope.brand);
+    convertUtil.copyFieldObj($scope.brandFields2, $scope.brand);
+    $rootScope.state.locales.forEach(function (locale) {
+      $scope.brand.name[locale] = $scope.brand.name.ko;
+    });
+    var requestBrand = _.pick($scope.brand, 'name', 'data');
+    var promise = undefined;
+    if ($state.params.brandId) {
+      promise = $http.put('/api/v1/brands/' + $scope.brand.id, requestBrand);
+    } else {
+      // create brand
+      promise = $http.post('/api/v1/brands', requestBrand);
+    }
+    promise.then(function (res) {
+      boUtils.stopProgressBar();
+      return $http.put('/api/v1/brands/' + res.data.id + '/index');
+    }, function () {
+      window.alert('failed to save brand');
+      boUtils.stopProgressBar();
+    }).then(function () {
+      boUtils.startProgressBar();
+      setTimeout(function () {
+        boUtils.stopProgressBar();
+        $state.go('brand.main');
+      }, 1000);
+    });
+  };
+
+  $scope.removeAlias = function (idx) {
+    $scope.brand.data.alias.splice(idx, 1);
+  };
+  $scope.onAliasInput = function (e) {
+    var keyCode = e.keyCode;
+    if (keyCode === 13 || keyCode === 32) {
+      // Enter
+      e.preventDefault();
+      var newAlias = e.target.value;
+      for (var i = 0; i < ($scope.brand.data.alias || []).length; i++) {
+        if ($scope.brand.data.alias[i] === newAlias) {
+          return;
+        }
+      }
+      if (!$scope.brand.data.alias) {
+        $scope.brand.data.alias = [];
+      }
+      $scope.brand.data.alias.push(newAlias);
+      $(e.target).val('');
+    }
+  };
+});
+}, {"./module":3}],
+4: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var buildingModule = angular.module('backoffice.building', ['ui.router', require('../utils/module').name, require('../third_party/angular-translate')]);
+
+buildingModule.config(function ($translateProvider) {
+  $translateProvider.registerAvailableLanguageKeys(['en', 'ko'], {
+    'en_US': 'en',
+    'en_UK': 'en',
+    'ko_KR': 'ko'
+  }).determinePreferredLanguage();
+
+  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
+});
+
+buildingModule.config(function ($stateProvider) {
+  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
+  var templateRoot = 'templates/metronic';
+  $stateProvider.state('building', {
+    url: '/building',
+    abstract: 'true',
+    template: '<ui-view/>'
+  }).state('building.main', {
+    url: '/main',
+    templateUrl: templateRoot + '/building/main.html',
+    controller: 'BuildingMainController'
+  }).state('building.info', {
+    url: '/info/:buildingId',
+    templateUrl: templateRoot + '/building/info.html',
+    controller: 'BuildingInfoController'
+  });
+});
+
+module.exports = buildingModule;
+
+// BEGIN module require js
+require('./controllers.js');
+// END module require js
+}, {"../utils/module":16,"../third_party/angular-translate":12,"./i18n/translations.en.json":21,"./i18n/translations.ko.json":22,"./controllers.js":23}],
+21: [function(require, module, exports) {
+module.exports = {
+
+};
+}, {}],
+22: [function(require, module, exports) {
+module.exports = {
+  "building": {
+    "main": {
+      "title": "빌딩"
+    },
+    "info": {
+      "title": "빌딩",
+      "addressLabel": "주소",
+      "businessHourLabel": "영업시간",
+      "holidayLabel": "휴무일",
+      "telLabel": "연락처",
+      "descriptionLabel": "소개"
+    }
+  }
+}
+;
+}, {}],
+23: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var buildingModule = require('./module');
+
+buildingModule.controller('BuildingMainController', function ($scope) {
+  $scope.buildingDatatables = {
+    field: 'buildings',
+    url: '/api/v1/buildings',
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="building.info({buildingId: ' + id + '})">' + id + '</a>';
+      }
+    }, {
+      data: 'name.ko',
+      orderable: false
+    }]
+  };
+});
+
+buildingModule.controller('BuildingInfoController', function ($scope, $http, $state, $rootScope, $translate, convertUtil) {
+  var url = '/api/v1/buildings/' + $state.params.buildingId;
+
+  var init = function init(building) {
+    $scope.contentTitle = $translate.instant('building.info.title');
+    $scope.contentSubTitle = '';
+    $scope.breadcrumb = [{
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home')
+    }, {
+      sref: 'building.main',
+      name: $translate.instant('building.main.title')
+    }, {
+      sref: 'building.info',
+      name: building.name.ko
+    }];
+    $rootScope.initAll($scope, $state.current.name);
+
+    $scope.building = building;
+    if (!$scope.building.data) {
+      $scope.building.data = {};
+    }
+    $scope.buildingFields = [{ title: $translate.instant('building.info.addressLabel'), obj: _.get($scope.building, 'data.address'), key: 'data.address' }, { title: $translate.instant('building.info.businessHourLabel'), obj: _.get($scope.building, 'data.businessHour'), key: 'data.businessHour' }, { title: $translate.instant('building.info.holidayLabel'), obj: _.get($scope.building, 'data.holiday'), key: 'data.holiday' }, { title: $translate.instant('building.info.telLabel'), obj: _.get($scope.building, 'data.tel'), key: 'data.tel' }, { title: $translate.instant('building.info.descriptionLabel'), obj: _.get($scope.building, 'data.description'), key: 'data.description', isMultiLine: true }];
+  };
+  $http.get(url).then(function (res) {
+    init(res.data);
+  });
+
+  $scope.save = function () {
+    convertUtil.copyFieldObj($scope.buildingFields, $scope.building);
+    $http.put(url, _.pick($scope.building, 'data')).then(function () {
+      $state.go('building.main');
+    });
+  };
+});
+}, {"./module":4}],
+5: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var cmsModule = angular.module('backoffice.cms', ['ui.router', 'ui.sortable', require('../third_party/angular-translate')]);
+
+module.exports = cmsModule;
+
+cmsModule.config(function ($translateProvider) {
+  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
+  $translateProvider.preferredLanguage('ko');
+});
+
+cmsModule.config(function ($stateProvider) {
+  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
+  var templateRoot = 'templates/metronic';
+
+  $stateProvider.state('cms', {
+    abstract: true,
+    url: '/cms',
+    template: '<ui-view/>'
+  }).state('cms.simple', {
+    url: '/simple/:name',
+    templateUrl: templateRoot + '/cms/simple.html',
+    controller: 'CmsSimpleController'
+  }).state('cms.main_category', {
+    url: '/main_category',
+    templateUrl: templateRoot + '/cms/main-category.html',
+    controller: 'CmsMainCategoryController'
+  });
+});
+
+// BEGIN module require js
+require('./controllers');
+// END module require js
+}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":24,"./i18n/translations.ko.json":25,"./controllers":26}],
+24: [function(require, module, exports) {
+module.exports = {
+
+};
+}, {}],
+25: [function(require, module, exports) {
+module.exports = {
+  "cms": {
+    "mainCategory": "메인페이지 카테고리",
+    "mainBanner": "메인 배너",
+    "subBanner": "서브 배너"
+  }
+}
+;
+}, {}],
+26: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var cmsModule = require('./module');
+
+cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $rootScope, $translate) {
+  $scope.cms = {
+    title: {
+      ko: '',
+      en: '',
+      zn_ch: '',
+      zn_tw: ''
+    },
+    children: []
+  };
+  $http.get('/api/v1/cms/' + $state.params.name).then(function (res) {
+    if (res.data) {
+      $scope.cms = res.data;
+    }
+  })['catch'](function () {
+    // ignore
+  });
+
+  $scope.name = $state.params.name;
+  $scope.contentTitle = $scope.name;
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'cms.simple',
+    name: $scope.name
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.newObject = {};
+  $scope.imageUploaded = function (result, obj) {
+    obj.image = { url: result.url.substring(5), publicId: result.public_id, version: result.version };
+  };
+
+  $scope.addRow = function () {
+    if (!$scope.newObject.link || $scope.newObject.link === '') {
+      window.alert('type link');
+      return;
+    }
+    if (!$scope.newObject.image || !$scope.newObject.image.url) {
+      window.alert('add image');
+      return;
+    }
+    $scope.cms.children.push($scope.newObject);
+    $scope.newObject = {};
+  };
+
+  $scope.save = function () {
+    $http.post('/api/v1/cms', { name: $scope.name, data: $scope.cms }).then(function (res) {
+      console.log(res);
+    });
+  };
+
+  $scope.rowSortable = {
+    handle: '.cms-simple-sortable-pointer',
+    placeholder: 'ui-state-highlight'
+  };
+});
+
+cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, $http, $state, boUtils) {
+  var cmsName = 'main_categories';
+  $scope.displayLocale = 'en';
+  var jstreeNode = $('#categoryTree');
+  var autoCompleteNode = $('#selectCategory');
+  var initAutoComplete = function initAutoComplete(root) {
+    // TODO locale
+    // const locale = $rootScope.state.editLocale;
+    $scope.allCategories = [];
+    $scope.categoryIdMap = {};
+    $scope.categoryNameMap = {};
+    var dfs = function dfs(root) {
+      var name = root.name[$scope.displayLocale];
+      var searchName = name;
+      if (root.parentId && $scope.categoryIdMap[root.parentId]) {
+        searchName += '(<-' + $scope.categoryIdMap[root.parentId].name[$scope.displayLocale] + ')';
+      }
+      $scope.allCategories.push(searchName);
+      $scope.categoryIdMap[root.id] = root;
+      $scope.categoryNameMap[searchName] = root;
+      (root.children || []).forEach(function (child) {
+        return dfs(child);
+      });
+      delete root.children;
+    };
+    dfs(root);
+
+    boUtils.autoComplete(autoCompleteNode, cmsName, $scope.allCategories);
+    autoCompleteNode.on('typeahead:selected', function (obj, datum) {
+      var idx = datum.indexOf('(<-');
+      var text = datum;
+      if (idx > 0) {
+        text = datum.substring(0, idx);
+      }
+      autoCompleteNode.typeahead('val', text);
+      var tree = jstreeNode.jstree(true);
+      var selected = tree.get_selected();
+      if (!selected || selected.length < 1) {
+        return;
+      }
+      var newCategory = $scope.categoryNameMap[datum];
+      if (tree.get_node(newCategory.id)) {
+        window.alert('category already in menu');
+        return;
+      }
+      tree.set_id(selected[0], newCategory.id);
+      tree.set_text(newCategory.id, text);
+      $scope.selectedNodeName = newCategory.name[$scope.displayLocale];
+      autoCompleteNode.blur();
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+    });
+  };
+  $http.get('/api/v1/categories').then(function (res) {
+    $scope.allCategories = [];
+    var root = res.data;
+    initAutoComplete(root);
+  });
+  var jstreeDataToCmsData = function jstreeDataToCmsData() {
+    var jstreeData = jstreeNode.jstree(true).get_json('#');
+    var dfs = function dfs(root) {
+      var res = $scope.categoryIdMap[root.id];
+      if (!res) {
+        window.alert('created node does not select category');
+        return null;
+      }
+      if (root.children && root.children.length > 0) {
+        res.children = root.children.map(function (child) {
+          return dfs(child);
+        }).filter(function (value) {
+          return !!value;
+        });
+      }
+      return res;
+    };
+    return jstreeData.map(function (data) {
+      return dfs(data);
+    });
+  };
+  var cmsDataToJstreeData = function cmsDataToJstreeData(cmsData) {
+    var dfs = function dfs(root) {
+      var res = {
+        id: root.id,
+        text: root.name ? root.name[$scope.displayLocale] : '카테고리 고르세요',
+        data: { id: root.id }
+      };
+      if (root.children) {
+        res.children = root.children.map(dfs);
+      }
+      return res;
+    };
+    return cmsData.map(function (data) {
+      return dfs(data);
+    });
+  };
+  var nextNodeId = 10000;
+  var initJsTree = function initJsTree(cmsData) {
+    jstreeNode.jstree({
+      core: {
+        themes: {
+          responsive: false
+        },
+        check_callback: true,
+        data: cmsDataToJstreeData(cmsData),
+        multiple: false
+      },
+      plugins: ['types', 'contextmenu'],
+      types: {
+        'default': {
+          max_depth: 2,
+          icon: 'fa fa-folder icon-state-warning icon-lg'
+        }
+      },
+      contextmenu: {
+        items: function items($node) {
+          var tree = jstreeNode.jstree(true);
+          return {
+            Create: {
+              label: 'Create',
+              action: function action() {
+                var newNodeId = tree.create_node($node, 'NewMenu');
+                tree.set_id(newNodeId, nextNodeId);
+                tree.deselect_all();
+                tree.select_node(nextNodeId++);
+                autoCompleteNode.typeahead('val', '');
+                $scope.selectedNodeName = null;
+                if (!$scope.$$phase) {
+                  $scope.$apply();
+                }
+                autoCompleteNode.focus();
+              }
+            },
+            Delete: {
+              label: 'Delete',
+              action: function action() {
+                tree.delete_node($node);
+              }
+            }
+          };
+        }
+      }
+    });
+    jstreeNode.on('select_node.jstree', function (e, data) {
+      var category = $scope.categoryIdMap[data.node.id];
+      if (!category) {
+        $scope.selectedNodeName = null;
+        return;
+      }
+      $scope.selectedNodeName = category.name[$scope.displayLocale];
+      autoCompleteNode.typeahead('val', $scope.selectedNodeName);
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+    });
+    jstreeNode.on('deselect_node.jstree', function () {
+      $scope.selectedNodeName = null;
+    });
+  };
+
+  $http.get('/api/v1/cms/' + cmsName).then(function (res) {
+    initJsTree(res.data);
+  });
+  $scope.save = function () {
+    $http.post('/api/v1/cms', { name: cmsName, data: jstreeDataToCmsData() }).then(function () {
+      window.alert('saved successfully');
+      $state.reload();
+    });
+  };
+});
+}, {"./module":5}],
+6: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var currencyModule = angular.module('backoffice.currency', ['ui.router', require('../third_party/angular-translate')]);
+
+currencyModule.config(function ($translateProvider) {
+  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
+  $translateProvider.preferredLanguage('ko');
+});
+
+currencyModule.config(function ($stateProvider) {
+  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
+  var templateRoot = 'templates/metronic';
+
+  $stateProvider.state('currency', {
+    abstract: true,
+    url: '/currency',
+    template: '<ui-view/>'
+  }).state('currency.main', {
+    url: '/main',
+    templateUrl: templateRoot + '/currency/main.html',
+    controller: 'CurrencyMainController'
+  });
+});
+
+module.exports = currencyModule;
+
+// BEGIN module require js
+require('./controllers.js');
+// END module require js
+}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":27,"./i18n/translations.ko.json":28,"./controllers.js":29}],
+27: [function(require, module, exports) {
+module.exports = {
+
+}
+;
+}, {}],
+28: [function(require, module, exports) {
+module.exports = {
+  "currency": {
+    "title": "환율"
+  }
+}
+;
+}, {}],
+29: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var currencyModule = require('./module');
+
+currencyModule.controller('CurrencyMainController', function ($scope, $http) {
+  $scope.rates = {
+    USD: 0,
+    CNY: 0
+  };
+  $http.get('/api/v1/currency').then(function (res) {
+    if (res.data.USD) {
+      $scope.rates.USD = res.data.USD;
+    }
+    if (res.data.CNY) {
+      $scope.rates.CNY = res.data.CNY;
+    }
+  });
+  $scope.save = function () {
+    $http.post('/api/v1/currency', $scope.rates).then(function () {})['catch'](function (res) {
+      window.alert(res);
+      console.log(res);
+    });
+  };
+});
+}, {"./module":6}],
+7: [function(require, module, exports) {
+'use strict';
+
+var dashboardModule = angular.module('backoffice.dashboard', ['ui.router', require('../third_party/angular-translate')]);
+
+dashboardModule.config(function ($translateProvider) {
+  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
+  $translateProvider.preferredLanguage('ko');
+});
+
+dashboardModule.config(function ($stateProvider) {
+  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
+  var templateRoot = 'templates/metronic';
+
+  $stateProvider.state('dashboard', {
+    url: '/dashboard',
+    templateUrl: templateRoot + '/dashboard/main.html',
+    controller: 'DashboardController'
+  });
+});
+
+module.exports = dashboardModule;
+
+// BEGIN module require js
+require('./controllers.js');
+// END module require js
+}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":30,"./i18n/translations.ko.json":31,"./controllers.js":32}],
+30: [function(require, module, exports) {
 module.exports = {
   "dashboard": {
     "home": "홈"
   }
 };
 }, {}],
-17: [function(require, module, exports) {
+31: [function(require, module, exports) {
 module.exports = {
   "dashboard": {
     "home": "홈",
@@ -1302,7 +1802,7 @@ module.exports = {
   }
 };
 }, {}],
-18: [function(require, module, exports) {
+32: [function(require, module, exports) {
 'use strict';
 
 var dashboardModule = require('./module');
@@ -1318,552 +1818,929 @@ dashboardModule.controller('DashboardController', function ($scope, $rootScope, 
   }];
   $rootScope.initAll($scope);
 });
-}, {"./module":4}],
-5: [function(require, module, exports) {
+}, {"./module":7}],
+8: [function(require, module, exports) {
 'use strict';
 
-var userModule = angular.module('backoffice.user', ['ui.router', require('../third_party/angular-translate')]);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-module.exports = userModule;
+var directiveModule = angular.module('backoffice.directives', [require('../utils/module').name]);
 
-userModule.config(function ($translateProvider) {
-  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
-  $translateProvider.preferredLanguage('ko');
-});
+module.exports = directiveModule;
 
-userModule.config(function ($stateProvider) {
-  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
-  var templateRoot = 'templates/metronic';
-
-  $stateProvider.state('user', {
-    abstract: true,
-    url: '/user',
-    template: '<ui-view/>'
-  }).state('user.manage', {
-    url: '/manage',
-    templateUrl: templateRoot + '/user/manage.html',
-    controller: 'UserManageController'
-  }).state('user.manage.tab', {
-    url: '/:tabName',
-    templateUrl: templateRoot + '/user/manage.html',
-    controller: 'UserManageController'
-  }).state('user.info', {
-    url: '/info/:userId',
-    templateUrl: templateRoot + '/user/info.html',
-    controller: 'UserInfoController',
-    resolve: {
-      user: function user($http, $stateParams) {
-        return $http.get('/api/v1/users/' + $stateParams.userId).then(function (res) {
-          return res.data;
-        });
-      }
-    }
-  }).state('user.waitConfirm', {
-    url: '/wait_confirm',
-    templateUrl: templateRoot + '/user/wait-confirm.html',
-    controller: 'UserWaitConfirmController'
-  });
-});
-
-userModule.factory('userUtil', function () {
+directiveModule.factory('datatableCommons', function ($compile) {
   return {
-    getRoleName: function getRoleName(user) {
-      var role = _.get(user, 'roles[0]');
-      return role ? role.type : '';
+    getOptions: function getOptions(scope, dataTables) {
+      var options = {
+        lengthMenu: [[10, 20, 50, 100, 150], [10, 20, 50, 100, 150]],
+        // change per page values here
+        pageLength: 50, // default record count per page
+        // data: realData, need implement
+        columns: dataTables.columns,
+        order: dataTables.order || [[0, 'desc']], // set first column as a default sort by desc
+        fnCreatedRow: function fnCreatedRow(nRow) {
+          $compile(nRow)(scope);
+        },
+        fnRowCallback: function fnRowCallback(nRow, aData) {
+          $(nRow).attr("id", aData.id);
+        },
+        orderCellsTop: true
+      };
+      if (dataTables.data) {
+        options.data = dataTables.data;
+      }
+      if (dataTables.disableFilter) {
+        options.bFilter = false;
+      }
+      return options;
     }
   };
 });
 
+directiveModule.directive('boDatatables', function ($http, $compile, $parse, datatableCommons) {
+  return {
+    restrict: 'A',
+    transclude: true,
+    template: '<div ng-transclude></div>',
+    link: function link(scope, elem, attr) {
+      var init = function init(dataTables, realData) {
+        if (realData) {
+          realData.forEach(function (elem, index) {
+            elem._index = index;
+          });
+        }
+        dataTables.data = realData;
+        var options = datatableCommons.getOptions(scope, dataTables);
+        if (dataTables.hasOwnProperty('bSort')) {
+          options.bSort = dataTables.bSort;
+        }
+        elem.find('table').dataTable(options);
+        if (dataTables.rowReorder) {
+          table.rowReordering();
+        }
+        if (attr.directiveLoad && scope[attr.directiveLoad]) {
+          scope[attr.directiveLoad]();
+        }
+      };
+      scope.$watch(attr.boDatatables, function (dataTables) {
+        var table = new $.fn.dataTable.Api(elem.find('table'));
+        table.destroy();
+        if (dataTables.data) {
+          init(dataTables.data);
+        } else {
+          $http.get(dataTables.url).then(function (res) {
+            if (dataTables.field && dataTables.field !== '') {
+              init(dataTables, res.data[dataTables.field]);
+            } else {
+              init(dataTables, res.data);
+            }
+          });
+        }
+      });
+    }
+  };
+});
+
+directiveModule.directive('boServerDatatables', function ($http, $compile, datatableCommons, boUtils) {
+  return {
+    restrict: 'A',
+    transclude: true,
+    template: '<div ng-transclude></div>',
+    scope: {
+      url: '@',
+      urlParams: '=',
+      boServerDatatables: '=',
+      tableRender: '&'
+    },
+    link: function link(scope, elem) {
+      var urlBase = scope.url;
+
+      var dataTables = scope.boServerDatatables;
+      var options = datatableCommons.getOptions(scope, dataTables);
+      options.serverSide = true;
+      options.ajax = function (data, callback, settings) {
+        // console.log(data);
+        var urlParams = _extends({}, scope.urlParams);
+        urlParams.offset = data.start;
+        urlParams.limit = data.length;
+        if (data.search.value) {
+          urlParams.q = data.search.value;
+        }
+        var order = _.get(data, 'order[0]');
+        if (order) {
+          var column = options.columns[order.column].data;
+          if (_.isString(column)) {
+            urlParams.sorts = order.dir === 'desc' ? '-' + column : column;
+          } else {
+            console.log('column is not String. cannot sort');
+          }
+        }
+        var url = boUtils.encodeQueryData(urlBase, urlParams);
+        $http.get(url).then(function (value) {
+          var serverData = value.data;
+          if (dataTables['field']) {
+            serverData = serverData[dataTables['field']];
+          }
+          if (!serverData) {
+            serverData = [];
+          }
+          var pageInfo = { data: serverData, draw: data.draw };
+          pageInfo.recordsTotal = _.get(value, 'data.pagination.total') || 0;
+          // TODO really filtered data
+          pageInfo.recordsFiltered = pageInfo.recordsTotal;
+          callback(pageInfo);
+          if (scope.tableRender) {
+            scope.tableRender();
+          }
+          // 2016. 03. 30. [heekyu] THIS DOES NOT WORK
+          // $compile(angular.element(elem.find('table')))(scope);
+        });
+      };
+      elem.find('table').dataTable(options);
+    }
+  };
+});
+
+directiveModule.directive('clUploadWidget', function () {
+  return {
+    restrict: 'A',
+    scope: {
+      callback: '&callback'
+    },
+    link: function link(scope, elem) {
+      elem.click(function () {
+        cloudinary.openUploadWidget({
+          cloud_name: 'linkshops',
+          upload_preset: 'nd9k8295',
+          multiple: false
+        }, function (error, result) {
+          if (!error) {
+            if (scope.callback) {
+              scope.callback({ result: result[0] });
+            }
+            scope.$apply();
+          }
+        });
+      });
+    }
+  };
+});
+
+directiveModule.directive('boFileReader', function () {
+  return {
+    restrict: 'A',
+    scope: {
+      onRead: '&onRead'
+    },
+    link: function link(scope, element) {
+      $(element).on('change', function (changeEvent) {
+        var files = changeEvent.target.files;
+        if (files.length) {
+          var r = new FileReader();
+          r.onload = function (e) {
+            var contents = e.target.result;
+            if (scope.onRead) {
+              scope.onRead({ contents: contents });
+            }
+            scope.$apply();
+          };
+
+          r.readAsText(files[0], 'EUC-KR'); // 2016. 01. 28. [heekyu] april send me EUC-KR encoded files
+        }
+      });
+    }
+  };
+});
+
+directiveModule.directive('convertToNumber', function () {
+  return {
+    require: 'ngModel',
+    link: function link(scope, element, attrs, ngModel) {
+      ngModel.$parsers.push(function (val) {
+        return parseInt(val, 10);
+      });
+      ngModel.$formatters.push(function (val) {
+        return '' + val;
+      });
+    }
+  };
+});
+}, {"../utils/module":16}],
+9: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var orderModule = angular.module('backoffice.order', ['ui.router', 'ui.bootstrap', require('../third_party/angular-translate')]);
+
+orderModule.config(function ($translateProvider) {
+  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
+  $translateProvider.preferredLanguage('ko');
+});
+
+orderModule.config(function ($stateProvider) {
+  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
+  var templateRoot = 'templates/metronic';
+
+  $stateProvider.state('order', {
+    url: '/order',
+    abstract: true,
+    template: '<ui-view/>'
+  }).state('order.main', {
+    url: '/main',
+    templateUrl: templateRoot + '/order/main.html',
+    controller: 'OrderMainController'
+  }).state('order.listBigBuyer', {
+    url: 'listBigBuyer',
+    templateUrl: templateRoot + '/order/listBigBuyer.html',
+    controller: 'OrderListBigBuyerController'
+  }).state('order.beforePayment', {
+    url: '/before_payment',
+    templateUrl: templateRoot + '/order/step0-before-payment.html',
+    controller: 'OrderListBeforePaymentController'
+  }).state('order.uncle', {
+    url: '/uncle',
+    templateUrl: templateRoot + '/order/uncle.html',
+    controller: 'OrderUncleController'
+  }).state('order.settlement', {
+    url: '/settlement',
+    templateUrl: templateRoot + '/order/settlement.html',
+    controller: 'OrderSettlementController'
+  }).state('order.cs', {
+    url: '/cs',
+    templateUrl: templateRoot + '/order/cs.html',
+    controller: 'OrderCsController'
+  }).state('order.detail', {
+    url: '/detail/:orderId',
+    templateUrl: templateRoot + '/order/detail.html',
+    controller: 'OrderDetailController',
+    resolve: {
+      order: function order($http, $rootScope, $stateParams) {
+        return $http.get('/api/v1/orders/' + $stateParams.orderId).then(function (res) {
+          return res.data;
+        });
+      }
+    }
+  });
+});
+
+module.exports = orderModule;
+
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":20,"./i18n/translations.ko.json":21,"./controllers.js":22}],
-20: [function(require, module, exports) {
+}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":33,"./i18n/translations.ko.json":34,"./controllers.js":35}],
+33: [function(require, module, exports) {
 module.exports = {
+  "order": {
 
+  }
 };
 }, {}],
-21: [function(require, module, exports) {
+34: [function(require, module, exports) {
 module.exports = {
-  "user": {
-    "createUser": {
-      "admin": "어드민 생성",
-      "seller": "셀러 생성"
+  "order": {
+    "title": "주문",
+    "main": {
+      "buyerEmailColumn": "주문자 이메일",
+      "buyerNameColumn": "주문자 이름",
+      "buyerTelColumn": "주문자 전화번호",
+      "createdAtColumn": "주문 생성 시각",
+      "paymentStatusColumn": "결제 상태",
+      "priceColumn": "주문가격",
+      "startProcessing": "주문처리",
+      "statusColumn": "주문 상태",
+      "title": "주문현황"
     },
-    "manage": {
-      "adminTab": "어드민",
-      "bigBuyerTab": "빅바이어",
-      "buyerTab": "바이어",
-      "noRoleTab": "미인증",
-      "sellerTab": "셀러",
-      "title": "사용자"
+    "detail": {
+      "title": "주문상세",
+      "refundTitle": "환불",
+      "saveButton": "저장"
     },
-    "info": {
-      "bizNameLabel": "사업자명",
-      "bizNumberLabel": "사업자 번호",
-      "emailLabel": "이메일",
-      "gradeLabel": "회원 등급",
-      "vbankCodeLabel": "은행코드",
-      "vbankAccountLabel": "가상계좌번호",
-      "changePasswordButton": "비밀번호 변경",
-      "isConfirmed": "인증 여부",
-      "title": "유저 정보",
-      "telLabel": "전화번호",
-      "userTypeLabel": "유저 종류",
-      "editRoleButton": "권한 변경",
-      "userDetailButton": "유저 상세 정보"
+    "beforePayment": {
+      "title": "무통장 입금 대기",
+      "subTitle": "또는 결제 전"
     },
-    "waitConfirm": {
-      "title": "바이어 인증 대기"
+    "address": {
+      "nameLabel": "이름",
+      "addressLabel": "주소",
+      "addressDetailLabel": "상세주소",
+      "telLabel": "T",
+      "postalCodeLabel": "우편번호",
+      "countryCodeLabel": "국가",
+      "streetLabel": "도로명"
     },
-    "role": {
-      "changeTitle": "유저 권한 변경"
+    "orderProduct": {
+      "orderIdColumn": "주문번호",
+      "brandIdColumn": "브랜드번호",
+      "brandNameColumn": "브랜드명",
+      "buildingNameColumn": "건물",
+      "floorColumn": "층",
+      "flatNumberColumn": "호수",
+      "telColumn": "전화번호",
+      "productIdColumn": "상품번호",
+      "productNameColumn": "상품약어",
+      "colorColumn": "색상",
+      "sizeColumn": "사이즈",
+      "quantityColumn": "주문수량",
+      "bank": {
+        "name": "은행",
+        "accountHolder": "예금주",
+        "accountNumber": "계좌번호",
+      },
+      "totalColumn": "금액",
+      "dateColumn": "주문날짜",
+      "buyerIdColumn": "바이어ID",
+    },
+    "uncle": {
+      "title": "삼촌주문목록",
+      "download": "CSV 다운로드"
+    },
+    "cs": {
+      "title": "운영팀주문목록"
+    },
+    "settlement": {
+      "title": "회계팀 대량이체"
+    },
+    "listBigBuyer": {
+      "title": "빅바이어주문목록"
     }
   }
 }
 ;
 }, {}],
-22: [function(require, module, exports) {
+35: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
 'use strict';
 
-var userModule = require('./module');
+var orderModule = require('./module');
 
-userModule.controller('UserManageController', function ($scope, $http, $q, $state, $rootScope, $translate, $compile, userUtil, boUtils) {
-  $scope.contentTitle = $translate.instant('user.manage.title');
+orderModule.controller('OrderMainController', function ($scope, $rootScope, $http, $state, $translate, boUtils) {
+  $scope.contentTitle = $translate.instant('order.main.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [{
     sref: 'dashboard',
     name: $translate.instant('dashboard.home')
   }, {
-    sref: 'user.manage',
-    name: $translate.instant('user.manage.title')
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
   }];
   $rootScope.initAll($scope, $state.current.name);
 
-  $scope.tabName = $state.params.tabName || '';
-  $scope.changeTab = function (tabName) {
-    if (!tabName) {
-      $state.go('user.manage', {}, { reload: true });
-      return;
-    }
-    $state.go('user.manage.tab', { tabName: tabName }, { reload: true });
-  };
-
-  $scope.userDatatables = {
-    field: 'users',
+  $scope.orderDatatables = {
+    field: 'orders',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: '/api/v1/orders?q=status:!0,paymentStatus:!0',
     columns: [{
       data: 'id',
       render: function render(id) {
-        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+        return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
       }
     }, {
-      data: 'email'
-    }, {
-      data: function data(_data) {
-        return _data;
-      },
-      render: function render(user) {
-        return userUtil.getRoleName(user);
-      }
-    }, {
-      // edit role button
-      data: 'id',
-      render: function render(id) {
-        return '<button class="btn blue" data-ng-click="openRolePopup(' + id + ')"><i class="fa fa-wrench"></i> ' + $translate.instant('user.info.editRoleButton') + '</button>';
-      }
-    }, {
-      // show user info button
-      data: 'id',
-      render: function render(id) {
-        return '<a ui-sref="user.info({ userId: ' + id + ' })"><button class="btn blue"><i class="fa fa-info"></i> ' + $translate.instant('user.info.userDetailButton') + '</button></a>';
-      }
-    }, {
-      data: 'id',
-      render: function render(id) {
-        return '<button class="btn blue" data-ng-click="openPasswordPopup(' + id + ')"><i class="fa fa-password"></i> ' + $translate.instant('user.info.changePasswordButton') + '</button>';
+      data: 'status',
+      render: function render(status) {
+        return $rootScope.getContentsI18nText('enum.order.status.' + status);
       }
     }, {
       data: 'createdAt',
       render: function render(data) {
         return boUtils.formatDate(data);
       }
-    }]
-  };
-
-  $scope.buyerDatatables = {
-    field: 'users',
-    // ID, Email, Name, tel, bizName, bizNumber
-    columns: [{
-      data: 'id',
-      render: function render(id) {
-        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+    }, {
+      data: 'totalKRW'
+    }, {
+      data: 'paymentStatus',
+      render: function render(status) {
+        return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
+      }
+    }, {
+      data: function data(_data) {
+        return _.get(_data, 'name') || '';
+      }
+    }, {
+      data: function data(_data2) {
+        return _.get(_data2, 'data.tel') || '';
       }
     }, {
       data: 'email'
-    }, {
-      data: function data(_data2) {
-        return _data2.name || '';
+    }]
+  };
+
+  /*
+    $(document).ready(() => {
+      $('#tt2').datepicker({
+        onSelect: function (a,b) { console.log(a); },
+        onClose: () => console.log(1),
+        autoclose: true,
+      });
+    });
+    */
+});
+
+orderModule.controller('OrderListBeforePaymentController', function ($scope, $rootScope, $http, $state, $translate, boUtils) {
+  $scope.contentTitle = $translate.instant('order.beforePayment.title');
+  $scope.contentSubTitle = $translate.instant('order.beforePayment.subTitle');
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
+    sref: 'order.beforePayment',
+    name: $translate.instant('order.beforePayment.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  // $scope.orderDatatables = OrderCommons.getDatatables('/api/v1/orders?q=status:!0,paymentStatus:0');
+  $scope.orderDatatables = {
+    field: 'orders',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: '/api/v1/orders?q=status:0,paymentStatus:200',
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
       }
     }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }, {
+      data: 'totalKRW'
+    }, {
       data: function data(_data3) {
-        return _.get(_data3, 'data.tel') || '';
+        return _.get(_data3, 'name') || '';
       }
     }, {
       data: function data(_data4) {
-        return _.get(_data4, 'data.bizName') || '';
-      }
-    }, {
-      data: function data(_data5) {
-        return _.get(_data5, 'data.bizNumber') || '';
-      }
-    }, {
-      data: 'createdAt',
-      render: function render(data) {
-        return boUtils.formatDate(data);
-      }
-    }]
-  };
-
-  $scope.sellerDatatables = {
-    field: 'users',
-    // ID, Email, Name, tel
-    columns: [{
-      data: 'id',
-      render: function render(id) {
-        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
-      }
-    }, {
-      data: function data(_data6) {
-        return _.get(_data6, 'roles[0].brand.id') || '';
-      },
-      render: function render(brandId) {
-        return '<a ui-sref="brand.edit({ brandId: ' + brandId + ' })">' + brandId + '</a>';
+        return _.get(_data4, 'data.tel') || '';
       }
     }, {
       data: 'email'
     }, {
-      data: function data(_data7) {
-        return _data7.name || '';
-      }
-    }, {
-      data: function data(_data8) {
-        return _.get(_data8, 'data.tel') || '';
-      }
-    }, {
-      data: 'createdAt',
-      render: function render(data) {
-        return boUtils.formatDate(data);
-      }
-    }]
-  };
-
-  $scope.noRoleDatatables = {
-    field: 'users',
-    // ID, Email, Name, tel, bizName, bizNumber, bizImage, changeToBuyer(action)
-    columns: [{
       data: 'id',
       render: function render(id) {
-        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
-      }
-    }, {
-      data: 'email'
-    }, {
-      data: function data(_data9) {
-        return _data9.name || '';
-      }
-    }, {
-      data: function data(_data10) {
-        return _.get(_data10, 'data.tel') || '';
-      }
-    }, {
-      data: function data(_data11) {
-        return _.get(_data11, 'data.bizName') || '';
-      }
-    }, {
-      data: function data(_data12) {
-        return _.get(_data12, 'data.bizNumber') || '';
-      }
-    }, {
-      data: function data(_data13) {
-        return _data13;
-      },
-      render: function render(user) {
-        return _.get(user, 'data.bizImage') ? '<button class="btn blue" data-ng-click="openBizImage(' + user.id + ')">사업자 등록증 보기</button>' : '';
-      }
-    }, {
-      data: function data(_data14) {
-        return _data14;
-      },
-      render: function render(user) {
-        return '<button class="btn blue" data-ng-click="changeToBuyer(' + user.id + ')">바이어 인증</button>';
-      }
-    }, {
-      data: 'createdAt',
-      render: function render(data) {
-        return boUtils.formatDate(data);
+        return '<button class="btn blue" data-ng-click="startProcessing(' + id + ')"><i class="fa fa-play"></i> ' + $translate.instant('order.main.startProcessing') + '</button>';
       }
     }]
   };
+  $scope.startProcessing = function (orderId) {
+    $http.post('/api/v1/orders/' + orderId + '/start_processing').then(function (res) {
+      // TODO: Update datatables row data.
+    });
+  };
+});
 
-  $scope.openBizImage = function (userId) {
-    $scope.activeUser = $scope.userIdToData[userId];
-    $('#user_biz_image').modal();
+orderModule.controller('OrderDetailController', function ($scope, $rootScope, $http, $state, $translate, boUtils, convertUtil, order) {
+  $scope.contentTitle = $translate.instant('order.detail.title');
+  $scope.contentSubTitle = 'Order Detail';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
+    sref: 'order.detail',
+    name: $translate.instant('order.detail.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  order.createdAt = boUtils.formatDate(order.createdAt);
+  order.finalShippingCostKRW = order.finalShippingCostKRW && Number(order.finalShippingCostKRW);
+  (order.orderProducts || []).forEach(function (p) {
+    if (boUtils.isString(p.product.id)) {
+      p.product.shortId = boUtils.shorten(p.product.id, 8);
+    } else {
+      p.product.shortId = p.id;
+    }
+  });
+  order.totalRefuned = 0;
+  (order.payments || []).forEach(function (p) {
+    if (p.type === 2 && p.status === 0) {
+      order.totalRefuned += +p.data.PRTC_Price;
+    }
+  });
+  $scope.order = order;
+  $scope.user = {};
+  $http.get('/api/v1/users/' + order.buyerId).then(function (res) {
+    $scope.user = res.data;
+  });
+
+  $scope.translateOrderStatus = function (status) {
+    return $rootScope.getContentsI18nText('enum.order.status.' + status);
+  };
+  $scope.translateOrderPaymentStatus = function (status) {
+    return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
+  };
+  $scope.translateOrderProductStatus = function (status) {
+    return $rootScope.getContentsI18nText('enum.orderProduct.status.' + status);
+  };
+  $scope.translatePaymentStatus = function (status) {
+    return $rootScope.getContentsI18nText('enum.payment.status.' + status);
+  };
+  $scope.translatePaymentType = function (type) {
+    return $rootScope.getContentsI18nText('enum.payment.type.' + type);
   };
 
-  $scope.changeToBuyer = function (userId) {
-    $http.post('/api/v1/users/' + userId + '/roles', { roleType: 'buyer' }).then(function () {
-      window.alert('바이어 인증이 완료되었습니다');
+  $scope.refundOrder = function () {
+    if (order.finalTotalKRW === undefined) {
+      alert('Plese save final order counts');
+      return;
+    }
+    var amount = +order.totalPaid.amount - +order.finalTotalKRW - order.totalRefuned;
+    console.log(amount);
+    var payments = _.filter(order.payments, function (p) {
+      return p.type === 0 && p.status === 0;
+    });
+    if (payments.length === 1) {
+      $scope.refund(payments[0], amount);
+    } else {
+      alert('multiple payment transaction');
+    }
+  };
+
+  $scope.popupRefund = function (payment) {
+    $scope.refundPayment = payment;
+    $('#order_refund_modal').modal();
+  };
+
+  $scope.refund = function (payment, amount) {
+    $scope.closePopup();
+    $http.post('/api/v1/orders/' + order.id + '/refund', {
+      paymentId: payment.id,
+      // amount: payment.data.TotPrice, // FIXME: from user input
+      amount: +amount,
+      msg: 'admin refund'
+    }).then(function (res) {
+      // TODO: refresh order.
       $state.reload();
     });
   };
 
-  $scope.newUser = {};
-  $scope.createUser = function (user) {
-    $http.post('/api/v1/users', user).then(function (res) {
-      $http.post('/api/v1/users/' + res.data.id + '/roles', $scope.newUserRole).then(function () {
-        $scope.closeUserPopup();
-        $state.reload();
-      })['catch'](function (err) {
-        window.alert(err.data.message);
-      });
+  $scope.finalize = function () {
+    var data = _.pick(order, 'finalShippingCostKRW');
+    data.orderProducts = order.orderProducts.map(function (o) {
+      return _.pick(o, 'id', 'finalQuantity');
+    });
+    $http.put('/api/v1/orders/' + order.id + '/finalize', data).then(function (res) {
+      $state.reload();
     }, function (err) {
-      window.alert(err.data.message);
+      return alert(err.data.message);
     });
   };
-  $scope.closeUserPopup = function () {
-    // 2016. 02. 23. [heekyu] modal hide is not work on page reload
-    $('#user_manage_create_user').modal('hide');
-    $('#user_manage_create_user').removeClass('in');
+
+  $scope.closePopup = function () {
+    $('#order_refund_modal').modal('hide');
+    $('#order_refund_modal').removeClass('in');
     $('.modal-backdrop').remove();
   };
 
-  $scope.editRole = { admin: false, buyer: false, bigBuyer: false, seller: false };
-  // former item has more priority
-  var roles = ['admin', 'bigBuyer', 'buyer'];
-  $scope.makeUserRolePopupData = function (user) {
-    var res = { admin: false, buyer: false, bigBuyer: false, seller: false };
-    if (user.roles) {
-      var _loop = function (i) {
-        var role = user.roles[i];
-        roles.forEach(function (item) {
-          if (role.type === item) {
-            res[item] = true;
-          }
-        });
-        if (role.type === 'owner') {
-          res.seller = true;
-        }
-      };
-
-      for (var i = 0; i < user.roles.length; i++) {
-        _loop(i);
-      };
-    }
-    $scope.editRole = res;
-  };
-  $scope.closeRolePopup = function () {
-    $('#user_change_role').modal('hide');
-    $('#user_change_role').removeClass('in');
-    $('.modal-backdrop').remove();
-  };
-  $scope.newUserPopup = {};
-  $scope.newUseris = function (role) {
-    $scope.newUserPopup.name = $translate.instant('user.createUser.' + role);
-    $scope.newUserRole = { roleType: role };
+  var brands = _.groupBy(order.orderProducts.map(function (o) {
+    return o.brand;
+  }), 'id');
+  $scope.getBrandName = function (brandId) {
+    return _.get(brands, [brandId, 0, 'name', 'ko'], brandId);
   };
 
-  var userIdToData = {};
-
-  $scope.openRolePopup = function (userId) {
-    var user = $scope.userIdToData[userId];
-    $scope.editRoleUser = user;
-    $scope.makeUserRolePopupData(user);
-    if (!$scope.$$phase) {
-      $scope.$apply();
-    }
-    $('#user_change_role').modal();
-  };
-
-  $scope.changePasswordUser = null;
-  $scope.openPasswordPopup = function (userId) {
-    var user = $scope.userIdToData[userId];
-    $scope.changePasswordUser = user;
-    $('#user_change_password').modal();
-  };
-  $scope.closePasswordPopup = function () {
-    $('#user_change_password').modal('hide');
-  };
-  $scope.savePassword = function () {
-    var user = $scope.changePasswordUser;
-    if (!user.password) {
-      window.alert('비밀번호를 입력하세요');
-      return;
-    }
-    var password = user.password;
-    delete user.password;
-    $http.put('/api/v1/users/' + user.id + '/reset_password', { password: password }).then(function () {
-      window.alert('비밀번호 저장되었습니다');
-      $scope.closePasswordPopup();
-    }, function () {
-      window.alert('비밀번호 저장이 실패하였습니다.');
+  $scope.saveStatus = function () {
+    var data = _.pick(order, 'status');
+    $http.put('/api/v1/orders/' + order.id + '/status', data).then(function (res) {
+      $state.reload();
+    }, function (err) {
+      return alert(err.data.message);
     });
   };
 
-  $scope.datatablesLoaded = function () {
-    var datas = $('.tabbable-bordered').find('table').DataTable().rows().data();
-    if (!$scope.userIdToData) {
-      $scope.userIdToData = {};
-    }
-    for (var i = 0; i < datas.length; i++) {
-      var data = datas[i];
-      $scope.userIdToData[data.id] = data;
-    }
-    $compile(angular.element($('table')))($scope);
-  };
-
-  // 2016. 02. 23. [heekyu] this is very limited since server cannot handle race condition properly
-  $scope.saveRole = function () {
-    var editRoleToData = function editRoleToData() {
-      for (var i = 0; i < roles.length; i++) {
-        var role = roles[i];
-        if ($scope.editRole[role]) {
-          return [{ type: role }];
-        }
-      }
-      return null;
-    };
-    var newRoleData = editRoleToData();
-    if (!newRoleData && !$scope.editRoleUser.roles) {
-      return;
-    }
-    var addOrDelete = {};
-
-    var isChangable = function isChangable(roleType) {
-      for (var i = 0; i < roles.length; i++) {
-        var role = roles[i];
-        if (role === roleType) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    ($scope.editRoleUser.roles || []).forEach(function (role) {
-      if (!isChangable(role.type)) {
-        return;
-      }
-      if (addOrDelete[role.type]) {
-        addOrDelete[role.type]--;
-      } else {
-        addOrDelete[role.type] = -1;
-      }
-    });
-    (newRoleData || []).forEach(function (role) {
-      if (!isChangable(role.type)) {
-        return;
-      }
-      if (addOrDelete[role.type]) {
-        addOrDelete[role.type]++;
-      } else {
-        addOrDelete[role.type] = 1;
-      }
-    });
-    var url = '/api/v1/users/' + $scope.editRoleUser.id + '/roles';
-    var keys = Object.keys(addOrDelete);
-    var addRoles = [];
-    var deleteRoles = [];
-    for (var i = 0; i < keys.length; i++) {
-      var key = keys[i];
-      var count = addOrDelete[key];
-      if (count === 1) {
-        addRoles.push(key);
-        // promises.push($http.post(url, { roleType: key }));
-      } else if (count === -1) {
-          deleteRoles.push(key);
-          // promises.push($http.delete(url, { data: { type: key }, headers: {"Content-Type": "application/json;charset=utf-8"} }));
-        }
-    }
-    if (deleteRoles.length > 0) {
-      $http['delete'](url, { data: { type: deleteRoles[0] }, headers: { "Content-Type": "application/json;charset=utf-8" } }).then(function () {
-        if (addRoles.length > 0) {
-          $http.post(url, { roleType: addRoles[0] }).then(function () {
-            $scope.closeRolePopup();
-            $state.reload();
-          })['catch'](function (err) {
-            window.alert(err.message);
-          });
-        } else {
-          $scope.closeRolePopup();
-          $state.reload();
-        }
-      })['catch'](function (err) {
-        window.alert(err.message);
-      });
-    } else if (addRoles.length > 0) {
-      $http.post(url, { roleType: addRoles[0] }).then(function () {
-        $scope.closeRolePopup();
-        $state.reload();
-      })['catch'](function (err) {
-        window.alert(err.message);
-      });
-    } else {
-      $scope.closeRolePopup();
-    }
-  };
+  if ($scope.order.address) {
+    $scope.addressFields = [{ title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name' }, { title: $translate.instant('order.address.postalCodeLabel'), obj: _.get($scope.order.address, 'detail.postalCode'), key: 'postalCode' }, { title: $translate.instant('order.address.addressLabel'), obj: _.get($scope.order.address, 'detail.address.base'), key: 'addressBase' }, { title: $translate.instant('order.address.addressDetailLabel'), obj: _.get($scope.order.address, 'detail.address.detail'), key: 'addressDetail' }, { title: $translate.instant('order.address.countryCodeLabel'), obj: _.get($scope.order.address, 'countryCode'), key: 'countryCode' }, { title: $translate.instant('order.address.telLabel'), obj: _.get($scope.order.address, 'detail.tel'), key: 'tel' }];
+  }
 });
 
-userModule.controller('UserWaitConfirmController', function ($scope, $state, $rootScope, $translate) {
-  $scope.contentTitle = $translate.instant('user.waitConfirm.title');
-  $scope.contentSubTitle = '';
+orderModule.controller('OrderUncleController', function ($scope, $rootScope, $http, $state, $translate) {
+  $scope.contentTitle = $translate.instant('order.uncle.title');
   $scope.breadcrumb = [{
     sref: 'dashboard',
     name: $translate.instant('dashboard.home')
   }, {
-    sref: 'user.manage',
-    name: $translate.instant('user.manage.title')
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
   }, {
-    sref: 'user.waitConfirm',
-    name: $translate.instant('user.waitConfirm.title')
+    sref: 'order.uncle',
+    name: $translate.instant('order.uncle.title')
   }];
+
+  $scope.orderDatatables = {
+    field: 'orderProducts',
+    disableFilter: true,
+    url: '/api/v1/uncle/order_products',
+    order: [],
+    columns: [{
+      data: 'orderId',
+      bSortable: false
+    }, {
+      data: function data(_data5) {
+        return _.get(_data5, 'brand.name.ko', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data6) {
+        return _.get(_data6, 'brand.data.location.building.name.ko', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data7) {
+        return _.get(_data7, 'brand.data.location.floor', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data8) {
+        return _.get(_data8, 'brand.data.location.flatNumber', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data9) {
+        return _.get(_data9, 'brand.data.tel', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data10) {
+        return _.get(_data10, 'product.name.ko', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data11) {
+        return _.get(_data11, 'productVariant.data.color', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data12) {
+        return _.get(_data12, 'productVariant.data.size', '');
+      },
+      bSortable: false
+    }, {
+      data: 'quantity',
+      bSortable: false
+    }]
+  };
+
+  $scope.download = function () {
+    $http.get('/api/v1/uncle/order_products?format=csv').then(function (res) {
+      var blob = new Blob([res.data]);
+      var downloadLink = angular.element('<a></a>');
+      downloadLink.attr('href', window.URL.createObjectURL(blob));
+      downloadLink.attr('download', 'uncle.csv');
+      downloadLink[0].click();
+    });
+  };
   $rootScope.initAll($scope, $state.current.name);
 });
 
-userModule.controller('UserInfoController', function ($scope, $http, $state, $rootScope, $translate, user, userUtil, convertUtil) {
-  $scope.contentTitle = $translate.instant('user.info.title');
-  $scope.contentSubTitle = '';
+orderModule.controller('OrderCsController', function ($scope, $rootScope, $http, $state, $translate) {
+  $scope.contentTitle = $translate.instant('order.cs.title');
   $scope.breadcrumb = [{
     sref: 'dashboard',
     name: $translate.instant('dashboard.home')
   }, {
-    sref: 'user.manage',
-    name: $translate.instant('user.manage.title')
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
   }, {
-    sref: 'user.waitConfirm',
-    name: $translate.instant('user.info.title')
+    sref: 'order.cs',
+    name: $translate.instant('order.cs.title')
+  }];
+
+  $scope.orderDatatables = {
+    field: 'orderProducts',
+    disableFilter: true,
+    url: '/api/v1/order_products',
+    order: [],
+    columns: [{
+      data: 'orderId',
+      bSortable: false
+    }, {
+      data: function data(_data13) {
+        return _.get(_data13, 'brand.id', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data14) {
+        return _.get(_data14, 'brand.name.ko', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data15) {
+        return _.get(_data15, 'brand.data.tel', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data16) {
+        return _.get(_data16, 'brand.data.bank.name', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data17) {
+        return _.get(_data17, 'brand.data.bank.accountHolder', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data18) {
+        return _.get(_data18, 'brand.data.bank.accountNumber', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data19) {
+        return _.get(_data19, 'product.id', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data20) {
+        return _.get(_data20, 'product.name.ko', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data21) {
+        return _.get(_data21, 'productVariant.data.color', '');
+      },
+      bSortable: false
+    }, {
+      data: function data(_data22) {
+        return _.get(_data22, 'productVariant.data.size', '');
+      },
+      bSortable: false
+    }, {
+      data: 'quantity',
+      bSortable: false
+    }, {
+      data: 'totalKRW',
+      bSortable: false
+    }, {
+      data: function data(_data23) {
+        return _.get(_data23, 'processedDate', '').substr(0, 10);
+      },
+      bSortable: false
+    }, {
+      data: 'buyerId',
+      bSortable: false
+    }]
+  };
+
+  $rootScope.initAll($scope, $state.current.name);
+});
+
+orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+  $scope.contentTitle = $translate.instant('order.listBigBuyer.title');
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
+    sref: 'order.listBigBuyer',
+    name: $translate.instant('order.listBigBuyer.title')
   }];
   $rootScope.initAll($scope, $state.current.name);
 
-  var init = function init(user) {
-    $scope.user = user;
-
-    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNameLabel'), obj: _.get($scope.user, 'data.bizName'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNumberLabel'), obj: _.get($scope.user, 'data.bizNumber'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false }, { title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false }];
+  $scope.orderDatatables = {
+    field: 'orders',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: '/api/v1/orders/big',
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
+      }
+    }, {
+      data: 'status',
+      render: function render(status) {
+        return $rootScope.getContentsI18nText('enum.order.status.' + status);
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }, {
+      data: 'totalKRW'
+    }, {
+      data: 'paymentStatus',
+      render: function render(status) {
+        return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
+      }
+    }, {
+      data: function data(_data24) {
+        return _.get(_data24, 'name') || '';
+      }
+    }, {
+      data: function data(_data25) {
+        return _.get(_data25, 'data.tel') || '';
+      }
+    }, {
+      data: 'email'
+    }]
   };
-  init(user);
+});
 
-  $scope.save = function () {
-    convertUtil.copyFieldObj($scope.userFields, $scope.user);
-    $http.put('/api/v1/users/' + $scope.user.id, _.pick($scope.user, 'data', 'inipay')).then(function (res) {
-      // init(res.data);
-      $state.go('user.manage');
+orderModule.controller('OrderSettlementController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+  $scope.contentTitle = $translate.instant('order.settlement.title');
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
+    sref: 'order.settlement',
+    name: $translate.instant('order.settlement.title')
+  }];
+
+  var today = moment();
+  var maxDays = 10;
+  $scope.dates = [];
+  for (var i = 0; i < maxDays; i++) {
+    $scope.dates.push(today.format('YYYY-MM-DD'));
+    today.subtract(1, 'd');
+  }
+  $scope.activeDate = $scope.dates[0];
+  $scope.setDate = function (date) {
+    $scope.activeDate = date;
+    udpateDatatables();
+  };
+
+  function udpateDatatables() {
+    $scope.orderDatatables = {
+      field: 'orders',
+      // disableFilter: true,
+      // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+      url: '/api/v1/order_products/settlement/' + $scope.activeDate,
+      columns: [{
+        data: 'orderId',
+        render: function render(orderId) {
+          return '<a ui-sref="order.detail({orderId: ' + orderId + '})">' + orderId + '</a>';
+        }
+      }, {
+        data: function data(_data26) {
+          return _.get(_data26, 'brand.id', '');
+        },
+        render: function render(brandId) {
+          return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandId + '</a>';
+        }
+      }, {
+        data: function data(_data27) {
+          return _.get(_data27, 'brand.name.ko', '');
+        }
+      }, {
+        data: function data(_data28) {
+          return _.get(_data28, 'brand.data.tel', '');
+        }
+      }, {
+        data: function data(_data29) {
+          return _.get(_data29, 'brand.data.bank.name', '');
+        }
+      }, {
+        data: function data(_data30) {
+          return _.get(_data30, 'brand.data.bank.accountNumber', '');
+        }
+      }, {
+        data: function data(_data31) {
+          return _.get(_data31, 'finalTotalKRW', '');
+        }
+      }, {
+        data: function data(_data32) {
+          return _.get(_data32, 'brand.data.bank.accountHolder', '');
+        }
+      }, {
+        data: 'buyerId',
+        render: function render(buyerId) {
+          return '<a ui-sref="user.info({userId: ' + buyerId + '})">' + buyerId + '</a>';
+        }
+      }]
+    };
+  }
+
+  udpateDatatables();
+
+  $scope.download = function () {
+    var date = $scope.activeDate;
+    $http.get('/api/v1/order_products/settlement/' + date + '?format=csv').then(function (res) {
+      var blob = new Blob([res.data]);
+      var downloadLink = angular.element('<a></a>');
+      downloadLink.attr('href', window.URL.createObjectURL(blob));
+      downloadLink.attr('download', 'settlement-' + date + '.csv');
+      downloadLink[0].click();
     });
   };
 
-  $scope.openBizImage = function () {
-    $('#user_biz_image').modal();
-  };
+  $rootScope.initAll($scope, $state.current.name);
 });
-}, {"./module":5}],
-6: [function(require, module, exports) {
+}, {"./module":9}],
+10: [function(require, module, exports) {
 'use strict';
 
 var productModule = angular.module('backoffice.product', ['ui.router', 'ui.bootstrap', require('../third_party/angular-translate')]);
@@ -2125,8 +3002,8 @@ require('./controllers/CategoryEditController');
 require('./controllers/ProductBatchUploadController');
 require('./controllers/ProductImageUploadController');
 // END module require js
-}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":23,"./i18n/translations.ko.json":24,"./controllers/ProductMainController":25,"./controllers/ProductEditController":26,"./controllers/CategoryEditController":27,"./controllers/ProductBatchUploadController":28,"./controllers/ProductImageUploadController":29}],
-23: [function(require, module, exports) {
+}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":36,"./i18n/translations.ko.json":37,"./controllers/ProductMainController":38,"./controllers/ProductEditController":39,"./controllers/CategoryEditController":40,"./controllers/ProductBatchUploadController":41,"./controllers/ProductImageUploadController":42}],
+36: [function(require, module, exports) {
 module.exports = {
   "product": {
     "main": {
@@ -2138,7 +3015,7 @@ module.exports = {
   }
 };
 }, {}],
-24: [function(require, module, exports) {
+37: [function(require, module, exports) {
 module.exports = {
   "product": {
     "saveAndNewButton": "저장하고 새 상품 만들기",
@@ -2190,7 +3067,7 @@ module.exports = {
 }
 ;
 }, {}],
-25: [function(require, module, exports) {
+38: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -2260,8 +3137,8 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
     }
   };
 });
-}, {"../module.js":6}],
-26: [function(require, module, exports) {
+}, {"../module.js":10}],
+39: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -2474,16 +3351,18 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   $scope.inputFields = [
   // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
   { title: 'name', key: 'name.ko', tmpKey: 'name', isRequired: true }];
+  $scope.moreFields = [{ title: '구분', enums: ['상의', '원피스', '바지', '치마', '기타'], key: 'data.detail.kind', tmpKey: 'detailKind' }, { title: '사이즈1', type: 'number', key: 'data.detail.size1', tmpKey: 'detailSize1' }, { title: '사이즈2', type: 'number', key: 'data.detail.size2', tmpKey: 'detailSize2' }, { title: '사이즈3', type: 'number', key: 'data.detail.size3', tmpKey: 'detailSize3' }, { title: '사이즈4', type: 'number', key: 'data.detail.size4', tmpKey: 'detailSize4' }, { title: '사이즈5', type: 'number', key: 'data.detail.size5', tmpKey: 'detailSize5' }, { title: '사이즈6', type: 'number', key: 'data.detail.size6', tmpKey: 'detailSize6' }, { title: '촬영모델', key: 'data.detail.modelName', tmpKey: 'detailModelName' }, { title: '모델착용사이즈', key: 'data.detail.modelSize', tmpKey: 'detailModelSize' }, { title: '원산지', key: 'data.detail.origin', tmpKey: 'detailOrigin' }, { title: '촉감', enums: ['까슬함', '적당함', '부드러움'], key: 'data.detail.touch', tmpKey: 'detailTouch' }, { title: '신축성', enums: ['좋음', '약간', '없음'], key: 'data.detail.flexibility', tmpKey: 'detailFlexibility' }, { title: '비침', enums: ['많이비침', '약간비침', '비침없음'], key: 'data.detail.transparency', tmpKey: 'detailTransparency' }, { title: '광택감', enums: ['광택있음', '약간있음', '광택없음'], key: 'data.detail.gloss', tmpKey: 'detailGloss' }, { title: '두께감', enums: ['두꺼움', '적당함', '얇음'], key: 'data.detail.thickness', tmpKey: 'detailThickness' }, { title: '안감', enums: ['전체안감', '부분안감', '안감없음'], key: 'data.detail.lining', tmpKey: 'detailLining' }];
 
+  var allFields = $scope.inputFields.concat($scope.moreFields);
   $scope.tmpObjToProduct = function () {
-    for (var i = 0; i < $scope.inputFields.length; i++) {
-      var field = $scope.inputFields[i];
+    for (var i = 0; i < allFields.length; i++) {
+      var field = allFields[i];
       _.set($scope.product, field.key, $scope.tmpObj[field.tmpKey]);
     }
   };
   $scope.productToTmpObj = function () {
-    for (var i = 0; i < $scope.inputFields.length; i++) {
-      var field = $scope.inputFields[i];
+    for (var i = 0; i < allFields.length; i++) {
+      var field = allFields[i];
       $scope.tmpObj[field.tmpKey] = _.get($scope.product, field.key);
     }
   };
@@ -3092,8 +3971,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     return $rootScope.getContentsI18nText('enum.productVariant.status.' + status);
   };
 });
-}, {"../module.js":6}],
-27: [function(require, module, exports) {
+}, {"../module.js":10}],
+40: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -3286,8 +4165,8 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     $state.reload();
   };
 });
-}, {"../module.js":6}],
-28: [function(require, module, exports) {
+}, {"../module.js":10}],
+41: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -3424,8 +4303,8 @@ productModule.controller('ProductBatchUploadController', function ($scope, $http
     console.log(contents);
   };
 });
-}, {"../module.js":6}],
-29: [function(require, module, exports) {
+}, {"../module.js":10}],
+42: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -3851,1305 +4730,7 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     $scope.clearImages();
   };
 });
-}, {"../module":6}],
-7: [function(require, module, exports) {
-// Copyright (C) 2016 Goom Inc. All rights reserved.
-
-'use strict';
-
-var orderModule = angular.module('backoffice.order', ['ui.router', 'ui.bootstrap', require('../third_party/angular-translate')]);
-
-orderModule.config(function ($translateProvider) {
-  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
-  $translateProvider.preferredLanguage('ko');
-});
-
-orderModule.config(function ($stateProvider) {
-  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
-  var templateRoot = 'templates/metronic';
-
-  $stateProvider.state('order', {
-    url: '/order',
-    abstract: true,
-    template: '<ui-view/>'
-  }).state('order.main', {
-    url: '/main',
-    templateUrl: templateRoot + '/order/main.html',
-    controller: 'OrderMainController'
-  }).state('order.listBigBuyer', {
-    url: 'listBigBuyer',
-    templateUrl: templateRoot + '/order/listBigBuyer.html',
-    controller: 'OrderListBigBuyerController'
-  }).state('order.beforePayment', {
-    url: '/before_payment',
-    templateUrl: templateRoot + '/order/step0-before-payment.html',
-    controller: 'OrderListBeforePaymentController'
-  }).state('order.uncle', {
-    url: '/uncle',
-    templateUrl: templateRoot + '/order/uncle.html',
-    controller: 'OrderUncleController'
-  }).state('order.settlement', {
-    url: '/settlement',
-    templateUrl: templateRoot + '/order/settlement.html',
-    controller: 'OrderSettlementController'
-  }).state('order.cs', {
-    url: '/cs',
-    templateUrl: templateRoot + '/order/cs.html',
-    controller: 'OrderCsController'
-  }).state('order.detail', {
-    url: '/detail/:orderId',
-    templateUrl: templateRoot + '/order/detail.html',
-    controller: 'OrderDetailController',
-    resolve: {
-      order: function order($http, $rootScope, $stateParams) {
-        return $http.get('/api/v1/orders/' + $stateParams.orderId).then(function (res) {
-          return res.data;
-        });
-      }
-    }
-  });
-});
-
-module.exports = orderModule;
-
-// BEGIN module require js
-require('./controllers.js');
-// END module require js
-}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":30,"./i18n/translations.ko.json":31,"./controllers.js":32}],
-30: [function(require, module, exports) {
-module.exports = {
-  "order": {
-
-  }
-};
-}, {}],
-31: [function(require, module, exports) {
-module.exports = {
-  "order": {
-    "title": "주문",
-    "main": {
-      "buyerEmailColumn": "주문자 이메일",
-      "buyerNameColumn": "주문자 이름",
-      "buyerTelColumn": "주문자 전화번호",
-      "createdAtColumn": "주문 생성 시각",
-      "paymentStatusColumn": "결제 상태",
-      "priceColumn": "주문가격",
-      "startProcessing": "주문처리",
-      "statusColumn": "주문 상태",
-      "title": "주문현황"
-    },
-    "detail": {
-      "title": "주문상세",
-      "refundTitle": "환불",
-      "saveButton": "저장"
-    },
-    "beforePayment": {
-      "title": "무통장 입금 대기",
-      "subTitle": "또는 결제 전"
-    },
-    "address": {
-      "nameLabel": "이름",
-      "addressLabel": "주소",
-      "addressDetailLabel": "상세주소",
-      "telLabel": "T",
-      "postalCodeLabel": "우편번호",
-      "countryCodeLabel": "국가",
-      "streetLabel": "도로명"
-    },
-    "orderProduct": {
-      "orderIdColumn": "주문번호",
-      "brandIdColumn": "브랜드번호",
-      "brandNameColumn": "브랜드명",
-      "buildingNameColumn": "건물",
-      "floorColumn": "층",
-      "flatNumberColumn": "호수",
-      "telColumn": "전화번호",
-      "productIdColumn": "상품번호",
-      "productNameColumn": "상품약어",
-      "colorColumn": "색상",
-      "sizeColumn": "사이즈",
-      "quantityColumn": "주문수량",
-      "bank": {
-        "name": "은행",
-        "accountHolder": "예금주",
-        "accountNumber": "계좌번호",
-      },
-      "totalColumn": "금액",
-      "dateColumn": "주문날짜",
-      "buyerIdColumn": "바이어ID",
-    },
-    "uncle": {
-      "title": "삼촌주문목록",
-      "download": "CSV 다운로드"
-    },
-    "cs": {
-      "title": "운영팀주문목록"
-    },
-    "settlement": {
-      "title": "회계팀 대량이체"
-    },
-    "listBigBuyer": {
-      "title": "빅바이어주문목록"
-    }
-  }
-}
-;
-}, {}],
-32: [function(require, module, exports) {
-// Copyright (C) 2016 Goom Inc. All rights reserved.
-
-'use strict';
-
-var orderModule = require('./module');
-
-orderModule.controller('OrderMainController', function ($scope, $rootScope, $http, $state, $translate, boUtils) {
-  $scope.contentTitle = $translate.instant('order.main.title');
-  $scope.contentSubTitle = '';
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'order.main',
-    name: $translate.instant('order.main.title')
-  }];
-  $rootScope.initAll($scope, $state.current.name);
-
-  $scope.orderDatatables = {
-    field: 'orders',
-    // disableFilter: true,
-    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: '/api/v1/orders?q=status:!0,paymentStatus:!0',
-    columns: [{
-      data: 'id',
-      render: function render(id) {
-        return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
-      }
-    }, {
-      data: 'status',
-      render: function render(status) {
-        return $rootScope.getContentsI18nText('enum.order.status.' + status);
-      }
-    }, {
-      data: 'createdAt',
-      render: function render(data) {
-        return boUtils.formatDate(data);
-      }
-    }, {
-      data: 'totalKRW'
-    }, {
-      data: 'paymentStatus',
-      render: function render(status) {
-        return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
-      }
-    }, {
-      data: function data(_data) {
-        return _.get(_data, 'name') || '';
-      }
-    }, {
-      data: function data(_data2) {
-        return _.get(_data2, 'data.tel') || '';
-      }
-    }, {
-      data: 'email'
-    }]
-  };
-
-  /*
-    $(document).ready(() => {
-      $('#tt2').datepicker({
-        onSelect: function (a,b) { console.log(a); },
-        onClose: () => console.log(1),
-        autoclose: true,
-      });
-    });
-    */
-});
-
-orderModule.controller('OrderListBeforePaymentController', function ($scope, $rootScope, $http, $state, $translate, boUtils) {
-  $scope.contentTitle = $translate.instant('order.beforePayment.title');
-  $scope.contentSubTitle = $translate.instant('order.beforePayment.subTitle');
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'order.main',
-    name: $translate.instant('order.main.title')
-  }, {
-    sref: 'order.beforePayment',
-    name: $translate.instant('order.beforePayment.title')
-  }];
-  $rootScope.initAll($scope, $state.current.name);
-
-  // $scope.orderDatatables = OrderCommons.getDatatables('/api/v1/orders?q=status:!0,paymentStatus:0');
-  $scope.orderDatatables = {
-    field: 'orders',
-    // disableFilter: true,
-    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: '/api/v1/orders?q=status:0,paymentStatus:200',
-    columns: [{
-      data: 'id',
-      render: function render(id) {
-        return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
-      }
-    }, {
-      data: 'createdAt',
-      render: function render(data) {
-        return boUtils.formatDate(data);
-      }
-    }, {
-      data: 'totalKRW'
-    }, {
-      data: function data(_data3) {
-        return _.get(_data3, 'name') || '';
-      }
-    }, {
-      data: function data(_data4) {
-        return _.get(_data4, 'data.tel') || '';
-      }
-    }, {
-      data: 'email'
-    }, {
-      data: 'id',
-      render: function render(id) {
-        return '<button class="btn blue" data-ng-click="startProcessing(' + id + ')"><i class="fa fa-play"></i> ' + $translate.instant('order.main.startProcessing') + '</button>';
-      }
-    }]
-  };
-  $scope.startProcessing = function (orderId) {
-    $http.post('/api/v1/orders/' + orderId + '/start_processing').then(function (res) {
-      // TODO: Update datatables row data.
-    });
-  };
-});
-
-orderModule.controller('OrderDetailController', function ($scope, $rootScope, $http, $state, $translate, boUtils, convertUtil, order) {
-  $scope.contentTitle = $translate.instant('order.detail.title');
-  $scope.contentSubTitle = 'Order Detail';
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'order.main',
-    name: $translate.instant('order.main.title')
-  }, {
-    sref: 'order.detail',
-    name: $translate.instant('order.detail.title')
-  }];
-  $rootScope.initAll($scope, $state.current.name);
-
-  order.createdAt = boUtils.formatDate(order.createdAt);
-  order.finalShippingCostKRW = order.finalShippingCostKRW && Number(order.finalShippingCostKRW);
-  (order.orderProducts || []).forEach(function (p) {
-    if (boUtils.isString(p.product.id)) {
-      p.product.shortId = boUtils.shorten(p.product.id, 8);
-    } else {
-      p.product.shortId = p.id;
-    }
-  });
-  order.totalRefuned = 0;
-  (order.payments || []).forEach(function (p) {
-    if (p.type === 2 && p.status === 0) {
-      order.totalRefuned += +p.data.PRTC_Price;
-    }
-  });
-  $scope.order = order;
-  $scope.user = {};
-  $http.get('/api/v1/users/' + order.buyerId).then(function (res) {
-    $scope.user = res.data;
-  });
-
-  $scope.translateOrderStatus = function (status) {
-    return $rootScope.getContentsI18nText('enum.order.status.' + status);
-  };
-  $scope.translateOrderPaymentStatus = function (status) {
-    return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
-  };
-  $scope.translateOrderProductStatus = function (status) {
-    return $rootScope.getContentsI18nText('enum.orderProduct.status.' + status);
-  };
-  $scope.translatePaymentStatus = function (status) {
-    return $rootScope.getContentsI18nText('enum.payment.status.' + status);
-  };
-  $scope.translatePaymentType = function (type) {
-    return $rootScope.getContentsI18nText('enum.payment.type.' + type);
-  };
-
-  $scope.refundOrder = function () {
-    if (order.finalTotalKRW === undefined) {
-      alert('Plese save final order counts');
-      return;
-    }
-    var amount = +order.totalPaid.amount - +order.finalTotalKRW - order.totalRefuned;
-    console.log(amount);
-    var payments = _.filter(order.payments, function (p) {
-      return p.type === 0 && p.status === 0;
-    });
-    if (payments.length === 1) {
-      $scope.refund(payments[0], amount);
-    } else {
-      alert('multiple payment transaction');
-    }
-  };
-
-  $scope.popupRefund = function (payment) {
-    $scope.refundPayment = payment;
-    $('#order_refund_modal').modal();
-  };
-
-  $scope.refund = function (payment, amount) {
-    $scope.closePopup();
-    $http.post('/api/v1/orders/' + order.id + '/refund', {
-      paymentId: payment.id,
-      // amount: payment.data.TotPrice, // FIXME: from user input
-      amount: +amount,
-      msg: 'admin refund'
-    }).then(function (res) {
-      // TODO: refresh order.
-      $state.reload();
-    });
-  };
-
-  $scope.finalize = function () {
-    var data = _.pick(order, 'finalShippingCostKRW');
-    data.orderProducts = order.orderProducts.map(function (o) {
-      return _.pick(o, 'id', 'finalQuantity');
-    });
-    $http.put('/api/v1/orders/' + order.id + '/finalize', data).then(function (res) {
-      $state.reload();
-    }, function (err) {
-      return alert(err.data.message);
-    });
-  };
-
-  $scope.closePopup = function () {
-    $('#order_refund_modal').modal('hide');
-    $('#order_refund_modal').removeClass('in');
-    $('.modal-backdrop').remove();
-  };
-
-  var brands = _.groupBy(order.orderProducts.map(function (o) {
-    return o.brand;
-  }), 'id');
-  $scope.getBrandName = function (brandId) {
-    return _.get(brands, [brandId, 0, 'name', 'ko'], brandId);
-  };
-
-  $scope.saveStatus = function () {
-    var data = _.pick(order, 'status');
-    $http.put('/api/v1/orders/' + order.id + '/status', data).then(function (res) {
-      $state.reload();
-    }, function (err) {
-      return alert(err.data.message);
-    });
-  };
-
-  if ($scope.order.address) {
-    $scope.addressFields = [{ title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name' }, { title: $translate.instant('order.address.postalCodeLabel'), obj: _.get($scope.order.address, 'detail.postalCode'), key: 'postalCode' }, { title: $translate.instant('order.address.addressLabel'), obj: _.get($scope.order.address, 'detail.address.base'), key: 'addressBase' }, { title: $translate.instant('order.address.addressDetailLabel'), obj: _.get($scope.order.address, 'detail.address.detail'), key: 'addressDetail' }, { title: $translate.instant('order.address.countryCodeLabel'), obj: _.get($scope.order.address, 'countryCode'), key: 'countryCode' }, { title: $translate.instant('order.address.telLabel'), obj: _.get($scope.order.address, 'detail.tel'), key: 'tel' }];
-  }
-});
-
-orderModule.controller('OrderUncleController', function ($scope, $rootScope, $http, $state, $translate) {
-  $scope.contentTitle = $translate.instant('order.uncle.title');
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'order.main',
-    name: $translate.instant('order.main.title')
-  }, {
-    sref: 'order.uncle',
-    name: $translate.instant('order.uncle.title')
-  }];
-
-  $scope.orderDatatables = {
-    field: 'orderProducts',
-    disableFilter: true,
-    url: '/api/v1/uncle/order_products',
-    order: [],
-    columns: [{
-      data: 'orderId',
-      bSortable: false
-    }, {
-      data: function data(_data5) {
-        return _.get(_data5, 'brand.name.ko', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data6) {
-        return _.get(_data6, 'brand.data.location.building.name.ko', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data7) {
-        return _.get(_data7, 'brand.data.location.floor', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data8) {
-        return _.get(_data8, 'brand.data.location.flatNumber', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data9) {
-        return _.get(_data9, 'brand.data.tel', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data10) {
-        return _.get(_data10, 'product.name.ko', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data11) {
-        return _.get(_data11, 'productVariant.data.color', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data12) {
-        return _.get(_data12, 'productVariant.data.size', '');
-      },
-      bSortable: false
-    }, {
-      data: 'quantity',
-      bSortable: false
-    }]
-  };
-
-  $scope.download = function () {
-    $http.get('/api/v1/uncle/order_products?format=csv').then(function (res) {
-      var blob = new Blob([res.data]);
-      var downloadLink = angular.element('<a></a>');
-      downloadLink.attr('href', window.URL.createObjectURL(blob));
-      downloadLink.attr('download', 'uncle.csv');
-      downloadLink[0].click();
-    });
-  };
-  $rootScope.initAll($scope, $state.current.name);
-});
-
-orderModule.controller('OrderCsController', function ($scope, $rootScope, $http, $state, $translate) {
-  $scope.contentTitle = $translate.instant('order.cs.title');
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'order.main',
-    name: $translate.instant('order.main.title')
-  }, {
-    sref: 'order.cs',
-    name: $translate.instant('order.cs.title')
-  }];
-
-  $scope.orderDatatables = {
-    field: 'orderProducts',
-    disableFilter: true,
-    url: '/api/v1/order_products',
-    order: [],
-    columns: [{
-      data: 'orderId',
-      bSortable: false
-    }, {
-      data: function data(_data13) {
-        return _.get(_data13, 'brand.id', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data14) {
-        return _.get(_data14, 'brand.name.ko', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data15) {
-        return _.get(_data15, 'brand.data.tel', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data16) {
-        return _.get(_data16, 'brand.data.bank.name', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data17) {
-        return _.get(_data17, 'brand.data.bank.accountHolder', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data18) {
-        return _.get(_data18, 'brand.data.bank.accountNumber', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data19) {
-        return _.get(_data19, 'product.id', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data20) {
-        return _.get(_data20, 'product.name.ko', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data21) {
-        return _.get(_data21, 'productVariant.data.color', '');
-      },
-      bSortable: false
-    }, {
-      data: function data(_data22) {
-        return _.get(_data22, 'productVariant.data.size', '');
-      },
-      bSortable: false
-    }, {
-      data: 'quantity',
-      bSortable: false
-    }, {
-      data: 'totalKRW',
-      bSortable: false
-    }, {
-      data: function data(_data23) {
-        return _.get(_data23, 'processedDate', '').substr(0, 10);
-      },
-      bSortable: false
-    }, {
-      data: 'buyerId',
-      bSortable: false
-    }]
-  };
-
-  $rootScope.initAll($scope, $state.current.name);
-});
-
-orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
-  $scope.contentTitle = $translate.instant('order.listBigBuyer.title');
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'order.main',
-    name: $translate.instant('order.main.title')
-  }, {
-    sref: 'order.listBigBuyer',
-    name: $translate.instant('order.listBigBuyer.title')
-  }];
-  $rootScope.initAll($scope, $state.current.name);
-
-  $scope.orderDatatables = {
-    field: 'orders',
-    // disableFilter: true,
-    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: '/api/v1/orders/big',
-    columns: [{
-      data: 'id',
-      render: function render(id) {
-        return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
-      }
-    }, {
-      data: 'status',
-      render: function render(status) {
-        return $rootScope.getContentsI18nText('enum.order.status.' + status);
-      }
-    }, {
-      data: 'createdAt',
-      render: function render(data) {
-        return boUtils.formatDate(data);
-      }
-    }, {
-      data: 'totalKRW'
-    }, {
-      data: 'paymentStatus',
-      render: function render(status) {
-        return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
-      }
-    }, {
-      data: function data(_data24) {
-        return _.get(_data24, 'name') || '';
-      }
-    }, {
-      data: function data(_data25) {
-        return _.get(_data25, 'data.tel') || '';
-      }
-    }, {
-      data: 'email'
-    }]
-  };
-});
-
-orderModule.controller('OrderSettlementController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
-  $scope.contentTitle = $translate.instant('order.settlement.title');
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'order.main',
-    name: $translate.instant('order.main.title')
-  }, {
-    sref: 'order.settlement',
-    name: $translate.instant('order.settlement.title')
-  }];
-
-  var today = moment();
-  var maxDays = 10;
-  $scope.dates = [];
-  for (var i = 0; i < maxDays; i++) {
-    $scope.dates.push(today.format('YYYY-MM-DD'));
-    today.subtract(1, 'd');
-  }
-  $scope.activeDate = $scope.dates[0];
-  $scope.setDate = function (date) {
-    $scope.activeDate = date;
-    udpateDatatables();
-  };
-
-  function udpateDatatables() {
-    $scope.orderDatatables = {
-      field: 'orders',
-      // disableFilter: true,
-      // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-      url: '/api/v1/order_products/settlement/' + $scope.activeDate,
-      columns: [{
-        data: 'orderId',
-        render: function render(orderId) {
-          return '<a ui-sref="order.detail({orderId: ' + orderId + '})">' + orderId + '</a>';
-        }
-      }, {
-        data: function data(_data26) {
-          return _.get(_data26, 'brand.id', '');
-        },
-        render: function render(brandId) {
-          return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandId + '</a>';
-        }
-      }, {
-        data: function data(_data27) {
-          return _.get(_data27, 'brand.name.ko', '');
-        }
-      }, {
-        data: function data(_data28) {
-          return _.get(_data28, 'brand.data.tel', '');
-        }
-      }, {
-        data: function data(_data29) {
-          return _.get(_data29, 'brand.data.bank.name', '');
-        }
-      }, {
-        data: function data(_data30) {
-          return _.get(_data30, 'brand.data.bank.accountNumber', '');
-        }
-      }, {
-        data: function data(_data31) {
-          return _.get(_data31, 'finalTotalKRW', '');
-        }
-      }, {
-        data: function data(_data32) {
-          return _.get(_data32, 'brand.data.bank.accountHolder', '');
-        }
-      }, {
-        data: 'buyerId',
-        render: function render(buyerId) {
-          return '<a ui-sref="user.info({userId: ' + buyerId + '})">' + buyerId + '</a>';
-        }
-      }]
-    };
-  }
-
-  udpateDatatables();
-
-  $scope.download = function () {
-    var date = $scope.activeDate;
-    $http.get('/api/v1/order_products/settlement/' + date + '?format=csv').then(function (res) {
-      var blob = new Blob([res.data]);
-      var downloadLink = angular.element('<a></a>');
-      downloadLink.attr('href', window.URL.createObjectURL(blob));
-      downloadLink.attr('download', 'settlement-' + date + '.csv');
-      downloadLink[0].click();
-    });
-  };
-
-  $rootScope.initAll($scope, $state.current.name);
-});
-}, {"./module":7}],
-8: [function(require, module, exports) {
-// Copyright (C) 2016 Goom Inc. All rights reserved.
-
-'use strict';
-
-var brandModule = angular.module('backoffice.brand', ['ui.router', require('../utils/module').name, require('../third_party/angular-translate')]);
-
-brandModule.config(function ($translateProvider) {
-  $translateProvider.registerAvailableLanguageKeys(['en', 'ko'], {
-    'en_US': 'en',
-    'en_UK': 'en',
-    'ko_KR': 'ko'
-  }).determinePreferredLanguage();
-
-  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
-});
-
-brandModule.config(function ($stateProvider) {
-  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
-  var templateRoot = 'templates/metronic';
-  $stateProvider.state('brand', {
-    url: '/brand',
-    abstract: 'true',
-    template: '<ui-view/>'
-  }).state('brand.main', {
-    url: '/main',
-    templateUrl: templateRoot + '/brand/main.html',
-    controller: 'BrandMainController'
-  }).state('brand.add', {
-    url: '/add',
-    templateUrl: templateRoot + '/brand/edit.html',
-    controller: 'BrandEditController'
-  }).state('brand.edit', {
-    url: '/edit/:brandId',
-    templateUrl: templateRoot + '/brand/edit.html',
-    controller: 'BrandEditController'
-  });
-});
-
-module.exports = brandModule;
-
-// BEGIN module require js
-require('./controllers.js');
-// END module require js
-}, {"../utils/module":15,"../third_party/angular-translate":12,"./i18n/translations.en.json":33,"./i18n/translations.ko.json":34,"./controllers.js":35}],
-33: [function(require, module, exports) {
-module.exports = {
-
-};
-}, {}],
-34: [function(require, module, exports) {
-module.exports = {
-  "brand": {
-    "title": "브랜드",
-    "createButton": "브랜드 생성",
-    "main": {
-      "createBrandTitle": "브랜드 생성"
-    },
-    "edit": {
-      "nameLabel": "브랜드명",
-      "bizNameLabel": "사업자명",
-      "bizNumberLabel": "사업자 번호",
-      "accountBankLabel": "은행",
-      "accountOwnerLabel": "예금주",
-      "accountNumberLabel": "계좌번호",
-      "buildingNameLabel": "빌딩 이름",
-      "buildingFloorLabel": "빌딩 층",
-      "buildingFlatNumberLabel": "빌딩 호수",
-      "telLabel": "전화 번호",
-      "mobileLabel": "핸드폰 번호",
-      "aliasLabel": "약어"
-    }
-  }
-}
-;
-}, {}],
-35: [function(require, module, exports) {
-// Copyright (C) 2016 Goom Inc. All rights reserved.
-
-'use strict';
-
-var brandModule = require('./module');
-
-brandModule.factory('brandCommons', function ($http) {
-  return {
-    saveBrand: function saveBrand(brand) {
-      var brandsUrl = '/api/v1/brands';
-      var promise = null;
-      var brandFields = ['pathname', 'name'];
-      if (brand.id) {
-        promise = $http.put('brandsUrl/' + brand.id, _.pick(brand, brandFields));
-      } else {
-        promise = $http.post(brandsUrl, _.pick(brand, brandFields));
-      }
-      return promise.then(function (res) {
-        $http.put('/api/v1/brands/' + res.data.id + '/index').then(function () {
-          // ignore
-        });
-        return res;
-      });
-    }
-  };
-});
-
-brandModule.controller('BrandMainController', function ($scope, $http, $element, brandCommons, boUtils) {
-  var brandsUrl = '/api/v1/brands';
-  var fieldName = 'brands';
-  $scope.brandDatatables = {
-    field: fieldName,
-    url: brandsUrl,
-    columns: [{
-      data: 'id',
-      render: function render(id) {
-        return '<a ui-sref="brand.edit({brandId: ' + id + '})">' + id + '</a>';
-      }
-    }, {
-      data: 'name.ko',
-      orderable: false
-    }]
-  };
-
-  $scope.createBrand = function (brand) {
-    brandCommons.saveBrand(brand).then(function () {
-      $scope.closeBrandPopup();
-      $scope.newBrand.name = {};
-      boUtils.refreshDatatableAjax(brandsUrl, $($element), fieldName);
-    })['catch'](function (err) {
-      var message = err.data.message;
-      if (!message) {
-        message = 'ERROR Occurred';
-      }
-      window.alert(message);
-    });
-  };
-
-  $scope.newBrand = {
-    name: {}
-  };
-
-  $scope.closeBrandPopup = function () {
-    $('#new_brand_modal').modal('hide');
-  };
-});
-
-brandModule.controller('BrandEditController', function ($scope, $http, $state, $rootScope, $translate, boUtils, convertUtil) {
-  var initFields = function initFields() {
-    if (!$scope.brand.data) {
-      $scope.brand.data = {};
-    }
-    $scope.brandFields1 = [{ title: 'ID', key: 'id', obj: $scope.brand.id, isReadOnly: true }, { title: $translate.instant('brand.edit.nameLabel'), obj: _.get($scope.brand, 'name.ko'), key: 'name.ko' }];
-    $scope.brandFields2 = [{ title: $translate.instant('brand.edit.bizNameLabel'), obj: _.get($scope.brand, 'data.businessRegistration.name'), key: 'data.businessRegistration.name' }, { title: $translate.instant('brand.edit.bizNumberLabel'), obj: _.get($scope.brand, 'data.businessRegistration.number'), key: 'data.businessRegistration.number' }, { title: $translate.instant('brand.edit.accountBankLabel'), obj: _.get($scope.brand, 'data.bank.name'), key: 'data.bank.name' }, { title: $translate.instant('brand.edit.accountOwnerLabel'), obj: _.get($scope.brand, 'data.bank.accountHolder'), key: 'data.bank.accountHolder' }, { title: $translate.instant('brand.edit.accountNumberLabel'), obj: _.get($scope.brand, 'data.bank.accountNumber'), key: 'data.bank.accountNumber' }, { title: $translate.instant('brand.edit.buildingNameLabel'), obj: _.get($scope.brand, 'data.building.name'), key: 'data.building.name' }, { title: $translate.instant('brand.edit.buildingFloorLabel'), obj: _.get($scope.brand, 'data.building.floor'), key: 'data.building.floor' }, { title: $translate.instant('brand.edit.buildingFlatNumberLabel'), obj: _.get($scope.brand, 'data.building.flatNumber'), key: 'data.building.flatNumber' }, { title: $translate.instant('brand.edit.telLabel'), obj: _.get($scope.brand, 'data.tel'), key: 'data.tel' }, { title: $translate.instant('brand.edit.mobileLabel'), obj: _.get($scope.brand, 'data.mobile'), key: 'data.mobile' }];
-  };
-  if ($state.params.brandId) {
-    boUtils.startProgressBar();
-    $http.get('/api/v1/brands/' + $state.params.brandId + '/unmodified').then(function (res) {
-      $scope.brand = res.data;
-      initFields();
-      boUtils.stopProgressBar();
-    }, function () {
-      window.alert('failed to get brand (' + $state.params.brandId + ')');
-      boUtils.stopProgressBar();
-    });
-  } else {
-    $scope.brand = { id: 'NEW', name: {}, data: {} };
-    initFields();
-  }
-  $scope.save = function () {
-    boUtils.startProgressBar();
-    convertUtil.copyFieldObj($scope.brandFields1, $scope.brand);
-    convertUtil.copyFieldObj($scope.brandFields2, $scope.brand);
-    $rootScope.state.locales.forEach(function (locale) {
-      $scope.brand.name[locale] = $scope.brand.name.ko;
-    });
-    var requestBrand = _.pick($scope.brand, 'name', 'data');
-    var promise = undefined;
-    if ($state.params.brandId) {
-      promise = $http.put('/api/v1/brands/' + $scope.brand.id, requestBrand);
-    } else {
-      // create brand
-      promise = $http.post('/api/v1/brands', requestBrand);
-    }
-    promise.then(function (res) {
-      boUtils.stopProgressBar();
-      return $http.put('/api/v1/brands/' + res.data.id + '/index');
-    }, function () {
-      window.alert('failed to save brand');
-      boUtils.stopProgressBar();
-    }).then(function () {
-      boUtils.startProgressBar();
-      setTimeout(function () {
-        boUtils.stopProgressBar();
-        $state.go('brand.main');
-      }, 1000);
-    });
-  };
-
-  $scope.removeAlias = function (idx) {
-    $scope.brand.data.alias.splice(idx, 1);
-  };
-  $scope.onAliasInput = function (e) {
-    var keyCode = e.keyCode;
-    if (keyCode === 13 || keyCode === 32) {
-      // Enter
-      e.preventDefault();
-      var newAlias = e.target.value;
-      for (var i = 0; i < ($scope.brand.data.alias || []).length; i++) {
-        if ($scope.brand.data.alias[i] === newAlias) {
-          return;
-        }
-      }
-      if (!$scope.brand.data.alias) {
-        $scope.brand.data.alias = [];
-      }
-      $scope.brand.data.alias.push(newAlias);
-      $(e.target).val('');
-    }
-  };
-});
-}, {"./module":8}],
-9: [function(require, module, exports) {
-// Copyright (C) 2016 Goom Inc. All rights reserved.
-
-'use strict';
-
-var currencyModule = angular.module('backoffice.currency', ['ui.router', require('../third_party/angular-translate')]);
-
-currencyModule.config(function ($translateProvider) {
-  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
-  $translateProvider.preferredLanguage('ko');
-});
-
-currencyModule.config(function ($stateProvider) {
-  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
-  var templateRoot = 'templates/metronic';
-
-  $stateProvider.state('currency', {
-    abstract: true,
-    url: '/currency',
-    template: '<ui-view/>'
-  }).state('currency.main', {
-    url: '/main',
-    templateUrl: templateRoot + '/currency/main.html',
-    controller: 'CurrencyMainController'
-  });
-});
-
-module.exports = currencyModule;
-
-// BEGIN module require js
-require('./controllers.js');
-// END module require js
-}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":36,"./i18n/translations.ko.json":37,"./controllers.js":38}],
-36: [function(require, module, exports) {
-module.exports = {
-
-}
-;
-}, {}],
-37: [function(require, module, exports) {
-module.exports = {
-  "currency": {
-    "title": "환율"
-  }
-}
-;
-}, {}],
-38: [function(require, module, exports) {
-// Copyright (C) 2016 Goom Inc. All rights reserved.
-
-'use strict';
-
-var currencyModule = require('./module');
-
-currencyModule.controller('CurrencyMainController', function ($scope, $http) {
-  $scope.rates = {
-    USD: 0,
-    CNY: 0
-  };
-  $http.get('/api/v1/currency').then(function (res) {
-    if (res.data.USD) {
-      $scope.rates.USD = res.data.USD;
-    }
-    if (res.data.CNY) {
-      $scope.rates.CNY = res.data.CNY;
-    }
-  });
-  $scope.save = function () {
-    $http.post('/api/v1/currency', $scope.rates).then(function () {})['catch'](function (res) {
-      window.alert(res);
-      console.log(res);
-    });
-  };
-});
-}, {"./module":9}],
-10: [function(require, module, exports) {
-// Copyright (C) 2016 Goom Inc. All rights reserved.
-
-'use strict';
-
-var cmsModule = angular.module('backoffice.cms', ['ui.router', 'ui.sortable', require('../third_party/angular-translate')]);
-
-module.exports = cmsModule;
-
-cmsModule.config(function ($translateProvider) {
-  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
-  $translateProvider.preferredLanguage('ko');
-});
-
-cmsModule.config(function ($stateProvider) {
-  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
-  var templateRoot = 'templates/metronic';
-
-  $stateProvider.state('cms', {
-    abstract: true,
-    url: '/cms',
-    template: '<ui-view/>'
-  }).state('cms.simple', {
-    url: '/simple/:name',
-    templateUrl: templateRoot + '/cms/simple.html',
-    controller: 'CmsSimpleController'
-  }).state('cms.main_category', {
-    url: '/main_category',
-    templateUrl: templateRoot + '/cms/main-category.html',
-    controller: 'CmsMainCategoryController'
-  });
-});
-
-// BEGIN module require js
-require('./controllers');
-// END module require js
-}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":39,"./i18n/translations.ko.json":40,"./controllers":41}],
-39: [function(require, module, exports) {
-module.exports = {
-
-};
-}, {}],
-40: [function(require, module, exports) {
-module.exports = {
-  "cms": {
-    "mainCategory": "메인페이지 카테고리",
-    "mainBanner": "메인 배너",
-    "subBanner": "서브 배너"
-  }
-}
-;
-}, {}],
-41: [function(require, module, exports) {
-// Copyright (C) 2016 Goom Inc. All rights reserved.
-
-'use strict';
-
-var cmsModule = require('./module');
-
-cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $rootScope, $translate) {
-  $scope.cms = {
-    title: {
-      ko: '',
-      en: '',
-      zn_ch: '',
-      zn_tw: ''
-    },
-    children: []
-  };
-  $http.get('/api/v1/cms/' + $state.params.name).then(function (res) {
-    if (res.data) {
-      $scope.cms = res.data;
-    }
-  })['catch'](function () {
-    // ignore
-  });
-
-  $scope.name = $state.params.name;
-  $scope.contentTitle = $scope.name;
-  $scope.contentSubTitle = '';
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'cms.simple',
-    name: $scope.name
-  }];
-  $rootScope.initAll($scope, $state.current.name);
-
-  $scope.newObject = {};
-  $scope.imageUploaded = function (result, obj) {
-    obj.image = { url: result.url.substring(5), publicId: result.public_id, version: result.version };
-  };
-
-  $scope.addRow = function () {
-    if (!$scope.newObject.link || $scope.newObject.link === '') {
-      window.alert('type link');
-      return;
-    }
-    if (!$scope.newObject.image || !$scope.newObject.image.url) {
-      window.alert('add image');
-      return;
-    }
-    $scope.cms.children.push($scope.newObject);
-    $scope.newObject = {};
-  };
-
-  $scope.save = function () {
-    $http.post('/api/v1/cms', { name: $scope.name, data: $scope.cms }).then(function (res) {
-      console.log(res);
-    });
-  };
-
-  $scope.rowSortable = {
-    handle: '.cms-simple-sortable-pointer',
-    placeholder: 'ui-state-highlight'
-  };
-});
-
-cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, $http, $state, boUtils) {
-  var cmsName = 'main_categories';
-  $scope.displayLocale = 'en';
-  var jstreeNode = $('#categoryTree');
-  var autoCompleteNode = $('#selectCategory');
-  var initAutoComplete = function initAutoComplete(root) {
-    // TODO locale
-    // const locale = $rootScope.state.editLocale;
-    $scope.allCategories = [];
-    $scope.categoryIdMap = {};
-    $scope.categoryNameMap = {};
-    var dfs = function dfs(root) {
-      var name = root.name[$scope.displayLocale];
-      var searchName = name;
-      if (root.parentId && $scope.categoryIdMap[root.parentId]) {
-        searchName += '(<-' + $scope.categoryIdMap[root.parentId].name[$scope.displayLocale] + ')';
-      }
-      $scope.allCategories.push(searchName);
-      $scope.categoryIdMap[root.id] = root;
-      $scope.categoryNameMap[searchName] = root;
-      (root.children || []).forEach(function (child) {
-        return dfs(child);
-      });
-      delete root.children;
-    };
-    dfs(root);
-
-    boUtils.autoComplete(autoCompleteNode, cmsName, $scope.allCategories);
-    autoCompleteNode.on('typeahead:selected', function (obj, datum) {
-      var idx = datum.indexOf('(<-');
-      var text = datum;
-      if (idx > 0) {
-        text = datum.substring(0, idx);
-      }
-      autoCompleteNode.typeahead('val', text);
-      var tree = jstreeNode.jstree(true);
-      var selected = tree.get_selected();
-      if (!selected || selected.length < 1) {
-        return;
-      }
-      var newCategory = $scope.categoryNameMap[datum];
-      if (tree.get_node(newCategory.id)) {
-        window.alert('category already in menu');
-        return;
-      }
-      tree.set_id(selected[0], newCategory.id);
-      tree.set_text(newCategory.id, text);
-      $scope.selectedNodeName = newCategory.name[$scope.displayLocale];
-      autoCompleteNode.blur();
-      if (!$scope.$$phase) {
-        $scope.$apply();
-      }
-    });
-  };
-  $http.get('/api/v1/categories').then(function (res) {
-    $scope.allCategories = [];
-    var root = res.data;
-    initAutoComplete(root);
-  });
-  var jstreeDataToCmsData = function jstreeDataToCmsData() {
-    var jstreeData = jstreeNode.jstree(true).get_json('#');
-    var dfs = function dfs(root) {
-      var res = $scope.categoryIdMap[root.id];
-      if (!res) {
-        window.alert('created node does not select category');
-        return null;
-      }
-      if (root.children && root.children.length > 0) {
-        res.children = root.children.map(function (child) {
-          return dfs(child);
-        }).filter(function (value) {
-          return !!value;
-        });
-      }
-      return res;
-    };
-    return jstreeData.map(function (data) {
-      return dfs(data);
-    });
-  };
-  var cmsDataToJstreeData = function cmsDataToJstreeData(cmsData) {
-    var dfs = function dfs(root) {
-      var res = {
-        id: root.id,
-        text: root.name ? root.name[$scope.displayLocale] : '카테고리 고르세요',
-        data: { id: root.id }
-      };
-      if (root.children) {
-        res.children = root.children.map(dfs);
-      }
-      return res;
-    };
-    return cmsData.map(function (data) {
-      return dfs(data);
-    });
-  };
-  var nextNodeId = 10000;
-  var initJsTree = function initJsTree(cmsData) {
-    jstreeNode.jstree({
-      core: {
-        themes: {
-          responsive: false
-        },
-        check_callback: true,
-        data: cmsDataToJstreeData(cmsData),
-        multiple: false
-      },
-      plugins: ['types', 'contextmenu'],
-      types: {
-        'default': {
-          max_depth: 2,
-          icon: 'fa fa-folder icon-state-warning icon-lg'
-        }
-      },
-      contextmenu: {
-        items: function items($node) {
-          var tree = jstreeNode.jstree(true);
-          return {
-            Create: {
-              label: 'Create',
-              action: function action() {
-                var newNodeId = tree.create_node($node, 'NewMenu');
-                tree.set_id(newNodeId, nextNodeId);
-                tree.deselect_all();
-                tree.select_node(nextNodeId++);
-                autoCompleteNode.typeahead('val', '');
-                $scope.selectedNodeName = null;
-                if (!$scope.$$phase) {
-                  $scope.$apply();
-                }
-                autoCompleteNode.focus();
-              }
-            },
-            Delete: {
-              label: 'Delete',
-              action: function action() {
-                tree.delete_node($node);
-              }
-            }
-          };
-        }
-      }
-    });
-    jstreeNode.on('select_node.jstree', function (e, data) {
-      var category = $scope.categoryIdMap[data.node.id];
-      if (!category) {
-        $scope.selectedNodeName = null;
-        return;
-      }
-      $scope.selectedNodeName = category.name[$scope.displayLocale];
-      autoCompleteNode.typeahead('val', $scope.selectedNodeName);
-      if (!$scope.$$phase) {
-        $scope.$apply();
-      }
-    });
-    jstreeNode.on('deselect_node.jstree', function () {
-      $scope.selectedNodeName = null;
-    });
-  };
-
-  $http.get('/api/v1/cms/' + cmsName).then(function (res) {
-    initJsTree(res.data);
-  });
-  $scope.save = function () {
-    $http.post('/api/v1/cms', { name: cmsName, data: jstreeDataToCmsData() }).then(function () {
-      window.alert('saved successfully');
-      $state.reload();
-    });
-  };
-});
-}, {"./module":10}],
+}, {"../module":10}],
 11: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
@@ -5182,14 +4763,14 @@ module.exports = textModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":42,"./i18n/translations.ko.json":43,"./controllers.js":44}],
-42: [function(require, module, exports) {
+}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":43,"./i18n/translations.ko.json":44,"./controllers.js":45}],
+43: [function(require, module, exports) {
 module.exports = {
 
 }
 ;
 }, {}],
-43: [function(require, module, exports) {
+44: [function(require, module, exports) {
 module.exports = {
   "text": {
     "title": "국제화"
@@ -5197,7 +4778,7 @@ module.exports = {
 }
 ;
 }, {}],
-44: [function(require, module, exports) {
+45: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -5319,11 +4900,555 @@ textModule.controller('TextMainController', function ($scope, $http, $q, $state,
 });
 }, {"./module":11}],
 13: [function(require, module, exports) {
+'use strict';
+
+var userModule = angular.module('backoffice.user', ['ui.router', require('../third_party/angular-translate')]);
+
+module.exports = userModule;
+
+userModule.config(function ($translateProvider) {
+  $translateProvider.translations('en', require('./i18n/translations.en.json')).translations('ko', require('./i18n/translations.ko.json'));
+  $translateProvider.preferredLanguage('ko');
+});
+
+userModule.config(function ($stateProvider) {
+  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
+  var templateRoot = 'templates/metronic';
+
+  $stateProvider.state('user', {
+    abstract: true,
+    url: '/user',
+    template: '<ui-view/>'
+  }).state('user.manage', {
+    url: '/manage',
+    templateUrl: templateRoot + '/user/manage.html',
+    controller: 'UserManageController'
+  }).state('user.manage.tab', {
+    url: '/:tabName',
+    templateUrl: templateRoot + '/user/manage.html',
+    controller: 'UserManageController'
+  }).state('user.info', {
+    url: '/info/:userId',
+    templateUrl: templateRoot + '/user/info.html',
+    controller: 'UserInfoController',
+    resolve: {
+      user: function user($http, $stateParams) {
+        return $http.get('/api/v1/users/' + $stateParams.userId).then(function (res) {
+          return res.data;
+        });
+      }
+    }
+  }).state('user.waitConfirm', {
+    url: '/wait_confirm',
+    templateUrl: templateRoot + '/user/wait-confirm.html',
+    controller: 'UserWaitConfirmController'
+  });
+});
+
+userModule.factory('userUtil', function () {
+  return {
+    getRoleName: function getRoleName(user) {
+      var role = _.get(user, 'roles[0]');
+      return role ? role.type : '';
+    }
+  };
+});
+
+// BEGIN module require js
+require('./controllers.js');
+// END module require js
+}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":46,"./i18n/translations.ko.json":47,"./controllers.js":48}],
+46: [function(require, module, exports) {
 module.exports = {
 
 };
 }, {}],
+47: [function(require, module, exports) {
+module.exports = {
+  "user": {
+    "createUser": {
+      "admin": "어드민 생성",
+      "seller": "셀러 생성"
+    },
+    "manage": {
+      "adminTab": "어드민",
+      "bigBuyerTab": "빅바이어",
+      "buyerTab": "바이어",
+      "noRoleTab": "미인증",
+      "sellerTab": "셀러",
+      "title": "사용자"
+    },
+    "info": {
+      "bizNameLabel": "사업자명",
+      "bizNumberLabel": "사업자 번호",
+      "emailLabel": "이메일",
+      "gradeLabel": "회원 등급",
+      "vbankCodeLabel": "은행코드",
+      "vbankAccountLabel": "가상계좌번호",
+      "changePasswordButton": "비밀번호 변경",
+      "isConfirmed": "인증 여부",
+      "title": "유저 정보",
+      "telLabel": "전화번호",
+      "userTypeLabel": "유저 종류",
+      "editRoleButton": "권한 변경",
+      "userDetailButton": "유저 상세 정보"
+    },
+    "waitConfirm": {
+      "title": "바이어 인증 대기"
+    },
+    "role": {
+      "changeTitle": "유저 권한 변경"
+    }
+  }
+}
+;
+}, {}],
+48: [function(require, module, exports) {
+'use strict';
+
+var userModule = require('./module');
+
+userModule.controller('UserManageController', function ($scope, $http, $q, $state, $rootScope, $translate, $compile, userUtil, boUtils) {
+  $scope.contentTitle = $translate.instant('user.manage.title');
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'user.manage',
+    name: $translate.instant('user.manage.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.tabName = $state.params.tabName || '';
+  $scope.changeTab = function (tabName) {
+    if (!tabName) {
+      $state.go('user.manage', {}, { reload: true });
+      return;
+    }
+    $state.go('user.manage.tab', { tabName: tabName }, { reload: true });
+  };
+
+  $scope.userDatatables = {
+    field: 'users',
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+      }
+    }, {
+      data: 'email'
+    }, {
+      data: function data(_data) {
+        return _data;
+      },
+      render: function render(user) {
+        return userUtil.getRoleName(user);
+      }
+    }, {
+      // edit role button
+      data: 'id',
+      render: function render(id) {
+        return '<button class="btn blue" data-ng-click="openRolePopup(' + id + ')"><i class="fa fa-wrench"></i> ' + $translate.instant('user.info.editRoleButton') + '</button>';
+      }
+    }, {
+      // show user info button
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="user.info({ userId: ' + id + ' })"><button class="btn blue"><i class="fa fa-info"></i> ' + $translate.instant('user.info.userDetailButton') + '</button></a>';
+      }
+    }, {
+      data: 'id',
+      render: function render(id) {
+        return '<button class="btn blue" data-ng-click="openPasswordPopup(' + id + ')"><i class="fa fa-password"></i> ' + $translate.instant('user.info.changePasswordButton') + '</button>';
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }]
+  };
+
+  $scope.buyerDatatables = {
+    field: 'users',
+    // ID, Email, Name, tel, bizName, bizNumber
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+      }
+    }, {
+      data: 'email'
+    }, {
+      data: function data(_data2) {
+        return _data2.name || '';
+      }
+    }, {
+      data: function data(_data3) {
+        return _.get(_data3, 'data.tel') || '';
+      }
+    }, {
+      data: function data(_data4) {
+        return _.get(_data4, 'data.bizName') || '';
+      }
+    }, {
+      data: function data(_data5) {
+        return _.get(_data5, 'data.bizNumber') || '';
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }]
+  };
+
+  $scope.sellerDatatables = {
+    field: 'users',
+    // ID, Email, Name, tel
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+      }
+    }, {
+      data: function data(_data6) {
+        return _.get(_data6, 'roles[0].brand.id') || '';
+      },
+      render: function render(brandId) {
+        return '<a ui-sref="brand.edit({ brandId: ' + brandId + ' })">' + brandId + '</a>';
+      }
+    }, {
+      data: 'email'
+    }, {
+      data: function data(_data7) {
+        return _data7.name || '';
+      }
+    }, {
+      data: function data(_data8) {
+        return _.get(_data8, 'data.tel') || '';
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }]
+  };
+
+  $scope.noRoleDatatables = {
+    field: 'users',
+    // ID, Email, Name, tel, bizName, bizNumber, bizImage, changeToBuyer(action)
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+      }
+    }, {
+      data: 'email'
+    }, {
+      data: function data(_data9) {
+        return _data9.name || '';
+      }
+    }, {
+      data: function data(_data10) {
+        return _.get(_data10, 'data.tel') || '';
+      }
+    }, {
+      data: function data(_data11) {
+        return _.get(_data11, 'data.bizName') || '';
+      }
+    }, {
+      data: function data(_data12) {
+        return _.get(_data12, 'data.bizNumber') || '';
+      }
+    }, {
+      data: function data(_data13) {
+        return _data13;
+      },
+      render: function render(user) {
+        return _.get(user, 'data.bizImage') ? '<button class="btn blue" data-ng-click="openBizImage(' + user.id + ')">사업자 등록증 보기</button>' : '';
+      }
+    }, {
+      data: function data(_data14) {
+        return _data14;
+      },
+      render: function render(user) {
+        return '<button class="btn blue" data-ng-click="changeToBuyer(' + user.id + ')">바이어 인증</button>';
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }]
+  };
+
+  $scope.openBizImage = function (userId) {
+    $scope.activeUser = $scope.userIdToData[userId];
+    $('#user_biz_image').modal();
+  };
+
+  $scope.changeToBuyer = function (userId) {
+    $http.post('/api/v1/users/' + userId + '/roles', { roleType: 'buyer' }).then(function () {
+      window.alert('바이어 인증이 완료되었습니다');
+      $state.reload();
+    });
+  };
+
+  $scope.newUser = {};
+  $scope.createUser = function (user) {
+    $http.post('/api/v1/users', user).then(function (res) {
+      $http.post('/api/v1/users/' + res.data.id + '/roles', $scope.newUserRole).then(function () {
+        $scope.closeUserPopup();
+        $state.reload();
+      })['catch'](function (err) {
+        window.alert(err.data.message);
+      });
+    }, function (err) {
+      window.alert(err.data.message);
+    });
+  };
+  $scope.closeUserPopup = function () {
+    // 2016. 02. 23. [heekyu] modal hide is not work on page reload
+    $('#user_manage_create_user').modal('hide');
+    $('#user_manage_create_user').removeClass('in');
+    $('.modal-backdrop').remove();
+  };
+
+  $scope.editRole = { admin: false, buyer: false, bigBuyer: false, seller: false };
+  // former item has more priority
+  var roles = ['admin', 'bigBuyer', 'buyer'];
+  $scope.makeUserRolePopupData = function (user) {
+    var res = { admin: false, buyer: false, bigBuyer: false, seller: false };
+    if (user.roles) {
+      var _loop = function (i) {
+        var role = user.roles[i];
+        roles.forEach(function (item) {
+          if (role.type === item) {
+            res[item] = true;
+          }
+        });
+        if (role.type === 'owner') {
+          res.seller = true;
+        }
+      };
+
+      for (var i = 0; i < user.roles.length; i++) {
+        _loop(i);
+      };
+    }
+    $scope.editRole = res;
+  };
+  $scope.closeRolePopup = function () {
+    $('#user_change_role').modal('hide');
+    $('#user_change_role').removeClass('in');
+    $('.modal-backdrop').remove();
+  };
+  $scope.newUserPopup = {};
+  $scope.newUseris = function (role) {
+    $scope.newUserPopup.name = $translate.instant('user.createUser.' + role);
+    $scope.newUserRole = { roleType: role };
+  };
+
+  var userIdToData = {};
+
+  $scope.openRolePopup = function (userId) {
+    var user = $scope.userIdToData[userId];
+    $scope.editRoleUser = user;
+    $scope.makeUserRolePopupData(user);
+    if (!$scope.$$phase) {
+      $scope.$apply();
+    }
+    $('#user_change_role').modal();
+  };
+
+  $scope.changePasswordUser = null;
+  $scope.openPasswordPopup = function (userId) {
+    var user = $scope.userIdToData[userId];
+    $scope.changePasswordUser = user;
+    $('#user_change_password').modal();
+  };
+  $scope.closePasswordPopup = function () {
+    $('#user_change_password').modal('hide');
+  };
+  $scope.savePassword = function () {
+    var user = $scope.changePasswordUser;
+    if (!user.password) {
+      window.alert('비밀번호를 입력하세요');
+      return;
+    }
+    var password = user.password;
+    delete user.password;
+    $http.put('/api/v1/users/' + user.id + '/reset_password', { password: password }).then(function () {
+      window.alert('비밀번호 저장되었습니다');
+      $scope.closePasswordPopup();
+    }, function () {
+      window.alert('비밀번호 저장이 실패하였습니다.');
+    });
+  };
+
+  $scope.datatablesLoaded = function () {
+    var datas = $('.tabbable-bordered').find('table').DataTable().rows().data();
+    if (!$scope.userIdToData) {
+      $scope.userIdToData = {};
+    }
+    for (var i = 0; i < datas.length; i++) {
+      var data = datas[i];
+      $scope.userIdToData[data.id] = data;
+    }
+    $compile(angular.element($('table')))($scope);
+  };
+
+  // 2016. 02. 23. [heekyu] this is very limited since server cannot handle race condition properly
+  $scope.saveRole = function () {
+    var editRoleToData = function editRoleToData() {
+      for (var i = 0; i < roles.length; i++) {
+        var role = roles[i];
+        if ($scope.editRole[role]) {
+          return [{ type: role }];
+        }
+      }
+      return null;
+    };
+    var newRoleData = editRoleToData();
+    if (!newRoleData && !$scope.editRoleUser.roles) {
+      return;
+    }
+    var addOrDelete = {};
+
+    var isChangable = function isChangable(roleType) {
+      for (var i = 0; i < roles.length; i++) {
+        var role = roles[i];
+        if (role === roleType) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    ($scope.editRoleUser.roles || []).forEach(function (role) {
+      if (!isChangable(role.type)) {
+        return;
+      }
+      if (addOrDelete[role.type]) {
+        addOrDelete[role.type]--;
+      } else {
+        addOrDelete[role.type] = -1;
+      }
+    });
+    (newRoleData || []).forEach(function (role) {
+      if (!isChangable(role.type)) {
+        return;
+      }
+      if (addOrDelete[role.type]) {
+        addOrDelete[role.type]++;
+      } else {
+        addOrDelete[role.type] = 1;
+      }
+    });
+    var url = '/api/v1/users/' + $scope.editRoleUser.id + '/roles';
+    var keys = Object.keys(addOrDelete);
+    var addRoles = [];
+    var deleteRoles = [];
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      var count = addOrDelete[key];
+      if (count === 1) {
+        addRoles.push(key);
+        // promises.push($http.post(url, { roleType: key }));
+      } else if (count === -1) {
+          deleteRoles.push(key);
+          // promises.push($http.delete(url, { data: { type: key }, headers: {"Content-Type": "application/json;charset=utf-8"} }));
+        }
+    }
+    if (deleteRoles.length > 0) {
+      $http['delete'](url, { data: { type: deleteRoles[0] }, headers: { "Content-Type": "application/json;charset=utf-8" } }).then(function () {
+        if (addRoles.length > 0) {
+          $http.post(url, { roleType: addRoles[0] }).then(function () {
+            $scope.closeRolePopup();
+            $state.reload();
+          })['catch'](function (err) {
+            window.alert(err.message);
+          });
+        } else {
+          $scope.closeRolePopup();
+          $state.reload();
+        }
+      })['catch'](function (err) {
+        window.alert(err.message);
+      });
+    } else if (addRoles.length > 0) {
+      $http.post(url, { roleType: addRoles[0] }).then(function () {
+        $scope.closeRolePopup();
+        $state.reload();
+      })['catch'](function (err) {
+        window.alert(err.message);
+      });
+    } else {
+      $scope.closeRolePopup();
+    }
+  };
+});
+
+userModule.controller('UserWaitConfirmController', function ($scope, $state, $rootScope, $translate) {
+  $scope.contentTitle = $translate.instant('user.waitConfirm.title');
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'user.manage',
+    name: $translate.instant('user.manage.title')
+  }, {
+    sref: 'user.waitConfirm',
+    name: $translate.instant('user.waitConfirm.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+});
+
+userModule.controller('UserInfoController', function ($scope, $http, $state, $rootScope, $translate, user, userUtil, convertUtil) {
+  $scope.contentTitle = $translate.instant('user.info.title');
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'user.manage',
+    name: $translate.instant('user.manage.title')
+  }, {
+    sref: 'user.waitConfirm',
+    name: $translate.instant('user.info.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  var init = function init(user) {
+    $scope.user = user;
+
+    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNameLabel'), obj: _.get($scope.user, 'data.bizName'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNumberLabel'), obj: _.get($scope.user, 'data.bizNumber'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false }, { title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false }];
+  };
+  init(user);
+
+  $scope.save = function () {
+    convertUtil.copyFieldObj($scope.userFields, $scope.user);
+    $http.put('/api/v1/users/' + $scope.user.id, _.pick($scope.user, 'data', 'inipay')).then(function (res) {
+      // init(res.data);
+      $state.go('user.manage');
+    });
+  };
+
+  $scope.openBizImage = function () {
+    $('#user_biz_image').modal();
+  };
+});
+}, {"./module":13}],
 14: [function(require, module, exports) {
+module.exports = {
+
+};
+}, {}],
+15: [function(require, module, exports) {
 module.exports = {
   "main": {
     "mainMenu": "메인",
