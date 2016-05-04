@@ -3,16 +3,17 @@
 const mainModule = angular.module('backoffice.main', [
     'ui.router',
     'ngCookies',
-    require('../directives/module.js').name,
-    require('../dashboard/module').name,
-    require('../user/module').name,
-    require('../product/module').name,
-    require('../order/module').name,
     require('../brand/module').name,
-    require('../currency/module').name,
+    require('../building/module').name,
     require('../cms/module').name,
+    require('../currency/module').name,
+    require('../dashboard/module').name,
+    require('../directives/module.js').name,
+    require('../order/module').name,
+    require('../product/module').name,
     require('../text/module').name,
     require('../third_party/angular-translate'),
+    require('../user/module').name,
   ])
   .config(($translateProvider) => {
     $translateProvider

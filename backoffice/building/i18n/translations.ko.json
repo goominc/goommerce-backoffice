@@ -1,0 +1,15 @@
+{
+  "building": {
+    "main": {
+      "title": "빌딩"
+    },
+    "info": {
+      "title": "빌딩",
+      "addressLabel": "주소",
+      "businessHourLabel": "영업시간",
+      "holidayLabel": "휴무일",
+      "telLabel": "연락처",
+      "descriptionLabel": "소개"
+    }
+  }
+}
