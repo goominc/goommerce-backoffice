@@ -2113,6 +2113,8 @@ module.exports = {
       "title": "주문현황"
     },
     "detail": {
+      "deleteButton": "주문 삭제",
+      "deleteMessage": "정말로 삭제하시겠습니까?",
       "title": "주문상세",
       "refundTitle": "환불",
       "saveButton": "저장"
@@ -2415,6 +2417,16 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     }, function (err) {
       return alert(err.data.message);
     });
+  };
+
+  $scope.deleteOrder = function () {
+    if (window.confirm($translate.instant('order.detail.deleteMessage'))) {
+      $http['delete']('/api/v1/orders/' + order.id).then(function () {
+        window.history.back();
+      }, function (err) {
+        return alert(err.data.message);
+      });
+    };
   };
 
   if ($scope.order.address) {

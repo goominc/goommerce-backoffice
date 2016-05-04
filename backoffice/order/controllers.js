@@ -236,6 +236,14 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     }, (err) => alert(err.data.message));
   };
 
+  $scope.deleteOrder = () => {
+    if (window.confirm($translate.instant('order.detail.deleteMessage'))) {
+      $http.delete(`/api/v1/orders/${order.id}`).then(() => {
+        window.history.back();
+      }, (err) => alert(err.data.message));
+    };
+  };
+
   if ($scope.order.address) {
     $scope.addressFields = [
       {title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name'},
