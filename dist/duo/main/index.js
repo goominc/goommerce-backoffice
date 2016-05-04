@@ -213,6 +213,10 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
     name: $translate.instant('brand.title'),
     sref: 'brand.main'
   }, {
+    key: 'building',
+    name: $translate.instant('building.main.title'),
+    sref: 'building.main'
+  }, {
     key: 'cms', // TODO get key from router
     name: 'CMS',
     sref: 'cms.main_category',
@@ -1327,7 +1331,8 @@ module.exports = {
       "businessHourLabel": "영업시간",
       "holidayLabel": "휴무일",
       "telLabel": "연락처",
-      "descriptionLabel": "소개"
+      "descriptionLabel": "소개",
+      "floorInfoLabel": "층별소개"
     }
   }
 }
@@ -1378,7 +1383,7 @@ buildingModule.controller('BuildingInfoController', function ($scope, $http, $st
     if (!$scope.building.data) {
       $scope.building.data = {};
     }
-    $scope.buildingFields = [{ title: $translate.instant('building.info.addressLabel'), obj: _.get($scope.building, 'data.address'), key: 'data.address' }, { title: $translate.instant('building.info.businessHourLabel'), obj: _.get($scope.building, 'data.businessHour'), key: 'data.businessHour' }, { title: $translate.instant('building.info.holidayLabel'), obj: _.get($scope.building, 'data.holiday'), key: 'data.holiday' }, { title: $translate.instant('building.info.telLabel'), obj: _.get($scope.building, 'data.tel'), key: 'data.tel' }, { title: $translate.instant('building.info.descriptionLabel'), obj: _.get($scope.building, 'data.description'), key: 'data.description', isMultiLine: true }];
+    $scope.buildingFields = [{ title: $translate.instant('building.info.addressLabel'), obj: _.get($scope.building, 'data.address'), key: 'data.address' }, { title: $translate.instant('building.info.businessHourLabel'), obj: _.get($scope.building, 'data.businessHour'), key: 'data.businessHour' }, { title: $translate.instant('building.info.holidayLabel'), obj: _.get($scope.building, 'data.holiday'), key: 'data.holiday' }, { title: $translate.instant('building.info.telLabel'), obj: _.get($scope.building, 'data.tel'), key: 'data.tel' }, { title: $translate.instant('building.info.floorInfoLabel'), obj: _.get($scope.building, 'data.floorInfo'), key: 'data.floorInfo' }, { title: $translate.instant('building.info.descriptionLabel'), obj: _.get($scope.building, 'data.description'), key: 'data.description', isMultiLine: true }];
   };
   $http.get(url).then(function (res) {
     init(res.data);
