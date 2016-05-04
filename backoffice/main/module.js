@@ -148,6 +148,11 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
       sref: 'brand.main',
     },
     {
+      key: 'building',
+      name: $translate.instant('building.main.title'),
+      sref: 'building.main',
+    },
+    {
       key: 'cms', // TODO get key from router
       name: 'CMS',
       sref: 'cms.main_category',
