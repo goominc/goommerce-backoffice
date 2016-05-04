@@ -6,3 +6,4 @@ components
 backoffice/components
 node_modules
 backoffice/main/index.js
+dist/vendor
