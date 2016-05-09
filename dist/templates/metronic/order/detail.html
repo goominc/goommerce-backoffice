@@ -316,17 +316,18 @@
                         <table class="table table-hover table-bordered table-striped">
                           <thead>
                           <tr>
-                            <th width="15%">상품ID</th>
-                            <th width="15%">상품명</th>
-                            <th width="15%">색상</th>
-                            <th width="15%">크기</th>
-                            <th width="10%">주문(최초) 가격</th>
-                            <th width="10%">가격</th>
-                            <th width="10%">주문(최초 수량)</th>
-                            <th width="10%">Total</th>
-                            <th width="10%">Final Quantity</th>
-                            <th width="10%">Final Total</th>
-                            <th width="10%">Status</th>
+                            <th>상품ID</th>
+                            <th>상품명</th>
+                            <th>색상</th>
+                            <th>크기</th>
+                            <th>주문(최초) 가격</th>
+                            <th>가격</th>
+                            <th>주문(최초 수량)</th>
+                            <th>Total</th>
+                            <th>재고 수량</th>
+                            <th>Final Quantity</th>
+                            <th>Final Total</th>
+                            <th>Status</th>
                           </tr>
                           </thead>
                           <tbody class="cell-center">
@@ -354,6 +355,9 @@
                             </td>
                             <td>
                               {{row.totalKRW}}
+                            </td>
+                            <td>
+                              {{row.data.stock.quantity}}
                             </td>
                             <td>
                               <input type="number" data-ng-model="row.finalQuantity">
