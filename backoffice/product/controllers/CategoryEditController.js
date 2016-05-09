@@ -82,12 +82,9 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     },
     types: {
       default: {
-        max_depth: 3,
+        // 2016. 05. 10. [heekyu] max_depth yields 'move_node' restriction
+        // max_depth: 3,
         icon: 'fa fa-folder icon-state-warning icon-lg',
-      },
-      file: {
-        max_depth: 3,
-        icon: 'fa fa-file icon-state-warning icon-lg',
       },
     },
     plugins: [ 'dnd', 'types', 'contextmenu' ],
