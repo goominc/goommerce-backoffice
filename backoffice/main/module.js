@@ -292,6 +292,11 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
   downloadTexts();
 
   $rootScope.getContentsI18nText = (key) => {
+    if (!$rootScope.state.texts) {
+      // 2016. 05. 10. [heekyu] before download texts
+      //                        TODO there is any problems?
+      return key;
+    }
     for (let i = 0; i < $rootScope.state.locales.length; i++) {
       const locale = $rootScope.state.locales[i];
       if (locale === $rootScope.state.editLocale || 'ko') {
