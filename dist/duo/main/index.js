@@ -288,6 +288,11 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       }
     }
   };
+  var editLocaleKey = 'editLocale';
+  var editLocale = 'ko';
+  if ($cookies.get(editLocaleKey)) {
+    editLocale = $cookies.get(editLocaleKey);
+  }
   // 2016. 02. 15. [heekyu] app-wide state
   $rootScope.state = {
     auth: {},
@@ -342,12 +347,6 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
   };
   checkLogin();
 
-  var editLocaleKey = 'editLocale';
-  var editLocale = 'ko';
-  if ($cookies.get(editLocaleKey)) {
-    editLocale = $cookies.get(editLocaleKey);
-  }
-
   // 2016. 03. 17. [heekyu] download all texts for order status
   //                        TODO texts module use this contents
   var downloadTexts = function downloadTexts() {
@@ -367,6 +366,11 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
   downloadTexts();
 
   $rootScope.getContentsI18nText = function (key) {
+    if (!$rootScope.state.texts) {
+      // 2016. 05. 10. [heekyu] before download texts
+      //                        TODO there is any problems?
+      return key;
+    }
     for (var i = 0; i < $rootScope.state.locales.length; i++) {
       var locale = $rootScope.state.locales[i];
       if (locale === $rootScope.state.editLocale || 'ko') {
@@ -3180,7 +3184,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     var current = start;
     var res = [];
     while (current <= end) {
-      res.push(current);
+      res.push(current.toString());
       current += step;
     }
     return res;
@@ -3198,15 +3202,25 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       return kind.selected = new Set();
     });
     productVariants.forEach(function (variant) {
+      /*
       if (!variant.sku) {
         return;
       }
-      var split = variant.sku.split('-');
+      const split = variant.sku.split('-');
       if (split.length < 2) {
         return;
       }
-      $scope.variantKinds[0].selected.add(split[split.length - 2]);
-      $scope.variantKinds[1].selected.add(split[split.length - 1]);
+      */
+      var split = variant.sku ? variant.sku.split('-').slice(-2) : [];
+      for (var i = 0; i < $scope.variantKinds.length; i++) {
+        var kind = $scope.variantKinds[i];
+        var value = _.get(variant, 'data.' + kind.key);
+        if (value) {
+          kind.selected.add(value.toString());
+        } else if (split.length == 2) {
+          kind.selected.add(split[i]);
+        }
+      }
     });
     $scope.variantKinds.forEach(function (kind) {
       return kind.kinds = Array.from(kind.selected);
@@ -4024,7 +4038,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
   var getTreeData = function getTreeData(root, currentCategoryId, opened) {
     var json = {
       id: root.id,
-      text: root.name ? root.name[editLocale] : 'NoName',
+      text: root.name ? root.name[editLocale] + '(' + root.id + ')' : 'NoName',
       data: { id: root.id },
       state: { selected: false, opened: opened } };
     /* TODO disabled: !root.isActive, */
