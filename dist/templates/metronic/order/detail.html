@@ -71,7 +71,14 @@
                           Payment Status:
                         </div>
                         <div class="col-md-7 value">
-                          <span class="label label-success">{{translateOrderPaymentStatus(order.paymentStatus)}}</span>
+                          <div class="form-group">
+                            <select class="form-control" data-ng-model="order.paymentStatus" convert-to-number>
+                              <option value="0">{{translateOrderPaymentStatus(0)}}</option>
+                              <option value="1">{{translateOrderPaymentStatus(1)}}</option>
+                              <option value="100">{{translateOrderPaymentStatus(100)}}</option>
+                              <option value="200">{{translateOrderPaymentStatus(200)}}</option>
+                            </select>
+                          </div>
                         </div>
                       </div>
                     </div>

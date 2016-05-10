@@ -230,7 +230,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   };
 
   $scope.saveStatus = () => {
-    const data = _.pick(order, 'status');
+    const data = _.pick(order, 'status', 'paymentStatus');
     $http.put(`/api/v1/orders/${order.id}/status`, data).then((res) => {
       $state.reload();
     }, (err) => alert(err.data.message));

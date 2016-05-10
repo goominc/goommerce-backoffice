@@ -2416,7 +2416,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   };
 
   $scope.saveStatus = function () {
-    var data = _.pick(order, 'status');
+    var data = _.pick(order, 'status', 'paymentStatus');
     $http.put('/api/v1/orders/' + order.id + '/status', data).then(function (res) {
       $state.reload();
     }, function (err) {
