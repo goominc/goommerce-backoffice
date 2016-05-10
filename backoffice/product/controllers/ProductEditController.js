@@ -20,7 +20,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     let current = start;
     const res = [];
     while (current <= end) {
-      res.push(current);
+      res.push(current.toString());
       current += step;
     }
     return res;
@@ -42,6 +42,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   const kindsFromProductVariants = (productVariants) => {
     $scope.variantKinds.forEach((kind) => kind.selected = new Set());
     productVariants.forEach((variant) => {
+      /*
       if (!variant.sku) {
         return;
       }
@@ -49,8 +50,17 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       if (split.length < 2) {
         return;
       }
-      $scope.variantKinds[0].selected.add(split[split.length - 2]);
-      $scope.variantKinds[1].selected.add(split[split.length - 1]);
+      */
+      const split = variant.sku ? variant.sku.split('-').slice(-2) : [];
+      for (let i = 0; i < $scope.variantKinds.length; i++) {
+        const kind = $scope.variantKinds[i];
+        const value = _.get(variant, `data.${kind.key}`);
+        if (value) {
+          kind.selected.add(value.toString());
+        } else if (split.length == 2) {
+          kind.selected.add(split[i]);
+        }
+      }
     });
     $scope.variantKinds.forEach((kind) => kind.kinds = Array.from(kind.selected));
   };
