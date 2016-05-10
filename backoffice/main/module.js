@@ -215,6 +215,11 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
       }
     }
   };
+  const editLocaleKey = 'editLocale';
+  let editLocale = 'ko';
+  if ($cookies.get(editLocaleKey)) {
+    editLocale = $cookies.get(editLocaleKey);
+  }
   // 2016. 02. 15. [heekyu] app-wide state
   $rootScope.state = {
     auth: {},
@@ -268,12 +273,6 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
     });
   };
   checkLogin();
-
-  const editLocaleKey = 'editLocale';
-  let editLocale = 'ko';
-  if ($cookies.get(editLocaleKey)) {
-    editLocale = $cookies.get(editLocaleKey);
-  }
 
   // 2016. 03. 17. [heekyu] download all texts for order status
   //                        TODO texts module use this contents
