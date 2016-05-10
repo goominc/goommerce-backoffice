@@ -34,7 +34,7 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
   const getTreeData = (root, currentCategoryId, opened) => {
     let json = {
       id: root.id,
-      text: root.name ? root.name[editLocale] : 'NoName',
+      text: root.name ? `${root.name[editLocale]}(${root.id})` : 'NoName',
       data: { id: root.id },
       state: { selected: false, opened }, /* TODO disabled: !root.isActive, */
     };
