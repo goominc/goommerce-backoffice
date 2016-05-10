@@ -5,7 +5,7 @@ input[type="checkbox"] + label {
   display:inline-block;
   width:19px;
   height:19px;
-  background-image: url("../../vendor/metronic/theme/assets/global/plugins/uniform/images/sprite.png");
+  background-image: url("https://s3.ap-northeast-2.amazonaws.com/linkshops/bo/vendor/metronic/theme/assets/global/plugins/uniform/images/sprite.png");
   background-repeat: no-repeat;
   background-position: 0 -260px;
   vertical-align: top;
@@ -64,6 +64,7 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
 }
+
 .brand-create-form-input {
   display: inline-block;
   width: 150px;
