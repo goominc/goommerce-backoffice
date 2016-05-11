@@ -184,7 +184,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     { title: '사이즈4', type: 'number', key: 'data.detail.size4', tmpKey: 'detailSize4' },
     { title: '사이즈5', type: 'number', key: 'data.detail.size5', tmpKey: 'detailSize5' },
     { title: '사이즈6', type: 'number', key: 'data.detail.size6', tmpKey: 'detailSize6' },
-    { title: '촬영모델', key: 'data.detail.modelName', tmpKey: 'detailModelName' },
+    { title: '촬영모델', enums: ['이은지', '임소리', '유영석'], key: 'data.detail.modelName', tmpKey: 'detailModelName' },
     { title: '모델착용사이즈', key: 'data.detail.modelSize', tmpKey: 'detailModelSize' },
     { title: '원산지', key: 'data.detail.origin', tmpKey: 'detailOrigin' },
     { title: '촉감', enums: ['까슬함', '적당함', '부드러움'], key: 'data.detail.touch', tmpKey: 'detailTouch' },
@@ -210,6 +210,9 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
   if ($scope.product.id) {
     $scope.productToTmpObj();
+  }
+  if (!$scope.tmpObj.detailModelSize) {
+    $scope.tmpObj.detailModelSize = 'Free';
   }
 
   $scope.productPriceChanged = (oldKRW, newKRW) => {
