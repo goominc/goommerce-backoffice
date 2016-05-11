@@ -76,18 +76,30 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
       {title: $translate.instant('brand.edit.nameLabel'), obj: _.get($scope.brand, 'name.ko'), key: 'name.ko'},
     ];
     $scope.brandFields2 = [
+      {title: $translate.instant('brand.edit.buildingFloorLabel'), obj: _.get($scope.brand, 'data.location.floor'), key: 'data.location.floor'},
+      {title: $translate.instant('brand.edit.buildingFlatNumberLabel'), obj: _.get($scope.brand, 'data.location.flatNumber'), key: 'data.location.flatNumber'},
       {title: $translate.instant('brand.edit.bizNameLabel'), obj: _.get($scope.brand, 'data.businessRegistration.name'), key: 'data.businessRegistration.name'},
       {title: $translate.instant('brand.edit.bizNumberLabel'), obj: _.get($scope.brand, 'data.businessRegistration.number'), key: 'data.businessRegistration.number'},
       {title: $translate.instant('brand.edit.accountBankLabel'), obj: _.get($scope.brand, 'data.bank.name'), key: 'data.bank.name'},
       {title: $translate.instant('brand.edit.accountOwnerLabel'), obj: _.get($scope.brand, 'data.bank.accountHolder'), key: 'data.bank.accountHolder'},
       {title: $translate.instant('brand.edit.accountNumberLabel'), obj: _.get($scope.brand, 'data.bank.accountNumber'), key: 'data.bank.accountNumber'},
-      {title: $translate.instant('brand.edit.buildingNameLabel'), obj: _.get($scope.brand, 'data.building.name'), key: 'data.building.name'},
-      {title: $translate.instant('brand.edit.buildingFloorLabel'), obj: _.get($scope.brand, 'data.building.floor'), key: 'data.building.floor'},
-      {title: $translate.instant('brand.edit.buildingFlatNumberLabel'), obj: _.get($scope.brand, 'data.building.flatNumber'), key: 'data.building.flatNumber'},
+      // {title: $translate.instant('brand.edit.buildingNameLabel'), obj: _.get($scope.brand, 'data.location.name'), key: 'data.location.name'},
       {title: $translate.instant('brand.edit.telLabel'), obj: _.get($scope.brand, 'data.tel'), key: 'data.tel'},
       {title: $translate.instant('brand.edit.mobileLabel'), obj: _.get($scope.brand, 'data.mobile'), key: 'data.mobile'},
     ];
+
+    $scope.buildingMap = {};
+    $scope.buildings = [];
+    $scope.buildingId = _.get($scope.brand, 'data.location.building.id').toString() || "0";
+    $http.get('/api/v1/buildings').then((res) => {
+      $scope.buildings = res.data.buildings || [];
+      $scope.buildings.forEach((building) => {
+        building.id = +building.id;
+        $scope.buildingMap[building.id] = building;
+      });
+    });
   };
+
   if ($state.params.brandId) {
     boUtils.startProgressBar();
     $http.get(`/api/v1/brands/${$state.params.brandId}/unmodified`).then((res) => {
@@ -109,6 +121,9 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
     $rootScope.state.locales.forEach((locale) => {
       $scope.brand.name[locale] = $scope.brand.name.ko;
     });
+    if ($scope.buildingMap && $scope.buildingMap[$scope.buildingId]) {
+      _.set($scope.brand, 'data.location.building', _.pick($scope.buildingMap[$scope.buildingId], ['id', 'name']));
+    }
     const requestBrand = _.pick($scope.brand, 'name', 'data');
     let promise;
     if ($state.params.brandId) {

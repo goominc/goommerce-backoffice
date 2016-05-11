@@ -12,7 +12,7 @@
       "accountBankLabel": "은행",
       "accountOwnerLabel": "예금주",
       "accountNumberLabel": "계좌번호",
-      "buildingNameLabel": "빌딩 이름",
+      "buildingLabel": "빌딩",
       "buildingFloorLabel": "빌딩 층",
       "buildingFlatNumberLabel": "빌딩 호수",
       "telLabel": "전화 번호",
