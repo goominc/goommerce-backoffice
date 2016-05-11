@@ -3382,7 +3382,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   $scope.inputFields = [
   // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
   { title: 'name', key: 'name.ko', tmpKey: 'name', isRequired: true }];
-  $scope.moreFields = [{ title: '구분', enums: ['상의', '원피스', '바지', '치마', '기타'], key: 'data.detail.kind', tmpKey: 'detailKind' }, { title: '사이즈1', type: 'number', key: 'data.detail.size1', tmpKey: 'detailSize1' }, { title: '사이즈2', type: 'number', key: 'data.detail.size2', tmpKey: 'detailSize2' }, { title: '사이즈3', type: 'number', key: 'data.detail.size3', tmpKey: 'detailSize3' }, { title: '사이즈4', type: 'number', key: 'data.detail.size4', tmpKey: 'detailSize4' }, { title: '사이즈5', type: 'number', key: 'data.detail.size5', tmpKey: 'detailSize5' }, { title: '사이즈6', type: 'number', key: 'data.detail.size6', tmpKey: 'detailSize6' }, { title: '촬영모델', key: 'data.detail.modelName', tmpKey: 'detailModelName' }, { title: '모델착용사이즈', key: 'data.detail.modelSize', tmpKey: 'detailModelSize' }, { title: '원산지', key: 'data.detail.origin', tmpKey: 'detailOrigin' }, { title: '촉감', enums: ['까슬함', '적당함', '부드러움'], key: 'data.detail.touch', tmpKey: 'detailTouch' }, { title: '신축성', enums: ['좋음', '약간', '없음'], key: 'data.detail.flexibility', tmpKey: 'detailFlexibility' }, { title: '비침', enums: ['많이비침', '약간비침', '비침없음'], key: 'data.detail.transparency', tmpKey: 'detailTransparency' }, { title: '광택감', enums: ['광택있음', '약간있음', '광택없음'], key: 'data.detail.gloss', tmpKey: 'detailGloss' }, { title: '두께감', enums: ['두꺼움', '적당함', '얇음'], key: 'data.detail.thickness', tmpKey: 'detailThickness' }, { title: '안감', enums: ['전체안감', '부분안감', '안감없음'], key: 'data.detail.lining', tmpKey: 'detailLining' }];
+  $scope.moreFields = [{ title: '구분', enums: ['상의', '원피스', '바지', '치마', '기타'], key: 'data.detail.kind', tmpKey: 'detailKind' }, { title: '사이즈1', type: 'number', key: 'data.detail.size1', tmpKey: 'detailSize1' }, { title: '사이즈2', type: 'number', key: 'data.detail.size2', tmpKey: 'detailSize2' }, { title: '사이즈3', type: 'number', key: 'data.detail.size3', tmpKey: 'detailSize3' }, { title: '사이즈4', type: 'number', key: 'data.detail.size4', tmpKey: 'detailSize4' }, { title: '사이즈5', type: 'number', key: 'data.detail.size5', tmpKey: 'detailSize5' }, { title: '사이즈6', type: 'number', key: 'data.detail.size6', tmpKey: 'detailSize6' }, { title: '촬영모델', enums: ['이은지', '임소리', '유영석'], key: 'data.detail.modelName', tmpKey: 'detailModelName' }, { title: '모델착용사이즈', key: 'data.detail.modelSize', tmpKey: 'detailModelSize' }, { title: '원산지', key: 'data.detail.origin', tmpKey: 'detailOrigin' }, { title: '촉감', enums: ['까슬함', '적당함', '부드러움'], key: 'data.detail.touch', tmpKey: 'detailTouch' }, { title: '신축성', enums: ['좋음', '약간', '없음'], key: 'data.detail.flexibility', tmpKey: 'detailFlexibility' }, { title: '비침', enums: ['많이비침', '약간비침', '비침없음'], key: 'data.detail.transparency', tmpKey: 'detailTransparency' }, { title: '광택감', enums: ['광택있음', '약간있음', '광택없음'], key: 'data.detail.gloss', tmpKey: 'detailGloss' }, { title: '두께감', enums: ['두꺼움', '적당함', '얇음'], key: 'data.detail.thickness', tmpKey: 'detailThickness' }, { title: '안감', enums: ['전체안감', '부분안감', '안감없음'], key: 'data.detail.lining', tmpKey: 'detailLining' }];
 
   var allFields = $scope.inputFields.concat($scope.moreFields);
   $scope.tmpObjToProduct = function () {
@@ -3399,6 +3399,9 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
   if ($scope.product.id) {
     $scope.productToTmpObj();
+  }
+  if (!$scope.tmpObj.detailModelSize) {
+    $scope.tmpObj.detailModelSize = 'Free';
   }
 
   $scope.productPriceChanged = function (oldKRW, newKRW) {
