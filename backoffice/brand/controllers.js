@@ -90,7 +90,7 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
 
     $scope.buildingMap = {};
     $scope.buildings = [];
-    $scope.buildingId = _.get($scope.brand, 'data.location.building.id').toString() || "0";
+    $scope.buildingId = (_.get($scope.brand, 'data.location.building.id') || "0").toString();
     $http.get('/api/v1/buildings').then((res) => {
       $scope.buildings = res.data.buildings || [];
       $scope.buildings.forEach((building) => {

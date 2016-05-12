@@ -1214,7 +1214,7 @@ brandModule.controller('BrandEditController', function ($scope, $http, $state, $
 
     $scope.buildingMap = {};
     $scope.buildings = [];
-    $scope.buildingId = _.get($scope.brand, 'data.location.building.id').toString() || "0";
+    $scope.buildingId = (_.get($scope.brand, 'data.location.building.id') || "0").toString();
     $http.get('/api/v1/buildings').then(function (res) {
       $scope.buildings = res.data.buildings || [];
       $scope.buildings.forEach(function (building) {
