@@ -1123,7 +1123,7 @@ module.exports = {
       "accountBankLabel": "은행",
       "accountOwnerLabel": "예금주",
       "accountNumberLabel": "계좌번호",
-      "buildingNameLabel": "빌딩 이름",
+      "buildingLabel": "빌딩",
       "buildingFloorLabel": "빌딩 층",
       "buildingFlatNumberLabel": "빌딩 호수",
       "telLabel": "전화 번호",
@@ -1208,8 +1208,22 @@ brandModule.controller('BrandEditController', function ($scope, $http, $state, $
       $scope.brand.data = {};
     }
     $scope.brandFields1 = [{ title: 'ID', key: 'id', obj: $scope.brand.id, isReadOnly: true }, { title: $translate.instant('brand.edit.nameLabel'), obj: _.get($scope.brand, 'name.ko'), key: 'name.ko' }];
-    $scope.brandFields2 = [{ title: $translate.instant('brand.edit.bizNameLabel'), obj: _.get($scope.brand, 'data.businessRegistration.name'), key: 'data.businessRegistration.name' }, { title: $translate.instant('brand.edit.bizNumberLabel'), obj: _.get($scope.brand, 'data.businessRegistration.number'), key: 'data.businessRegistration.number' }, { title: $translate.instant('brand.edit.accountBankLabel'), obj: _.get($scope.brand, 'data.bank.name'), key: 'data.bank.name' }, { title: $translate.instant('brand.edit.accountOwnerLabel'), obj: _.get($scope.brand, 'data.bank.accountHolder'), key: 'data.bank.accountHolder' }, { title: $translate.instant('brand.edit.accountNumberLabel'), obj: _.get($scope.brand, 'data.bank.accountNumber'), key: 'data.bank.accountNumber' }, { title: $translate.instant('brand.edit.buildingNameLabel'), obj: _.get($scope.brand, 'data.building.name'), key: 'data.building.name' }, { title: $translate.instant('brand.edit.buildingFloorLabel'), obj: _.get($scope.brand, 'data.building.floor'), key: 'data.building.floor' }, { title: $translate.instant('brand.edit.buildingFlatNumberLabel'), obj: _.get($scope.brand, 'data.building.flatNumber'), key: 'data.building.flatNumber' }, { title: $translate.instant('brand.edit.telLabel'), obj: _.get($scope.brand, 'data.tel'), key: 'data.tel' }, { title: $translate.instant('brand.edit.mobileLabel'), obj: _.get($scope.brand, 'data.mobile'), key: 'data.mobile' }];
+    $scope.brandFields2 = [{ title: $translate.instant('brand.edit.buildingFloorLabel'), obj: _.get($scope.brand, 'data.location.floor'), key: 'data.location.floor' }, { title: $translate.instant('brand.edit.buildingFlatNumberLabel'), obj: _.get($scope.brand, 'data.location.flatNumber'), key: 'data.location.flatNumber' }, { title: $translate.instant('brand.edit.bizNameLabel'), obj: _.get($scope.brand, 'data.businessRegistration.name'), key: 'data.businessRegistration.name' }, { title: $translate.instant('brand.edit.bizNumberLabel'), obj: _.get($scope.brand, 'data.businessRegistration.number'), key: 'data.businessRegistration.number' }, { title: $translate.instant('brand.edit.accountBankLabel'), obj: _.get($scope.brand, 'data.bank.name'), key: 'data.bank.name' }, { title: $translate.instant('brand.edit.accountOwnerLabel'), obj: _.get($scope.brand, 'data.bank.accountHolder'), key: 'data.bank.accountHolder' }, { title: $translate.instant('brand.edit.accountNumberLabel'), obj: _.get($scope.brand, 'data.bank.accountNumber'), key: 'data.bank.accountNumber' },
+    // {title: $translate.instant('brand.edit.buildingNameLabel'), obj: _.get($scope.brand, 'data.location.name'), key: 'data.location.name'},
+    { title: $translate.instant('brand.edit.telLabel'), obj: _.get($scope.brand, 'data.tel'), key: 'data.tel' }, { title: $translate.instant('brand.edit.mobileLabel'), obj: _.get($scope.brand, 'data.mobile'), key: 'data.mobile' }];
+
+    $scope.buildingMap = {};
+    $scope.buildings = [];
+    $scope.buildingId = _.get($scope.brand, 'data.location.building.id').toString() || "0";
+    $http.get('/api/v1/buildings').then(function (res) {
+      $scope.buildings = res.data.buildings || [];
+      $scope.buildings.forEach(function (building) {
+        building.id = +building.id;
+        $scope.buildingMap[building.id] = building;
+      });
+    });
   };
+
   if ($state.params.brandId) {
     boUtils.startProgressBar();
     $http.get('/api/v1/brands/' + $state.params.brandId + '/unmodified').then(function (res) {
@@ -1231,6 +1245,9 @@ brandModule.controller('BrandEditController', function ($scope, $http, $state, $
     $rootScope.state.locales.forEach(function (locale) {
       $scope.brand.name[locale] = $scope.brand.name.ko;
     });
+    if ($scope.buildingMap && $scope.buildingMap[$scope.buildingId]) {
+      _.set($scope.brand, 'data.location.building', _.pick($scope.buildingMap[$scope.buildingId], ['id', 'name']));
+    }
     var requestBrand = _.pick($scope.brand, 'name', 'data');
     var promise = undefined;
     if ($state.params.brandId) {
@@ -2510,15 +2527,6 @@ orderModule.controller('OrderUncleController', function ($scope, $rootScope, $ht
     }]
   };
 
-  $scope.download = function () {
-    $http.get('/api/v1/uncle/order_products?format=csv').then(function (res) {
-      var blob = new Blob([res.data]);
-      var downloadLink = angular.element('<a></a>');
-      downloadLink.attr('href', window.URL.createObjectURL(blob));
-      downloadLink.attr('download', 'uncle.csv');
-      downloadLink[0].click();
-    });
-  };
   $rootScope.initAll($scope, $state.current.name);
 });
 
@@ -2746,17 +2754,6 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
   }
 
   udpateDatatables();
-
-  $scope.download = function () {
-    var date = $scope.activeDate;
-    $http.get('/api/v1/order_products/settlement/' + date + '?format=csv').then(function (res) {
-      var blob = new Blob([res.data]);
-      var downloadLink = angular.element('<a></a>');
-      downloadLink.attr('href', window.URL.createObjectURL(blob));
-      downloadLink.attr('download', 'settlement-' + date + '.csv');
-      downloadLink[0].click();
-    });
-  };
 
   $rootScope.initAll($scope, $state.current.name);
 });
