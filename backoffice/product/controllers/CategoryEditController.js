@@ -187,6 +187,14 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     });
   };
 
+  $scope.reindex = () => {
+    $http.put('/api/v1/products/reindex').then((res) => {
+      window.alert(res.data.message);
+    }, (err) => {
+      window.alert(err.data);
+    });
+  };
+
   $scope.changeCategoryEditLocale = (locale) => {
     $rootScope.changeEditLocale(locale);
     $state.reload();

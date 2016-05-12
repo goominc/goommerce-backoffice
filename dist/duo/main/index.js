@@ -3082,7 +3082,8 @@ module.exports = {
       "rootName": "전체",
       "nameNewCategory": "새 카테고리",
       "labelNewCategory": "카테고리 생성",
-      "labelDeleteCategory": "삭제"
+      "labelDeleteCategory": "삭제",
+      "reindexButton": "검색 업데이트"
     },
     "batchUpload": {
       "title": "상품 일괄 등록",
@@ -4193,6 +4194,14 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
       categoryIdMap[category.id] = category;
       jstreeNode.jstree('set_text', category.id, category.name[editLocale]);
       $scope.category = category;
+    }, function (err) {
+      window.alert(err.data);
+    });
+  };
+
+  $scope.reindex = function () {
+    $http.put('/api/v1/products/reindex').then(function (res) {
+      window.alert(res.data.message);
     }, function (err) {
       window.alert(err.data);
     });

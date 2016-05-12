@@ -13,13 +13,16 @@
             <div class="portlet-body">
               <div class="row">
                 <div class="col-md-12" style="margin-bottom: 20px;">
-                  <button class="btn" style="margin-right: 20px;"
-                          data-ng-repeat="locale in state.locales"
-                          data-ng-class="{'red': state.editLocale === locale, 'blue': state.editLocale !== locale}"
-                          data-ng-click="changeCategoryEditLocale(locale)"
-                  >
-                    {{locale}}
-                  </button>
+                  <div class="actions btn-set">
+                    <button class="btn" style="margin-right: 20px;"
+                            data-ng-repeat="locale in state.locales"
+                            data-ng-class="{'red': state.editLocale === locale, 'blue': state.editLocale !== locale}"
+                            data-ng-click="changeCategoryEditLocale(locale)"
+                    >
+                      {{locale}}
+                    </button>
+                    <button class="btn blue pull-right" ng-click="reindex()"><i class="fa fa-check"></i> {{'product.category.reindexButton' | translate}}</button>
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <div id="categoryTree"></div>
