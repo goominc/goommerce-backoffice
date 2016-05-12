@@ -25,7 +25,8 @@
       "telLabel": "전화번호",
       "userTypeLabel": "유저 종류",
       "editRoleButton": "권한 변경",
-      "userDetailButton": "유저 상세 정보"
+      "userDetailButton": "유저 상세 정보",
+      "settlementAliasLabel": "회계팀 약어"
     },
     "waitConfirm": {
       "title": "바이어 인증 대기"
