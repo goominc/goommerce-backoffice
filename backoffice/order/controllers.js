@@ -280,6 +280,10 @@ orderModule.controller('OrderUncleController', ($scope, $rootScope, $http, $stat
     order: [],
     columns: [
       {
+        data: (data) => _.get(data, 'processedDate', '').substring(2, 10),
+        bSortable: false,
+      },
+      {
         data: 'orderId',
         bSortable: false,
       },
@@ -301,6 +305,10 @@ orderModule.controller('OrderUncleController', ($scope, $rootScope, $http, $stat
       },
       {
         data: (data) => _.get(data, 'brand.data.tel', ''),
+        bSortable: false,
+      },
+      {
+        data: (data) => _.get(data, 'product.id', ''),
         bSortable: false,
       },
       {
