@@ -394,7 +394,7 @@ userModule.controller('UserWaitConfirmController', ($scope, $state, $rootScope, 
   $rootScope.initAll($scope, $state.current.name);
 });
 
-userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, $translate, user, userUtil, convertUtil) => {
+userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, $translate, user, boUtils, userUtil, convertUtil) => {
   $scope.contentTitle = $translate.instant('user.info.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
@@ -442,4 +442,27 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
   $scope.openBizImage = () => {
     $('#user_biz_image').modal();
   };
+
+  $('#image-upload-button').on('change', function (changeEvent) {
+    boUtils.startProgressBar();
+    const r = new FileReader();
+    r.onload = function(e) {
+      boUtils.uploadImage(e.target.result, `user/${$scope.user.id || 'none'}/${new Date().getTime()}`).then((res) => {
+        boUtils.stopProgressBar();
+        const uploaded = {
+          url: res.url.slice(5),
+          publicId: res.public_id,
+          version: res.version,
+        };
+        _.set($scope.user, 'data.bizImage', uploaded);
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      }, () => {
+        window.alert('image upload fail');
+        boUtils.stopProgressBar();
+      });
+    };
+    r.readAsDataURL(changeEvent.target.files[0]);
+  });
 });
