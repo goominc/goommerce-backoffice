@@ -63,6 +63,7 @@ buildingModule.controller('BuildingInfoController', ($scope, $http, $state, $roo
   $scope.save = () => {
     convertUtil.copyFieldObj($scope.buildingFields, $scope.building);
     $http.put(url, _.pick($scope.building, 'data')).then(() => {
+      $http.put('/api/v1/buildings/cache');
       $state.go('building.main');
     });
   };
