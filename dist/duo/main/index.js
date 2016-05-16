@@ -1153,7 +1153,8 @@ module.exports = {
       "buildingFlatNumberLabel": "빌딩 호수",
       "telLabel": "전화 번호",
       "mobileLabel": "핸드폰 번호",
-      "aliasLabel": "약어"
+      "aliasLabel": "약어",
+      "selectUser": "유저 선택"
     },
     "inquiry": {
       "title": "입점신청",
@@ -1241,15 +1242,26 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
   };
 });
 
-brandModule.controller('BrandEditController', function ($scope, $http, $state, $rootScope, $translate, boUtils, convertUtil) {
+brandModule.controller('BrandEditController', function ($scope, $http, $state, $rootScope, $translate, $compile, boUtils, convertUtil, userUtil) {
   var initFields = function initFields() {
     if (!$scope.brand.data) {
       $scope.brand.data = {};
     }
+    $scope.contentTitle = $translate.instant('brand.title');
+    $scope.contentSubTitle = '';
+    $scope.breadcrumb = [{
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home')
+    }, {
+      sref: 'brand.main',
+      name: $translate.instant('brand.title')
+    }, {
+      name: _.get($scope.brand, 'name.ko')
+    }];
+    $rootScope.initAll($scope, $state.current.name);
+
     $scope.brandFields1 = [{ title: 'ID', key: 'id', obj: $scope.brand.id, isReadOnly: true }, { title: $translate.instant('brand.edit.nameLabel'), obj: _.get($scope.brand, 'name.ko'), key: 'name.ko' }];
-    $scope.brandFields2 = [{ title: $translate.instant('brand.edit.buildingFloorLabel'), obj: _.get($scope.brand, 'data.location.floor'), key: 'data.location.floor' }, { title: $translate.instant('brand.edit.buildingFlatNumberLabel'), obj: _.get($scope.brand, 'data.location.flatNumber'), key: 'data.location.flatNumber' }, { title: $translate.instant('brand.edit.bizNameLabel'), obj: _.get($scope.brand, 'data.businessRegistration.name'), key: 'data.businessRegistration.name' }, { title: $translate.instant('brand.edit.bizNumberLabel'), obj: _.get($scope.brand, 'data.businessRegistration.number'), key: 'data.businessRegistration.number' }, { title: $translate.instant('brand.edit.accountBankLabel'), obj: _.get($scope.brand, 'data.bank.name'), key: 'data.bank.name' }, { title: $translate.instant('brand.edit.accountOwnerLabel'), obj: _.get($scope.brand, 'data.bank.accountHolder'), key: 'data.bank.accountHolder' }, { title: $translate.instant('brand.edit.accountNumberLabel'), obj: _.get($scope.brand, 'data.bank.accountNumber'), key: 'data.bank.accountNumber' },
-    // {title: $translate.instant('brand.edit.buildingNameLabel'), obj: _.get($scope.brand, 'data.location.name'), key: 'data.location.name'},
-    { title: $translate.instant('brand.edit.telLabel'), obj: _.get($scope.brand, 'data.tel'), key: 'data.tel' }, { title: $translate.instant('brand.edit.mobileLabel'), obj: _.get($scope.brand, 'data.mobile'), key: 'data.mobile' }];
+    $scope.brandFields2 = [{ title: $translate.instant('brand.edit.buildingFloorLabel'), obj: _.get($scope.brand, 'data.location.floor'), key: 'data.location.floor' }, { title: $translate.instant('brand.edit.buildingFlatNumberLabel'), obj: _.get($scope.brand, 'data.location.flatNumber'), key: 'data.location.flatNumber' }, { title: $translate.instant('brand.edit.bizNameLabel'), obj: _.get($scope.brand, 'data.businessRegistration.name'), key: 'data.businessRegistration.name' }, { title: $translate.instant('brand.edit.bizNumberLabel'), obj: _.get($scope.brand, 'data.businessRegistration.number'), key: 'data.businessRegistration.number' }, { title: $translate.instant('brand.edit.accountBankLabel'), obj: _.get($scope.brand, 'data.bank.name'), key: 'data.bank.name' }, { title: $translate.instant('brand.edit.accountOwnerLabel'), obj: _.get($scope.brand, 'data.bank.accountHolder'), key: 'data.bank.accountHolder' }, { title: $translate.instant('brand.edit.accountNumberLabel'), obj: _.get($scope.brand, 'data.bank.accountNumber'), key: 'data.bank.accountNumber' }, { title: $translate.instant('brand.edit.telLabel'), obj: _.get($scope.brand, 'data.tel'), key: 'data.tel' }, { title: $translate.instant('brand.edit.mobileLabel'), obj: _.get($scope.brand, 'data.mobile'), key: 'data.mobile' }];
 
     $scope.buildingMap = {};
     $scope.buildings = [];
@@ -1263,11 +1275,100 @@ brandModule.controller('BrandEditController', function ($scope, $http, $state, $
     });
   };
 
+  $scope.owners = [];
+  $scope.staffs = [];
+
+  var initMembers = function initMembers() {
+    $http.get('/api/v1/brands/' + $scope.brand.id + '/members').then(function (res) {
+      (res.data || []).forEach(function (user) {
+        for (var i = 0; i < (user.roles || []).length; i++) {
+          var role = user.roles[i];
+          if (+_.get(role, 'brand.id') !== +$scope.brand.id) {
+            continue;
+          }
+          if (role.type === 'owner') {
+            $scope.owners.push(user);
+            break;
+          } else if (role.type === 'staff') {
+            $scope.staffs.push(user);
+            break;
+          }
+        }
+      });
+    });
+
+    $scope.openUserPopup = function () {
+      $('#user_list_popup').modal();
+    };
+    $scope.closeUserPopup = function () {
+      $('#user_list_popup').modal('hide');
+      $('#user_list_popup').removeClass('in');
+      $('.modal-backdrop').remove();
+    };
+    $scope.userDatatables = {
+      field: 'users',
+      pageLength: 10,
+      columns: [{
+        data: 'id',
+        render: function render(id) {
+          return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+        }
+      }, {
+        data: 'email'
+      }, {
+        data: function data(_data) {
+          return _data;
+        },
+        render: function render(user) {
+          return userUtil.getRoleName(user);
+        }
+      }, {
+        data: 'id',
+        render: function render(id) {
+          return '<button class="btn blue" data-ng-click="addMember(' + id + ', \'owner\')">Owner추가</button>';
+        }
+      }, {
+        data: 'id',
+        render: function render(id) {
+          return '<button class="btn blue" data-ng-click="addMember(' + id + ', \'staff\')">Staff추가</button>';
+        }
+      }]
+    };
+    $scope.userDatatablesRendered = function () {
+      $compile(angular.element($('table')))($scope);
+    };
+    $scope.addMember = function (userId, roleType) {
+      boUtils.startProgressBar();
+      $http.post('/api/v1/users/' + userId + '/roles', { roleType: roleType, brandId: $scope.brand.id }).then(function () {
+        boUtils.stopProgressBar();
+        $scope.closeUserPopup();
+        // 2016. 05. 16. [heekyu] modal does not hide correcly on state reload
+        $state.reload();
+      }, function () {
+        boUtils.stopProgressBar();
+        window.alert('failed to update ' + roleType);
+      });
+    };
+    $scope.removeMember = function (user, roleType) {
+      for (var i = 0; i < user.roles.length; i++) {
+        var role = user.roles[i];
+        if (role.type === roleType && +_.get(role, 'brand.id') === +$scope.brand.id) {
+          var url = '/api/v1/users/' + user.id + '/roles';
+          $http['delete'](url, { data: role, headers: { "Content-Type": "application/json;charset=utf-8" } }).then(function () {
+            $state.reload();
+          });
+          break;
+        }
+      }
+    };
+  };
+
   if ($state.params.brandId) {
     boUtils.startProgressBar();
     $http.get('/api/v1/brands/' + $state.params.brandId + '/unmodified').then(function (res) {
       $scope.brand = res.data;
       initFields();
+      initMembers();
       boUtils.stopProgressBar();
     }, function () {
       window.alert('failed to get brand (' + $state.params.brandId + ')');
@@ -1354,16 +1455,16 @@ brandModule.controller('BrandInquiryListController', function ($scope, $http, $r
         return '<a ui-sref="brand.inquiry.info({inquiryId: ' + id + '})">' + id + '</a>';
       }
     }, {
-      data: function data(_data) {
-        return _.get(_data, 'data.name') || '';
-      }
-    }, {
       data: function data(_data2) {
-        return _.get(_data2, 'data.contactName') || '';
+        return _.get(_data2, 'data.name') || '';
       }
     }, {
       data: function data(_data3) {
-        return _.get(_data3, 'data.tel') || '';
+        return _.get(_data3, 'data.contactName') || '';
+      }
+    }, {
+      data: function data(_data4) {
+        return _.get(_data4, 'data.tel') || '';
       }
     }, {
       data: 'id',
@@ -1529,6 +1630,7 @@ buildingModule.controller('BuildingInfoController', function ($scope, $http, $st
   $scope.save = function () {
     convertUtil.copyFieldObj($scope.buildingFields, $scope.building);
     $http.put(url, _.pick($scope.building, 'data')).then(function () {
+      $http.put('/api/v1/buildings/cache');
       $state.go('building.main');
     });
   };
@@ -1976,7 +2078,7 @@ directiveModule.factory('datatableCommons', function ($compile) {
       var options = {
         lengthMenu: [[10, 20, 50, 100, 150], [10, 20, 50, 100, 150]],
         // change per page values here
-        pageLength: 50, // default record count per page
+        pageLength: dataTables.pageLength || 50, // default record count per page
         // data: realData, need implement
         columns: dataTables.columns,
         order: dataTables.order || [[0, 'desc']], // set first column as a default sort by desc
