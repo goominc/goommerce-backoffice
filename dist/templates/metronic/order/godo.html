@@ -1,0 +1,66 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet">
+            <div class="portlet-title">
+              <div class="btn-group">
+                <button type="button" class="btn btn-default">{{activeMonth}}</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li data-ng-repeat="month in months">
+                    <a data-ng-click="setMonth(month)">{{month}}</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="portlet-body">
+              <div bo-datatables="orderDatatables">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                  <tr role="row" class="heading">
+                    <td>{{'order.common.orderId' | translate}}</td>
+                    <td>{{'order.common.processedDate' | translate}}</td>
+                    <td>{{'order.common.total' | translate}}</td>
+                    <td>{{'order.common.handlingFee' | translate}}</td>
+                    <td>{{'order.common.commission' | translate}}</td>
+                  </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->

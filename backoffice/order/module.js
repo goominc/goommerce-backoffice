@@ -53,6 +53,11 @@ orderModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/order/cs.html',
       controller: 'OrderCsController',
     })
+    .state('order.godo', {
+      url: '/godo',
+      templateUrl: templateRoot + '/order/godo.html',
+      controller: 'OrderGodoController',
+    })
     .state('order.detail', {
       url: '/detail/:orderId',
       templateUrl: templateRoot + '/order/detail.html',

@@ -198,6 +198,10 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       key: 'order.listBigBuyer',
       name: $translate.instant('order.listBigBuyer.title'),
       sref: 'order.listBigBuyer'
+    }, {
+      key: 'order.godo',
+      name: $translate.instant('order.godo.title'),
+      sref: 'order.godo'
     }]
   }, {
     key: 'user', // TODO get key from router
@@ -2096,6 +2100,10 @@ orderModule.config(function ($stateProvider) {
     url: '/cs',
     templateUrl: templateRoot + '/order/cs.html',
     controller: 'OrderCsController'
+  }).state('order.godo', {
+    url: '/godo',
+    templateUrl: templateRoot + '/order/godo.html',
+    controller: 'OrderGodoController'
   }).state('order.detail', {
     url: '/detail/:orderId',
     templateUrl: templateRoot + '/order/detail.html',
@@ -2127,6 +2135,13 @@ module.exports = {
 module.exports = {
   "order": {
     "title": "주문",
+    "common": {
+      "orderId": "주문번호",
+      "processedDate": "주문 날짜",
+      "total": "합계",
+      "handlingFee": "사입비",
+      "commission": "수수료",
+    },
     "main": {
       "buyerEmailColumn": "주문자 이메일",
       "buyerNameColumn": "주문자 이름",
@@ -2192,6 +2207,9 @@ module.exports = {
     },
     "listBigBuyer": {
       "title": "빅바이어주문목록"
+    },
+    "godo": {
+      "title": "고도몰"
     }
   }
 }
@@ -2709,10 +2727,10 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
   $scope.activeDate = $scope.dates[0];
   $scope.setDate = function (date) {
     $scope.activeDate = date;
-    udpateDatatables();
+    updateDatatables();
   };
 
-  function udpateDatatables() {
+  function updateDatatables() {
     $scope.orderDatatables = {
       field: 'orders',
       // disableFilter: true,
@@ -2763,9 +2781,73 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
     };
   }
 
-  udpateDatatables();
+  updateDatatables();
 
   $rootScope.initAll($scope, $state.current.name);
+});
+
+orderModule.controller('OrderGodoController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+  $scope.contentTitle = $translate.instant('order.godo.title');
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
+    sref: 'order.godo',
+    name: $translate.instant('order.godo.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  var today = moment();
+  var maxMonths = 12;
+  $scope.months = [];
+  for (var i = 0; i < maxMonths; i++) {
+    $scope.months.push(today.format('YYYY-MM'));
+    today.subtract(1, 'months');
+  }
+  $scope.activeMonth = $scope.months[0];
+  $scope.setMonth = function (month) {
+    $scope.activeMonth = month;
+    updateDatatables();
+  };
+
+  function updateDatatables() {
+    var start = moment($scope.activeMonth).startOf('month').subtract(7, 'd').format('YYYY-MM-DD');
+    var end = moment($scope.activeMonth).endOf('month').subtract(7, 'd').format('YYYY-MM-DD');
+    console.log(start, end);
+    $scope.orderDatatables = {
+      field: 'orders',
+      // disableFilter: true,
+      // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+      url: '/api/v1/affiliate/godo/settlement?start=' + start + '&end=' + end,
+      columns: [{
+        data: 'id',
+        render: function render(id) {
+          return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
+        }
+      }, {
+        data: function data(_data35) {
+          return _.get(_data35, 'processedDate', '').substring(0, 10);
+        }
+      }, {
+        data: function data(_data36) {
+          return _.get(_data36, 'finalTotalKRW', '');
+        }
+      }, {
+        data: function data(_data37) {
+          return _.get(_data37, 'finalHandlingFeeKRW', '');
+        }
+      }, {
+        data: function data(_data38) {
+          return _.get(_data38, 'commissionKRW', '');
+        }
+      }]
+    };
+  }
+
+  updateDatatables();
 });
 }, {"./module":9}],
 10: [function(require, module, exports) {
@@ -5456,7 +5538,7 @@ userModule.controller('UserWaitConfirmController', function ($scope, $state, $ro
   $rootScope.initAll($scope, $state.current.name);
 });
 
-userModule.controller('UserInfoController', function ($scope, $http, $state, $rootScope, $translate, user, userUtil, convertUtil) {
+userModule.controller('UserInfoController', function ($scope, $http, $state, $rootScope, $translate, user, boUtils, userUtil, convertUtil) {
   $scope.contentTitle = $translate.instant('user.info.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [{
@@ -5489,6 +5571,29 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
   $scope.openBizImage = function () {
     $('#user_biz_image').modal();
   };
+
+  $('#image-upload-button').on('change', function (changeEvent) {
+    boUtils.startProgressBar();
+    var r = new FileReader();
+    r.onload = function (e) {
+      boUtils.uploadImage(e.target.result, 'user/' + ($scope.user.id || 'none') + '/' + new Date().getTime()).then(function (res) {
+        boUtils.stopProgressBar();
+        var uploaded = {
+          url: res.url.slice(5),
+          publicId: res.public_id,
+          version: res.version
+        };
+        _.set($scope.user, 'data.bizImage', uploaded);
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      }, function () {
+        window.alert('image upload fail');
+        boUtils.stopProgressBar();
+      });
+    };
+    r.readAsDataURL(changeEvent.target.files[0]);
+  });
 });
 }, {"./module":13}],
 14: [function(require, module, exports) {

@@ -128,6 +128,11 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: $translate.instant('order.listBigBuyer.title'),
           sref: 'order.listBigBuyer',
         },
+        {
+          key: 'order.godo',
+          name: $translate.instant('order.godo.title'),
+          sref: 'order.godo',
+        },
       ],
     },
     {

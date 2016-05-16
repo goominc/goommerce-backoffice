@@ -507,10 +507,10 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
   $scope.activeDate = $scope.dates[0];
   $scope.setDate = (date) => {
     $scope.activeDate = date;
-    udpateDatatables();
+    updateDatatables();
   };
 
-  function udpateDatatables() {
+  function updateDatatables() {
     $scope.orderDatatables = {
       field: 'orders',
       // disableFilter: true,
@@ -557,7 +557,73 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
     };
   }
 
-  udpateDatatables();
+  updateDatatables();
 
   $rootScope.initAll($scope, $state.current.name);
+});
+
+orderModule.controller('OrderGodoController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
+  $scope.contentTitle = $translate.instant('order.godo.title');
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'order.main',
+      name: $translate.instant('order.main.title'),
+    },
+    {
+      sref: 'order.godo',
+      name: $translate.instant('order.godo.title'),
+    },
+  ];
+  $rootScope.initAll($scope, $state.current.name);
+
+  const today = moment();
+  const maxMonths = 12;
+  $scope.months = [];
+  for (let i = 0; i < maxMonths; i++) {
+    $scope.months.push(today.format('YYYY-MM'));
+    today.subtract(1, 'months');
+  }
+  $scope.activeMonth = $scope.months[0];
+  $scope.setMonth = (month) => {
+    $scope.activeMonth = month;
+    updateDatatables();
+  };
+
+  function updateDatatables() {
+    const start = moment($scope.activeMonth).startOf('month').subtract(7, 'd').format('YYYY-MM-DD');
+    const end = moment($scope.activeMonth).endOf('month').subtract(7, 'd').format('YYYY-MM-DD');
+    console.log(start, end);
+    $scope.orderDatatables = {
+      field: 'orders',
+      // disableFilter: true,
+      // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+      url: `/api/v1/affiliate/godo/settlement?start=${start}&end=${end}`,
+      columns: [
+        {
+          data: 'id',
+          render: (id) => {
+            return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>'
+          },
+        },
+        {
+          data: (data) => _.get(data, 'processedDate', '').substring(0, 10),
+        },
+        {
+          data: (data) => _.get(data, 'finalTotalKRW', ''),
+        },
+        {
+          data: (data) => _.get(data, 'finalHandlingFeeKRW', ''),
+        },
+        {
+          data: (data) => _.get(data, 'commissionKRW', ''),
+        },
+      ],
+    };
+  }
+
+  updateDatatables();
 });

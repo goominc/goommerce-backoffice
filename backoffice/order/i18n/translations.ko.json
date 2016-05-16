@@ -1,6 +1,13 @@
 {
   "order": {
     "title": "주문",
+    "common": {
+      "orderId": "주문번호",
+      "processedDate": "주문 날짜",
+      "total": "합계",
+      "handlingFee": "사입비",
+      "commission": "수수료",
+    },
     "main": {
       "buyerEmailColumn": "주문자 이메일",
       "buyerNameColumn": "주문자 이름",
@@ -66,6 +73,9 @@
     },
     "listBigBuyer": {
       "title": "빅바이어주문목록"
+    },
+    "godo": {
+      "title": "고도몰"
     }
   }
 }
