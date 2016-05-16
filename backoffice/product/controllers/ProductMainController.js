@@ -20,7 +20,6 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
   $scope.productDatatables = {
     field: 'products',
     // disableFilter: true,
-    url: boConfig.apiUrl + '/api/v1/products/search',
     columns: [
       {
         data: 'id',

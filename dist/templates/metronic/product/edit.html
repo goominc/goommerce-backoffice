@@ -98,10 +98,11 @@
                               </button>
                             </div>
                             <div class="product-variant-attr-candidate-wrap" data-ng-if="kind.currentGroup && kind.groupMap[kind.currentGroup]">
-                              <button class="btn default product-variant-attr-candidate-button"
-                                      data-ng-class="{'active': kind.selected.has(attr), 'product-variant-color-button': $parent.$index === 0, 'product-variant-size-button': $parent.$index === 1}"
-                                      data-ng-repeat="attr in kind.groupMap[kind.currentGroup]"
-                                      data-ng-click="clickVariantAttribute($event, $parent.$index, attr)"
+                              <button
+                                class="btn default product-variant-attr-candidate-button"
+                                data-ng-class="{'active': kind.selected.has(attr), 'product-variant-color-button': $parent.$index === 0, 'product-variant-size-button': $parent.$index === 1}"
+                                data-ng-repeat="attr in kind.groupMap[kind.currentGroup]"
+                                data-ng-click="clickVariantAttribute($event, $parent.$index, attr)"
                               >
                                 {{attr}}
                               </button>
