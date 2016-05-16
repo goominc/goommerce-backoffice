@@ -13,7 +13,7 @@ directiveModule.factory('datatableCommons', ($compile) => {
           [10, 20, 50, 100, 150],
           [10, 20, 50, 100, 150],  // change per page values here
         ],
-        pageLength: 50, // default record count per page
+        pageLength: dataTables.pageLength || 50, // default record count per page
         // data: realData, need implement
         columns: dataTables.columns,
         order: dataTables.order || [

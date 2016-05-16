@@ -66,11 +66,28 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, brandCom
   };
 });
 
-brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope, $translate, boUtils, convertUtil) => {
+brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope, $translate, $compile, boUtils, convertUtil, userUtil) => {
   const initFields = () => {
     if (!$scope.brand.data) {
       $scope.brand.data = {};
     }
+    $scope.contentTitle = $translate.instant('brand.title');
+    $scope.contentSubTitle = '';
+    $scope.breadcrumb = [
+      {
+        sref: 'dashboard',
+        name: $translate.instant('dashboard.home'),
+      },
+      {
+        sref: 'brand.main',
+        name: $translate.instant('brand.title'),
+      },
+      {
+        name: _.get($scope.brand, 'name.ko'),
+      },
+    ];
+    $rootScope.initAll($scope, $state.current.name);
+
     $scope.brandFields1 = [
       {title: 'ID', key: 'id', obj: $scope.brand.id, isReadOnly: true},
       {title: $translate.instant('brand.edit.nameLabel'), obj: _.get($scope.brand, 'name.ko'), key: 'name.ko'},
@@ -83,7 +100,6 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
       {title: $translate.instant('brand.edit.accountBankLabel'), obj: _.get($scope.brand, 'data.bank.name'), key: 'data.bank.name'},
       {title: $translate.instant('brand.edit.accountOwnerLabel'), obj: _.get($scope.brand, 'data.bank.accountHolder'), key: 'data.bank.accountHolder'},
       {title: $translate.instant('brand.edit.accountNumberLabel'), obj: _.get($scope.brand, 'data.bank.accountNumber'), key: 'data.bank.accountNumber'},
-      // {title: $translate.instant('brand.edit.buildingNameLabel'), obj: _.get($scope.brand, 'data.location.name'), key: 'data.location.name'},
       {title: $translate.instant('brand.edit.telLabel'), obj: _.get($scope.brand, 'data.tel'), key: 'data.tel'},
       {title: $translate.instant('brand.edit.mobileLabel'), obj: _.get($scope.brand, 'data.mobile'), key: 'data.mobile'},
     ];
@@ -100,11 +116,100 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
     });
   };
 
+  $scope.owners = [];
+  $scope.staffs = [];
+
+  const initMembers = () => {
+    $http.get(`/api/v1/brands/${$scope.brand.id}/members`).then((res) => {
+      (res.data || []).forEach((user) => {
+        for (let i = 0; i < (user.roles || []).length; i++) {
+          const role = user.roles[i];
+          if (+_.get(role, 'brand.id') !== +$scope.brand.id) {
+            continue;
+          }
+          if (role.type === 'owner') {
+            $scope.owners.push(user);
+            break;
+          } else if (role.type === 'staff') {
+            $scope.staffs.push(user);
+            break;
+          }
+        }
+      });
+    });
+
+    $scope.openUserPopup = () => {
+      $('#user_list_popup').modal();
+    };
+    $scope.closeUserPopup = () => {
+      $('#user_list_popup').modal('hide');
+      $('#user_list_popup').removeClass('in');
+      $('.modal-backdrop').remove();
+    };
+    $scope.userDatatables = {
+      field: 'users',
+      pageLength: 10,
+      columns: [
+        {
+          data: 'id',
+          render: (id) => {
+            return `<a ui-sref="user.info({ userId: ${id} })">${id}</a>`;
+          },
+        },
+        {
+          data: 'email',
+        },
+        {
+          data: (data) => data,
+          render: (user) => {
+            return userUtil.getRoleName(user);
+          },
+        },
+        {
+          data: 'id',
+          render: (id) => `<button class="btn blue" data-ng-click="addMember(${id}, 'owner')">Owner추가</button>`,
+        },
+        {
+          data: 'id',
+          render: (id) => `<button class="btn blue" data-ng-click="addMember(${id}, 'staff')">Staff추가</button>`,
+        },
+      ],
+    };
+    $scope.userDatatablesRendered = () => {
+      $compile(angular.element($('table')))($scope);
+    };
+    $scope.addMember = (userId, roleType) => {
+      boUtils.startProgressBar();
+      $http.post(`/api/v1/users/${userId}/roles`, { roleType, brandId: $scope.brand.id }).then(() => {
+        boUtils.stopProgressBar();
+        $scope.closeUserPopup();
+        // 2016. 05. 16. [heekyu] modal does not hide correcly on state reload
+        $state.reload();
+      }, () => {
+        boUtils.stopProgressBar();
+        window.alert(`failed to update ${roleType}`);
+      });
+    };
+    $scope.removeMember = (user, roleType) => {
+      for (let i = 0; i < user.roles.length; i++) {
+        const role = user.roles[i];
+        if (role.type === roleType && +_.get(role, 'brand.id') === +$scope.brand.id) {
+          const url = `/api/v1/users/${user.id}/roles`;
+          $http.delete(url, { data: role, headers: {"Content-Type": "application/json;charset=utf-8"} }).then(() => {
+            $state.reload();
+          });
+          break;
+        }
+      }
+    };
+  };
+
   if ($state.params.brandId) {
     boUtils.startProgressBar();
     $http.get(`/api/v1/brands/${$state.params.brandId}/unmodified`).then((res) => {
       $scope.brand = res.data;
       initFields();
+      initMembers();
       boUtils.stopProgressBar();
     }, () => {
       window.alert(`failed to get brand (${$state.params.brandId})`);

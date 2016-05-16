@@ -14,7 +14,8 @@
               <div class="portlet">
                 <div class="portlet-title">
                   <div class="actions btn-set">
-                    <button class="btn blue" ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
+                    <button class="btn blue" data-ng-click="openUserPopup()" data-ng-if="brand.id">{{'brand.edit.selectUser' | translate}}</button>
+                    <button class="btn blue" data-ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
                   </div>
                 </div>
               </div>
@@ -22,6 +23,22 @@
             <div class="portlet-body">
               <form class="row form-horizontal">
                 <div class="col-md-12">
+                  <div class="form-group" data-ng-if="brand.id">
+                    <label class="col-md-2 control-label">Owner</label>
+                    <div class="col-md-10">
+                      <button class="btn btn-circle btn-default" data-ng-repeat="owner in owners">
+                        {{owner.email}} <i class="fa fa-remove" data-ng-click="removeMember(owner, 'owner')"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-group" data-ng-if="brand.id">
+                    <label class="col-md-2 control-label">Staff</label>
+                    <div class="col-md-10">
+                      <button class="btn btn-circle btn-default" data-ng-repeat="staff in staffs">
+                        {{staff.email}} <i class="fa fa-remove" data-ng-click="removeMember(staff, 'staff')"></i>
+                      </button>
+                    </div>
+                  </div>
                   <div class="form-group" data-ng-repeat="field in brandFields1">
                     <label class="col-md-2 control-label">{{field.title}} <span data-ng-if="field.isRequired" class="required"> * </span> </label>
                     <div class="col-md-10">
@@ -60,15 +77,28 @@
     </div>
   </div>
 </div>
-<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
-<div class="modal fade">
+
+<div class="modal fade" id="user_list_popup" data-ng-if="brand.id">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
 
       </div>
       <div class="modal-body">
-
+        <div bo-server-datatables="userDatatables" url="/api/v1/users" url-params="{ roles: 'none' }" table-render="userDatatablesRendered()">
+          <table>
+            <thead>
+            <tr>
+              <td>ID</td>
+              <td>Email</td>
+              <td>Role</td>
+              <td></td><!-- set owner -->
+              <td></td><!-- set staff -->
+            </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
       <div class="modal-footer">
 
@@ -76,4 +106,3 @@
     </div>
   </div>
 </div>
--->
