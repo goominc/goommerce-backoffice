@@ -151,6 +151,18 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
       key: 'brand', // TODO get key from router
       name: $translate.instant('brand.title'),
       sref: 'brand.main',
+      children: [
+        {
+          key: 'brand.main', // TODO get key from router
+          name: $translate.instant('main.mainMenu'),
+          sref: 'brand.main',
+        },
+        {
+          key: 'brand.inquiry.list',
+          name: $translate.instant('brand.inquiry.title'),
+          sref: 'brand.inquiry.list',
+        },
+      ],
     },
     {
       key: 'building',

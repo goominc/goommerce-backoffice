@@ -43,6 +43,21 @@ brandModule.config(($stateProvider) => {
       url: '/edit/:brandId',
       templateUrl: templateRoot + '/brand/edit.html',
       controller: 'BrandEditController',
+    })
+    .state('brand.inquiry', {
+      url: '/inquiries',
+      abstract: 'true',
+      template: '<ui-view/>',
+    })
+    .state('brand.inquiry.list', {
+      url: '/list',
+      templateUrl: templateRoot + '/brand/inquiry-list.html',
+      controller: 'BrandInquiryListController',
+    })
+    .state('brand.inquiry.info', {
+      url: '/info/:inquiryId',
+      templateUrl: templateRoot + '/brand/inquiry-info.html',
+      controller: 'BrandInquiryInfoController',
     });
 });
 

@@ -1,0 +1,53 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="portlet-body">
+              <form class="row form-horizontal">
+                <div class="col-md-12">
+                  <div class="form-group" data-ng-repeat="field in inquiryFields">
+                    <label class="col-md-2 control-label">{{field.title}} <span data-ng-if="field.isRequired" class="required"> * </span> </label>
+                    <div class="col-md-10">
+                      <input
+                        data-ng-readonly="field.isReadOnly"
+                        type="text"
+                        class="form-control"
+                        placeholder="{{field.placeholder}}"
+                        ng-model="field.obj"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->

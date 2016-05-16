@@ -18,6 +18,20 @@
       "telLabel": "전화 번호",
       "mobileLabel": "핸드폰 번호",
       "aliasLabel": "약어"
+    },
+    "inquiry": {
+      "title": "입점신청",
+      "info": {
+        "title": "신청정보",
+        "nameLabel": "업체명",
+        "contactNameLabel": "연락처",
+        "telLabel": "연락처",
+        "emailLabel": "이메일",
+        "buildingLabel": "판매상가",
+        "floorLabel": "층",
+        "flatNumberLabel": "호수",
+        "productTypeLabel": "판매물품"
+      }
     }
   }
 }

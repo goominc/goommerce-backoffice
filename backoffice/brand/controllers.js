@@ -169,3 +169,97 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
     }
   };
 });
+
+brandModule.controller('BrandInquiryListController', ($scope, $http, $rootScope, $state, $translate) => {
+  $scope.contentTitle = $translate.instant('brand.inquiry.title');
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'brand.inquiry',
+      name: $translate.instant('brand.inquiry.title'),
+    },
+  ];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.brandInquiryDatatables = {
+    field: 'inquiries',
+    url: '/api/v1/brands/inquiries',
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return `<a ui-sref="brand.inquiry.info({inquiryId: ${id}})">${id}</a>`;
+        },
+      },
+      {
+        data: (data) => _.get(data, 'data.name') || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.contactName') || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.tel') || '',
+      },
+      {
+        data: 'id',
+        render: (id) => {
+          return `<button class="btn red" data-ng-click="deleteInquiryItem(${id})"><i class="fa fa-remove"></i> ${$translate.instant('main.deleteButton')}</button>`;
+        },
+      }
+    ],
+  };
+  $scope.deleteInquiryItem = (id) => {
+    $http.put(`/api/v1/brands/inquiries/${id}`, { isActive: false }).then(() => {
+      window.alert('Item Deleted Successfully');
+      $state.reload();
+    });
+  };
+});
+
+brandModule.controller('BrandInquiryInfoController', ($scope, $rootScope, $state, $http, $translate) => {
+  $scope.contentTitle = $translate.instant('brand.inquiry.title');
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'brand.inquiry.list',
+      name: $translate.instant('brand.inquiry.title'),
+    },
+    {
+      sref: 'brand.inquiry.info',
+      name: $translate.instant('brand.inquiry.info.title'),
+    },
+  ];
+  $rootScope.initAll($scope, $state.current.name);
+
+  const init = (inquiry) => {
+    $scope.inquiry = inquiry;
+    if (!$scope.inquiry || !$scope.inquiry.data) {
+      window.alert('Empty Inquiry Data');
+      return;
+    }
+
+    $scope.inquiryFields = [
+      {title: 'ID', key: 'id', obj: $scope.inquiry.id, isReadOnly: true},
+      {title: $translate.instant('brand.inquiry.info.nameLabel'), obj: $scope.inquiry.data.name, key: 'name', isReadOnly: true},
+      {title: $translate.instant('brand.inquiry.info.contactNameLabel'), obj: $scope.inquiry.data.contactName, key: 'contactName', isReadOnly: true},
+      {title: $translate.instant('brand.inquiry.info.emailLabel'), obj: $scope.inquiry.data.email, key: 'email', isReadOnly: true},
+      {title: $translate.instant('brand.inquiry.info.telLabel'), obj: $scope.inquiry.data.tel, key: 'tel', isReadOnly: true},
+      {title: $translate.instant('brand.inquiry.info.buildingLabel'), obj: $scope.inquiry.data.building, key: 'building', isReadOnly: true},
+      {title: $translate.instant('brand.inquiry.info.floorLabel'), obj: $scope.inquiry.data.floor, key: 'floor', isReadOnly: true},
+      {title: $translate.instant('brand.inquiry.info.flatNumberLabel'), obj: $scope.inquiry.data.flatNumber, key: 'flatNumber', isReadOnly: true},
+      {title: $translate.instant('brand.inquiry.info.productTypeLabel'), obj: $scope.inquiry.data.productType, key: 'productType', isReadOnly: true},
+    ];
+  };
+
+  $http.get(`/api/v1/brands/inquiries/${$state.params.inquiryId}`).then((res) => {
+    init(res.data);
+  });
+});
