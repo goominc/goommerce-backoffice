@@ -5318,6 +5318,7 @@ module.exports = {
       "buyerTab": "바이어",
       "noRoleTab": "미인증",
       "sellerTab": "셀러",
+      "godoTab": "고도몰",
       "title": "사용자"
     },
     "info": {

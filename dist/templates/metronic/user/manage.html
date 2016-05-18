@@ -133,6 +133,24 @@
                         </table>
                       </div>
                     </uib-tab>
+                    <uib-tab heading="{{'user.manage.godoTab' | translate}}" active="tabName === 'godo'" data-ng-click="changeTab('godo')">
+                      <div data-ng-if="tabName === 'godo'" bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ sources: 'godo' }">
+                        <table class="table table-bordered table-hover" style="width: 100%;">
+                          <thead>
+                          <tr role="row" class="heading">
+                            <td>ID</td>
+                            <td>{{'main.word.email' | translate}}</td>
+                            <td>{{'main.word.name' | translate}}</td>
+                            <td>{{'main.word.tel' | translate}}</td>
+                            <td>{{'user.info.bizNameLabel' | translate}}</td>
+                            <td>{{'user.info.bizNumberLabel' | translate}}</td>
+                            <td>{{'main.word.createdAt' | translate}}</td>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center"></tbody>
+                        </table>
+                      </div>
+                    </uib-tab>
                   </uib-tabset>
                 </div>
               </div>
