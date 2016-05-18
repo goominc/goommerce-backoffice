@@ -2357,6 +2357,7 @@ module.exports = {
       "commission": "수수료",
     },
     "main": {
+      "buyerIdColumn": "주문자 ID",
       "buyerEmailColumn": "주문자 이메일",
       "buyerNameColumn": "주문자 이름",
       "buyerTelColumn": "주문자 전화번호",
@@ -2476,6 +2477,11 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
         return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
       }
     }, {
+      data: 'buyerId',
+      render: function render(buyerId) {
+        return '<a ui-sref="user.info({userId: ' + buyerId + '})">' + buyerId + '</a>';
+      }
+    }, {
       data: function data(_data) {
         return _.get(_data, 'name') || '';
       }
@@ -2532,6 +2538,11 @@ orderModule.controller('OrderListBeforePaymentController', function ($scope, $ro
       }
     }, {
       data: 'totalKRW'
+    }, {
+      data: 'buyerId',
+      render: function render(buyerId) {
+        return '<a ui-sref="user.info({userId: ' + buyerId + '})">' + buyerId + '</a>';
+      }
     }, {
       data: function data(_data3) {
         return _.get(_data3, 'name') || '';
@@ -2903,6 +2914,11 @@ orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $
       data: 'paymentStatus',
       render: function render(status) {
         return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
+      }
+    }, {
+      data: 'buyerId',
+      render: function render(buyerId) {
+        return '<a ui-sref="user.info({userId: ' + buyerId + '})">' + buyerId + '</a>';
       }
     }, {
       data: function data(_data26) {

@@ -45,6 +45,12 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         render: (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`),
       },
       {
+        data: 'buyerId',
+        render: (buyerId) => {
+          return '<a ui-sref="user.info({userId: ' + buyerId+ '})">' + buyerId + '</a>'
+        },
+      },
+      {
         data: (data) => _.get(data, 'name') || '',
       },
       {
@@ -105,6 +111,12 @@ orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, 
       },
       {
         data: 'totalKRW',
+      },
+      {
+        data: 'buyerId',
+        render: (buyerId) => {
+          return '<a ui-sref="user.info({userId: ' + buyerId+ '})">' + buyerId + '</a>'
+        },
       },
       {
         data: (data) => _.get(data, 'name') || '',
@@ -466,6 +478,12 @@ orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $r
       {
         data: 'paymentStatus',
         render: (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`),
+      },
+      {
+        data: 'buyerId',
+        render: (buyerId) => {
+          return '<a ui-sref="user.info({userId: ' + buyerId+ '})">' + buyerId + '</a>'
+        },
       },
       {
         data: (data) => _.get(data, 'name') || '',

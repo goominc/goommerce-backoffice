@@ -9,6 +9,7 @@
       "commission": "수수료",
     },
     "main": {
+      "buyerIdColumn": "주문자 ID",
       "buyerEmailColumn": "주문자 이메일",
       "buyerNameColumn": "주문자 이름",
       "buyerTelColumn": "주문자 전화번호",
