@@ -303,7 +303,7 @@
                           <tbody class="cell-center">
                             <tr data-ng-repeat="row in order.adjustments">
                               <td>
-                                {{getBrandName(row.brandId)}}
+                                {{row.brand.name.ko}}
                               </td>
                               <td>
                                 {{row.type}}
@@ -323,6 +323,7 @@
                         <table class="table table-hover table-bordered table-striped">
                           <thead>
                           <tr>
+                            <th>브랜드</th>
                             <th>상품ID</th>
                             <th>상품명</th>
                             <th>색상</th>
@@ -339,6 +340,9 @@
                           </thead>
                           <tbody class="cell-center">
                           <tr data-ng-repeat="row in order.orderProducts">
+                            <td>
+                              {{row.brand.name.ko}}
+                            </td>
                             <td>
                               <a href="/products/{{row.product.id}}" target="_blank">{{row.product.shortId}}</a>
                             </td>

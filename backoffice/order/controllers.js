@@ -236,11 +236,6 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $('.modal-backdrop').remove();
   };
 
-  const brands = _.groupBy(order.orderProducts.map((o) => o.brand), 'id');
-  $scope.getBrandName = (brandId) => {
-    return _.get(brands, [brandId, 0, 'name', 'ko'], brandId);
-  };
-
   $scope.saveStatus = () => {
     const data = _.pick(order, 'status', 'paymentStatus');
     $http.put(`/api/v1/orders/${order.id}/status`, data).then((res) => {
