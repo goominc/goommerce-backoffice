@@ -10,8 +10,16 @@
       <div class="row">
         <div class="col-md-12">
           <div class="portlet light">
-            <div class="portlet-title">
+            <div class="col-md-12" style="margin-bottom: 20px;">
               <div class="actions btn-set">
+                <button
+                  class="btn" style="margin-right: 20px;"
+                  data-ng-repeat="locale in state.locales"
+                  data-ng-class="{'red': state.editLocale === locale, 'blue': state.editLocale !== locale}"
+                  data-ng-click="state.editLocale = locale"
+                >
+                  {{locale}}
+                </button>
                 <button class="btn blue" data-ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
               </div>
             </div>
@@ -39,15 +47,15 @@
                       <th><button class="btn blue" data-ng-click="addRow()"><i class="fa fa-plus"></i> {{'main.createButton' | translate}}</button></th>
                     </tr>
                     </thead>
-                    <tbody ui-sortable="rowSortable" data-ng-model="cms.children">
-                    <tr class="cms-simple-item-table" data-ng-repeat="child in cms.children">
+                    <tbody ui-sortable="rowSortable" data-ng-model="cms[state.editLocale].rows">
+                    <tr class="cms-simple-item-table" data-ng-repeat="row in cms[state.editLocale].rows">
                       <td class="cms-simple-sortable-pointer">{{$index+1}}</td>
-                      <td>{{child.link}}</td>
+                      <td><input data-ng-model="row.link" /></td>
                       <td style="text-align: left;">
-                        <img width="auto" height="150px" data-ng-src="{{child.image.url}}" />
+                        <img width="auto" height="150px" data-ng-src="{{row.image.url}}" />
                       </td>
                       <td></td>
-                      <td><button class="btn red"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></td>
+                      <td><button class="btn red" data-ng-click="removeRow($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></td>
                     </tr>
                     </tbody>
                   </table>

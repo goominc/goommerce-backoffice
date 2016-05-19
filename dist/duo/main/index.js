@@ -233,17 +233,28 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
     key: 'cms', // TODO get key from router
     name: 'CMS',
     sref: 'cms.main_category',
-    children: [{
+    children: [
+    /*
+    {
       name: $translate.instant('cms.mainCategory'),
-      sref: 'cms.main_category'
+      sref: 'cms.main_category',
+    },
+    */
+    {
+      name: $translate.instant('cms.dMainBanner'),
+      sref: 'cms.simple({name: "desktop_main_banner"})'
     }, {
-      name: $translate.instant('cms.mainBanner'),
-      sref: 'cms.simple({name: "pc_main_banner1"})'
-    }, {
-      name: $translate.instant('cms.subBanner'),
-      sref: 'cms.simple({name: "pc_main_banner2"})'
+      name: $translate.instant('cms.dRightBanner'),
+      sref: 'cms.simple({name: "desktop_right_banner"})'
     }]
-  }, {
+  },
+  /*
+  {
+    name: $translate.instant('cms.mMainBanner'),
+    sref: 'cms.simple({name: "mobile_main_banner"})',
+  },
+  */
+  {
     key: 'currency', // TODO get key from router
     name: $translate.instant('currency.title'),
     sref: 'currency.main'
@@ -1703,8 +1714,9 @@ module.exports = {
 module.exports = {
   "cms": {
     "mainCategory": "메인페이지 카테고리",
-    "mainBanner": "메인 배너",
-    "subBanner": "서브 배너"
+    "dMainBanner": "데스크탑 메인 배너",
+    "dRightBanner": "데스크탑 우측 배너",
+    "mMainBanner": "모바일 메인 배너"
   }
 }
 ;
@@ -1718,13 +1730,10 @@ var cmsModule = require('./module');
 
 cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $rootScope, $translate) {
   $scope.cms = {
-    title: {
-      ko: '',
-      en: '',
-      zn_ch: '',
-      zn_tw: ''
-    },
-    children: []
+    ko: { rows: [] },
+    en: { rows: [] },
+    'zh-cn': { rows: [] },
+    'zh-tw': { rows: [] }
   };
   $http.get('/api/v1/cms/' + $state.params.name).then(function (res) {
     if (res.data) {
@@ -1752,21 +1761,38 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
   };
 
   $scope.addRow = function () {
+    /*
     if (!$scope.newObject.link || $scope.newObject.link === '') {
       window.alert('type link');
       return;
+    }
+    */
+    if (!$scope.newObject.link) {
+      $scope.newObject.link = '';
     }
     if (!$scope.newObject.image || !$scope.newObject.image.url) {
       window.alert('add image');
       return;
     }
-    $scope.cms.children.push($scope.newObject);
+    $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
+    if ($rootScope.state.editLocale === 'ko') {
+      $rootScope.state.locales.forEach(function (locale) {
+        if ((_.get($scope.cms, locale + '.rows') || []).length === $scope.cms[$rootScope.state.editLocale].rows.length - 1) {
+          $scope.cms[locale].rows.push($scope.newObject);
+        }
+      });
+    }
     $scope.newObject = {};
+  };
+
+  $scope.removeRow = function (index) {
+    $scope.cms[$rootScope.state.editLocale].rows.splice(index, 1)[0];
   };
 
   $scope.save = function () {
     $http.post('/api/v1/cms', { name: $scope.name, data: $scope.cms }).then(function (res) {
       console.log(res);
+      window.alert('Saved Successfully');
     });
   };
 

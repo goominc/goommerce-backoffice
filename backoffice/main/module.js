@@ -174,18 +174,26 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
       name: 'CMS',
       sref: 'cms.main_category',
       children: [
+        /*
         {
           name: $translate.instant('cms.mainCategory'),
           sref: 'cms.main_category',
         },
+        */
         {
-          name: $translate.instant('cms.mainBanner'),
-          sref: 'cms.simple({name: "pc_main_banner1"})',
+          name: $translate.instant('cms.dMainBanner'),
+          sref: 'cms.simple({name: "desktop_main_banner"})',
         },
         {
-          name: $translate.instant('cms.subBanner'),
-          sref: 'cms.simple({name: "pc_main_banner2"})',
+          name: $translate.instant('cms.dRightBanner'),
+          sref: 'cms.simple({name: "desktop_right_banner"})',
         },
+        /*
+        {
+          name: $translate.instant('cms.mMainBanner'),
+          sref: 'cms.simple({name: "mobile_main_banner"})',
+        },
+        */
       ],
     },
     {

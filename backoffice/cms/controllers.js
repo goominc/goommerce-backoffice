@@ -4,13 +4,10 @@ const cmsModule = require('./module');
 
 cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, $translate) => {
   $scope.cms = {
-    title: {
-      ko: '',
-      en: '',
-      zn_ch: '',
-      zn_tw: '',
-    },
-    children: [],
+    ko: { rows: [] },
+    en: { rows: [] },
+    'zh-cn': { rows: [] },
+    'zh-tw': { rows: [] },
   };
   $http.get(`/api/v1/cms/${$state.params.name}`).then((res) => {
     if (res.data) {
@@ -41,21 +38,38 @@ cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, 
   };
 
   $scope.addRow = () => {
+    /*
     if (!$scope.newObject.link || $scope.newObject.link === '') {
       window.alert('type link');
       return;
     }
+    */
+    if (!$scope.newObject.link) {
+      $scope.newObject.link = '';
+    }
     if (!$scope.newObject.image || !$scope.newObject.image.url) {
-      window.alert('add image');
+      window.alert('add image'  );
       return;
     }
-    $scope.cms.children.push($scope.newObject);
+    $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
+    if ($rootScope.state.editLocale === 'ko') {
+      $rootScope.state.locales.forEach((locale) => {
+        if ((_.get($scope.cms, `${locale}.rows`) || []).length === $scope.cms[$rootScope.state.editLocale].rows.length - 1) {
+          $scope.cms[locale].rows.push($scope.newObject);
+        }
+      });
+    }
     $scope.newObject = {};
+  };
+
+  $scope.removeRow = (index) => {
+    $scope.cms[$rootScope.state.editLocale].rows.splice(index, 1)[0];
   };
 
   $scope.save = () => {
     $http.post(`/api/v1/cms`, { name: $scope.name, data: $scope.cms }).then((res) => {
       console.log(res);
+      window.alert('Saved Successfully');
     });
   };
 
