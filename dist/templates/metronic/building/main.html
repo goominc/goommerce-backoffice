@@ -11,7 +11,11 @@
         <div class="col-md-12">
           <div class="portlet light">
             <div class="portlet-title">
-              Content
+              <div class="actions btn-set">
+                <button class="btn blue" data-toggle="modal" data-target="#new_building">
+                  <i class="fa fa-plus"></i> {{'building.main.newBuildingPopup' | translate}}
+                </button>
+              </div>
             </div>
             <div class="portlet-body">
               <div class="row">
@@ -36,20 +40,30 @@
     </div>
   </div>
 </div>
-<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
-<div class="modal fade">
+<div class="modal fade" id="new_building">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-
-      </div>
-      <div class="modal-body">
-
-      </div>
-      <div class="modal-footer">
-
-      </div>
+      <form data-ng-submit="createBuilding(newBuilding)">
+        <div class="modal-header">
+          {{'building.main.newBuildingPopup' | translate}}
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-9" style="margin-bottom: 20px;">
+              <div class="input-group">
+                <span class="input-group-addon">
+                  <i class="fa fa-envelope"></i>
+                </span>
+                <input type="text" class="form-control" data-ng-model="newBuilding.name" placeholder="Building Name">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn default" type="reset" data-ng-click="closePopup()">{{'main.closeButton' | translate}}</button>
+          <button class="btn blue" type="submit"><i class="fa fa-plus"></i> {{'building.main.newBuildingPopup' | translate}}</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
--->

@@ -2,7 +2,7 @@
 
 const buildingModule = require('./module');
 
-buildingModule.controller('BuildingMainController', ($scope) => {
+buildingModule.controller('BuildingMainController', ($scope, $http, $state, $rootScope, boUtils) => {
   $scope.buildingDatatables = {
     field: 'buildings',
     url: '/api/v1/buildings',
@@ -18,6 +18,26 @@ buildingModule.controller('BuildingMainController', ($scope) => {
         orderable: false,
       },
     ],
+  };
+  $scope.createBuilding = (building) => {
+    const data = { name: {} };
+    $rootScope.state.locales.forEach((locale) => {
+      data.name[locale] = building.name;
+    });
+    boUtils.startProgressBar();
+    $http.post('/api/v1/buildings', data).then(() => {
+      boUtils.stopProgressBar();
+      $scope.closePopup();
+      $state.reload();
+    }, () => {
+      boUtils.stopProgressBar();
+      window.alert('error');
+    });
+  };
+  $scope.closePopup = () => {
+    $('#new_building').modal('hide');
+    $('#new_building').removeClass('in');
+    $('.modal-backdrop').remove();
   };
 });
 

@@ -347,6 +347,10 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     $scope.tmpObjToProduct();
     // $scope.imageToProduct();
     $scope.imageRowsToVariant();
+    // 2016. 05. 18. [heekyu] set default main image for product
+    if (!_.get($scope.product, 'appImages.default[0]')) {
+
+    }
     $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then((res) => {

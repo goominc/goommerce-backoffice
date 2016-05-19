@@ -1,7 +1,8 @@
 {
   "building": {
     "main": {
-      "title": "빌딩"
+      "title": "빌딩",
+      "newBuildingPopup": "새 건물 추가"
     },
     "info": {
       "title": "빌딩",
