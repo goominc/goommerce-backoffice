@@ -1561,7 +1561,8 @@ module.exports = {
 module.exports = {
   "building": {
     "main": {
-      "title": "빌딩"
+      "title": "빌딩",
+      "newBuildingPopup": "새 건물 추가"
     },
     "info": {
       "title": "빌딩",
@@ -1583,7 +1584,7 @@ module.exports = {
 
 var buildingModule = require('./module');
 
-buildingModule.controller('BuildingMainController', function ($scope) {
+buildingModule.controller('BuildingMainController', function ($scope, $http, $state, $rootScope, boUtils) {
   $scope.buildingDatatables = {
     field: 'buildings',
     url: '/api/v1/buildings',
@@ -1596,6 +1597,26 @@ buildingModule.controller('BuildingMainController', function ($scope) {
       data: 'name.ko',
       orderable: false
     }]
+  };
+  $scope.createBuilding = function (building) {
+    var data = { name: {} };
+    $rootScope.state.locales.forEach(function (locale) {
+      data.name[locale] = building.name;
+    });
+    boUtils.startProgressBar();
+    $http.post('/api/v1/buildings', data).then(function () {
+      boUtils.stopProgressBar();
+      $scope.closePopup();
+      $state.reload();
+    }, function () {
+      boUtils.stopProgressBar();
+      window.alert('error');
+    });
+  };
+  $scope.closePopup = function () {
+    $('#new_building').modal('hide');
+    $('#new_building').removeClass('in');
+    $('.modal-backdrop').remove();
   };
 });
 
@@ -3891,6 +3912,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.tmpObjToProduct();
     // $scope.imageToProduct();
     $scope.imageRowsToVariant();
+    // 2016. 05. 18. [heekyu] set default main image for product
+    if (!_.get($scope.product, 'appImages.default[0]')) {}
     $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then(function (res) {
