@@ -81,6 +81,19 @@
                           </div>
                         </div>
                       </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          Settlement Status:
+                        </div>
+                        <div class="col-md-7 value">
+                          <div class="form-group">
+                            <select class="form-control" data-ng-model="order.settlementStatus" convert-to-number>
+                              <option value="0">{{translateOrderSettlementStatus(0)}}</option>
+                              <option value="100">{{translateOrderSettlementStatus(100)}}</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

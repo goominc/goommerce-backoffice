@@ -184,6 +184,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
 
   $scope.translateOrderStatus = (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`);
   $scope.translateOrderPaymentStatus = (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`);
+  $scope.translateOrderSettlementStatus = (status) => $rootScope.getContentsI18nText(`enum.order.settlementStatus.${status}`);
   $scope.translateOrderProductStatus = (status) => $rootScope.getContentsI18nText(`enum.orderProduct.status.${status}`);
   $scope.translatePaymentStatus = (status) => $rootScope.getContentsI18nText(`enum.payment.status.${status}`);
   $scope.translatePaymentType = (type) => $rootScope.getContentsI18nText(`enum.payment.type.${type}`);
@@ -237,7 +238,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   };
 
   $scope.saveStatus = () => {
-    const data = _.pick(order, 'status', 'paymentStatus');
+    const data = _.pick(order, 'status', 'paymentStatus', 'settlementStatus');
     $http.put(`/api/v1/orders/${order.id}/status`, data).then((res) => {
       $state.reload();
     }, (err) => alert(err.data.message));

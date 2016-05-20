@@ -2656,6 +2656,9 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   $scope.translateOrderPaymentStatus = function (status) {
     return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
   };
+  $scope.translateOrderSettlementStatus = function (status) {
+    return $rootScope.getContentsI18nText('enum.order.settlementStatus.' + status);
+  };
   $scope.translateOrderProductStatus = function (status) {
     return $rootScope.getContentsI18nText('enum.orderProduct.status.' + status);
   };
@@ -2720,7 +2723,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   };
 
   $scope.saveStatus = function () {
-    var data = _.pick(order, 'status', 'paymentStatus');
+    var data = _.pick(order, 'status', 'paymentStatus', 'settlementStatus');
     $http.put('/api/v1/orders/' + order.id + '/status', data).then(function (res) {
       $state.reload();
     }, function (err) {
