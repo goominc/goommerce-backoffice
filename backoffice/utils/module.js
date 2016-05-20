@@ -96,7 +96,7 @@ utilModule.factory('boUtils', ($http) => {
         return '';
       }
 
-      return `${name.ko} ( ${_.get(brand, 'data.building.name')} ${_.get(brand, 'data.building.floor')} ${_.get(brand, 'data.building.flatNumber')}호 )`; // eslint-disable-line
+      return `${name.ko} ( ${_.get(brand, 'data.location.building.name.ko')} ${_.get(brand, 'data.location.floor')} ${_.get(brand, 'data.location.flatNumber')}호 )`; // eslint-disable-line
     },
     startProgressBar: () => {
       Metronic.blockUI({target: '#bo-content-container', boxed: true});
