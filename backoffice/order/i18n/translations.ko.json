@@ -7,6 +7,8 @@
       "total": "합계",
       "handlingFee": "사입비",
       "commission": "수수료",
+      "brandName": "브랜드명",
+      "vat": "부가세"
     },
     "main": {
       "buyerIdColumn": "주문자 ID",
@@ -77,6 +79,12 @@
     },
     "godo": {
       "title": "고도몰"
+    },
+    "vat": {
+      "title": "부가세"
+    },
+    "brandVat": {
+      "title": "브랜드 부가세 내역"
     }
   }
 }

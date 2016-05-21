@@ -641,3 +641,78 @@ orderModule.controller('OrderGodoController', ($scope, $http, $state, $rootScope
 
   updateDatatables();
 });
+
+orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
+  $scope.contentTitle = $translate.instant('order.vat.title');
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'order.main',
+      name: $translate.instant('order.main.title'),
+    },
+    {
+      name: $translate.instant('order.vat.title'),
+    },
+  ];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.month = $state.params.month || '';
+  $scope.orderDatatables = {
+    field: 'orders',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: `/api/v1/orders/vat/${$scope.month}`,
+    columns: [
+      {
+        data: (data) => _.get(data, 'brand.id', ''),
+        render: (id) => {
+          return `<a ui-sref="order.brandVat({brandId:${id},month:'${$scope.month}'})">${id}</a>`;
+        },
+      },
+      {
+        data: (data) => _.get(data, 'brand.name.ko', ''),
+      },
+      {
+        data: 'vatKRW',
+      },
+    ],
+  };
+});
+
+orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
+  const { month, brandId } = $state.params;
+
+  $scope.contentTitle = $translate.instant('order.vat.title');
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: `order.vat({month:"${month}"})`,
+      name: $translate.instant('order.vat.title'),
+    },
+    {
+      name: $translate.instant('order.brandVat.title'),
+    },
+  ];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.orderDatatables = {
+    field: 'orders',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: `/api/v1/orders/vat/brands/${brandId}/${month}`,
+    columns: [
+      {
+        data: (date) => _.get(date, 'processedDate', '').substring(0, 10)
+      },
+      {
+        data: 'vatKRW'
+      },
+    ],
+  };
+});

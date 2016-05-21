@@ -195,6 +195,10 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       name: $translate.instant('order.settlement.title'),
       sref: 'order.settlement'
     }, {
+      key: 'order.vat',
+      name: $translate.instant('order.vat.title'),
+      sref: 'order.vat({month: "' + moment().format('YYYY-MM') + '"})'
+    }, {
       key: 'order.listBigBuyer',
       name: $translate.instant('order.listBigBuyer.title'),
       sref: 'order.listBigBuyer'
@@ -2357,6 +2361,14 @@ orderModule.config(function ($stateProvider) {
     url: '/settlement',
     templateUrl: templateRoot + '/order/settlement.html',
     controller: 'OrderSettlementController'
+  }).state('order.vat', {
+    url: '/vat/:month',
+    templateUrl: templateRoot + '/order/vat.html',
+    controller: 'OrderVatController'
+  }).state('order.brandVat', {
+    url: '/brandVat/:brandId/:month',
+    templateUrl: templateRoot + '/order/brandVat.html',
+    controller: 'OrderBrandVatController'
   }).state('order.cs', {
     url: '/cs',
     templateUrl: templateRoot + '/order/cs.html',
@@ -2402,6 +2414,8 @@ module.exports = {
       "total": "합계",
       "handlingFee": "사입비",
       "commission": "수수료",
+      "brandName": "브랜드명",
+      "vat": "부가세"
     },
     "main": {
       "buyerIdColumn": "주문자 ID",
@@ -2472,6 +2486,12 @@ module.exports = {
     },
     "godo": {
       "title": "고도몰"
+    },
+    "vat": {
+      "title": "부가세"
+    },
+    "brandVat": {
+      "title": "브랜드 부가세 내역"
     }
   }
 }
@@ -3121,6 +3141,74 @@ orderModule.controller('OrderGodoController', function ($scope, $http, $state, $
   }
 
   updateDatatables();
+});
+
+orderModule.controller('OrderVatController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+  $scope.contentTitle = $translate.instant('order.vat.title');
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
+    name: $translate.instant('order.vat.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.month = $state.params.month || '';
+  $scope.orderDatatables = {
+    field: 'orders',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: '/api/v1/orders/vat/' + $scope.month,
+    columns: [{
+      data: function data(_data39) {
+        return _.get(_data39, 'brand.id', '');
+      },
+      render: function render(id) {
+        return '<a ui-sref="order.brandVat({brandId:' + id + ',month:\'' + $scope.month + '\'})">' + id + '</a>';
+      }
+    }, {
+      data: function data(_data40) {
+        return _.get(_data40, 'brand.name.ko', '');
+      }
+    }, {
+      data: 'vatKRW'
+    }]
+  };
+});
+
+orderModule.controller('OrderBrandVatController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+  var _$state$params = $state.params;
+  var month = _$state$params.month;
+  var brandId = _$state$params.brandId;
+
+  $scope.contentTitle = $translate.instant('order.vat.title');
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'order.vat({month:"' + month + '"})',
+    name: $translate.instant('order.vat.title')
+  }, {
+    name: $translate.instant('order.brandVat.title')
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.orderDatatables = {
+    field: 'orders',
+    // disableFilter: true,
+    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
+    url: '/api/v1/orders/vat/brands/' + brandId + '/' + month,
+    columns: [{
+      data: function data(date) {
+        return _.get(date, 'processedDate', '').substring(0, 10);
+      }
+    }, {
+      data: 'vatKRW'
+    }]
+  };
 });
 }, {"./module":9}],
 10: [function(require, module, exports) {

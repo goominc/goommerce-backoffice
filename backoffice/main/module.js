@@ -124,6 +124,11 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           sref: 'order.settlement',
         },
         {
+          key: 'order.vat',
+          name: $translate.instant('order.vat.title'),
+          sref: `order.vat({month: "${moment().format('YYYY-MM')}"})`,
+        },
+        {
           key: 'order.listBigBuyer',
           name: $translate.instant('order.listBigBuyer.title'),
           sref: 'order.listBigBuyer',

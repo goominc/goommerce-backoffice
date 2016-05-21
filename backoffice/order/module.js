@@ -48,6 +48,16 @@ orderModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/order/settlement.html',
       controller: 'OrderSettlementController',
     })
+    .state('order.vat', {
+      url: '/vat/:month',
+      templateUrl: templateRoot + '/order/vat.html',
+      controller: 'OrderVatController',
+    })
+    .state('order.brandVat', {
+      url: '/brandVat/:brandId/:month',
+      templateUrl: templateRoot + '/order/brandVat.html',
+      controller: 'OrderBrandVatController',
+    })
     .state('order.cs', {
       url: '/cs',
       templateUrl: templateRoot + '/order/cs.html',
