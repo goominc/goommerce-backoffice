@@ -680,6 +680,63 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
       },
     ],
   };
+
+  $scope.export = () => {
+    var CLIENT_ID = '352586701861-20pb7c3qlp7klemfap5qfms0hl0eshrv.apps.googleusercontent.com';
+
+    var SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
+
+    function checkAuth() {
+      gapi.auth.authorize(
+        {
+          'client_id': CLIENT_ID,
+          'scope': SCOPES.join(' '),
+          'immediate': true
+        }, handleAuthResult);
+      }
+
+    function handleAuthResult(authResult) {
+      if (authResult && !authResult.error) {
+        // Hide auth UI, then load client library.
+        loadSheetsApi();
+      } else {
+        // Show auth UI, allowing the user to initiate authorization by
+        // clicking authorize button.
+      }
+    }
+
+    function loadSheetsApi() {
+      var discoveryUrl =
+          'https://sheets.googleapis.com/$discovery/rest?version=v4';
+      gapi.client.load(discoveryUrl).then(run);
+    }
+
+    function run() {
+      $http.get(`/api/v1/orders/vat/${$scope.month}`).then((res) => {
+        const { orders } = res.data;
+        gapi.client.sheets.spreadsheets.create({
+          properties: { title: `VAT-${$scope.month}` },
+          sheets: orders.map((o) => ({
+            properties: { title: o.brand.name.ko },
+          })),
+        }).then((response) => {
+          console.log(response.result)
+        }, (response) => {
+          appendPre('Error: ' + response.result.error.message);
+        });
+      });
+    }
+
+    function appendPre(message) {
+      var pre = document.getElementById('output');
+      var textContent = document.createTextNode(message + '\n');
+      pre.appendChild(textContent);
+    }
+
+    gapi.auth.authorize(
+      {client_id: CLIENT_ID, scope: SCOPES, immediate: false},
+      handleAuthResult);
+  };
 });
 
 orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
