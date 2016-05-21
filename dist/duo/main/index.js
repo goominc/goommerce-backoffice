@@ -3008,7 +3008,7 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
       field: 'orders',
       // disableFilter: true,
       // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-      url: '/api/v1/order_products/settlement/' + $scope.activeDate,
+      url: '/api/v1/orders/settlement/' + $scope.activeDate,
       columns: [{
         data: 'orderId',
         render: function render(orderId) {
