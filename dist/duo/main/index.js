@@ -3209,6 +3209,17 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
     }
 
     function run() {
+      var mergeCells = function mergeCells(sheetId) {
+        return {
+          range: {
+            sheetId: sheetId,
+            startRowIndex: 5,
+            endRowIndex: 21,
+            startColumnIndex: 4,
+            endColumnIndex: 8
+          }
+        };
+      };
       $http.get('/api/v1/orders/vat/brands/' + $scope.month).then(function (res) {
         var list = res.data.list;
 
@@ -3227,7 +3238,7 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
                 }, {
                   // blank line
                 }, {
-                  values: [{ userEnteredValue: { stringValue: '날짜' } }, { userEnteredValue: { stringValue: '거래금액' } }]
+                  values: [{ userEnteredValue: { stringValue: '날짜' } }, { userEnteredValue: { stringValue: '거래금액' } }, {}, { userEnteredValue: { formulaValue: '=IMAGE("https://www.google.com/images/srpr/logo3w.png", 3)' } }]
                 }].concat(_toConsumableArray(o.list.map(function (l) {
                   return {
                     values: [{ userEnteredValue: { stringValue: l.processedDate.substring(0, 10) } }, { userEnteredValue: { numberValue: l.vatKRW } }]
@@ -3238,17 +3249,23 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
               }]
             };
           })
-        }). /*
-            merges: [{
-              startRowIndex: 5,
-              endRowIndex: 21,
-              startColumnIndex: 4,
-              endColumnIndex: 8,
-            }],
-            */
-        then(function (response) {
-          console.log(response.result);
-        }, function (response) {
+        }).then(function (_ref) {
+          var _ref$result = _ref.result;
+          var spreadsheetId = _ref$result.spreadsheetId;
+          var sheets = _ref$result.sheets;
+          return gapi.client.sheets.spreadsheets.batchUpdate({
+            spreadsheetId: spreadsheetId,
+            requests: sheets.map(function (s) {
+              return {
+                mergeCells: mergeCells(s.properties.sheetId)
+              };
+            })
+          });
+        }).then(function (_ref2) {
+          var spreadsheetId = _ref2.result.spreadsheetId;
+
+          window.open('https://docs.google.com/spreadsheets/d/' + spreadsheetId);
+        }).then(undefined, function (response) {
           appendPre('Error: ' + response.result.error.message);
         });
       });

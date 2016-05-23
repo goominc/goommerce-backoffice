@@ -712,6 +712,15 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
     }
 
     function run() {
+      const mergeCells = (sheetId) => ({
+        range: {
+          sheetId,
+          startRowIndex: 5,
+          endRowIndex: 21,
+          startColumnIndex: 4,
+          endColumnIndex: 8,
+        },
+      });
       $http.get(`/api/v1/orders/vat/brands/${$scope.month}`).then((res) => {
         const { list } = res.data;
         gapi.client.sheets.spreadsheets.create({
@@ -745,6 +754,8 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
                 values: [
                   { userEnteredValue: { stringValue: '날짜' } },
                   { userEnteredValue: { stringValue: '거래금액' } },
+                  {},
+                  { userEnteredValue: { formulaValue: '=IMAGE("https://www.google.com/images/srpr/logo3w.png", 3)' } },
                 ]
               }, ...o.list.map((l) => ({
                 values: [
@@ -758,18 +769,17 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
                 ]
               }],
             }],
-            /*
-            merges: [{
-              startRowIndex: 5,
-              endRowIndex: 21,
-              startColumnIndex: 4,
-              endColumnIndex: 8,
-            }],
-            */
           })),
-        }).then((response) => {
-          console.log(response.result)
-        }, (response) => {
+        }).then(({ result: { spreadsheetId, sheets } }) =>
+          gapi.client.sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requests: sheets.map((s) => ({
+              mergeCells: mergeCells(s.properties.sheetId),
+            })),
+          })
+        ).then(({ result: { spreadsheetId }}) => {
+          window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`);
+        }).then(undefined, (response) => {
           appendPre('Error: ' + response.result.error.message);
         });
       });
