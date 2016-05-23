@@ -661,7 +661,7 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
 
   $scope.month = $state.params.month || '';
   $scope.orderDatatables = {
-    field: 'orders',
+    field: 'list',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: `/api/v1/orders/vat/${$scope.month}`,
@@ -712,12 +712,60 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
     }
 
     function run() {
-      $http.get(`/api/v1/orders/vat/${$scope.month}`).then((res) => {
-        const { orders } = res.data;
+      $http.get(`/api/v1/orders/vat/brands/${$scope.month}`).then((res) => {
+        const { list } = res.data;
         gapi.client.sheets.spreadsheets.create({
           properties: { title: `VAT-${$scope.month}` },
-          sheets: orders.map((o) => ({
+          sheets: list.map((o) => ({
             properties: { title: o.brand.name.ko },
+            data: [{
+              startRow: 2,
+              startColumn: 1,
+              rowData: [{
+                values: [
+                  { userEnteredValue: { stringValue: '건물' } },
+                  { userEnteredValue: { stringValue: '거래처명' } },
+                  { userEnteredValue: { stringValue: '층' } },
+                  { userEnteredValue: { stringValue: '라인' } },
+                  { userEnteredValue: { stringValue: '호' } },
+                  { userEnteredValue: { stringValue: '전화번호' } },
+                ]
+              }, {
+                values: [
+                  { userEnteredValue: { stringValue: _.get(o.brand, 'data.location.building.name.ko') } },
+                  { userEnteredValue: { stringValue: _.get(o.brand, 'name.ko') } },
+                  { userEnteredValue: { stringValue: _.get(o.brand, 'data.location.floor') } },
+                  { userEnteredValue: { stringValue: '라인' } },
+                  { userEnteredValue: { stringValue: _.get(o.brand, 'data.location.flatNumber') } },
+                  { userEnteredValue: { stringValue: _.get(o.brand, 'data.tel') } },
+                ]
+              }, {
+                // blank line
+              }, {
+                values: [
+                  { userEnteredValue: { stringValue: '날짜' } },
+                  { userEnteredValue: { stringValue: '거래금액' } },
+                ]
+              }, ...o.list.map((l) => ({
+                values: [
+                  { userEnteredValue: { stringValue: l.processedDate.substring(0, 10) } },
+                  { userEnteredValue: { numberValue: l.vatKRW } },
+                ]
+              })), {
+                values: [
+                  { userEnteredValue: { stringValue: '합계' } },
+                  { userEnteredValue: { formulaValue: `=SUM(C7:C${7 + o.list.length - 1})` } },
+                ]
+              }],
+            }],
+            /*
+            merges: [{
+              startRowIndex: 5,
+              endRowIndex: 21,
+              startColumnIndex: 4,
+              endColumnIndex: 8,
+            }],
+            */
           })),
         }).then((response) => {
           console.log(response.result)
@@ -759,7 +807,7 @@ orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootS
   $rootScope.initAll($scope, $state.current.name);
 
   $scope.orderDatatables = {
-    field: 'orders',
+    field: 'list',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: `/api/v1/orders/vat/brands/${brandId}/${month}`,
