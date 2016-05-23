@@ -193,12 +193,10 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: $translate.instant('cms.dRightBanner'),
           sref: 'cms.simple({name: "desktop_right_banner"})',
         },
-        /*
         {
           name: $translate.instant('cms.mMainBanner'),
           sref: 'cms.simple({name: "mobile_main_banner"})',
         },
-        */
       ],
     },
     {
