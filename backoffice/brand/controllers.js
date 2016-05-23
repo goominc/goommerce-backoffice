@@ -23,7 +23,7 @@ brandModule.factory('brandCommons', ($http) => {
   };
 });
 
-brandModule.controller('BrandMainController', ($scope, $http, $element, brandCommons, boUtils) => {
+brandModule.controller('BrandMainController', ($scope, $http, $element, $compile, brandCommons, boUtils) => {
   const brandsUrl = '/api/v1/brands';
   const fieldName = 'brands';
   $scope.brandDatatables = {
@@ -39,6 +39,42 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, brandCom
       {
         data: 'name.ko',
         orderable: false,
+      },
+      {
+        data: (data) => _.get(data, 'data.tel') || '',
+        orderable: false,
+      },
+      {
+        data: (data) => _.get(data, 'data.location.building.name.ko') || '',
+        orderable: false,
+      },
+      {
+        data: (data) => _.get(data, 'data.location.floor') || '',
+        orderable: false,
+      },
+      {
+        data: (data) => _.get(data, 'data.location.flatNumber') || '',
+        orderable: false,
+      },
+      {
+        data: (data) => $http.get(`/api/v1/brands/${data.id}/members`).then((res) => {
+          for (let i = 0; i < (res.data || []).length; i++) {
+            const user = res.data[i];
+            for (let j = 0; j < (user.roles || []).length; j++) {
+              const role = user.roles[j];
+              if (role.type === 'owner' && +_.get(role, 'brand.id') === +data.id) {
+                const node = $(`#${data.id} td`).eq(6);
+                node.html(`<a ui-sref="user.info({ userId: ${user.id} })">${user.email}</a>`);
+                $compile(node)($scope);
+                return user;
+              }
+            }
+          }
+          return {};
+        }),
+        render: () => {
+          return '';
+        },
       },
     ],
   };
@@ -63,6 +99,10 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, brandCom
 
   $scope.closeBrandPopup = () => {
     $('#new_brand_modal').modal('hide');
+  };
+
+  $scope.datatablesLoaded = () => {
+
   };
 });
 

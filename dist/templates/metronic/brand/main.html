@@ -21,13 +21,17 @@
               </div>
               <div class="row">
                 <div class="col-md-12">
-                  <div bo-server-datatables="brandDatatables" url="/api/v1/brands/search" url-params="{}">
+                  <div bo-server-datatables="brandDatatables" url="/api/v1/brands/search" url-params="{}" table-render="datatablesLoaded()">
                     <table>
                       <thead>
                       <tr role="heading">
                         <th>ID</th>
-                        <th>Name</th>
-                        <!-- TODO Owner -->
+                        <th>{{'main.word.name' | translate}}</th>
+                        <th>{{'main.word.tel' | translate}}</th>
+                        <th>{{'brand.edit.buildingLabel' | translate}}</th>
+                        <th>{{'brand.edit.buildingFloorLabel' | translate}}</th>
+                        <th>{{'brand.edit.buildingFlatNumberLabel' | translate}}</th>
+                        <th>Owner</th>
                       </tr>
                       </thead>
                       <tbody></tbody>

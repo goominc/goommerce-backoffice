@@ -250,15 +250,11 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
     }, {
       name: $translate.instant('cms.dRightBanner'),
       sref: 'cms.simple({name: "desktop_right_banner"})'
+    }, {
+      name: $translate.instant('cms.mMainBanner'),
+      sref: 'cms.simple({name: "mobile_main_banner"})'
     }]
-  },
-  /*
-  {
-    name: $translate.instant('cms.mMainBanner'),
-    sref: 'cms.simple({name: "mobile_main_banner"})',
-  },
-  */
-  {
+  }, {
     key: 'currency', // TODO get key from router
     name: $translate.instant('currency.title'),
     sref: 'currency.main'
@@ -1217,7 +1213,7 @@ brandModule.factory('brandCommons', function ($http) {
   };
 });
 
-brandModule.controller('BrandMainController', function ($scope, $http, $element, brandCommons, boUtils) {
+brandModule.controller('BrandMainController', function ($scope, $http, $element, $compile, brandCommons, boUtils) {
   var brandsUrl = '/api/v1/brands';
   var fieldName = 'brands';
   $scope.brandDatatables = {
@@ -1231,6 +1227,47 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
     }, {
       data: 'name.ko',
       orderable: false
+    }, {
+      data: function data(_data) {
+        return _.get(_data, 'data.tel') || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data2) {
+        return _.get(_data2, 'data.location.building.name.ko') || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data3) {
+        return _.get(_data3, 'data.location.floor') || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data4) {
+        return _.get(_data4, 'data.location.flatNumber') || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data5) {
+        return $http.get('/api/v1/brands/' + _data5.id + '/members').then(function (res) {
+          for (var i = 0; i < (res.data || []).length; i++) {
+            var user = res.data[i];
+            for (var j = 0; j < (user.roles || []).length; j++) {
+              var role = user.roles[j];
+              if (role.type === 'owner' && +_.get(role, 'brand.id') === +_data5.id) {
+                var node = $('#' + _data5.id + ' td').eq(6);
+                node.html('<a ui-sref="user.info({ userId: ' + user.id + ' })">' + user.email + '</a>');
+                $compile(node)($scope);
+                return user;
+              }
+            }
+          }
+          return {};
+        });
+      },
+      render: function render() {
+        return '';
+      }
     }]
   };
 
@@ -1255,6 +1292,8 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
   $scope.closeBrandPopup = function () {
     $('#new_brand_modal').modal('hide');
   };
+
+  $scope.datatablesLoaded = function () {};
 });
 
 brandModule.controller('BrandEditController', function ($scope, $http, $state, $rootScope, $translate, $compile, boUtils, convertUtil, userUtil) {
@@ -1331,8 +1370,8 @@ brandModule.controller('BrandEditController', function ($scope, $http, $state, $
       }, {
         data: 'email'
       }, {
-        data: function data(_data) {
-          return _data;
+        data: function data(_data6) {
+          return _data6;
         },
         render: function render(user) {
           return userUtil.getRoleName(user);
@@ -1470,16 +1509,16 @@ brandModule.controller('BrandInquiryListController', function ($scope, $http, $r
         return '<a ui-sref="brand.inquiry.info({inquiryId: ' + id + '})">' + id + '</a>';
       }
     }, {
-      data: function data(_data2) {
-        return _.get(_data2, 'data.name') || '';
+      data: function data(_data7) {
+        return _.get(_data7, 'data.name') || '';
       }
     }, {
-      data: function data(_data3) {
-        return _.get(_data3, 'data.contactName') || '';
+      data: function data(_data8) {
+        return _.get(_data8, 'data.contactName') || '';
       }
     }, {
-      data: function data(_data4) {
-        return _.get(_data4, 'data.tel') || '';
+      data: function data(_data9) {
+        return _.get(_data9, 'data.tel') || '';
       }
     }, {
       data: 'id',
