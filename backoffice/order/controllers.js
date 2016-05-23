@@ -755,7 +755,7 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
                   { userEnteredValue: { stringValue: '날짜' } },
                   { userEnteredValue: { stringValue: '거래금액' } },
                   {},
-                  { userEnteredValue: { formulaValue: '=IMAGE("https://www.google.com/images/srpr/logo3w.png", 3)' } },
+                  { userEnteredValue: { formulaValue: '=IMAGE("https://s3.ap-northeast-2.amazonaws.com/linkshops/bo/images/bz.jpg")' } },
                 ]
               }, ...o.list.map((l) => ({
                 values: [

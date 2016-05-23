@@ -3238,7 +3238,7 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
                 }, {
                   // blank line
                 }, {
-                  values: [{ userEnteredValue: { stringValue: '날짜' } }, { userEnteredValue: { stringValue: '거래금액' } }, {}, { userEnteredValue: { formulaValue: '=IMAGE("https://www.google.com/images/srpr/logo3w.png", 3)' } }]
+                  values: [{ userEnteredValue: { stringValue: '날짜' } }, { userEnteredValue: { stringValue: '거래금액' } }, {}, { userEnteredValue: { formulaValue: '=IMAGE("https://s3.ap-northeast-2.amazonaws.com/linkshops/bo/images/bz.jpg")' } }]
                 }].concat(_toConsumableArray(o.list.map(function (l) {
                   return {
                     values: [{ userEnteredValue: { stringValue: l.processedDate.substring(0, 10) } }, { userEnteredValue: { numberValue: l.vatKRW } }]
