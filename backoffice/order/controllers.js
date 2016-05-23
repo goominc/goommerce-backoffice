@@ -780,15 +780,9 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
         ).then(({ result: { spreadsheetId }}) => {
           window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`);
         }).then(undefined, (response) => {
-          appendPre('Error: ' + response.result.error.message);
+          console.log('Error: ' + response.result.error.message);
         });
       });
-    }
-
-    function appendPre(message) {
-      var pre = document.getElementById('output');
-      var textContent = document.createTextNode(message + '\n');
-      pre.appendChild(textContent);
     }
 
     gapi.auth.authorize(

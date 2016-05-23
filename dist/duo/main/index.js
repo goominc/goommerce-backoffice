@@ -3266,15 +3266,9 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
 
           window.open('https://docs.google.com/spreadsheets/d/' + spreadsheetId);
         }).then(undefined, function (response) {
-          appendPre('Error: ' + response.result.error.message);
+          console.log('Error: ' + response.result.error.message);
         });
       });
-    }
-
-    function appendPre(message) {
-      var pre = document.getElementById('output');
-      var textContent = document.createTextNode(message + '\n');
-      pre.appendChild(textContent);
     }
 
     gapi.auth.authorize({ client_id: CLIENT_ID, scope: SCOPES, immediate: false }, handleAuthResult);
