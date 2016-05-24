@@ -322,7 +322,8 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
     auth: {},
     batchUploadedProducts: [],
     locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
-    editLocale: editLocale
+    editLocale: editLocale,
+    datatables: {}
   };
   $rootScope.$on('$stateChangeSuccess', function (event, toState) {
     handleMenus(toState.name);
@@ -407,6 +408,10 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
   $rootScope.changeEditLocale = function (locale) {
     $rootScope.state.editLocale = locale;
     $cookies.put(editLocaleKey, locale);
+  };
+
+  $rootScope.updateDatatablesSearch = function (key, value) {
+    _.set($rootScope.state.datatables, key, value);
   };
 });
 
@@ -2165,13 +2170,9 @@ module.exports = directiveModule;
 directiveModule.factory('datatableCommons', function ($compile) {
   return {
     getOptions: function getOptions(scope, dataTables) {
-      var options = {
-        lengthMenu: [[10, 20, 50, 100, 150], [10, 20, 50, 100, 150]],
-        // change per page values here
-        pageLength: dataTables.pageLength || 50, // default record count per page
-        // data: realData, need implement
-        columns: dataTables.columns,
-        order: dataTables.order || [[0, 'desc']], // set first column as a default sort by desc
+      var options = _extends({
+        lengthMenu: [[10, 20, 50, 100, 150], [10, 20, 50, 100, 150]]
+      }, _.pick(dataTables, ['columns', 'data', 'order', 'oSearch', 'pageLength']), {
         fnCreatedRow: function fnCreatedRow(nRow) {
           $compile(nRow)(scope);
         },
@@ -2179,10 +2180,8 @@ directiveModule.factory('datatableCommons', function ($compile) {
           $(nRow).attr("id", aData.id);
         },
         orderCellsTop: true
-      };
-      if (dataTables.data) {
-        options.data = dataTables.data;
-      }
+      });
+      _.defaults(options, { order: [0, 'desc'], pageLength: 50 });
       if (dataTables.disableFilter) {
         options.bFilter = false;
       }
@@ -2235,16 +2234,16 @@ directiveModule.directive('boDatatables', function ($http, $compile, $parse, dat
   };
 });
 
-directiveModule.directive('boServerDatatables', function ($http, $compile, datatableCommons, boUtils) {
+directiveModule.directive('boServerDatatables', function ($http, $compile, $rootScope, datatableCommons, boUtils) {
   return {
     restrict: 'A',
     transclude: true,
     template: '<div ng-transclude></div>',
     scope: {
-      url: '@',
-      urlParams: '=',
       boServerDatatables: '=',
-      tableRender: '&'
+      tableRender: '&',
+      url: '@',
+      urlParams: '='
     },
     link: function link(scope, elem) {
       var urlBase = scope.url;
@@ -2259,6 +2258,9 @@ directiveModule.directive('boServerDatatables', function ($http, $compile, datat
         urlParams.limit = data.length;
         if (data.search.value) {
           urlParams.q = data.search.value;
+        }
+        if (dataTables.storeKey) {
+          $rootScope.updateDatatablesSearch(dataTables.storeKey, data.search.value);
         }
         var order = _.get(data, 'order[0]');
         if (order) {
@@ -2359,6 +2361,8 @@ directiveModule.directive('convertToNumber', function () {
     }
   };
 });
+// change per page values here
+// data: realData, need implement
 }, {"../utils/module":16}],
 9: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
@@ -3681,7 +3685,7 @@ module.exports = {
 
 var productModule = require('../module.js');
 
-productModule.controller('ProductMainController', function ($scope, $http, $state, $rootScope, $translate, $compile, boConfig) {
+productModule.controller('ProductMainController', function ($scope, $http, $state, $rootScope, $translate, $compile, boUtils) {
   $scope.contentTitle = $translate.instant('product.main.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [{
@@ -3693,8 +3697,10 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
   }];
   $rootScope.initAll($scope, $state.current.name);
 
+  var storeKey = 'products';
   $scope.productDatatables = {
     field: 'products',
+    storeKey: storeKey, // 2016. 05. 24. [heekyu] Case 262
     // disableFilter: true,
     columns: [{
       data: 'id',
@@ -3717,6 +3723,11 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       },
       orderable: false
     }, {
+      data: function data(product) {
+        return boUtils.formatDate(product.createdAt);
+      },
+      orderable: false
+    }, {
       data: 'id',
       orderable: false,
       render: function render(id) {
@@ -3724,6 +3735,9 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       }
     }]
   };
+  if ($rootScope.state.datatables[storeKey]) {
+    $scope.productDatatables.oSearch = { sSearch: $rootScope.state.datatables[storeKey] };
+  }
   $scope.datatablesLoaded = function () {
     $compile(angular.element($('table')))($scope);
   };

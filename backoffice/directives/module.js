@@ -13,12 +13,8 @@ directiveModule.factory('datatableCommons', ($compile) => {
           [10, 20, 50, 100, 150],
           [10, 20, 50, 100, 150],  // change per page values here
         ],
-        pageLength: dataTables.pageLength || 50, // default record count per page
         // data: realData, need implement
-        columns: dataTables.columns,
-        order: dataTables.order || [
-          [0, 'desc'],
-        ], // set first column as a default sort by desc
+        ..._.pick(dataTables, ['columns', 'data', 'order', 'oSearch', 'pageLength']),
         fnCreatedRow: (nRow) => {
           $compile(nRow)(scope);
         },
@@ -27,9 +23,7 @@ directiveModule.factory('datatableCommons', ($compile) => {
         },
         orderCellsTop: true,
       };
-      if (dataTables.data) {
-        options.data = dataTables.data;
-      }
+      _.defaults(options, { order: [0, 'desc'], pageLength: 50 });
       if (dataTables.disableFilter) {
         options.bFilter = false;
       }
@@ -82,16 +76,16 @@ directiveModule.directive('boDatatables', ($http, $compile, $parse, datatableCom
   };
 });
 
-directiveModule.directive('boServerDatatables', ($http, $compile, datatableCommons, boUtils) => {
+directiveModule.directive('boServerDatatables', ($http, $compile, $rootScope, datatableCommons, boUtils) => {
   return {
     restrict: 'A',
     transclude: true,
     template: '<div ng-transclude></div>',
     scope: {
-      url: '@',
-      urlParams: '=',
       boServerDatatables: '=',
       tableRender: '&',
+      url: '@',
+      urlParams: '=',
     },
     link: (scope, elem) => {
       const urlBase = scope.url;
@@ -106,6 +100,9 @@ directiveModule.directive('boServerDatatables', ($http, $compile, datatableCommo
         urlParams.limit = data.length;
         if (data.search.value) {
           urlParams.q = data.search.value;
+        }
+        if (dataTables.storeKey) {
+          $rootScope.updateDatatablesSearch(dataTables.storeKey, data.search.value);
         }
         const order = _.get(data, 'order[0]');
         if (order) {

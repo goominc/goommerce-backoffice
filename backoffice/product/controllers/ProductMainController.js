@@ -2,7 +2,7 @@
 
 const productModule = require('../module.js');
 
-productModule.controller('ProductMainController', ($scope, $http, $state, $rootScope, $translate, $compile, boConfig) => {
+productModule.controller('ProductMainController', ($scope, $http, $state, $rootScope, $translate, $compile, boUtils) => {
   $scope.contentTitle = $translate.instant('product.main.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
@@ -17,8 +17,10 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
   ];
   $rootScope.initAll($scope, $state.current.name);
 
+  const storeKey = 'products';
   $scope.productDatatables = {
     field: 'products',
+    storeKey, // 2016. 05. 24. [heekyu] Case 262
     // disableFilter: true,
     columns: [
       {
@@ -40,6 +42,10 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
         orderable: false,
       },
       {
+        data: (product) => boUtils.formatDate(product.createdAt),
+        orderable: false,
+      },
+      {
         data: 'id',
         orderable: false,
         render: (id) => {
@@ -48,6 +54,9 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
       },
     ],
   };
+  if ($rootScope.state.datatables[storeKey]) {
+    $scope.productDatatables.oSearch = { sSearch: $rootScope.state.datatables[storeKey] };
+  }
   $scope.datatablesLoaded = () => {
     $compile(angular.element($('table')))($scope);
   };

@@ -254,6 +254,7 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
     batchUploadedProducts: [],
     locales: ['ko', 'en', 'zh-cn', 'zh-tw'],
     editLocale,
+    datatables: {},
   };
   $rootScope.$on('$stateChangeSuccess', (event, toState) => {
     handleMenus(toState.name);
@@ -336,6 +337,10 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
   $rootScope.changeEditLocale = (locale) => {
     $rootScope.state.editLocale = locale;
     $cookies.put(editLocaleKey, locale);
+  };
+
+  $rootScope.updateDatatablesSearch = (key, value) => {
+    _.set($rootScope.state.datatables, key, value);
   };
 });
 
