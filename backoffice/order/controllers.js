@@ -676,7 +676,7 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
         data: (data) => _.get(data, 'brand.name.ko', ''),
       },
       {
-        data: 'vatKRW',
+        data: (data) => _.get(data, 'vatKRW', ''),
       },
     ],
   };
@@ -820,7 +820,7 @@ orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootS
         data: (date) => _.get(date, 'processedDate', '').substring(0, 10)
       },
       {
-        data: 'vatKRW'
+        data: (data) => _.get(data, 'vatKRW', ''),
       },
     ],
   };

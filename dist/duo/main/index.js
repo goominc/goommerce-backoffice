@@ -3223,7 +3223,9 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
         return _.get(_data40, 'brand.name.ko', '');
       }
     }, {
-      data: 'vatKRW'
+      data: function data(_data41) {
+        return _.get(_data41, 'vatKRW', '');
+      }
     }]
   };
 
@@ -3349,7 +3351,9 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
         return _.get(date, 'processedDate', '').substring(0, 10);
       }
     }, {
-      data: 'vatKRW'
+      data: function data(_data42) {
+        return _.get(_data42, 'vatKRW', '');
+      }
     }]
   };
 });
