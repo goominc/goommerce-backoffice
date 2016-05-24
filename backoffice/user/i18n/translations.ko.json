@@ -2,6 +2,7 @@
   "user": {
     "createUser": {
       "admin": "어드민 생성",
+      "user": "유저 생성",
       "seller": "셀러 생성"
     },
     "manage": {

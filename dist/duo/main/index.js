@@ -5640,6 +5640,7 @@ module.exports = {
   "user": {
     "createUser": {
       "admin": "어드민 생성",
+      "user": "유저 생성",
       "seller": "셀러 생성"
     },
     "manage": {
@@ -5874,7 +5875,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
   $scope.newUser = {};
   $scope.createUser = function (user) {
     $http.post('/api/v1/users', user).then(function (res) {
-      $http.post('/api/v1/users/' + res.data.id + '/roles', $scope.newUserRole).then(function () {
+      ($scope.newUserRole ? $http.post('/api/v1/users/' + res.data.id + '/roles', $scope.newUserRole) : $q.when(true)).then(function () {
         $scope.closeUserPopup();
         $state.reload();
       })['catch'](function (err) {
@@ -5922,8 +5923,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
   };
   $scope.newUserPopup = {};
   $scope.newUseris = function (role) {
-    $scope.newUserPopup.name = $translate.instant('user.createUser.' + role);
-    $scope.newUserRole = { roleType: role };
+    $scope.newUserPopup.name = $translate.instant('user.createUser.' + (role || 'user'));
+    if (role) {
+      $scope.newUserRole = { roleType: role };
+    } else {
+      $scope.newUserRole = null;
+    }
   };
 
   var userIdToData = {};

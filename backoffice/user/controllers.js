@@ -186,7 +186,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
   $scope.newUser = {};
   $scope.createUser = (user) => {
     $http.post('/api/v1/users', user).then((res) => {
-      $http.post(`/api/v1/users/${res.data.id}/roles`, $scope.newUserRole).then(() => {
+      ($scope.newUserRole ? $http.post(`/api/v1/users/${res.data.id}/roles`, $scope.newUserRole) : $q.when(true)).then(() => {
         $scope.closeUserPopup();
         $state.reload();
       }).catch((err) => {
@@ -230,8 +230,12 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
   };
   $scope.newUserPopup = {};
   $scope.newUseris = (role) => {
-    $scope.newUserPopup.name = $translate.instant(`user.createUser.${role}`);
-    $scope.newUserRole = { roleType: role };
+    $scope.newUserPopup.name = $translate.instant(`user.createUser.${role || 'user'}`);
+    if (role) {
+      $scope.newUserRole = { roleType: role };
+    } else {
+      $scope.newUserRole = null;
+    }
   };
 
   const userIdToData = {};
