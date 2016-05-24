@@ -19,8 +19,8 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
 
   $scope.startDate = $state.params.start || '';
   $scope.endDate = $state.params.end || '';
-  if ($scope.startDate && $scope.endDate && new Date($scope.startDate).getTime() >= new Date($scope.endDate).getTime()) {
-    window.alert('시작 날짜가 더 작아야 합니다');
+  if ($scope.startDate && $scope.endDate && new Date($scope.startDate).getTime() > new Date($scope.endDate).getTime()) {
+    window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
   }
 
   const storeKey = 'products';
@@ -98,7 +98,7 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
     const start = new Date($scope.startDate);
     const end = new Date($scope.endDate);
     const diff = end.getTime() - start.getTime();
-    if (diff > 0) {
+    if (diff >= 0) {
       urlParams.start = $scope.startDate;
       urlParams.end = $scope.endDate;
     }
