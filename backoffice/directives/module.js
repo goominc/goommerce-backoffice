@@ -86,6 +86,7 @@ directiveModule.directive('boServerDatatables', ($http, $compile, $rootScope, da
       tableRender: '&',
       url: '@',
       urlParams: '=',
+      fnUrlParams: '&',
     },
     link: (scope, elem) => {
       const urlBase = scope.url;
@@ -96,6 +97,9 @@ directiveModule.directive('boServerDatatables', ($http, $compile, $rootScope, da
       options.ajax = (data, callback, settings) => {
         // console.log(data);
         const urlParams = { ...scope.urlParams };
+        if (scope.fnUrlParams) {
+          scope.fnUrlParams({ urlParams });
+        }
         urlParams.offset = data.start;
         urlParams.limit = data.length;
         if (data.search.value) {

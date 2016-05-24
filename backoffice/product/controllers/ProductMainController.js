@@ -17,6 +17,12 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
   ];
   $rootScope.initAll($scope, $state.current.name);
 
+  $scope.startDate = $state.params.start || '';
+  $scope.endDate = $state.params.end || '';
+  if ($scope.startDate && $scope.endDate && new Date($scope.startDate).getTime() >= new Date($scope.endDate).getTime()) {
+    window.alert('시작 날짜가 더 작아야 합니다');
+  }
+
   const storeKey = 'products';
   $scope.productDatatables = {
     field: 'products',
@@ -73,6 +79,28 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
       }).catch((err) => {
         window.alert(err);
       });
+    }
+  };
+
+  $('#product_createdAt_start').datepicker({ autoclose: true });
+  $('#product_createdAt_end').datepicker({ autoclose: true });
+  $('#product_createdAt_start').on('change', (e) => {
+    $state.go('product.main', _.merge({}, $state.params, { start: $('#product_createdAt_start').val() }));
+  });
+  $('#product_createdAt_end').on('change', (e) => {
+    $state.go('product.main', _.merge({}, $state.params, { end: $('#product_createdAt_end').val() }));
+  });
+
+  $scope.fnUrlParams = (urlParams) => {
+    if (!$scope.startDate || !$scope.endDate) {
+      return;
+    }
+    const start = new Date($scope.startDate);
+    const end = new Date($scope.endDate);
+    const diff = end.getTime() - start.getTime();
+    if (diff > 0) {
+      urlParams.start = $scope.startDate;
+      urlParams.end = $scope.endDate;
     }
   };
 });

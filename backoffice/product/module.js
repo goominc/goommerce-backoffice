@@ -23,7 +23,7 @@ productModule.config(($stateProvider) => {
       template: '<ui-view/>',
     })
     .state('product.main', {
-      url: '/main',
+      url: '/main?start,end',
       templateUrl: templateRoot + '/product/main.html',
       controller: 'ProductMainController',
     })

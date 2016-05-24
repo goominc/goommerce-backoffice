@@ -133,18 +133,18 @@
             <a data-ng-if="!menu.sref || menu.sref === ''"> {{menu.name}}
               <i class="fa fa-angle-down" ng-if="menu.children"></i>
             </a>
-            <a data-ng-if="menu.sref && menu.sref !== ''" ui-sref="{{menu.sref}}"> {{menu.name}}
+            <a data-ng-if="menu.sref && menu.sref !== ''" ui-sref="{{menu.sref}}" ui-sref-opts="{reload: true, inherit: false}"> {{menu.name}}
               <i class="fa fa-angle-down" ng-if="menu.children"></i>
             </a>
             <ul class="dropdown-menu" ng-if="menu.children">
               <li data-ng-class="{'dropdown-submenu': depth2.children}" class=" " ng-repeat="depth2 in menu.children">
-                <a ui-sref="{{depth2.sref}}">
+                <a ui-sref="{{depth2.sref}}" ui-sref-opts="{reload: true, inherit: false}">
                   {{depth2.name}} <span data-ng-if="depth2.badge" class="badge badge-danger" style="right: 10px;">{{depth2.badge}}</span>
                   <span class="arrow"></span>
                 </a>
                 <ul class="dropdown-menu" ng-if="depth2.children">
                   <li class=" " ng-repeat="depth3 in depth2.children">
-                    <a ui-sref="{{depth3.sref}}"> {{depth3.name}}
+                    <a ui-sref="{{depth3.sref}}" ui-sref-opts="{reload: true, inherit: false}"> {{depth3.name}}
                       <span class="arrow"></span>
                     </a>
                   </li>

@@ -12,12 +12,18 @@
           <div class="portlet light">
             <div class="portlet-title">
               <div class="actions btn-set">
+                <div style="float: left; margin-right: 20px;" class="input-group input-large date-picker input-daterange">
+                  <input type="text" class="form-control" id="product_createdAt_start" data-date-format="yyyy-mm-dd" data-ng-model="startDate">
+                  <span class="input-group-addon">
+                  to </span>
+                  <input type="text" class="form-control" id="product_createdAt_end" data-date-format="yyyy-mm-dd" data-ng-model="endDate">
+                </div>
                 <button class="btn blue" ui-sref="product.add">
                   <i class="fa fa-plus"></i> {{'product.edit.createTitle' | translate}}
                 </button>
               </div>
             </div>
-            <div bo-server-datatables="productDatatables" url="/api/v1/products" table-render="datatablesLoaded()">
+            <div bo-server-datatables="productDatatables" url="/api/v1/products" table-render="datatablesLoaded()" fn-url-params="fnUrlParams(urlParams)">
               <table class="table table-bordered table-hover">
                 <thead>
                 <tr role="row" class="heading">

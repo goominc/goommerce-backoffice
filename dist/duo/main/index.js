@@ -2243,7 +2243,8 @@ directiveModule.directive('boServerDatatables', function ($http, $compile, $root
       boServerDatatables: '=',
       tableRender: '&',
       url: '@',
-      urlParams: '='
+      urlParams: '=',
+      fnUrlParams: '&'
     },
     link: function link(scope, elem) {
       var urlBase = scope.url;
@@ -2254,6 +2255,9 @@ directiveModule.directive('boServerDatatables', function ($http, $compile, $root
       options.ajax = function (data, callback, settings) {
         // console.log(data);
         var urlParams = _extends({}, scope.urlParams);
+        if (scope.fnUrlParams) {
+          scope.fnUrlParams({ urlParams: urlParams });
+        }
         urlParams.offset = data.start;
         urlParams.limit = data.length;
         if (data.search.value) {
@@ -3369,7 +3373,7 @@ productModule.config(function ($stateProvider) {
     url: '/product',
     template: '<ui-view/>'
   }).state('product.main', {
-    url: '/main',
+    url: '/main?start,end',
     templateUrl: templateRoot + '/product/main.html',
     controller: 'ProductMainController'
   }).state('product.add', {
@@ -3697,6 +3701,12 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
   }];
   $rootScope.initAll($scope, $state.current.name);
 
+  $scope.startDate = $state.params.start || '';
+  $scope.endDate = $state.params.end || '';
+  if ($scope.startDate && $scope.endDate && new Date($scope.startDate).getTime() >= new Date($scope.endDate).getTime()) {
+    window.alert('시작 날짜가 더 작아야 합니다');
+  }
+
   var storeKey = 'products';
   $scope.productDatatables = {
     field: 'products',
@@ -3754,6 +3764,28 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       })['catch'](function (err) {
         window.alert(err);
       });
+    }
+  };
+
+  $('#product_createdAt_start').datepicker({ autoclose: true });
+  $('#product_createdAt_end').datepicker({ autoclose: true });
+  $('#product_createdAt_start').on('change', function (e) {
+    $state.go('product.main', _.merge({}, $state.params, { start: $('#product_createdAt_start').val() }));
+  });
+  $('#product_createdAt_end').on('change', function (e) {
+    $state.go('product.main', _.merge({}, $state.params, { end: $('#product_createdAt_end').val() }));
+  });
+
+  $scope.fnUrlParams = function (urlParams) {
+    if (!$scope.startDate || !$scope.endDate) {
+      return;
+    }
+    var start = new Date($scope.startDate);
+    var end = new Date($scope.endDate);
+    var diff = end.getTime() - start.getTime();
+    if (diff > 0) {
+      urlParams.start = $scope.startDate;
+      urlParams.end = $scope.endDate;
     }
   };
 });
