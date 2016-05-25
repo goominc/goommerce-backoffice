@@ -137,6 +137,11 @@
                           {{user.data.tel}}
                         </div>
                       </div>
+                      <div class="row static-info" data-ng-if="user.data.bizImage.url">
+                        <div class="col-md-12">
+                          <img data-toggle="modal" data-target="#user_biz_image" width="100%" data-ng-src="{{user.data.bizImage.url}}" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -496,6 +501,13 @@
           <button class="btn blue" type="submit"><i class="fa fa-plus"></i> {{'main.saveButton' | translate}}</button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="user_biz_image">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <img width="600" data-ng-src="{{user.data.bizImage.url}}" />
     </div>
   </div>
 </div>
