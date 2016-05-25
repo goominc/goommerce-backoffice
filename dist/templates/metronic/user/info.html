@@ -28,6 +28,14 @@
                       <input data-ng-readonly="field.isReadOnly" type="text" class="form-control" placeholder="{{field.placeholder}}" ng-model="field.obj">
                     </div>
                   </div>
+                  <div class="form-group" data-ng-if="myBrand">
+                    <label class="col-md-2 control-label">
+                      브랜드 바로가기
+                    </label>
+                    <div class="col-md-10">
+                      <a ui-sref="brand.edit({ brandId: myBrand.id})">{{myBrand.id}}</a>
+                    </div>
+                  </div>
                   <div class="form-group">
                     <label class="col-md-2 control-label">사업자 등록증</label>
                     <div class="col-md-10">

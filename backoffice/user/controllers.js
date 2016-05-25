@@ -432,6 +432,11 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
       {title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false},
       {title: $translate.instant('user.info.settlementAliasLabel'), obj: _.get($scope.user, 'data.settlement.alias'), key: 'data.settlement.alias', isRequired: false},
     ];
+    const roleType = _.get($scope.user, 'roles[0].type');
+    const brand = _.get($scope.user, 'roles[0].brand');
+    if (roleType === 'owner' && brand) {
+      $scope.myBrand = brand;
+    }
   };
   init(user);
 

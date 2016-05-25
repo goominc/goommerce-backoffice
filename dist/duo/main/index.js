@@ -95,7 +95,7 @@
 var mainModule = require('./module');
 
 mainModule.constant('boConfig', {
-  apiUrl: ''
+  apiUrl: 'http://localhost:8080'
 });
 }, {"./module":2}],
 2: [function(require, module, exports) {
@@ -2677,9 +2677,12 @@ orderModule.controller('OrderListBeforePaymentController', function ($scope, $ro
     }]
   };
   $scope.startProcessing = function (orderId) {
-    $http.post('/api/v1/orders/' + orderId + '/start_processing').then(function (res) {
-      // TODO: Update datatables row data.
-    });
+    if (window.confirm('입금 확인하셨습니까?')) {
+      $http.post('/api/v1/orders/' + orderId + '/start_processing').then(function (res) {
+        // TODO: Update datatables row data.
+        $state.reload();
+      });
+    }
   };
 });
 
@@ -3711,6 +3714,8 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
     window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
   }
 
+  $scope.productIdMap = {};
+
   var storeKey = 'products';
   $scope.productDatatables = {
     field: 'products',
@@ -3742,12 +3747,32 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       },
       orderable: false
     }, {
+      data: function data(product) {
+        return product;
+      },
+      orderable: false,
+      render: function render(product) {
+        $scope.productIdMap[product.id] = product;
+        return '\n            <input type="checkbox" id="product_main_isActive_' + product.id + '"\n              data-ng-checked="' + product.isActive + '"\n              data-ng-click="toggleIsActive(productIdMap[' + product.id + '])"\n            />\n            <label for="product_main_isActive_' + product.id + '"></label>\n          ';
+      }
+    }, {
       data: 'id',
       orderable: false,
       render: function render(id) {
         return '<button data-ng-click="deleteProduct(' + id + ')" class="btn red"><i class="fa fa-remove"></i> ' + $translate.instant('main.deleteButton') + '</button>';
       }
     }]
+  };
+  $scope.toggleIsActive = function (product) {
+    $http.put('/api/v1/products/' + product.id, { isActive: !product.isActive }).then(function () {
+      product.isActive = !product.isActive;
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+      $http.put('/api/v1/products/' + product.id + '/index');
+    }, function () {
+      window.alert('failed to update isActive');
+    });
   };
   if ($rootScope.state.datatables[storeKey]) {
     $scope.productDatatables.oSearch = { sSearch: $rootScope.state.datatables[storeKey] };
@@ -6110,6 +6135,11 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     $scope.user = user;
 
     $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNameLabel'), obj: _.get($scope.user, 'data.bizName'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNumberLabel'), obj: _.get($scope.user, 'data.bizNumber'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false }, { title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false }, { title: $translate.instant('user.info.settlementAliasLabel'), obj: _.get($scope.user, 'data.settlement.alias'), key: 'data.settlement.alias', isRequired: false }];
+    var roleType = _.get($scope.user, 'roles[0].type');
+    var brand = _.get($scope.user, 'roles[0].brand');
+    if (roleType === 'owner' && brand) {
+      $scope.myBrand = brand;
+    }
   };
   init(user);
 
