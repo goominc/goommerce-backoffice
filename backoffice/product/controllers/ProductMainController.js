@@ -23,6 +23,8 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
     window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
   }
 
+  $scope.productIdMap = {};
+
   const storeKey = 'products';
   $scope.productDatatables = {
     field: 'products',
@@ -52,6 +54,20 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
         orderable: false,
       },
       {
+        data: (product) => product,
+        orderable: false,
+        render: (product) => {
+          $scope.productIdMap[product.id] = product;
+          return `
+            <input type="checkbox" id="product_main_isActive_${product.id}"
+              data-ng-checked="${product.isActive}"
+              data-ng-click="toggleIsActive(productIdMap[${product.id}])"
+            />
+            <label for="product_main_isActive_${product.id}"></label>
+          `;
+        },
+      },
+      {
         data: 'id',
         orderable: false,
         render: (id) => {
@@ -59,6 +75,17 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
         },
       },
     ],
+  };
+  $scope.toggleIsActive = (product) => {
+    $http.put(`/api/v1/products/${product.id}`, { isActive: !product.isActive }).then(() => {
+      product.isActive = !product.isActive;
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+      $http.put(`/api/v1/products/${product.id}/index`);
+    }, () => {
+      window.alert('failed to update isActive');
+    });
   };
   if ($rootScope.state.datatables[storeKey]) {
     $scope.productDatatables.oSearch = { sSearch: $rootScope.state.datatables[storeKey] };
