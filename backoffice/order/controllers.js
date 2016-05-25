@@ -136,9 +136,12 @@ orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, 
     ],
   };
   $scope.startProcessing = (orderId) => {
-    $http.post(`/api/v1/orders/${orderId}/start_processing`).then((res) => {
-      // TODO: Update datatables row data.
-    });
+    if (window.confirm('입금 확인하셨습니까?')) {
+      $http.post(`/api/v1/orders/${orderId}/start_processing`).then((res) => {
+        // TODO: Update datatables row data.
+        $state.reload();
+      });
+    }
   };
 });
 
