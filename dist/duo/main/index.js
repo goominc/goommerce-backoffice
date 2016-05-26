@@ -95,7 +95,7 @@
 var mainModule = require('./module');
 
 mainModule.constant('boConfig', {
-  apiUrl: 'http://localhost:8080'
+  apiUrl: ''
 });
 }, {"./module":2}],
 2: [function(require, module, exports) {
@@ -1254,13 +1254,28 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
       orderable: false
     }, {
       data: function data(_data5) {
-        return $http.get('/api/v1/brands/' + _data5.id + '/members').then(function (res) {
+        return _.get(_data5, 'data.bank.name') || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data6) {
+        return _.get(_data6, 'data.bank.accountNumber') || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data7) {
+        return _.get(_data7, 'data.bank.accountHolder') || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data8) {
+        return $http.get('/api/v1/brands/' + _data8.id + '/members').then(function (res) {
           for (var i = 0; i < (res.data || []).length; i++) {
             var user = res.data[i];
             for (var j = 0; j < (user.roles || []).length; j++) {
               var role = user.roles[j];
-              if (role.type === 'owner' && +_.get(role, 'brand.id') === +_data5.id) {
-                var node = $('#' + _data5.id + ' td').eq(6);
+              if (role.type === 'owner' && +_.get(role, 'brand.id') === +_data8.id) {
+                var node = $('#' + _data8.id + ' td').eq(9);
                 node.html('<a ui-sref="user.info({ userId: ' + user.id + ' })">' + user.email + '</a>');
                 $compile(node)($scope);
                 return user;
@@ -1375,8 +1390,8 @@ brandModule.controller('BrandEditController', function ($scope, $http, $state, $
       }, {
         data: 'email'
       }, {
-        data: function data(_data6) {
-          return _data6;
+        data: function data(_data9) {
+          return _data9;
         },
         render: function render(user) {
           return userUtil.getRoleName(user);
@@ -1514,16 +1529,16 @@ brandModule.controller('BrandInquiryListController', function ($scope, $http, $r
         return '<a ui-sref="brand.inquiry.info({inquiryId: ' + id + '})">' + id + '</a>';
       }
     }, {
-      data: function data(_data7) {
-        return _.get(_data7, 'data.name') || '';
+      data: function data(_data10) {
+        return _.get(_data10, 'data.name') || '';
       }
     }, {
-      data: function data(_data8) {
-        return _.get(_data8, 'data.contactName') || '';
+      data: function data(_data11) {
+        return _.get(_data11, 'data.contactName') || '';
       }
     }, {
-      data: function data(_data9) {
-        return _.get(_data9, 'data.tel') || '';
+      data: function data(_data12) {
+        return _.get(_data12, 'data.tel') || '';
       }
     }, {
       data: 'id',

@@ -57,13 +57,25 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, $compile
         orderable: false,
       },
       {
+        data: (data) => _.get(data, 'data.bank.name') || '',
+        orderable: false,
+      },
+      {
+        data: (data) => _.get(data, 'data.bank.accountNumber') || '',
+        orderable: false,
+      },
+      {
+        data: (data) => _.get(data, 'data.bank.accountHolder') || '',
+        orderable: false,
+      },
+      {
         data: (data) => $http.get(`/api/v1/brands/${data.id}/members`).then((res) => {
           for (let i = 0; i < (res.data || []).length; i++) {
             const user = res.data[i];
             for (let j = 0; j < (user.roles || []).length; j++) {
               const role = user.roles[j];
               if (role.type === 'owner' && +_.get(role, 'brand.id') === +data.id) {
-                const node = $(`#${data.id} td`).eq(6);
+                const node = $(`#${data.id} td`).eq(9);
                 node.html(`<a ui-sref="user.info({ userId: ${user.id} })">${user.email}</a>`);
                 $compile(node)($scope);
                 return user;
