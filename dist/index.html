@@ -237,5 +237,17 @@
 <script src="//apis.google.com/js/client.js"></script>
 <script type="text/javascript">
   $.cloudinary.config({ cloud_name: 'linkshops', api_key: '592412811688523' });
+  // http://stackoverflow.com/questions/149055/how-can-i-format-numbers-as-money-in-javascript
+  /**
+   * Number.prototype.format(n, x)
+   *
+   * @param integer n: length of decimal
+   * @param integer x: length of sections
+   */
+  Number.prototype.format = function(n, x) {
+    var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\.' : '$') + ')';
+    return this.toFixed(Math.max(0, ~~n)).replace(new RegExp(re, 'g'), '$&,');
+  };
+
 </script>
 </html>
