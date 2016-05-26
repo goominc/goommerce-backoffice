@@ -28,7 +28,8 @@
       "userTypeLabel": "유저 종류",
       "editRoleButton": "권한 변경",
       "userDetailButton": "유저 상세 정보",
-      "settlementAliasLabel": "회계팀 약어"
+      "settlementAliasLabel": "회계팀 약어",
+      "signupMemoLabel": "중국 가입자 메모"
     },
     "waitConfirm": {
       "title": "바이어 인증 대기"
