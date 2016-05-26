@@ -190,13 +190,13 @@
                           subtotal:
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.subtotalKRW}}
+                          KRW {{(+order.subtotalKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.finalSubtotalKRW}}
+                          KRW {{(+order.finalSubtotalKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.subtotalKRW - order.finalSubtotalKRW}}
+                          KRW {{(order.subtotalKRW - order.finalSubtotalKRW).format()}}
                         </div>
                       </div>
                       <div class="row static-info">
@@ -204,13 +204,13 @@
                           tax:
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.taxKRW}}
+                          KRW {{(+order.taxKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.finalTaxKRW}}
+                          KRW {{(+order.finalTaxKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.taxKRW - order.finalTaxKRW}}
+                          KRW {{(order.taxKRW - order.finalTaxKRW).format()}}
                         </div>
                       </div>
                       <div class="row static-info">
@@ -218,13 +218,13 @@
                           handling fee:
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.handlingFeeKRW}}
+                          KRW {{(+order.handlingFeeKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.finalHandlingFeeKRW}}
+                          KRW {{(+order.finalHandlingFeeKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.handlingFeeKRW - order.finalHandlingFeeKRW}}
+                          KRW {{(order.handlingFeeKRW - order.finalHandlingFeeKRW).format()}}
                         </div>
                       </div>
                       <div class="row static-info">
@@ -232,13 +232,13 @@
                           shipping cost:
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.shippingCostKRW}}
+                          KRW {{(+order.shippingCostKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.finalShippingCostKRW}}
+                          KRW {{(+order.finalShippingCostKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.shippingCostKRW - order.finalShippingCostKRW}}
+                          KRW {{(order.shippingCostKRW - order.finalShippingCostKRW).format()}}
                         </div>
                       </div>
                       <div class="row static-info">
@@ -246,13 +246,13 @@
                           adjustment:
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.adjustmentTotalKRW}}
+                          KRW {{(+order.adjustmentTotalKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.finalAdjustmentTotalKRW}}
+                          KRW {{(+order.finalAdjustmentTotalKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.adjustmentTotalKRW - order.finalAdjustmentTotalKRW}}
+                          KRW {{(order.adjustmentTotalKRW - order.finalAdjustmentTotalKRW).format()}}
                         </div>
                       </div>
                       <div class="row static-info">
@@ -260,13 +260,13 @@
                           total:
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.totalKRW}}
+                          KRW {{(+order.totalKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.finalTotalKRW}}
+                          KRW {{(+order.finalTotalKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.totalKRW - order.finalTotalKRW}}
+                          KRW {{(order.totalKRW - order.finalTotalKRW).format()}}
                         </div>
                       </div>
                       <div class="row static-info">
@@ -274,13 +274,13 @@
                           Payment:
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.totalPaid.amount}}
+                          KRW {{(+order.totalPaid.amount).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.finalTotalKRW}}
+                          KRW {{(+order.finalTotalKRW).format()}}
                         </div>
                         <div class="col-md-3 value">
-                          KRW {{order.totalPaid.amount - order.finalTotalKRW - order.totalRefuned}} ({{order.totalRefuned}})
+                          KRW {{(order.totalPaid.amount - order.finalTotalKRW - order.totalRefuned).format()}} ({{(+order.totalRefuned).format()}})
                         </div>
                       </div>
                       <div class="row static-info">
@@ -374,16 +374,16 @@
                               {{row.productVariant.data.size}}
                             </td>
                             <td>
-                              <span>{{row.productVariant.KRW}} KRW</span>
+                              <span>{{(+row.productVariant.KRW).format()}} KRW</span>
                             </td>
                             <td>
-                              <span>{{row.productVariant.KRW}} KRW</span>
+                              <span>{{(+row.productVariant.KRW).format()}} KRW</span>
                             </td>
                             <td>
                               {{row.quantity}}
                             </td>
                             <td>
-                              {{row.totalKRW}}
+                              {{(+row.totalKRW).format()}}
                             </td>
                             <td>
                               {{row.data.stock.quantity}}
@@ -392,7 +392,7 @@
                               <input type="number" data-ng-model="row.finalQuantity">
                             </td>
                             <td>
-                              {{row.finalTotalKRW}}
+                              {{(+row.finalTotalKRW).format()}}
                             </td>
                             <td>
                               {{translateOrderProductStatus(row.status)}}
@@ -443,10 +443,10 @@
                             </td>
                             <td>
                               <div ng-if="row.type === 0 || row.type === 3">
-                                {{row.data.TotPrice || row.data.amt_input}}
+                                {{(row.data.TotPrice || row.data.amt_input).format()}}
                               </div>
                               <div ng-if="row.type === 2">
-                                {{row.data.PRTC_Price}}
+                                {{row.data.PRTC_Price.format()}}
                               </div>
                             </td>
                             <td>
@@ -491,7 +491,7 @@
         <div class="modal-body">
           <div class="row">
             <div class="col-md-12 form-group">
-              <label class="control-label">환불 가능 금액: {{refundPayment.data.TotPrice}} </label>
+              <label class="control-label">환불 가능 금액: {{refundPayment.data.TotPrice.format()}} </label>
               <input class="form-control" type="number" min="1" max="{{refundPayment.data.TotPrice || 1}}" data-ng-model="refundAmount" placeholder="환불 금액을 입력하세요" />
             </div>
           </div>

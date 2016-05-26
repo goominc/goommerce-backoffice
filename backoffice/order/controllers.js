@@ -38,7 +38,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         render: (data) => boUtils.formatDate(data),
       },
       {
-        data: 'totalKRW',
+        data: (data) => (+data.totalKRW).format(),
       },
       {
         data: 'paymentStatus',
@@ -110,7 +110,7 @@ orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, 
         render: (data) => boUtils.formatDate(data),
       },
       {
-        data: 'totalKRW',
+        data: (data) => (+data.totalKRW).format(),
       },
       {
         data: 'buyerId',
@@ -416,7 +416,7 @@ orderModule.controller('OrderCsController', ($scope, $rootScope, $http, $state, 
         bSortable: false,
       },
       {
-        data: 'totalKRW',
+        data: (data) => (+data.totalKRW).format(),
         bSortable: false,
       },
       {
@@ -472,7 +472,7 @@ orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $r
         render: (data) => boUtils.formatDate(data),
       },
       {
-        data: 'totalKRW',
+        data: (data) => (+data.totalKRW).format(),
       },
       {
         data: 'paymentStatus',
