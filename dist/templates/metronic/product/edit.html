@@ -192,7 +192,7 @@
                           class="btn btn-circle default"
                           data-ng-repeat="value in field.enums"
                           data-ng-class="{'active': tmpObj[field.tmpKey] === value}"
-                          data-ng-click="tmpObj[field.tmpKey] = value"
+                          data-ng-click="onEnumClick($event, field.tmpKey, value)"
                         >
                           {{value}}
                         </button>

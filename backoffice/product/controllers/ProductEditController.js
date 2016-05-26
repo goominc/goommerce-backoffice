@@ -186,7 +186,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     { title: '사이즈6', type: 'number', key: 'data.detail.size6', tmpKey: 'detailSize6' },
     { title: '촬영모델', enums: ['이은지', '임소리', '유영석'], key: 'data.detail.modelName', tmpKey: 'detailModelName' },
     { title: '모델착용사이즈', key: 'data.detail.modelSize', tmpKey: 'detailModelSize' },
-    { title: '원산지', key: 'data.detail.origin', tmpKey: 'detailOrigin' },
+    { title: '원산지', enums: ['없음', '한국', '중국'], key: 'data.detail.origin', tmpKey: 'detailOrigin' },
     { title: '촉감', enums: ['까슬함', '적당함', '부드러움'], key: 'data.detail.touch', tmpKey: 'detailTouch' },
     { title: '신축성', enums: ['좋음', '약간', '없음'], key: 'data.detail.flexibility', tmpKey: 'detailFlexibility' },
     { title: '비침', enums: ['많이비침', '약간비침', '비침없음'], key: 'data.detail.transparency', tmpKey: 'detailTransparency' },
@@ -194,6 +194,16 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     { title: '두께감', enums: ['두꺼움', '적당함', '얇음'], key: 'data.detail.thickness', tmpKey: 'detailThickness' },
     { title: '안감', enums: ['전체안감', '부분안감', '안감없음'], key: 'data.detail.lining', tmpKey: 'detailLining' },
   ];
+
+  $scope.onEnumClick = (event, tmpKey, val) => {
+    const current = _.get($scope.tmpObj, tmpKey);
+    if (current === val) {
+      _.set($scope.tmpObj, tmpKey, '');
+      $(event.target).blur();
+    } else {
+      _.set($scope.tmpObj, tmpKey, val);
+    }
+  };
 
   const allFields = $scope.inputFields.concat($scope.moreFields);
   $scope.tmpObjToProduct = () => {
