@@ -442,8 +442,8 @@
                               {{translatePaymentType(row.type)}}
                             </td>
                             <td>
-                              <div ng-if="row.type === 0">
-                                {{row.data.TotPrice}}
+                              <div ng-if="row.type === 0 || row.type === 3">
+                                {{row.data.TotPrice || row.data.amt_input}}
                               </div>
                               <div ng-if="row.type === 2">
                                 {{row.data.PRTC_Price}}
