@@ -5521,7 +5521,7 @@ textModule.controller('TextMainController', function ($scope, $http, $q, $state,
       text: key,
       data: obj,
       children: [],
-      state: { selected: false, opened: true, disabled: true }
+      state: { selected: false, opened: false, disabled: true }
     };
     for (var i = 0; i < keys.length; i++) {
       var child = obj[keys[i]];

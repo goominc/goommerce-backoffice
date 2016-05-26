@@ -22,7 +22,7 @@ textModule.controller('TextMainController', ($scope, $http, $q, $state, $rootSco
       text: key,
       data: obj,
       children: [],
-      state: { selected: false, opened: true, disabled: true },
+      state: { selected: false, opened: false, disabled: true },
     };
     for (let i = 0; i < keys.length; i++) {
       const child = obj[keys[i]];
