@@ -42,9 +42,10 @@
                       <img width="200" data-ng-src="{{user.data.bizImage.url}}" data-ng-if="user.data.bizImage.url" />
                       <button class="btn blue" data-ng-click="openBizImage()" data-ng-if="user.data.bizImage.url">사업자 등록증 보기</button>
                       <span class="btn green fileinput-button" style="margin: 15px 0;">
-                          <i class="fa fa-plus"></i> 사업자 등록증 변경
-                          <input type="file" id="image-upload-button" />
-                        </span>
+                        <i class="fa fa-plus"></i> 사업자 등록증 변경
+                        <input type="file" id="image-upload-button" />
+                      </span>
+                      <a href="{{user.data.bizImage.url}}" target="_blank">새 창에서 열어서 확인</a>
                     </div>
                   </div>
                 </div>
