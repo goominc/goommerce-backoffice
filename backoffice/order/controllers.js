@@ -193,8 +193,8 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   $scope.translatePaymentType = (type) => $rootScope.getContentsI18nText(`enum.payment.type.${type}`);
   $scope.paymentAmount = (payment) => {
     if (payment && payment.data) {
-      const { TotPrice, amt_input, P_AMT } = payment.data;
-      return Number(TotPrice || amt_input || P_AMT || 0);
+      const { TotPrice, amt_input, P_AMT, PRTC_Price } = payment.data;
+      return Number(TotPrice || amt_input || P_AMT || PRTC_Price || 0);
     }
     return 0;
   }

@@ -418,12 +418,12 @@
                           <tr>
                             <th width="10%">ID</th>
                             <th width="10%">Parent ID</th>
-                            <th width="30%">TID</th>
+                            <th width="30%">TID / 메세지</th>
                             <th width="10%">Type</th>
-                            <th width="10%">Total</th>
-                            <th width="10%">Currency</th>
+                            <th width="10%">가격</th>
+                            <th width="10%">통화</th>
                             <th width="5%">Method</th>
-                            <th width="5%">Status</th>
+                            <th width="5%">상태</th>
                             <th width="10%"></th>
                           </tr>
                           </thead>
@@ -436,7 +436,7 @@
                               {{row.parentId}}
                             </td>
                             <td>
-                              {{row.tid || row.data.ResultMsg}}
+                              {{row.tid}}<br/>{{row.data.ResultMsg}}
                             </td>
                             <td>
                               {{translatePaymentType(row.type)}}
