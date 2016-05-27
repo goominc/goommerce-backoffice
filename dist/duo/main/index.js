@@ -2759,6 +2759,17 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   $scope.translatePaymentType = function (type) {
     return $rootScope.getContentsI18nText('enum.payment.type.' + type);
   };
+  $scope.paymentAmount = function (payment) {
+    if (payment && payment.data) {
+      var _payment$data = payment.data;
+      var TotPrice = _payment$data.TotPrice;
+      var amt_input = _payment$data.amt_input;
+      var P_AMT = _payment$data.P_AMT;
+
+      return Number(TotPrice || amt_input || P_AMT || 0);
+    }
+    return 0;
+  };
 
   $scope.refundOrder = function () {
     if (order.finalTotalKRW === undefined) {

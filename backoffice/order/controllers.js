@@ -191,6 +191,13 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   $scope.translateOrderProductStatus = (status) => $rootScope.getContentsI18nText(`enum.orderProduct.status.${status}`);
   $scope.translatePaymentStatus = (status) => $rootScope.getContentsI18nText(`enum.payment.status.${status}`);
   $scope.translatePaymentType = (type) => $rootScope.getContentsI18nText(`enum.payment.type.${type}`);
+  $scope.paymentAmount = (payment) => {
+    if (payment && payment.data) {
+      const { TotPrice, amt_input, P_AMT } = payment.data;
+      return Number(TotPrice || amt_input || P_AMT || 0);
+    }
+    return 0;
+  }
 
   $scope.refundOrder = () => {
     if (order.finalTotalKRW === undefined) {

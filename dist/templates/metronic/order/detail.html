@@ -436,18 +436,13 @@
                               {{row.parentId}}
                             </td>
                             <td>
-                              {{row.tid}}
+                              {{row.tid || row.data.ResultMsg}}
                             </td>
                             <td>
                               {{translatePaymentType(row.type)}}
                             </td>
                             <td>
-                              <div ng-if="row.type === 0 || row.type === 3">
-                                {{(+(row.data.TotPrice || row.data.amt_input)).format()}}
-                              </div>
-                              <div ng-if="row.type === 2">
-                                {{(+row.data.PRTC_Price).format()}}
-                              </div>
+                              {{paymentAmount(row).format()}}
                             </td>
                             <td>
                               {{row.data.currency}}
@@ -491,8 +486,8 @@
         <div class="modal-body">
           <div class="row">
             <div class="col-md-12 form-group">
-              <label class="control-label">환불 가능 금액: {{refundPayment.data.TotPrice.format()}} </label>
-              <input class="form-control" type="number" min="1" max="{{refundPayment.data.TotPrice || 1}}" data-ng-model="refundAmount" placeholder="환불 금액을 입력하세요" />
+              <label class="control-label">환불 가능 금액: {{paymentAmount(refundPayment).format()}} </label>
+              <input class="form-control" type="number" min="1" max="{{paymentAmount(refundPayment)|| 1}}" data-ng-model="refundAmount" placeholder="환불 금액을 입력하세요" />
             </div>
           </div>
         </div>
