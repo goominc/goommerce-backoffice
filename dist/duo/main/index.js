@@ -4329,6 +4329,16 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
   var makeImageRows = function makeImageRows() {
     $scope.imageRows = [];
+    // 2016. 05. 27. [heekyu] product image
+    var mainImages = _.get($scope.product, 'appImages.default') || [];
+    $scope.imageRows.push({
+      sku: '메인 상품 이미지',
+      color: '-',
+      rowspan: 1,
+      imagespan: 1,
+      slotCount: mainImages.length,
+      images: mainImages
+    });
     var colors = Object.keys($scope.variantsByColor);
     var firstVariant = true;
     colors.forEach(function (color) {
@@ -4441,8 +4451,11 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     }
   };
   $scope.imageRowsToVariant = function () {
+    if ($scope.imageRows[0].images.length) {
+      _.set($scope.product, 'appImages.default', $scope.imageRows[0].images);
+    }
     $scope.setProductMainImage(); // TODO
-    var i = 0;
+    var i = 1;
     while (i < $scope.imageRows.length) {
       var row = $scope.imageRows[i];
       for (var j = 0; j < row.imagespan; j++) {

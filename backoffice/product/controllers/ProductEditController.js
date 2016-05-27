@@ -416,6 +416,16 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
 
   const makeImageRows = () => {
     $scope.imageRows = [];
+    // 2016. 05. 27. [heekyu] product image
+    const mainImages = _.get($scope.product, 'appImages.default') || [];
+    $scope.imageRows.push({
+      sku: '메인 상품 이미지',
+      color: '-',
+      rowspan: 1,
+      imagespan: 1,
+      slotCount: mainImages.length,
+      images: mainImages,
+    });
     const colors = Object.keys($scope.variantsByColor);
     let firstVariant = true;
     colors.forEach((color) => {
@@ -428,7 +438,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           sku: variant.sku,
           color,
           rowspan,
-          imagespan: imagespan,
+          imagespan,
           mainProduct: firstVariant,
           slotCount: 2, // TODO,
           images: [],
@@ -521,8 +531,11 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     }
   };
   $scope.imageRowsToVariant = () => {
+    if ($scope.imageRows[0].images.length) {
+      _.set($scope.product, 'appImages.default', $scope.imageRows[0].images);
+    }
     $scope.setProductMainImage(); // TODO
-    let i = 0;
+    let i = 1;
     while (i < $scope.imageRows.length) {
       const row = $scope.imageRows[i];
       for (let j = 0; j < row.imagespan; j++) {
