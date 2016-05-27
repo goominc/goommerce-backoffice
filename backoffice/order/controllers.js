@@ -187,6 +187,9 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   $http.get(`/api/v1/users/${order.buyerId}`).then((res) => {
     $scope.user = res.data;
   });
+  $http.get(`/api/v1/orders/${order.id}/logs`).then((res) => {
+    $scope.paymentLogs = _.groupBy(res.data.logs, 'paymentId');
+  });
 
   $scope.translateOrderStatus = (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`);
   $scope.translateOrderPaymentStatus = (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`);
