@@ -204,6 +204,12 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     }
     return 0;
   }
+  $scope.paymentMethod = (payment) => {
+    if (payment && payment.data) {
+      const { payMethod, paymethod, P_TYPE } = payment.data;
+      return (payMethod || paymethod || P_TYPE || 'VBANK').toUpperCase();
+    }
+  }
 
   $scope.refundOrder = () => {
     if (order.finalTotalKRW === undefined) {
@@ -225,13 +231,16 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $('#order_refund_modal').modal();
   };
 
-  $scope.refund = (payment, amount) => {
+  $scope.refund = (payment, amount, accountNumber, accountHolder, bankCode) => {
     $scope.closePopup();
     $http.post(`/api/v1/orders/${order.id}/refund`, {
       paymentId: payment.id,
       // amount: payment.data.TotPrice, // FIXME: from user input
       amount: +amount,
       msg: 'admin refund',
+      accountNumber,
+      accountHolder,
+      bankCode,
     }).then((res) => {
       // TODO: refresh order.
       $state.reload();

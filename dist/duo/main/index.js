@@ -2779,6 +2779,16 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     }
     return 0;
   };
+  $scope.paymentMethod = function (payment) {
+    if (payment && payment.data) {
+      var _payment$data2 = payment.data;
+      var payMethod = _payment$data2.payMethod;
+      var paymethod = _payment$data2.paymethod;
+      var P_TYPE = _payment$data2.P_TYPE;
+
+      return (payMethod || paymethod || P_TYPE || 'VBANK').toUpperCase();
+    }
+  };
 
   $scope.refundOrder = function () {
     if (order.finalTotalKRW === undefined) {
@@ -2802,13 +2812,16 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     $('#order_refund_modal').modal();
   };
 
-  $scope.refund = function (payment, amount) {
+  $scope.refund = function (payment, amount, accountNumber, accountHolder, bankCode) {
     $scope.closePopup();
     $http.post('/api/v1/orders/' + order.id + '/refund', {
       paymentId: payment.id,
       // amount: payment.data.TotPrice, // FIXME: from user input
       amount: +amount,
-      msg: 'admin refund'
+      msg: 'admin refund',
+      accountNumber: accountNumber,
+      accountHolder: accountHolder,
+      bankCode: bankCode
     }).then(function (res) {
       // TODO: refresh order.
       $state.reload();
