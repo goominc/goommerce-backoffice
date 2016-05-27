@@ -59,6 +59,9 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
       {
         data: 'email',
       },
+      {
+        data: (data) => _.get(data, 'data.affiliate.source') || '',
+      },
     ],
   };
 

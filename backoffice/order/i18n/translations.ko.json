@@ -20,6 +20,7 @@
       "priceColumn": "주문가격",
       "startProcessing": "주문처리",
       "statusColumn": "주문 상태",
+      "sourceColumn": "가입경로",
       "title": "주문현황"
     },
     "detail": {
