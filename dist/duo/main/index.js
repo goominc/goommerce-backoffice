@@ -2746,6 +2746,9 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     $scope.user = res.data;
   });
   $http.get('/api/v1/orders/' + order.id + '/logs').then(function (res) {
+    res.data.logs.forEach(function (l) {
+      return l.createdAt = boUtils.formatDate(l.createdAt);
+    });
     $scope.paymentLogs = _.groupBy(res.data.logs, 'paymentId');
   });
 

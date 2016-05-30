@@ -188,6 +188,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $scope.user = res.data;
   });
   $http.get(`/api/v1/orders/${order.id}/logs`).then((res) => {
+    res.data.logs.forEach((l) => (l.createdAt = boUtils.formatDate(l.createdAt)));
     $scope.paymentLogs = _.groupBy(res.data.logs, 'paymentId');
   });
 

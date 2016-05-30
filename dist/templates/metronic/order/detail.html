@@ -416,15 +416,16 @@
                         <table class="table table-hover table-bordered table-striped">
                           <thead>
                           <tr>
-                            <th width="10%">ID</th>
-                            <th width="10%">Parent ID</th>
+                            <th width="5%">ID</th>
+                            <th width="5%">PID</th>
                             <th width="30%">TID / 메세지</th>
-                            <th width="10%">Type</th>
+                            <th width="5%">Type</th>
                             <th width="10%">가격</th>
-                            <th width="10%">통화</th>
+                            <th width="5%">통화</th>
                             <th width="5%">Method</th>
                             <th width="5%">상태</th>
                             <th width="5%">요청자</th>
+                            <th width="10%">시간</th>
                             <th width="10%"></th>
                           </tr>
                           </thead>
@@ -456,6 +457,9 @@
                             </td>
                             <td>
                               {{paymentLogs[row.id][0].requester.name.ko || paymentLogs[row.id][0].requester.email}}
+                            </td>
+                            <td>
+                              {{paymentLogs[row.id][0].createdAt}}
                             </td>
                             <td>
                               <div ng-if="row.type === 0">
