@@ -141,4 +141,45 @@ textModule.controller('TextMainController', ($scope, $http, $q, $state, $rootSco
     $rootScope.changeEditLocale(locale);
     redraw();
   };
+
+  $scope.searchNode = (text) => {
+    const selectIfMatch = (nodeId) => {
+      const node = jstreeNode.jstree('get_node', nodeId);
+      for (let j = 0; j < $rootScope.state.locales.length; j++) {
+        const locale = $rootScope.state.locales[j];
+        if (node.data[locale] === text) {
+          jstreeNode.jstree('deselect_all');
+          jstreeNode.jstree('select_node', nodeId);
+          $('body').stop();
+          $('body').animate({ scrollTop: $(`#${nodeId}`).offset().top }, 500);
+          return true;
+        }
+      }
+      return false;
+    };
+    const nodeIds = Object.keys(nodeToKey);
+    for (let i = 0; i < nodeIds.length; i++) {
+      const nodeId = nodeIds[i];
+      if (!$scope.activeNode || $scope.activeNode.id < nodeId) {
+        if (selectIfMatch(nodeId)) {
+          return;
+        }
+      }
+    }
+    if ($scope.activeNode) {
+      for (let i = 0; i < nodeIds.length; i++) {
+        const nodeId = nodeIds[i];
+        if ($scope.activeNode.id > nodeId) {
+          if (selectIfMatch(nodeId)) {
+            return;
+          }
+        }
+      }
+    }
+  };
+  $scope.onSearchKeyPress = (event, searchText) => {
+    if (event.keyCode === 13) {
+      $scope.searchNode(searchText);
+    }
+  };
 });

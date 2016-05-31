@@ -5709,6 +5709,47 @@ textModule.controller('TextMainController', function ($scope, $http, $q, $state,
     $rootScope.changeEditLocale(locale);
     redraw();
   };
+
+  $scope.searchNode = function (text) {
+    var selectIfMatch = function selectIfMatch(nodeId) {
+      var node = jstreeNode.jstree('get_node', nodeId);
+      for (var j = 0; j < $rootScope.state.locales.length; j++) {
+        var locale = $rootScope.state.locales[j];
+        if (node.data[locale] === text) {
+          jstreeNode.jstree('deselect_all');
+          jstreeNode.jstree('select_node', nodeId);
+          $('body').stop();
+          $('body').animate({ scrollTop: $('#' + nodeId).offset().top }, 500);
+          return true;
+        }
+      }
+      return false;
+    };
+    var nodeIds = Object.keys(nodeToKey);
+    for (var i = 0; i < nodeIds.length; i++) {
+      var nodeId = nodeIds[i];
+      if (!$scope.activeNode || $scope.activeNode.id < nodeId) {
+        if (selectIfMatch(nodeId)) {
+          return;
+        }
+      }
+    }
+    if ($scope.activeNode) {
+      for (var i = 0; i < nodeIds.length; i++) {
+        var nodeId = nodeIds[i];
+        if ($scope.activeNode.id > nodeId) {
+          if (selectIfMatch(nodeId)) {
+            return;
+          }
+        }
+      }
+    }
+  };
+  $scope.onSearchKeyPress = function (event, searchText) {
+    if (event.keyCode === 13) {
+      $scope.searchNode(searchText);
+    }
+  };
 });
 }, {"./module":11}],
 13: [function(require, module, exports) {

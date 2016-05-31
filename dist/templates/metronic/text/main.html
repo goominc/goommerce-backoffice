@@ -13,6 +13,21 @@
             <div class="portlet-body">
               <div class="row">
                 <div class="col-md-12" style="margin-bottom: 20px;">
+                  <div class="form-group">
+                    <label class="col-md-2 control-label">
+                      텍스트 검색
+                    </label>
+                    <div class="col-md-10">
+                      <input
+                        class="form-control"
+                        data-ng-change="searchNode(searchText)"
+                        data-ng-keypress="onSearchKeyPress($event, searchText)"
+                        data-ng-model="searchText"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12" style="margin-bottom: 20px;">
                   <button class="btn" style="margin-right: 20px;"
                           data-ng-repeat="locale in state.locales"
                           data-ng-class="{'red': state.editLocale === locale, 'blue': state.editLocale !== locale}"
