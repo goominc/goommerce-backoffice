@@ -450,7 +450,7 @@
                               {{row.data.currency}}
                             </td>
                             <td>
-                              {{row.data.payMethod}}
+                              {{row.data.payMethod || row.data.P_TYPE || row.data.paymethod}}
                             </td>
                             <td>
                               {{translatePaymentStatus(row.status)}}
