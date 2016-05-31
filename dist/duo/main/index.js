@@ -245,14 +245,28 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
     },
     */
     {
-      name: $translate.instant('cms.dMainBanner'),
-      sref: 'cms.simple({name: "desktop_main_banner"})'
+      name: 'banners',
+      sref: '',
+      children: [{
+        name: $translate.instant('cms.dMainBanner'),
+        sref: 'cms.simple({name: "desktop_main_banner"})'
+      }, {
+        name: $translate.instant('cms.dRightBanner'),
+        sref: 'cms.simple({name: "desktop_right_banner"})'
+      }, {
+        name: $translate.instant('cms.mMainBanner'),
+        sref: 'cms.simple({name: "mobile_main_banner"})'
+      }]
     }, {
-      name: $translate.instant('cms.dRightBanner'),
-      sref: 'cms.simple({name: "desktop_right_banner"})'
-    }, {
-      name: $translate.instant('cms.mMainBanner'),
-      sref: 'cms.simple({name: "mobile_main_banner"})'
+      name: $translate.instant('cms.dSiteKeywords'),
+      sref: '',
+      children: [{
+        name: 'KO',
+        sref: 'cms.pureHtml({name: "desktop_site_keywords_ko"})'
+      }, {
+        name: 'ZH-CN',
+        sref: 'cms.pureHtml({name: "desktop_site_keywords_zh-cn"})'
+      }]
     }]
   }, {
     key: 'currency', // TODO get key from router
@@ -1761,6 +1775,10 @@ cmsModule.config(function ($stateProvider) {
     url: '/main_category',
     templateUrl: templateRoot + '/cms/main-category.html',
     controller: 'CmsMainCategoryController'
+  }).state('cms.pureHtml', {
+    url: '/pure/:name',
+    templateUrl: templateRoot + '/cms/pure.html',
+    controller: 'CmsPureHtmlController'
   });
 });
 
@@ -1779,7 +1797,8 @@ module.exports = {
     "mainCategory": "메인페이지 카테고리",
     "dMainBanner": "데스크탑 메인 배너",
     "dRightBanner": "데스크탑 우측 배너",
-    "mMainBanner": "모바일 메인 배너"
+    "mMainBanner": "모바일 메인 배너",
+    "dSiteKeywords": "데스크탑 사이트 키워드"
   }
 }
 ;
@@ -2032,6 +2051,25 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
     $http.post('/api/v1/cms', { name: cmsName, data: jstreeDataToCmsData() }).then(function () {
       window.alert('saved successfully');
       $state.reload();
+    });
+  };
+});
+
+cmsModule.controller('CmsPureHtmlController', function ($scope, $http, $rootScope, $state) {
+  $('#summernote').summernote({ height: 400 });
+  var name = $state.params.name;
+  $http.get('/api/v1/cms/' + name).then(function (res) {
+    $scope.cmsData = res.data;
+    var data = res.data.data;
+    $('#summernote').code('' + data);
+  });
+
+  $scope.save = function () {
+    var data = $('#summernote').code();
+    $http.post('/api/v1/cms', { name: name, data: { name: name, data: data } }).then(function () {
+      window.alert('saved successfully');
+    }, function () {
+      window.alert('fail');
     });
   };
 });

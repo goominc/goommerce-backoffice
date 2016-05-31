@@ -239,3 +239,22 @@ cmsModule.controller('CmsMainCategoryController', ($scope, $rootScope, $http, $s
     });
   };
 });
+
+cmsModule.controller('CmsPureHtmlController', ($scope, $http, $rootScope, $state) => {
+  $('#summernote').summernote({ height: 400 });
+  const name = $state.params.name;
+  $http.get(`/api/v1/cms/${name}`).then((res) => {
+    $scope.cmsData = res.data;
+    const data = res.data.data;
+    $('#summernote').code(`${data}`);
+  });
+
+  $scope.save = () => {
+    const data = $('#summernote').code();
+    $http.post('/api/v1/cms', { name, data: { name, data } }).then(() => {
+      window.alert('saved successfully');
+    }, () => {
+      window.alert('fail');
+    });
+  };
+});

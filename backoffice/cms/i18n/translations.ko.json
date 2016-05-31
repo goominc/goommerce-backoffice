@@ -3,6 +3,7 @@
     "mainCategory": "메인페이지 카테고리",
     "dMainBanner": "데스크탑 메인 배너",
     "dRightBanner": "데스크탑 우측 배너",
-    "mMainBanner": "모바일 메인 배너"
+    "mMainBanner": "모바일 메인 배너",
+    "dSiteKeywords": "데스크탑 사이트 키워드"
   }
 }

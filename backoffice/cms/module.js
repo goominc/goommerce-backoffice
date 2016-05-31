@@ -35,6 +35,11 @@ cmsModule.config(($stateProvider) => {
       url: '/main_category',
       templateUrl: templateRoot + '/cms/main-category.html',
       controller: 'CmsMainCategoryController',
+    })
+    .state('cms.pureHtml', {
+      url: '/pure/:name',
+      templateUrl: templateRoot + '/cms/pure.html',
+      controller: 'CmsPureHtmlController',
     });
 });
 

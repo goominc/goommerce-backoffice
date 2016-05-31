@@ -186,16 +186,36 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
         },
         */
         {
-          name: $translate.instant('cms.dMainBanner'),
-          sref: 'cms.simple({name: "desktop_main_banner"})',
+          name: 'banners',
+          sref: '',
+          children: [
+            {
+              name: $translate.instant('cms.dMainBanner'),
+              sref: 'cms.simple({name: "desktop_main_banner"})',
+            },
+            {
+              name: $translate.instant('cms.dRightBanner'),
+              sref: 'cms.simple({name: "desktop_right_banner"})',
+            },
+            {
+              name: $translate.instant('cms.mMainBanner'),
+              sref: 'cms.simple({name: "mobile_main_banner"})',
+            },
+          ],
         },
         {
-          name: $translate.instant('cms.dRightBanner'),
-          sref: 'cms.simple({name: "desktop_right_banner"})',
-        },
-        {
-          name: $translate.instant('cms.mMainBanner'),
-          sref: 'cms.simple({name: "mobile_main_banner"})',
+          name: $translate.instant('cms.dSiteKeywords'),
+          sref: '',
+          children: [
+            {
+              name: 'KO',
+              sref: 'cms.pureHtml({name: "desktop_site_keywords_ko"})',
+            },
+            {
+              name: 'ZH-CN',
+              sref: 'cms.pureHtml({name: "desktop_site_keywords_zh-cn"})',
+            },
+          ],
         },
       ],
     },
