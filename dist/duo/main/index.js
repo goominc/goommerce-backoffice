@@ -5570,17 +5570,28 @@ var textModule = require('./module');
 
 textModule.controller('TextMainController', function ($scope, $http, $q, $state, $rootScope) {
   $scope.activeNode = null;
+  var jstreeNode = $('#textTree');
+
   var nodeToKey = {};
   var nodeNum = 0;
-  var getTreeData = function getTreeData(key, obj) {
+  var getTreeData = function getTreeData(key, obj, fullPath) {
     nodeNum++;
     nodeToKey[nodeNum] = key;
     if (obj.ko || obj.en) {
-      return {
+      var _res = {
         id: nodeNum,
         text: obj[$rootScope.state.editLocale],
         data: obj
       };
+      if ($scope.activeKey && $scope.activeKey === fullPath) {
+        (function () {
+          var activeNodeNum = nodeNum;
+          setTimeout(function () {
+            jstreeNode.jstree('select_node', activeNodeNum);
+          }, 100);
+        })();
+      }
+      return _res;
     }
     var keys = Object.keys(obj);
     var res = {
@@ -5592,7 +5603,7 @@ textModule.controller('TextMainController', function ($scope, $http, $q, $state,
     };
     for (var i = 0; i < keys.length; i++) {
       var child = obj[keys[i]];
-      res.children.push(getTreeData(keys[i], child));
+      res.children.push(getTreeData(keys[i], child, key + '.' + keys[i]));
     }
     return res;
   };
@@ -5600,12 +5611,11 @@ textModule.controller('TextMainController', function ($scope, $http, $q, $state,
     var res = [];
     var keys = Object.keys(origData);
     keys.forEach(function (key) {
-      res.push(getTreeData(key, origData[key]));
+      res.push(getTreeData(key, origData[key], key));
     });
     return res;
   };
 
-  var jstreeNode = $('#textTree');
   var initJsTree = function initJsTree(origData) {
     nodeNum = 0;
     var jstreeData = jsTreeData(origData);
@@ -5620,7 +5630,7 @@ textModule.controller('TextMainController', function ($scope, $http, $q, $state,
       }
     });
     jstreeNode.on('select_node.jstree', function (e, data) {
-      $scope.activeNode = data.node.data;
+      $scope.activeNode = data.node;
       if (!$scope.$$phase) {
         $scope.$apply();
       }
@@ -5636,7 +5646,7 @@ textModule.controller('TextMainController', function ($scope, $http, $q, $state,
 
   $scope.origData = null;
   var getTextsAndDrawTree = function getTextsAndDrawTree(func) {
-    $http.get('/api/v1/i18n/texts').then(function (res) {
+    return $http.get('/api/v1/i18n/texts').then(function (res) {
       $scope.origData = res.data;
       func($scope.origData);
     })['catch'](function (err) {
@@ -5661,19 +5671,38 @@ textModule.controller('TextMainController', function ($scope, $http, $q, $state,
     return dfs({ children: tops });
   };
   $scope.save = function () {
-    var data = jstreeToJson();
-    var keys = Object.keys(data);
-    var promises = [];
-    for (var i = 0; i < keys.length; i++) {
-      var key = keys[i];
+    // 2016. 05. 31. [heekyu] do not update all but only activeNode
+    var nodeFullPath = '';
+    var node = $scope.activeNode;
+    while (node.id !== '#') {
+      nodeFullPath = '' + nodeToKey[node.id] + (nodeFullPath ? '.' : '') + nodeFullPath;
+      node = jstreeNode.jstree('get_node', node.parent);
+    }
+    $http.put('/api/v1/i18n/texts', {
+      path: nodeFullPath,
+      data: $scope.activeNode.data
+    }).then(function () {
+      $scope.activeKey = nodeFullPath;
+      $scope.activeNode = null;
+      getTextsAndDrawTree(redraw).then(function () {
+        jstreeNode.jstree('select_node');
+      });
+    });
+    /*
+    const data = jstreeToJson();
+    const keys = Object.keys(data);
+    const promises = [];
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
       promises.push($http.put('/api/v1/i18n/texts', { path: key, data: data[key] }));
     }
-    $q.all(promises).then(function () {
+    $q.all(promises).then(() => {
       getTextsAndDrawTree(redraw);
       // 2016. 02. 29. [heekyu] activeNode is changed when redraw
       //                TODO maintain activeNode
       $scope.activeNode = null;
     });
+    */
   };
 
   $scope.changeTextEditLocale = function (locale) {

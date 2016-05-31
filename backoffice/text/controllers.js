@@ -4,17 +4,26 @@ const textModule = require('./module');
 
 textModule.controller('TextMainController', ($scope, $http, $q, $state, $rootScope) => {
   $scope.activeNode = null;
+  const jstreeNode = $('#textTree');
+
   const nodeToKey = {};
   let nodeNum = 0;
-  const getTreeData = (key, obj) => {
+  const getTreeData = (key, obj, fullPath) => {
     nodeNum++;
     nodeToKey[nodeNum] = key;
     if (obj.ko || obj.en) {
-      return {
+      const res = {
         id: nodeNum,
         text: obj[$rootScope.state.editLocale],
         data: obj,
+      };
+      if ($scope.activeKey && $scope.activeKey === fullPath) {
+        const activeNodeNum = nodeNum;
+        setTimeout(() => {
+          jstreeNode.jstree('select_node', activeNodeNum);
+        }, 100);
       }
+      return res;
     }
     const keys = Object.keys(obj);
     const res = {
@@ -26,7 +35,7 @@ textModule.controller('TextMainController', ($scope, $http, $q, $state, $rootSco
     };
     for (let i = 0; i < keys.length; i++) {
       const child = obj[keys[i]];
-      res.children.push(getTreeData(keys[i], child));
+      res.children.push(getTreeData(keys[i], child, `${key}.${keys[i]}`));
     }
     return res;
   };
@@ -34,12 +43,11 @@ textModule.controller('TextMainController', ($scope, $http, $q, $state, $rootSco
     const res = [];
     const keys = Object.keys(origData);
     keys.forEach((key) => {
-      res.push(getTreeData(key, origData[key]))
+      res.push(getTreeData(key, origData[key], key));
     });
     return res;
   };
 
-  const jstreeNode = $('#textTree');
   const initJsTree = (origData) => {
     nodeNum = 0;
     const jstreeData = jsTreeData(origData);
@@ -54,7 +62,7 @@ textModule.controller('TextMainController', ($scope, $http, $q, $state, $rootSco
       },
     });
     jstreeNode.on('select_node.jstree', (e, data) => {
-      $scope.activeNode = data.node.data;
+      $scope.activeNode = data.node;
       if (!$scope.$$phase) {
         $scope.$apply();
       }
@@ -70,7 +78,7 @@ textModule.controller('TextMainController', ($scope, $http, $q, $state, $rootSco
 
   $scope.origData = null;
   const getTextsAndDrawTree = (func) => {
-    $http.get('/api/v1/i18n/texts').then((res) => {
+    return $http.get('/api/v1/i18n/texts').then((res) => {
       $scope.origData = res.data;
       func($scope.origData);
     }).catch((err) => {
@@ -95,6 +103,24 @@ textModule.controller('TextMainController', ($scope, $http, $q, $state, $rootSco
     return dfs({ children: tops });
   };
   $scope.save = () => {
+    // 2016. 05. 31. [heekyu] do not update all but only activeNode
+    let nodeFullPath = '';
+    let node = $scope.activeNode;
+    while (node.id !== '#') {
+      nodeFullPath = `${nodeToKey[node.id]}${nodeFullPath ? '.' : ''}${nodeFullPath}`;
+      node = jstreeNode.jstree('get_node', node.parent);
+    }
+    $http.put('/api/v1/i18n/texts', {
+      path: nodeFullPath,
+      data: $scope.activeNode.data,
+    }).then(() => {
+      $scope.activeKey = nodeFullPath;
+      $scope.activeNode = null;
+      getTextsAndDrawTree(redraw).then(() => {
+        jstreeNode.jstree('select_node')
+      });
+    });
+    /*
     const data = jstreeToJson();
     const keys = Object.keys(data);
     const promises = [];
@@ -108,6 +134,7 @@ textModule.controller('TextMainController', ($scope, $http, $q, $state, $rootSco
       //                TODO maintain activeNode
       $scope.activeNode = null;
     });
+    */
   };
 
   $scope.changeTextEditLocale = (locale) => {
