@@ -349,10 +349,11 @@
                             <th>주문(최초) 가격</th>
                             <th>가격</th>
                             <th>주문(최초 수량)</th>
-                            <th>Total</th>
+                            <th>주문금액</th>
                             <th>재고 수량</th>
-                            <th>Final Quantity</th>
-                            <th>Final Total</th>
+                            <th>최종수량</th>
+                            <th>최종금액</th>
+                            <th>정산금액</th>
                             <th>Status</th>
                           </tr>
                           </thead>
@@ -374,10 +375,10 @@
                               {{row.productVariant.data.size}}
                             </td>
                             <td>
-                              <span>{{(+row.productVariant.KRW).format()}} KRW</span>
+                              <span>{{(+row.productVariant.KRW).format()}}</span>
                             </td>
                             <td>
-                              <span>{{(+row.productVariant.KRW).format()}} KRW</span>
+                              <span>{{(+row.productVariant.KRW).format()}}</span>
                             </td>
                             <td>
                               {{row.quantity}}
@@ -393,6 +394,9 @@
                             </td>
                             <td>
                               {{(+row.finalTotalKRW).format()}}
+                            </td>
+                            <td>
+                              <input type="number" string-to-number data-ng-model="row.settledKRW">
                             </td>
                             <td>
                               {{translateOrderProductStatus(row.status)}}

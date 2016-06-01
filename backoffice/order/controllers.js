@@ -251,7 +251,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   $scope.finalize = () => {
     const data = _.pick(order, 'finalShippingCostKRW');
     data.orderProducts = order.orderProducts.map(
-      (o) => _.pick(o, 'id', 'finalQuantity'));
+      (o) => _.pick(o, 'id', 'finalQuantity', 'settledKRW'));
     $http.put(`/api/v1/orders/${order.id}/finalize`, data).then((res) => {
       $state.reload();
     }, (err) => alert(err.data.message));

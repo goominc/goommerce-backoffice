@@ -209,3 +209,17 @@ directiveModule.directive('convertToNumber', () => {
     }
   };
 });
+
+directiveModule.directive('stringToNumber', function() {
+  return {
+    require: 'ngModel',
+    link: function(scope, element, attrs, ngModel) {
+      ngModel.$parsers.push(function(value) {
+        return _.isNull(value) || _.isUndefined(value) ? undefined : '' + value;
+      });
+      ngModel.$formatters.push(function(value) {
+        return parseFloat(value, 10);
+      });
+    }
+  };
+});

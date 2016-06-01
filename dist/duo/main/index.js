@@ -2418,6 +2418,20 @@ directiveModule.directive('convertToNumber', function () {
     }
   };
 });
+
+directiveModule.directive('stringToNumber', function () {
+  return {
+    require: 'ngModel',
+    link: function link(scope, element, attrs, ngModel) {
+      ngModel.$parsers.push(function (value) {
+        return _.isNull(value) || _.isUndefined(value) ? undefined : '' + value;
+      });
+      ngModel.$formatters.push(function (value) {
+        return parseFloat(value, 10);
+      });
+    }
+  };
+});
 // change per page values here
 // data: realData, need implement
 }, {"../utils/module":16}],
@@ -2872,7 +2886,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   $scope.finalize = function () {
     var data = _.pick(order, 'finalShippingCostKRW');
     data.orderProducts = order.orderProducts.map(function (o) {
-      return _.pick(o, 'id', 'finalQuantity');
+      return _.pick(o, 'id', 'finalQuantity', 'settledKRW');
     });
     $http.put('/api/v1/orders/' + order.id + '/finalize', data).then(function (res) {
       $state.reload();
