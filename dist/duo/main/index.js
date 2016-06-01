@@ -5875,6 +5875,8 @@ module.exports = {
       "bizNameLabel": "사업자명",
       "bizNumberLabel": "사업자 번호",
       "emailLabel": "이메일",
+      "firstNameLabel": "이름",
+      "lastNameLabel": "성",
       "gradeLabel": "회원 등급",
       "vbankCodeLabel": "은행코드",
       "vbankAccountLabel": "가상계좌번호",
@@ -5923,6 +5925,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }
     $state.go('user.manage.tab', { tabName: tabName }, { reload: true });
   };
+  $scope.userIdMap = {};
 
   $scope.userDatatables = {
     field: 'users',
@@ -5962,6 +5965,14 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       render: function render(data) {
         return boUtils.formatDate(data);
       }
+    }, {
+      data: function data(_data2) {
+        return _data2;
+      },
+      render: function render(user) {
+        $scope.userIdMap[user.id] = user;
+        return '<button class="btn red" data-ng-click="inactivateUser($event, ' + user.id + ')">비활성화</button>';
+      }
     }]
   };
 
@@ -5976,20 +5987,20 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data2) {
-        return _data2.name || '';
-      }
-    }, {
       data: function data(_data3) {
-        return _.get(_data3, 'data.tel') || '';
+        return _data3.name || '';
       }
     }, {
       data: function data(_data4) {
-        return _.get(_data4, 'data.bizName') || '';
+        return _.get(_data4, 'data.tel') || '';
       }
     }, {
       data: function data(_data5) {
-        return _.get(_data5, 'data.bizNumber') || '';
+        return _.get(_data5, 'data.bizName') || '';
+      }
+    }, {
+      data: function data(_data6) {
+        return _.get(_data6, 'data.bizNumber') || '';
       }
     }, {
       data: 'createdAt',
@@ -6008,8 +6019,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: function data(_data6) {
-        return _.get(_data6, 'roles[0].brand.id') || '';
+      data: function data(_data7) {
+        return _.get(_data7, 'roles[0].brand.id') || '';
       },
       render: function render(brandId) {
         return '<a ui-sref="brand.edit({ brandId: ' + brandId + ' })">' + brandId + '</a>';
@@ -6017,12 +6028,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data7) {
-        return _data7.name || '';
+      data: function data(_data8) {
+        return _data8.name || '';
       }
     }, {
-      data: function data(_data8) {
-        return _.get(_data8, 'data.tel') || '';
+      data: function data(_data9) {
+        return _.get(_data9, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -6043,31 +6054,31 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data9) {
-        return _data9.name || '';
-      }
-    }, {
       data: function data(_data10) {
-        return _.get(_data10, 'data.tel') || '';
+        return _data10.name || '';
       }
     }, {
       data: function data(_data11) {
-        return _.get(_data11, 'data.bizName') || '';
+        return _.get(_data11, 'data.tel') || '';
       }
     }, {
       data: function data(_data12) {
-        return _.get(_data12, 'data.bizNumber') || '';
+        return _.get(_data12, 'data.bizName') || '';
       }
     }, {
       data: function data(_data13) {
-        return _data13;
+        return _.get(_data13, 'data.bizNumber') || '';
+      }
+    }, {
+      data: function data(_data14) {
+        return _data14;
       },
       render: function render(user) {
         return _.get(user, 'data.bizImage') ? '<button class="btn blue" data-ng-click="openBizImage(' + user.id + ')">사업자 등록증 보기</button>' : '';
       }
     }, {
-      data: function data(_data14) {
-        return _data14;
+      data: function data(_data15) {
+        return _data15;
       },
       render: function render(user) {
         return '<button class="btn blue" data-ng-click="changeToBuyer(' + user.id + ')">바이어 인증</button>';
@@ -6289,6 +6300,22 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       $scope.closeRolePopup();
     }
   };
+
+  $scope.inactivateUser = function (e, userId) {
+    var user = $scope.userIdMap[userId];
+    e.preventDefault();
+    if (window.confirm('유저 ' + (user.name || '') + ' 비활성화 하시겠습니까?')) {
+      $http['delete']('/api/v1/users/' + user.id + '/inactivate').then(function () {
+        user.isActive = !user.isActive;
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+        $('.tabbable-bordered').find('table').DataTable().ajax.reload();
+      }, function () {
+        window.alert('fail');
+      });
+    }
+  };
 });
 
 userModule.controller('UserWaitConfirmController', function ($scope, $state, $rootScope, $translate) {
@@ -6325,7 +6352,7 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
   var init = function init(user) {
     $scope.user = user;
 
-    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNameLabel'), obj: _.get($scope.user, 'data.bizName'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNumberLabel'), obj: _.get($scope.user, 'data.bizNumber'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false }, { title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false }, { title: $translate.instant('user.info.settlementAliasLabel'), obj: _.get($scope.user, 'data.settlement.alias'), key: 'data.settlement.alias', isRequired: false }];
+    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'data.firstName'), isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNameLabel'), obj: _.get($scope.user, 'data.bizName'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNumberLabel'), obj: _.get($scope.user, 'data.bizNumber'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false }, { title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false }, { title: $translate.instant('user.info.settlementAliasLabel'), obj: _.get($scope.user, 'data.settlement.alias'), key: 'data.settlement.alias', isRequired: false }];
     var roleType = _.get($scope.user, 'roles[0].type');
     var brand = _.get($scope.user, 'roles[0].brand');
     if (roleType === 'owner' && brand) {

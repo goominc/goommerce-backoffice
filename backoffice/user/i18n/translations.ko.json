@@ -18,6 +18,8 @@
       "bizNameLabel": "사업자명",
       "bizNumberLabel": "사업자 번호",
       "emailLabel": "이메일",
+      "firstNameLabel": "이름",
+      "lastNameLabel": "성",
       "gradeLabel": "회원 등급",
       "vbankCodeLabel": "은행코드",
       "vbankAccountLabel": "가상계좌번호",

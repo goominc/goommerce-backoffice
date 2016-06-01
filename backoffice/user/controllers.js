@@ -24,6 +24,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
     }
     $state.go('user.manage.tab', { tabName }, { reload: true });
   };
+  $scope.userIdMap = {};
 
   $scope.userDatatables = {
     field: 'users',
@@ -64,6 +65,13 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       {
         data: 'createdAt',
         render: (data) => boUtils.formatDate(data),
+      },
+      {
+        data: (data) => data,
+        render: (user) => {
+          $scope.userIdMap[user.id] = user;
+          return `<button class="btn red" data-ng-click="inactivateUser($event, ${user.id})">비활성화</button>`;
+        },
       },
     ],
   };
@@ -376,6 +384,22 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       $scope.closeRolePopup();
     }
   };
+
+  $scope.inactivateUser = (e, userId) => {
+    const user = $scope.userIdMap[userId];
+    e.preventDefault();
+    if (window.confirm(`유저 ${user.name || ''} 비활성화 하시겠습니까?`)) {
+      $http.delete(`/api/v1/users/${user.id}/inactivate`).then(() => {
+        user.isActive = !user.isActive;
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+        $('.tabbable-bordered').find('table').DataTable().ajax.reload();
+      }, () => {
+        window.alert('fail');
+      });
+    }
+  };
 });
 
 userModule.controller('UserWaitConfirmController', ($scope, $state, $rootScope, $translate) => {
@@ -423,6 +447,8 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     $scope.userFields = [
       {title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true},
       {title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true},
+      {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
+      {title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'data.firstName'), isReadOnly: true, isRequired: true},
       {title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false},
       {title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false},
       {title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false},
