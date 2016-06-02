@@ -549,6 +549,11 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
     $scope.activeDate = date;
     updateDatatables();
   };
+  $scope.done = () => {
+    $http.put(`/api/v1/orders/settlement/${$scope.activeDate}`).then(
+      () => $state.reload()
+    );
+  };
 
   function updateDatatables() {
     $scope.orderDatatables = {

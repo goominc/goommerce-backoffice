@@ -2594,7 +2594,8 @@ module.exports = {
       "title": "운영팀주문목록"
     },
     "settlement": {
-      "title": "회계팀 대량이체"
+      "title": "회계팀 대량이체",
+      "done": "대량이체 완료",
     },
     "listBigBuyer": {
       "title": "빅바이어주문목록"
@@ -3184,6 +3185,11 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
   $scope.setDate = function (date) {
     $scope.activeDate = date;
     updateDatatables();
+  };
+  $scope.done = function () {
+    $http.put('/api/v1/orders/settlement/' + $scope.activeDate).then(function () {
+      return $state.reload();
+    });
   };
 
   function updateDatatables() {
