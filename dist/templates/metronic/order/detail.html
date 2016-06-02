@@ -42,7 +42,7 @@
                           Order Time:
                         </div>
                         <div class="col-md-7 value">
-                          {{order.createdAt}}
+                          {{order.orderedAt || order.createdAt}}
                         </div>
                       </div>
                       <div class="row static-info">
