@@ -2889,6 +2889,9 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     data.orderProducts = order.orderProducts.map(function (o) {
       return _.pick(o, 'id', 'finalQuantity', 'settledKRW');
     });
+    data.adjustments = order.adjustments.map(function (a) {
+      return _.pick(a, 'id', 'settledKRW');
+    });
     $http.put('/api/v1/orders/' + order.id + '/finalize', data).then(function (res) {
       $state.reload();
     }, function (err) {

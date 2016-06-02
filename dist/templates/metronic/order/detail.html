@@ -315,8 +315,9 @@
                           <thead>
                             <th width="30%">브랜드 명</th>
                             <th width="10%">Type</th>
-                            <th width="30%">Original</th>
-                            <th width="30%">Final</th>
+                            <th width="20%">Original</th>
+                            <th width="20%">Final</th>
+                            <th width="20%">정산금액</th>
                           </thead>
                           <tbody class="cell-center">
                             <tr data-ng-repeat="row in order.adjustments">
@@ -331,6 +332,9 @@
                               </td>
                               <td>
                                 {{row.finalKRW}}
+                              </td>
+                              <td>
+                                <input type="number" string-to-number data-ng-model="row.settledKRW">
                               </td>
                             </tr>
                           </tbody>
