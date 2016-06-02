@@ -118,7 +118,7 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, $compile
   };
 });
 
-brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope, $translate, $compile, boUtils, convertUtil, userUtil) => {
+brandModule.controller('BrandEditController', ($scope, $http, $q, $state, $rootScope, $translate, $compile, boUtils, convertUtil, userUtil) => {
   const initFields = () => {
     if (!$scope.brand.data) {
       $scope.brand.data = {};
@@ -291,7 +291,7 @@ brandModule.controller('BrandEditController', ($scope, $http, $state, $rootScope
     }
     promise.then((res) => {
       boUtils.stopProgressBar();
-      return $http.put(`/api/v1/brands/${res.data.id}/index`);
+      return $q.all([$http.put(`/api/v1/brands/${res.data.id}/index`), $http.put('/api/v1/buildings/cache')]);
     }, () => {
       window.alert('failed to save brand');
       boUtils.stopProgressBar();

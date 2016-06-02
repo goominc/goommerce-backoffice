@@ -1330,7 +1330,7 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
   $scope.datatablesLoaded = function () {};
 });
 
-brandModule.controller('BrandEditController', function ($scope, $http, $state, $rootScope, $translate, $compile, boUtils, convertUtil, userUtil) {
+brandModule.controller('BrandEditController', function ($scope, $http, $q, $state, $rootScope, $translate, $compile, boUtils, convertUtil, userUtil) {
   var initFields = function initFields() {
     if (!$scope.brand.data) {
       $scope.brand.data = {};
@@ -1486,7 +1486,7 @@ brandModule.controller('BrandEditController', function ($scope, $http, $state, $
     }
     promise.then(function (res) {
       boUtils.stopProgressBar();
-      return $http.put('/api/v1/brands/' + res.data.id + '/index');
+      return $q.all([$http.put('/api/v1/brands/' + res.data.id + '/index'), $http.put('/api/v1/buildings/cache')]);
     }, function () {
       window.alert('failed to save brand');
       boUtils.stopProgressBar();
