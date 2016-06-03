@@ -13,6 +13,7 @@
             <div class="portlet-title">
               {{order.id}}
               <div class="actions btn-set">
+                <button class="btn blue" ng-click="exportPackingList()"><i class="fa fa-check"></i> {{'order.detail.logisticsButton' | translate}}</button>
                 <button class="btn red" ng-click="deleteOrder()"><i class="fa fa-exclamation-triangle"></i> {{'order.detail.deleteButton' | translate}}</button>
               </div>
             </div>

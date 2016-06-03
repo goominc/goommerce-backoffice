@@ -28,7 +28,8 @@
       "deleteMessage": "정말로 삭제하시겠습니까?",
       "title": "주문상세",
       "refundTitle": "환불",
-      "saveButton": "저장"
+      "saveButton": "저장",
+      "logisticsButton": "물류팀"
     },
     "beforePayment": {
       "title": "무통장 입금 대기",

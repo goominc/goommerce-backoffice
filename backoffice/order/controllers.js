@@ -280,6 +280,138 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     };
   };
 
+  $scope.exportPackingList = () => {
+    var CLIENT_ID = '352586701861-20pb7c3qlp7klemfap5qfms0hl0eshrv.apps.googleusercontent.com';
+
+    var SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
+
+    function checkAuth() {
+      gapi.auth.authorize(
+        {
+          'client_id': CLIENT_ID,
+          'scope': SCOPES.join(' '),
+          'immediate': true
+        }, handleAuthResult);
+      }
+
+    function handleAuthResult(authResult) {
+      if (authResult && !authResult.error) {
+        // Hide auth UI, then load client library.
+        loadSheetsApi();
+      } else {
+        // Show auth UI, allowing the user to initiate authorization by
+        // clicking authorize button.
+      }
+    }
+
+    function loadSheetsApi() {
+      var discoveryUrl =
+          'https://sheets.googleapis.com/$discovery/rest?version=v4';
+      gapi.client.load(discoveryUrl).then(run);
+    }
+
+    function run() {
+      const mergeCells = (sheetId, startColumnIndex, startRowIndex, endColumnIndex, endRowIndex) => ({
+        range: {
+          sheetId,
+          startRowIndex,
+          endRowIndex,
+          startColumnIndex,
+          endColumnIndex,
+        },
+      });
+      gapi.client.sheets.spreadsheets.create({
+        properties: { title: `${order.id}-패킹리스트` },
+        sheets: [{
+          data: [{
+            startRow: 0,
+            startColumn: 0,
+            rowData: [{
+              values: [
+                {
+                  userEnteredValue: { stringValue: '패킹리스트' },
+                  userEnteredFormat: { horizontalAlignment: 'CENTER' },
+                },
+              ]
+            }, {
+              // blank line
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '주문일' } },
+                { userEnteredValue: { stringValue: order.orderedAt } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '주문자' } },
+                { userEnteredValue: { stringValue: _.get(order.address, 'detail.name', '') } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '연락처' } },
+                { userEnteredValue: { stringValue: _.get(order.address, 'detail.tel', '') } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '국가' } },
+                { userEnteredValue: { stringValue: _.get(order.address, 'countryCode', '') } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '주소' } },
+                { userEnteredValue: { stringValue: `${_.get(order.address, 'detail.address.base', '')} ${_.get(order.address, 'detail.address.detail', '')}` } },
+              ]
+            }, {
+              // blank line
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '주문번호' } },
+                { userEnteredValue: { stringValue: '브랜드' } },
+                { userEnteredValue: { stringValue: '상품번호' } },
+                { userEnteredValue: { stringValue: '컬러' } },
+                { userEnteredValue: { stringValue: '사이즈' } },
+                { userEnteredValue: { stringValue: '상품명' } },
+                { userEnteredValue: { stringValue: '주문수량' } },
+                { userEnteredValue: { stringValue: '최종수량' } },
+              ]
+            }, ...order.orderProducts.map((op) => ({
+              values: [
+                { userEnteredValue: { stringValue: op.orderId.toString() } },
+                { userEnteredValue: { stringValue: op.brand.name.ko } },
+                { userEnteredValue: { stringValue: op.product.shortId.toString() } },
+                { userEnteredValue: { stringValue: op.productVariant.data.color } },
+                { userEnteredValue: { stringValue: op.productVariant.data.size } },
+                { userEnteredValue: { stringValue: op.product.name.ko } },
+                { userEnteredValue: { stringValue: op.quantity.toString() } },
+                { userEnteredValue: { stringValue: _.get(op, 'finalQuantity', '').toString() } },
+              ]
+            }))],
+          }],
+        }],
+      }).then(({ result: { spreadsheetId, sheets } }) => {
+        const sheetId = sheets[0].properties.sheetId;
+        return gapi.client.sheets.spreadsheets.batchUpdate({
+          spreadsheetId,
+          requests: [
+            { mergeCells: mergeCells(sheetId, 0, 0, 8, 1) },
+            { mergeCells: mergeCells(sheetId, 1, 2, 8, 3) },
+            { mergeCells: mergeCells(sheetId, 1, 3, 8, 4) },
+            { mergeCells: mergeCells(sheetId, 1, 4, 8, 5) },
+            { mergeCells: mergeCells(sheetId, 1, 5, 8, 6) },
+            { mergeCells: mergeCells(sheetId, 1, 6, 8, 7) },
+          ],
+        });
+      }).then(({ result: { spreadsheetId }}) => {
+        window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`);
+      }).then(undefined, (response) => {
+        console.log('Error: ' + response.result.error.message);
+      });
+    }
+
+    gapi.auth.authorize(
+      {client_id: CLIENT_ID, scope: SCOPES, immediate: false},
+      handleAuthResult);
+  };
+
   if ($scope.order.address) {
     $scope.addressFields = [
       {title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name'},
