@@ -201,6 +201,12 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
               name: $translate.instant('cms.mMainBanner'),
               sref: 'cms.simple({name: "mobile_main_banner"})',
             },
+            /*
+            {
+              name: $translate.instant('cms.dTopBanner'),
+              sref: 'cms.simple({name: "desktop_top_banner"})'
+            },
+            */
           ],
         },
         {
@@ -214,6 +220,20 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
             {
               name: 'ZH-CN',
               sref: 'cms.pureHtml({name: "desktop_site_keywords_zh-cn"})',
+            },
+          ],
+        },
+        {
+          name: $translate.instant('cms.dShippingPolicy'),
+          sref: '',
+          children: [
+            {
+              name: 'KO',
+              sref: 'cms.pureHtml({name: "desktop_shipping_policy_ko"})',
+            },
+            {
+              name: 'ZH-CN',
+              sref: 'cms.pureHtml({name: "desktop_shipping_policy_zh-cn"})',
             },
           ],
         },

@@ -4,6 +4,8 @@
     "dMainBanner": "데스크탑 메인 배너",
     "dRightBanner": "데스크탑 우측 배너",
     "mMainBanner": "모바일 메인 배너",
-    "dSiteKeywords": "데스크탑 사이트 키워드"
+    "dShippingPolicy": "데스크탑 사입비 배송비 정책",
+    "dSiteKeywords": "데스크탑 사이트 키워드",
+    "dTopBanner": "데스크탑 탑 띠배너"
   }
 }
