@@ -284,6 +284,16 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
         name: 'ZH-CN',
         sref: 'cms.pureHtml({name: "desktop_shipping_policy_zh-cn"})'
       }]
+    }, {
+      name: $translate.instant('cms.mShippingPolicy'),
+      sref: '',
+      children: [{
+        name: 'KO',
+        sref: 'cms.pureHtml({name: "mobile_shipping_policy_ko"})'
+      }, {
+        name: 'ZH-CN',
+        sref: 'cms.pureHtml({name: "mobile_shipping_policy_zh-cn"})'
+      }]
     }]
   }, {
     key: 'currency', // TODO get key from router
@@ -1816,6 +1826,7 @@ module.exports = {
     "dRightBanner": "데스크탑 우측 배너",
     "mMainBanner": "모바일 메인 배너",
     "dShippingPolicy": "데스크탑 사입비 배송비 정책",
+    "mShippingPolicy": "모바일 사입비 배송비 정책",
     "dSiteKeywords": "데스크탑 사이트 키워드",
     "dTopBanner": "데스크탑 탑 띠배너"
   }
@@ -6495,7 +6506,7 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'data.firstName'), isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNameLabel'), obj: _.get($scope.user, 'data.bizName'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNumberLabel'), obj: _.get($scope.user, 'data.bizNumber'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false }, { title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false }, { title: $translate.instant('user.info.settlementAliasLabel'), obj: _.get($scope.user, 'data.settlement.alias'), key: 'data.settlement.alias', isRequired: false }, { title: $translate.instant('user.info.orderNameLabel'), obj: _.get($scope.user, 'data.order.name'), key: 'data.order.name', isRequired: false }];
     var roleType = _.get($scope.user, 'roles[0].type');
     var brand = _.get($scope.user, 'roles[0].brand');
-    if (roleType === 'owner' && brand) {
+    if ((roleType === 'owner' || roleType === 'staff') && brand) {
       $scope.myBrand = brand;
     }
   };
