@@ -32,7 +32,7 @@
       "userDetailButton": "유저 상세 정보",
       "settlementAliasLabel": "회계팀 약어",
       "signupMemoLabel": "중국 가입자 메모",
-      "orderPrefixLabel": "주문명"
+      "orderNameLabel": "주문명"
     },
     "waitConfirm": {
       "title": "바이어 인증 대기"
