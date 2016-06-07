@@ -237,6 +237,20 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
             },
           ],
         },
+        {
+          name: $translate.instant('cms.mShippingPolicy'),
+          sref: '',
+          children: [
+            {
+              name: 'KO',
+              sref: 'cms.pureHtml({name: "mobile_shipping_policy_ko"})',
+            },
+            {
+              name: 'ZH-CN',
+              sref: 'cms.pureHtml({name: "mobile_shipping_policy_zh-cn"})',
+            },
+          ],
+        },
       ],
     },
     {
