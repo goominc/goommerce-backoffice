@@ -461,7 +461,7 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     ];
     const roleType = _.get($scope.user, 'roles[0].type');
     const brand = _.get($scope.user, 'roles[0].brand');
-    if (roleType === 'owner' && brand) {
+    if ((roleType === 'owner' || roleType === 'staff') && brand) {
       $scope.myBrand = brand;
     }
   };
