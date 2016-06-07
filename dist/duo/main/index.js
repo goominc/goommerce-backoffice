@@ -257,7 +257,14 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
         name: $translate.instant('cms.mMainBanner'),
         sref: 'cms.simple({name: "mobile_main_banner"})'
       }]
-    }, {
+    },
+    /*
+    {
+      name: $translate.instant('cms.dTopBanner'),
+      sref: 'cms.simple({name: "desktop_top_banner"})'
+    },
+    */
+    {
       name: $translate.instant('cms.dSiteKeywords'),
       sref: '',
       children: [{
@@ -266,6 +273,16 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       }, {
         name: 'ZH-CN',
         sref: 'cms.pureHtml({name: "desktop_site_keywords_zh-cn"})'
+      }]
+    }, {
+      name: $translate.instant('cms.dShippingPolicy'),
+      sref: '',
+      children: [{
+        name: 'KO',
+        sref: 'cms.pureHtml({name: "desktop_shipping_policy_ko"})'
+      }, {
+        name: 'ZH-CN',
+        sref: 'cms.pureHtml({name: "desktop_shipping_policy_zh-cn"})'
       }]
     }]
   }, {
@@ -1798,7 +1815,9 @@ module.exports = {
     "dMainBanner": "데스크탑 메인 배너",
     "dRightBanner": "데스크탑 우측 배너",
     "mMainBanner": "모바일 메인 배너",
-    "dSiteKeywords": "데스크탑 사이트 키워드"
+    "dShippingPolicy": "데스크탑 사입비 배송비 정책",
+    "dSiteKeywords": "데스크탑 사이트 키워드",
+    "dTopBanner": "데스크탑 탑 띠배너"
   }
 }
 ;
