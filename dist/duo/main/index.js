@@ -1264,6 +1264,7 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
   var fieldName = 'brands';
   $scope.brandDatatables = {
     field: fieldName,
+    storeKey: 'brandMain',
     url: brandsUrl,
     columns: [{
       data: 'id',
@@ -2250,7 +2251,7 @@ var directiveModule = angular.module('backoffice.directives', [require('../utils
 
 module.exports = directiveModule;
 
-directiveModule.factory('datatableCommons', function ($compile) {
+directiveModule.factory('datatableCommons', function ($compile, $rootScope) {
   return {
     getOptions: function getOptions(scope, dataTables) {
       var options = _extends({
@@ -2268,7 +2269,26 @@ directiveModule.factory('datatableCommons', function ($compile) {
       if (dataTables.disableFilter) {
         options.bFilter = false;
       }
+      if (dataTables.storeKey) {
+        var searchValue = _.get($rootScope.state, 'datatables.' + dataTables.storeKey + '.searchValue');
+        var pageStart = _.get($rootScope.state, 'datatables.' + dataTables.storeKey + '.pageStart');
+        if (searchValue) {
+          options.oSearch = { sSearch: searchValue };
+        }
+        if (pageStart) {
+          options.displayStart = pageStart;
+        }
+      }
       return options;
+    },
+    saveSearchParams: function saveSearchParams(dataTables, searchValue, pageStart) {
+      if (dataTables.storeKey) {
+        var storeData = {
+          searchValue: searchValue,
+          pageStart: pageStart
+        };
+        $rootScope.updateDatatablesSearch(dataTables.storeKey, storeData);
+      }
     }
   };
 });
@@ -2290,10 +2310,18 @@ directiveModule.directive('boDatatables', function ($http, $compile, $parse, dat
         if (dataTables.hasOwnProperty('bSort')) {
           options.bSort = dataTables.bSort;
         }
-        elem.find('table').dataTable(options);
+        var table = elem.find('table');
+        table.dataTable(options);
         if (dataTables.rowReorder) {
           table.rowReordering();
         }
+        table.on('search.dt', function (e, settings) {
+          // 2016. 06. 08. [heekyu] FIXME if multiple datatables in a page?
+          var searchValue = $('.dataTables_filter input').val();
+          var pageStart = table.DataTable().page.info().start;
+          console.log(dataTables.storeKey);
+          datatableCommons.saveSearchParams(dataTables, searchValue, pageStart);
+        });
         if (attr.directiveLoad && scope[attr.directiveLoad]) {
           scope[attr.directiveLoad]();
         }
@@ -2317,7 +2345,7 @@ directiveModule.directive('boDatatables', function ($http, $compile, $parse, dat
   };
 });
 
-directiveModule.directive('boServerDatatables', function ($http, $compile, $rootScope, datatableCommons, boUtils) {
+directiveModule.directive('boServerDatatables', function ($http, $compile, datatableCommons, boUtils) {
   return {
     restrict: 'A',
     transclude: true,
@@ -2336,7 +2364,6 @@ directiveModule.directive('boServerDatatables', function ($http, $compile, $root
       var options = datatableCommons.getOptions(scope, dataTables);
       options.serverSide = true;
       options.ajax = function (data, callback, settings) {
-        // console.log(data);
         var urlParams = _extends({}, scope.urlParams);
         if (scope.fnUrlParams) {
           scope.fnUrlParams({ urlParams: urlParams });
@@ -2346,9 +2373,7 @@ directiveModule.directive('boServerDatatables', function ($http, $compile, $root
         if (data.search.value) {
           urlParams.q = data.search.value;
         }
-        if (dataTables.storeKey) {
-          $rootScope.updateDatatablesSearch(dataTables.storeKey, data.search.value);
-        }
+        datatableCommons.saveSearchParams(dataTables, data.search.value, data.start);
         var order = _.get(data, 'order[0]');
         if (order) {
           var column = options.columns[order.column].data;
@@ -2667,6 +2692,7 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
 
   $scope.orderDatatables = {
     field: 'orders',
+    storeKey: 'orderMain',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders?q=status:!0,paymentStatus:!0,roleType:buyer',
@@ -2745,6 +2771,7 @@ orderModule.controller('OrderListBeforePaymentController', function ($scope, $ro
   // $scope.orderDatatables = OrderCommons.getDatatables('/api/v1/orders?q=status:!0,paymentStatus:0');
   $scope.orderDatatables = {
     field: 'orders',
+    storeKey: 'orderBeforePayment',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders?q=status:0,paymentStatus:200',
@@ -3071,6 +3098,7 @@ orderModule.controller('OrderUncleController', function ($scope, $rootScope, $ht
 
   $scope.orderDatatables = {
     field: 'orderProducts',
+    storeKey: 'orderUncle',
     disableFilter: true,
     url: '/api/v1/uncle/order_products',
     order: [],
@@ -3151,6 +3179,7 @@ orderModule.controller('OrderCsController', function ($scope, $rootScope, $http,
 
   $scope.orderDatatables = {
     field: 'orderProducts',
+    storeKey: 'orderCs',
     disableFilter: true,
     url: '/api/v1/order_products',
     order: [],
@@ -3245,6 +3274,7 @@ orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $
 
   $scope.orderDatatables = {
     field: 'orders',
+    storeKey: 'orderBigBuyer',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders/big',
@@ -3325,6 +3355,7 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
   function updateDatatables() {
     $scope.orderDatatables = {
       field: 'orders',
+      storeKey: 'orderSettlement',
       // disableFilter: true,
       // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
       url: '/api/v1/orders/settlement/' + $scope.activeDate,
@@ -3411,6 +3442,7 @@ orderModule.controller('OrderGodoController', function ($scope, $http, $state, $
     console.log(start, end);
     $scope.orderDatatables = {
       field: 'orders',
+      storeKey: 'orderGodo',
       // disableFilter: true,
       // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
       url: '/api/v1/affiliate/godo/settlement?start=' + start + '&end=' + end,
@@ -3458,6 +3490,7 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
   $scope.month = $state.params.month || '';
   $scope.orderDatatables = {
     field: 'list',
+    storeKey: 'orderVat',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders/vat/' + $scope.month,
@@ -3593,6 +3626,7 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
 
   $scope.orderDatatables = {
     field: 'list',
+    storeKey: 'orderBrandVat',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders/vat/brands/' + brandId + '/' + month,
@@ -4021,9 +4055,6 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       window.alert('failed to update isActive');
     });
   };
-  if ($rootScope.state.datatables[storeKey]) {
-    $scope.productDatatables.oSearch = { sSearch: $rootScope.state.datatables[storeKey] };
-  }
   $scope.datatablesLoaded = function () {
     $compile(angular.element($('table')))($scope);
   };
@@ -6075,6 +6106,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
 
   $scope.userDatatables = {
     field: 'users',
+    storeKey: 'userMain',
     columns: [{
       data: 'id',
       render: function render(id) {
@@ -6124,6 +6156,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
 
   $scope.buyerDatatables = {
     field: 'users',
+    storeKey: 'userBuyer',
     // ID, Email, Name, tel, bizName, bizNumber
     columns: [{
       data: 'id',
@@ -6158,6 +6191,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
 
   $scope.sellerDatatables = {
     field: 'users',
+    storeKey: 'userSeller',
     // ID, Email, Name, tel
     columns: [{
       data: 'id',
@@ -6191,6 +6225,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
 
   $scope.noRoleDatatables = {
     field: 'users',
+    storeKey: 'userNoRole',
     // ID, Email, Name, tel, bizName, bizNumber, bizImage, changeToBuyer(action)
     columns: [{
       data: 'id',

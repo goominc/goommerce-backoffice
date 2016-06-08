@@ -28,6 +28,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
 
   $scope.userDatatables = {
     field: 'users',
+    storeKey: 'userMain',
     columns: [
       {
         data: 'id',
@@ -78,6 +79,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
 
   $scope.buyerDatatables = {
     field: 'users',
+    storeKey: 'userBuyer',
     // ID, Email, Name, tel, bizName, bizNumber
     columns: [
       {
@@ -110,6 +112,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
 
   $scope.sellerDatatables = {
     field: 'users',
+    storeKey: 'userSeller',
     // ID, Email, Name, tel
     columns: [
       {
@@ -140,6 +143,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
 
   $scope.noRoleDatatables = {
     field: 'users',
+    storeKey: 'userNoRole',
     // ID, Email, Name, tel, bizName, bizNumber, bizImage, changeToBuyer(action)
     columns: [
       {

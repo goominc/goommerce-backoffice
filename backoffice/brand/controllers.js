@@ -28,6 +28,7 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, $compile
   const fieldName = 'brands';
   $scope.brandDatatables = {
     field: fieldName,
+    storeKey: 'brandMain',
     url: brandsUrl,
     columns: [
       {

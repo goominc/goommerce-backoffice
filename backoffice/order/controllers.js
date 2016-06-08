@@ -19,6 +19,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
 
   $scope.orderDatatables = {
     field: 'orders',
+    storeKey: 'orderMain',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders?q=status:!0,paymentStatus:!0,roleType:buyer',
@@ -98,6 +99,7 @@ orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, 
   // $scope.orderDatatables = OrderCommons.getDatatables('/api/v1/orders?q=status:!0,paymentStatus:0');
   $scope.orderDatatables = {
     field: 'orders',
+    storeKey: 'orderBeforePayment',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders?q=status:0,paymentStatus:200',
@@ -443,6 +445,7 @@ orderModule.controller('OrderUncleController', ($scope, $rootScope, $http, $stat
 
   $scope.orderDatatables = {
     field: 'orderProducts',
+    storeKey: 'orderUncle',
     disableFilter: true,
     url: '/api/v1/uncle/order_products',
     order: [],
@@ -520,6 +523,7 @@ orderModule.controller('OrderCsController', ($scope, $rootScope, $http, $state, 
 
   $scope.orderDatatables = {
     field: 'orderProducts',
+    storeKey: 'orderCs',
     disableFilter: true,
     url: '/api/v1/order_products',
     order: [],
@@ -610,6 +614,7 @@ orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $r
 
   $scope.orderDatatables = {
     field: 'orders',
+    storeKey: 'orderBigBuyer',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders/big',
@@ -692,6 +697,7 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
   function updateDatatables() {
     $scope.orderDatatables = {
       field: 'orders',
+      storeKey: 'orderSettlement',
       // disableFilter: true,
       // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
       url: '/api/v1/orders/settlement/' + $scope.activeDate,
@@ -778,6 +784,7 @@ orderModule.controller('OrderGodoController', ($scope, $http, $state, $rootScope
     console.log(start, end);
     $scope.orderDatatables = {
       field: 'orders',
+      storeKey: 'orderGodo',
       // disableFilter: true,
       // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
       url: `/api/v1/affiliate/godo/settlement?start=${start}&end=${end}`,
@@ -827,6 +834,7 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
   $scope.month = $state.params.month || '';
   $scope.orderDatatables = {
     field: 'list',
+    storeKey: 'orderVat',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: `/api/v1/orders/vat/${$scope.month}`,
@@ -977,6 +985,7 @@ orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootS
 
   $scope.orderDatatables = {
     field: 'list',
+    storeKey: 'orderBrandVat',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: `/api/v1/orders/vat/brands/${brandId}/${month}`,

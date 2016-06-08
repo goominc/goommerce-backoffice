@@ -87,9 +87,6 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
       window.alert('failed to update isActive');
     });
   };
-  if ($rootScope.state.datatables[storeKey]) {
-    $scope.productDatatables.oSearch = { sSearch: $rootScope.state.datatables[storeKey] };
-  }
   $scope.datatablesLoaded = () => {
     $compile(angular.element($('table')))($scope);
   };

@@ -5,7 +5,7 @@ const directiveModule = angular.module('backoffice.directives', [
 
 module.exports = directiveModule;
 
-directiveModule.factory('datatableCommons', ($compile) => {
+directiveModule.factory('datatableCommons', ($compile, $rootScope) => {
   return {
     getOptions: (scope, dataTables) => {
       const options = {
@@ -27,7 +27,26 @@ directiveModule.factory('datatableCommons', ($compile) => {
       if (dataTables.disableFilter) {
         options.bFilter = false;
       }
+      if (dataTables.storeKey) {
+        const searchValue = _.get($rootScope.state, `datatables.${dataTables.storeKey}.searchValue`);
+        const pageStart = _.get($rootScope.state, `datatables.${dataTables.storeKey}.pageStart`);
+        if (searchValue) {
+          options.oSearch = { sSearch: searchValue };
+        }
+        if (pageStart) {
+          options.displayStart = pageStart;
+        }
+      }
       return options;
+    },
+    saveSearchParams: (dataTables, searchValue, pageStart) => {
+      if (dataTables.storeKey) {
+        const storeData = {
+          searchValue,
+          pageStart,
+        };
+        $rootScope.updateDatatablesSearch(dataTables.storeKey, storeData);
+      }
     },
   };
 });
@@ -49,10 +68,18 @@ directiveModule.directive('boDatatables', ($http, $compile, $parse, datatableCom
         if (dataTables.hasOwnProperty('bSort')) {
           options.bSort = dataTables.bSort;
         }
-        elem.find('table').dataTable(options);
+        const table = elem.find('table');
+        table.dataTable(options);
         if (dataTables.rowReorder) {
           table.rowReordering();
         }
+        table.on('search.dt', (e, settings) => {
+          // 2016. 06. 08. [heekyu] FIXME if multiple datatables in a page?
+          const searchValue = $('.dataTables_filter input').val();
+          const pageStart = table.DataTable().page.info().start;
+          console.log(dataTables.storeKey);
+          datatableCommons.saveSearchParams(dataTables, searchValue, pageStart);
+        });
         if (attr.directiveLoad && scope[attr.directiveLoad]) {
           scope[attr.directiveLoad]();
         }
@@ -76,7 +103,7 @@ directiveModule.directive('boDatatables', ($http, $compile, $parse, datatableCom
   };
 });
 
-directiveModule.directive('boServerDatatables', ($http, $compile, $rootScope, datatableCommons, boUtils) => {
+directiveModule.directive('boServerDatatables', ($http, $compile, datatableCommons, boUtils) => {
   return {
     restrict: 'A',
     transclude: true,
@@ -95,7 +122,6 @@ directiveModule.directive('boServerDatatables', ($http, $compile, $rootScope, da
       const options = datatableCommons.getOptions(scope, dataTables);
       options.serverSide = true;
       options.ajax = (data, callback, settings) => {
-        // console.log(data);
         const urlParams = { ...scope.urlParams };
         if (scope.fnUrlParams) {
           scope.fnUrlParams({ urlParams });
@@ -105,9 +131,7 @@ directiveModule.directive('boServerDatatables', ($http, $compile, $rootScope, da
         if (data.search.value) {
           urlParams.q = data.search.value;
         }
-        if (dataTables.storeKey) {
-          $rootScope.updateDatatablesSearch(dataTables.storeKey, data.search.value);
-        }
+        datatableCommons.saveSearchParams(dataTables, data.search.value, data.start);
         const order = _.get(data, 'order[0]');
         if (order) {
           const column = options.columns[order.column].data;
