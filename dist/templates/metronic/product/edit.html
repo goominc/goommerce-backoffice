@@ -109,34 +109,6 @@
                             </div>
                           </div>
                         </div>
-                        <!--div class="col-md-12" style="margin-bottom: 20px;" data-ng-repeat="kind in variantKinds">
-                          <div class="col-md-1 control-label">{{kind.name}}</div>
-                          <div class="col-md-11">
-                            <button class="btn btn-circle default" style="margin-right: 20px;" data-ng-repeat="k in kind.kinds">
-                              {{k}} <i data-ng-click="removeVariantKindItem($parent.$index, $index)" class="fa fa-remove"></i>
-                            </button>
-                            <button class="btn btn-circle default add-item-box">
-                              <input type="text" data-ng-blur="addVariantKindItem($index, newObjects.variantKindItem)" ng-keypress="onInputKeypress($event)" data-ng-model="newObjects.variantKindItem"> <i data-ng-click="hideAddItemBox()" class="fa fa-remove"></i>
-                            </button>
-                            <button class="btn blue add-variant-btn" data-ng-click="clickAddVariantOrItem($event)">
-                              <i class="fa fa-plus"></i>
-                            </button>
-                            <button data-ng-click="removeVariantKind($index)" class="btn red" style="margin-left: 30px;">
-                              <i class="fa fa-remove"></i> {{'product.edit.removeVariantKind' | translate}}
-                            </button>
-                          </div>
-                        </div>
-                        <div class="col-md-12">
-                          <button class="btn btn-circle default add-item-box">
-                            <input type="text" data-ng-blur="addVariantKind(newObjects.variantKind)" ng-keypress="onInputKeypress($event)" data-ng-model="newObjects.variantKind"> <i data-ng-click="hideAddItemBox()" class="fa fa-remove"></i>
-                          </button>
-                          <button class="btn blue add-variant-btn" data-ng-click="clickAddVariantOrItem($event)">
-                            <i class="fa fa-plus"></i> {{'product.edit.addVariantKind' | translate}}
-                          </button>
-                          <button class="btn blue" data-ng-click="generateProductVariants()">
-                            규격 상품 생성 <i class="fa fa-angle-down"></i>
-                          </button>
-                        </div-->
                       </div>
                     </div>
                     <div class="form-group">
@@ -145,10 +117,10 @@
                         <table class="table table-bordered dataTable product-variant-table">
                           <thead>
                           <tr role="row" class="heading">
-                            <th width="20%">Color</th>
-                            <th width="20%">Size</th>
-                            <th width="20%">Price</th>
-                            <th width="20%">Status</th>
+                            <th width="20%">색상</th>
+                            <th width="20%">사이즈</th>
+                            <th width="20%">가격</th>
+                            <th width="20%">상태</th>
                             <th width="20%"></th>
                           </tr>
                           </thead>

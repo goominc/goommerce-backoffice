@@ -187,16 +187,6 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
     let imgIdx = 0;
     let promise = $q.when();
     const loadImages = (item) => {
-      let loadDone = 0;
-      const plusLoadDone = () => {
-        loadDone++;
-        if (loadDone == imgIdx) {
-          boUtils.stopProgressBar();
-          if (!$scope.$$phase) {
-            $scope.$apply();
-          }
-        }
-      };
       return new Promise((resolve, reject) => {
         const rows = item.rows;
         const loadPromises = [];
@@ -250,55 +240,39 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
   };
   $scope.saveImages = () => {
     boUtils.startProgressBar();
-    let uploadedVariantCount = 0;
-    let allVariantCount = 0;
     const changedProducts = new Set();
-    const plusDoneVariant = () => {
-      uploadedVariantCount++;
-      if (allVariantCount === uploadedVariantCount) {
-        for (let changedProduct of changedProducts.values()) {
-          // silently indexing
-          $http.put(`/api/v1/products/${changedProduct}`, { isActive: true }).then(() => {
-            // 2016. 04. 26. [heekyu] index after isActive updated
-            $http.put(`/api/v1/products/${changedProduct}/index`);
-          });
-        }
-        window.alert('all images uploaded and product informations saved');
-        boUtils.stopProgressBar();
-      }
-    };
     const isAddProductImage = !$scope.uploadTypes[$scope.uploadTypeIndex].productHasImage;
     const uploadRowImages = (productId, productVariantIds, images, isSaveProduct) => {
       changedProducts.add(productId);
       const appImages = new Array(images.length);
-      let uploadCount = 0;
-      let done = 0;
+      const promises = [];
       for (let i = 0; i < images.length; i++) {
         const imageUrl = images[i].url;
         if (imageUrl.length > 2 && imageUrl.substring(0, 2) === '//') {
           appImages[i] = images[i];
         } else {
-          uploadCount++;
-          $.ajax({
-            url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
-            type: 'POST',
-            data: {file: imageUrl, upload_preset: 'nd9k8295'},
-            success: (res) => {
-              appImages[i] = {
-                url: res.url.substring(5),
-                publicId: res.public_id,
-                version: res.version,
-                mainImage: isSaveProduct,
-              };
-              plusDone();
-              if (res) return res;
-            },
-            error: (res) => {
-              window.alert(res);
-              appImages[i] = {};
-              plusDone();
-            },
-          });
+          promises.push(new Promise((resolve, reject) => {
+            $.ajax({
+              url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
+              type: 'POST',
+              data: {file: imageUrl, upload_preset: 'nd9k8295'},
+              success: (res) => {
+                appImages[i] = {
+                  url: res.url.substring(5),
+                  publicId: res.public_id,
+                  version: res.version,
+                  mainImage: isSaveProduct,
+                };
+                resolve(res);
+                if (res) return res;
+              },
+              error: (res) => {
+                window.alert(res);
+                appImages[i] = {};
+                reject(Error(res));
+              },
+            });
+          }));
         }
       }
       const saveProductVariant = () => {
@@ -316,20 +290,11 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
         } else {
           promises.push($http.put(`/api/v1/products/${productId}`, data));
         }
-        $q.all(promises).then((res) => {
-          plusDoneVariant();
-        });
+        return $q.all(promises);
       };
-      const plusDone = () => {
-        done++;
-        if (done === uploadCount) {
-          saveProductVariant();
-        }
-      };
-      if (uploadCount === 0) {
-        saveProductVariant();
-      }
+      return $q.all(promises).then(() => saveProductVariant());
     };
+    let promise = $q.when();
     for (let j = 0; j < $scope.items.length; j++) {
       const item = $scope.items[j];
       let r = 0;
@@ -347,10 +312,22 @@ productModule.controller('ProductImageUploadController', ($scope, $http, $q, pro
             }
           }
         }
-        allVariantCount++;
-        uploadRowImages(item.product.id, variantIds, images, isAddProductImage && isUploadProduct);
+        promise = promise.then(() => (
+          uploadRowImages(item.product.id, variantIds, images, isAddProductImage && isUploadProduct)
+        ));
       }
     }
+    promise.then(() => {
+      for (let changedProduct of changedProducts.values()) {
+        // silently indexing
+        $http.put(`/api/v1/products/${changedProduct}`, { isActive: true }).then(() => {
+          // 2016. 04. 26. [heekyu] index after isActive updated
+          $http.put(`/api/v1/products/${changedProduct}/index`);
+        });
+      }
+      window.alert('all images uploaded and product informations saved');
+      boUtils.stopProgressBar();
+    });
   };
 
   $scope.clearImages = () => {

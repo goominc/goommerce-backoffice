@@ -4339,16 +4339,22 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.variantKinds[index].currentGroup = group;
   };
   $scope.clickVariantAttribute = function (event, index, attr) {
-    var selected = $scope.variantKinds[index].selected;
+    var variantKind = $scope.variantKinds[index];
+    var selected = variantKind.selected;
     if (selected.has(attr)) {
-      selected['delete'](attr);
+      for (var i = 0; i < variantKind.kinds.length; i++) {
+        if (variantKind.kinds[i] === attr) {
+          $scope.removeVariantKindItem(index, i);
+          return;
+        }
+      }
     } else {
       selected.add(attr);
-    }
-    $scope.variantKinds[index].kinds = Array.from(selected);
+      variantKind.kinds = Array.from(selected);
 
-    $scope.generateProductVariants();
-    $scope.initImages();
+      $scope.generateProductVariants();
+      $scope.initImages();
+    }
   };
   $scope.removeVariantKindItem = function (kindIndex, itemIndex) {
     var variantKind = $scope.variantKinds[kindIndex];
@@ -5474,16 +5480,6 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     var imgIdx = 0;
     var promise = $q.when();
     var loadImages = function loadImages(item) {
-      var loadDone = 0;
-      var plusLoadDone = function plusLoadDone() {
-        loadDone++;
-        if (loadDone == imgIdx) {
-          boUtils.stopProgressBar();
-          if (!$scope.$$phase) {
-            $scope.$apply();
-          }
-        }
-      };
       return new Promise(function (resolve, reject) {
         var rows = item.rows;
         var loadPromises = [];
@@ -5551,87 +5547,45 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
   };
   $scope.saveImages = function () {
     boUtils.startProgressBar();
-    var uploadedVariantCount = 0;
-    var allVariantCount = 0;
     var changedProducts = new Set();
-    var plusDoneVariant = function plusDoneVariant() {
-      uploadedVariantCount++;
-      if (allVariantCount === uploadedVariantCount) {
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          var _loop4 = function () {
-            var changedProduct = _step.value;
-
-            // silently indexing
-            $http.put('/api/v1/products/' + changedProduct, { isActive: true }).then(function () {
-              // 2016. 04. 26. [heekyu] index after isActive updated
-              $http.put('/api/v1/products/' + changedProduct + '/index');
-            });
-          };
-
-          for (var _iterator = changedProducts.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            _loop4();
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator['return']) {
-              _iterator['return']();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-
-        window.alert('all images uploaded and product informations saved');
-        boUtils.stopProgressBar();
-      }
-    };
     var isAddProductImage = !$scope.uploadTypes[$scope.uploadTypeIndex].productHasImage;
     var uploadRowImages = function uploadRowImages(productId, productVariantIds, images, isSaveProduct) {
       changedProducts.add(productId);
       var appImages = new Array(images.length);
-      var uploadCount = 0;
-      var done = 0;
+      var promises = [];
 
-      var _loop5 = function (i) {
+      var _loop4 = function (i) {
         var imageUrl = images[i].url;
         if (imageUrl.length > 2 && imageUrl.substring(0, 2) === '//') {
           appImages[i] = images[i];
         } else {
-          uploadCount++;
-          $.ajax({
-            url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
-            type: 'POST',
-            data: { file: imageUrl, upload_preset: 'nd9k8295' },
-            success: function success(res) {
-              appImages[i] = {
-                url: res.url.substring(5),
-                publicId: res.public_id,
-                version: res.version,
-                mainImage: isSaveProduct
-              };
-              plusDone();
-              if (res) return res;
-            },
-            error: function error(res) {
-              window.alert(res);
-              appImages[i] = {};
-              plusDone();
-            }
-          });
+          promises.push(new Promise(function (resolve, reject) {
+            $.ajax({
+              url: 'https://api.cloudinary.com/v1_1/linkshops/image/upload',
+              type: 'POST',
+              data: { file: imageUrl, upload_preset: 'nd9k8295' },
+              success: function success(res) {
+                appImages[i] = {
+                  url: res.url.substring(5),
+                  publicId: res.public_id,
+                  version: res.version,
+                  mainImage: isSaveProduct
+                };
+                resolve(res);
+                if (res) return res;
+              },
+              error: function error(res) {
+                window.alert(res);
+                appImages[i] = {};
+                reject(Error(res));
+              }
+            });
+          }));
         }
       };
 
       for (var i = 0; i < images.length; i++) {
-        _loop5(i);
+        _loop4(i);
       }
       var saveProductVariant = function saveProductVariant() {
         var promises = [];
@@ -5648,24 +5602,19 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
         } else {
           promises.push($http.put('/api/v1/products/' + productId, data));
         }
-        $q.all(promises).then(function (res) {
-          plusDoneVariant();
-        });
+        return $q.all(promises);
       };
-      var plusDone = function plusDone() {
-        done++;
-        if (done === uploadCount) {
-          saveProductVariant();
-        }
-      };
-      if (uploadCount === 0) {
-        saveProductVariant();
-      }
+      return $q.all(promises).then(function () {
+        return saveProductVariant();
+      });
     };
-    for (var j = 0; j < $scope.items.length; j++) {
+    var promise = $q.when();
+
+    var _loop5 = function (j) {
       var item = $scope.items[j];
       var r = 0;
-      while (r < item.rows.length) {
+
+      var _loop7 = function () {
         var sameColor = item.rows[r].rowspan;
         var images = item.rows[r].images;
         var variantIds = [];
@@ -5679,10 +5628,56 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
             }
           }
         }
-        allVariantCount++;
-        uploadRowImages(item.product.id, variantIds, images, isAddProductImage && isUploadProduct);
+        promise = promise.then(function () {
+          return uploadRowImages(item.product.id, variantIds, images, isAddProductImage && isUploadProduct);
+        });
+      };
+
+      while (r < item.rows.length) {
+        _loop7();
       }
+    };
+
+    for (var j = 0; j < $scope.items.length; j++) {
+      _loop5(j);
     }
+    promise.then(function () {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        var _loop6 = function () {
+          var changedProduct = _step.value;
+
+          // silently indexing
+          $http.put('/api/v1/products/' + changedProduct, { isActive: true }).then(function () {
+            // 2016. 04. 26. [heekyu] index after isActive updated
+            $http.put('/api/v1/products/' + changedProduct + '/index');
+          });
+        };
+
+        for (var _iterator = changedProducts.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          _loop6();
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator['return']) {
+            _iterator['return']();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      window.alert('all images uploaded and product informations saved');
+      boUtils.stopProgressBar();
+    });
   };
 
   $scope.clearImages = function () {

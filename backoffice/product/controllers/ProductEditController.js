@@ -243,16 +243,22 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     $scope.variantKinds[index].currentGroup = group;
   };
   $scope.clickVariantAttribute = (event, index, attr) => {
-    const selected = $scope.variantKinds[index].selected;
+    const variantKind = $scope.variantKinds[index];
+    const selected = variantKind.selected;
     if (selected.has(attr)) {
-      selected.delete(attr);
+      for (let i = 0; i < variantKind.kinds.length; i++) {
+        if (variantKind.kinds[i] === attr) {
+          $scope.removeVariantKindItem(index, i);
+          return;
+        }
+      }
     } else {
       selected.add(attr);
-    }
-    $scope.variantKinds[index].kinds = Array.from(selected);
+      variantKind.kinds = Array.from(selected);
 
-    $scope.generateProductVariants();
-    $scope.initImages();
+      $scope.generateProductVariants();
+      $scope.initImages();
+    }
   };
   $scope.removeVariantKindItem = (kindIndex, itemIndex) => {
     const variantKind = $scope.variantKinds[kindIndex];
