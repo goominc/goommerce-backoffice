@@ -2678,10 +2678,95 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var orderModule = require('./module');
 
-orderModule.factory('orderCommons', function () {
+orderModule.factory('orderCommons', function ($rootScope, $compile) {
+  var allStatus = [0, 100, 101, 102, 200, 201, 202, 203, 300, 400];
+  var allPaymentStatus = [0, 1, 100, 200];
   return {
-    allStatus: [0, 100, 101, 102, 200, 201, 202, 203, 300, 400],
-    allPaymentStatus: [0, 1, 100, 200]
+    allStatus: allStatus,
+    allPaymentStatus: allPaymentStatus,
+    applyFilterSearch: function applyFilterSearch(scope, state, storeKeyPrefix, roleType) {
+      scope.startDate = _.get($rootScope, storeKeyPrefix + '.startDate') || '';
+      scope.endDate = _.get($rootScope, storeKeyPrefix + '.endDate') || '';
+      if (scope.startDate && scope.endDate && new Date(scope.startDate).getTime() > new Date(scope.endDate).getTime()) {
+        window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
+      }
+      var reloadDatatables = function reloadDatatables() {
+        $('table').DataTable().ajax.reload();
+      };
+
+      $('#order_start_date').datepicker({ autoclose: true });
+      $('#order_end_date').datepicker({ autoclose: true });
+      $('#order_start_date').on('change', function (e) {
+        _.set($rootScope, storeKeyPrefix + '.startDate', $('#order_start_date').val());
+        state.reload();
+        // reloadDatatables();
+      });
+      $('#order_end_date').on('change', function (e) {
+        _.set($rootScope, storeKeyPrefix + '.endDate', $('#order_end_date').val());
+        state.reload();
+        // reloadDatatables();
+      });
+
+      scope.allStatus = allStatus.slice(1);
+      scope.allPaymentStatus = allPaymentStatus;
+
+      scope.setStatusFilter = function (s) {
+        _.set($rootScope, storeKeyPrefix + '.searchOrderStatus', s);
+        reloadDatatables();
+      };
+      scope.setPaymentStatusFilter = function (p) {
+        _.set($rootScope, storeKeyPrefix + '.searchPaymentStatus', p);
+        reloadDatatables();
+      };
+      if (!_.get($rootScope, storeKeyPrefix + '.searchOrderStatus')) {
+        scope.setStatusFilter(-1);
+      }
+      if (!_.get($rootScope, storeKeyPrefix + '.searchPaymentStatus')) {
+        scope.setPaymentStatusFilter(-1);
+      }
+
+      scope.translateOrderStatus = function (status) {
+        if (status === -1) {
+          return '모든 주문 상태';
+        }
+        return $rootScope.getContentsI18nText('enum.order.status.' + status);
+      };
+      scope.translateOrderPaymentStatus = function (status) {
+        if (status === -1) {
+          return '모든 결제 상태';
+        }
+        return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
+      };
+      scope.fnUrlParams = function (urlParams) {
+        var searchOrderStatus = _.get($rootScope, storeKeyPrefix + '.searchOrderStatus');
+        var searchPaymentStatus = _.get($rootScope, storeKeyPrefix + '.searchPaymentStatus');
+        var queryParams = {};
+        if (roleType) {
+          queryParams.roleType = roleType;
+        }
+        if (searchOrderStatus >= 0) {
+          queryParams.status = searchOrderStatus;
+        } else {
+          queryParams.status = '!0';
+        }
+        if (searchPaymentStatus >= 0) {
+          queryParams.paymentStatus = searchPaymentStatus;
+        }
+        if (scope.startDate && scope.endDate) {
+          var start = new Date(scope.startDate);
+          var end = new Date(scope.endDate);
+          var diff = end.getTime() - start.getTime();
+          if (diff >= 0) {
+            queryParams.orderedAt = scope.startDate + '~' + scope.endDate;
+          }
+        }
+        _.merge(urlParams, queryParams);
+      };
+      scope.datatablesLoaded = function () {
+        $('table').css('width', '100%');
+        $compile(angular.element($('table')))(scope);
+      };
+    }
   };
 });
 
@@ -2701,8 +2786,6 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
     field: 'orders',
     storeKey: 'orderMain',
     // disableFilter: true,
-    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: '/api/v1/orders?q=status:!0,paymentStatus:!0,roleType:buyer',
     columns: [{
       data: 'id',
       render: function render(id) {
@@ -2749,92 +2832,7 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
     }]
   };
 
-  $scope.startDate = _.get($rootScope, 'state.order.main.startDate') || '';
-  $scope.endDate = _.get($rootScope, 'state.order.main.endDate') || '';
-  if ($scope.startDate && $scope.endDate && new Date($scope.startDate).getTime() > new Date($scope.endDate).getTime()) {
-    window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
-  }
-
-  var reloadDatatables = function reloadDatatables() {
-    $('table').DataTable().ajax.reload();
-  };
-
-  $('#order_start_date').datepicker({ autoclose: true });
-  $('#order_end_date').datepicker({ autoclose: true });
-  $('#order_start_date').on('change', function (e) {
-    _.set($rootScope, 'state.order.main.startDate', $('#order_start_date').val());
-    $state.reload();
-    // reloadDatatables();
-  });
-  $('#order_end_date').on('change', function (e) {
-    _.set($rootScope, 'state.order.main.endDate', $('#order_end_date').val());
-    $state.reload();
-    // reloadDatatables();
-  });
-
-  $scope.allStatus = orderCommons.allStatus.slice(1);
-  $scope.allPaymentStatus = orderCommons.allPaymentStatus;
-
-  $scope.setStatusFilter = function (s) {
-    _.set($rootScope, 'state.order.main.searchOrderStatus', s);
-    reloadDatatables();
-  };
-  $scope.setPaymentStatusFilter = function (p) {
-    _.set($rootScope, 'state.order.main.searchPaymentStatus', p);
-    reloadDatatables();
-  };
-  if (!_.get($rootScope, 'state.order.main.searchOrderStatus')) {
-    $scope.setStatusFilter(-1);
-  }
-  if (!_.get($rootScope, 'state.order.main.searchPaymentStatus')) {
-    $scope.setPaymentStatusFilter(-1);
-  }
-
-  $scope.translateOrderStatus = function (status) {
-    if (status === -1) {
-      return '모든 주문 상태';
-    }
-    return $rootScope.getContentsI18nText('enum.order.status.' + status);
-  };
-  $scope.translateOrderPaymentStatus = function (status) {
-    if (status === -1) {
-      return '모든 결제 상태';
-    }
-    return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
-  };
-  $scope.fnUrlParams = function (urlParams) {
-    var searchOrderStatus = _.get($rootScope, 'state.order.main.searchOrderStatus');
-    var searchPaymentStatus = _.get($rootScope, 'state.order.main.searchPaymentStatus');
-    var queryParams = {
-      roleType: 'buyer'
-    };
-    if (searchOrderStatus >= 0) {
-      queryParams.status = searchOrderStatus;
-    } else {
-      queryParams.status = '!0';
-    }
-    if (searchPaymentStatus >= 0) {
-      queryParams.paymentStatus = searchPaymentStatus;
-    } else {
-      queryParams.paymentStatus = '!0';
-    }
-    if ($scope.startDate && $scope.endDate) {
-      var start = new Date($scope.startDate);
-      var end = new Date($scope.endDate);
-      var diff = end.getTime() - start.getTime();
-      if (diff >= 0) {
-        queryParams.orderedAt = $scope.startDate + '~' + $scope.endDate;
-      }
-    }
-    urlParams.q = Object.keys(queryParams).map(function (p) {
-      return p + ':' + queryParams[p];
-    }).join(',');
-    // urlParams.q = 'status:!0,paymentStatus:!0,roleType:buyer';
-  };
-  $scope.datatablesLoaded = function () {
-    $('table').css('width', '100%');
-    $compile(angular.element($('table')))($scope);
-  };
+  orderCommons.applyFilterSearch($scope, $state, 'state.order.main', 'buyer');
 });
 
 orderModule.controller('OrderListBeforePaymentController', function ($scope, $rootScope, $http, $state, $translate, boUtils) {
@@ -3385,7 +3383,7 @@ orderModule.controller('OrderCsController', function ($scope, $rootScope, $http,
   $rootScope.initAll($scope, $state.current.name);
 });
 
-orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $state, $rootScope, $translate, boUtils, orderCommons) {
   $scope.contentTitle = $translate.instant('order.listBigBuyer.title');
   $scope.breadcrumb = [{
     sref: 'dashboard',
@@ -3446,6 +3444,8 @@ orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $
       data: 'email'
     }]
   };
+
+  orderCommons.applyFilterSearch($scope, $state, 'state.order.bigBuyer');
 });
 
 orderModule.controller('OrderSettlementController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
@@ -3461,21 +3461,30 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
     name: $translate.instant('order.settlement.title')
   }];
 
+  $('.date-picker').datepicker({ autoclose: true });
+  $('.date-picker input').on('change', function (e) {
+    $scope.activeDate = $('.date-picker input').val();
+    updateDatatables();
+  });
   var today = moment();
-  var maxDays = 10;
-  $scope.dates = [];
-  for (var i = 0; i < maxDays; i++) {
-    $scope.dates.push(today.format('YYYY-MM-DD'));
-    today.subtract(1, 'd');
-  }
-  $scope.activeDate = $scope.dates[0];
+  $scope.activeDate = today.format('YYYY-MM-DD');
+  /*
+    const maxDays = 10;
+    $scope.dates = [];
+    for (let i = 0; i < maxDays; i++) {
+      $scope.dates.push(today.format('YYYY-MM-DD'));
+      today.subtract(1, 'd');
+    }
+    $scope.activeDate = $scope.dates[0];
+    */
   $scope.setDate = function (date) {
     $scope.activeDate = date;
     updateDatatables();
   };
   $scope.done = function () {
     $http.put('/api/v1/orders/settlement/' + $scope.activeDate).then(function () {
-      return $state.reload();
+      window.alert('정산(출금) 내역이 정상적으로 업데이트 되었습니다.');
+      $state.reload();
     });
   };
 
@@ -3516,7 +3525,7 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
         }
       }, {
         data: function data(_data38) {
-          return _.get(_data38, 'finalTotalKRW', '');
+          return _.get(_data38, 'finalTotalKRW', '0');
         }
       }, {
         data: function data(_data39) {

@@ -11,14 +11,11 @@
         <div class="col-md-12">
           <div class="portlet">
             <div class="portlet-title">
-              <div class="btn-group">
-                <button type="button" class="btn btn-default">{{activeDate}}</button>
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
-                <ul class="dropdown-menu" role="menu">
-                  <li data-ng-repeat="date in dates">
-                    <a data-ng-click="setDate(date)">{{date}}</a>
-                  </li>
-                </ul>
+              <div class="input-group input-small date date-picker" data-date-format="yyyy-mm-dd" data-date-end-date="+0d">
+                <input type="text" class="form-control" style="background-color: #fff" readonly="" data-ng-model="activeDate">
+                <span class="input-group-btn">
+                  <button class="btn default" type="button"><i class="fa fa-calendar"></i></button>
+                </span>
               </div>
               <div class="actions btn-set">
                 <a data-ng-click="done()">

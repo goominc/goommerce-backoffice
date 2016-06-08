@@ -815,7 +815,14 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
     },
   ];
 
+  $('.date-picker').datepicker({ autoclose: true });
+  $('.date-picker input').on('change', (e) => {
+    $scope.activeDate = $('.date-picker input').val();
+    updateDatatables();
+  });
   const today = moment();
+  $scope.activeDate = today.format('YYYY-MM-DD');
+/*
   const maxDays = 10;
   $scope.dates = [];
   for (let i = 0; i < maxDays; i++) {
@@ -823,13 +830,17 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
     today.subtract(1, 'd');
   }
   $scope.activeDate = $scope.dates[0];
+  */
   $scope.setDate = (date) => {
     $scope.activeDate = date;
     updateDatatables();
   };
   $scope.done = () => {
     $http.put(`/api/v1/orders/settlement/${$scope.activeDate}`).then(
-      () => $state.reload()
+      () => {
+        window.alert('정산(출금) 내역이 정상적으로 업데이트 되었습니다.');
+        $state.reload();
+      }
     );
   };
 
@@ -866,7 +877,7 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
           data: (data) => _.get(data, 'brand.data.bank.accountNumber', ''),
         },
         {
-          data: (data) => _.get(data, 'finalTotalKRW', ''),
+          data: (data) => _.get(data, 'finalTotalKRW', '0'),
         },
         {
           data: (data) => _.get(data, 'brand.data.bank.accountHolder', ''),
