@@ -9,15 +9,57 @@
     <div class="page-content-inner">
       <div class="row">
         <div class="col-md-12">
+          <div class="portlet">
+            <div class="portlet-title">
+              <div style="float: left; margin-right: 20px;" class="input-group input-large date-picker input-daterange">
+                <input type="text" class="form-control" id="order_start_date" data-date-format="yyyy-mm-dd" data-ng-model="state.order.main.startDate">
+                  <span class="input-group-addon">
+                  to </span>
+                <input type="text" class="form-control" id="order_end_date" data-date-format="yyyy-mm-dd" data-ng-model="state.order.main.endDate">
+              </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-default">{{translateOrderStatus(state.order.main.searchOrderStatus)}}</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li>
+                    <a data-ng-click="setStatusFilter(-1)">{{translateOrderStatus(-1)}}</a>
+                  </li>
+                  <li data-ng-repeat="s in allStatus">
+                    <a data-ng-click="setStatusFilter(s)">{{translateOrderStatus(s)}}</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-default">{{translateOrderPaymentStatus(state.order.main.searchPaymentStatus)}}</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li>
+                    <a data-ng-click="setPaymentStatusFilter(-1)">{{translateOrderPaymentStatus(-1)}}</a>
+                  </li>
+                  <li data-ng-repeat="p in allPaymentStatus">
+                    <a data-ng-click="setPaymentStatusFilter(p)">{{translateOrderPaymentStatus(p)}}</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12">
           <div class="portlet light">
             <div class="portlet-body">
-              <div bo-datatables="orderDatatables">
+              <div
+                bo-server-datatables="orderDatatables"
+                url="/api/v1/orders"
+                url-params="{}"
+                table-render="datatablesLoaded()"
+                fn-url-params="fnUrlParams(urlParams)"
+              >
                 <table class="table table-bordered table-hover">
                   <thead>
                   <tr role="row" class="heading">
                     <td>ID</td>
                     <td>{{'order.main.statusColumn' | translate}}</td>
-                    <td>{{'order.main.createdAtColumn' | translate}}</td>
+                    <td>{{'order.main.orderedAtColumn' | translate}}</td>
                     <td>{{'order.main.priceColumn' | translate}}</td>
                     <td>{{'order.main.paymentStatusColumn' | translate}}</td>
                     <td>{{'order.main.buyerIdColumn' | translate}}</td>

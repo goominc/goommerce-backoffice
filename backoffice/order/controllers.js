@@ -2,7 +2,30 @@
 
 const orderModule = require('./module');
 
-orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state, $translate, boUtils) => {
+orderModule.factory('orderCommons', () => {
+  return {
+    allStatus: [
+      0,
+      100,
+      101,
+      102,
+      200,
+      201,
+      202,
+      203,
+      300,
+      400,
+    ],
+    allPaymentStatus: [
+      0,
+      1,
+      100,
+      200,
+    ],
+  };
+});
+
+orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state, $translate, $compile, boUtils, orderCommons) => {
   $scope.contentTitle = $translate.instant('order.main.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
@@ -35,8 +58,8 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         render: (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`),
       },
       {
-        data: 'createdAt',
-        render: (data) => boUtils.formatDate(data),
+        data: 'orderedAt',
+        render: (data) => data ? boUtils.formatDate(data) : '',
       },
       {
         data: (data) => (+data.totalKRW).format(),
@@ -66,15 +89,90 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
     ],
   };
 
-/*
-  $(document).ready(() => {
-    $('#tt2').datepicker({
-      onSelect: function (a,b) { console.log(a); },
-      onClose: () => console.log(1),
-      autoclose: true,
-    });
+  $scope.startDate = _.get($rootScope, 'state.order.main.startDate') || '';
+  $scope.endDate =  _.get($rootScope, 'state.order.main.endDate') || '';
+  if ($scope.startDate && $scope.endDate && new Date($scope.startDate).getTime() > new Date($scope.endDate).getTime()) {
+    window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
+  }
+
+  const reloadDatatables = () => {
+    $('table').DataTable().ajax.reload();
+  };
+
+  $('#order_start_date').datepicker({ autoclose: true });
+  $('#order_end_date').datepicker({ autoclose: true });
+  $('#order_start_date').on('change', (e) => {
+    _.set($rootScope, 'state.order.main.startDate', $('#order_start_date').val());
+    $state.reload();
+    // reloadDatatables();
   });
-  */
+  $('#order_end_date').on('change', (e) => {
+    _.set($rootScope, 'state.order.main.endDate', $('#order_end_date').val());
+    $state.reload();
+    // reloadDatatables();
+  });
+
+  $scope.allStatus = orderCommons.allStatus.slice(1);
+  $scope.allPaymentStatus = orderCommons.allPaymentStatus;
+
+  $scope.setStatusFilter = (s) => {
+    _.set($rootScope, 'state.order.main.searchOrderStatus', s);
+    reloadDatatables();
+  };
+  $scope.setPaymentStatusFilter = (p) => {
+    _.set($rootScope, 'state.order.main.searchPaymentStatus', p);
+    reloadDatatables();
+  };
+  if (!_.get($rootScope, 'state.order.main.searchOrderStatus')) {
+    $scope.setStatusFilter(-1);
+  }
+  if (!_.get($rootScope, 'state.order.main.searchPaymentStatus')) {
+    $scope.setPaymentStatusFilter(-1);
+  }
+
+  $scope.translateOrderStatus = (status) => {
+    if (status === -1) {
+      return '모든 주문 상태';
+    }
+    return $rootScope.getContentsI18nText(`enum.order.status.${status}`);
+  };
+  $scope.translateOrderPaymentStatus = (status) => {
+    if (status === -1) {
+      return '모든 결제 상태';
+    }
+    return $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`);
+  };
+  $scope.fnUrlParams = (urlParams) => {
+    const searchOrderStatus = _.get($rootScope, 'state.order.main.searchOrderStatus');
+    const searchPaymentStatus = _.get($rootScope, 'state.order.main.searchPaymentStatus');
+    const queryParams = {
+      roleType: 'buyer',
+    };
+    if (searchOrderStatus >= 0) {
+      queryParams.status = searchOrderStatus;
+    } else {
+      queryParams.status = '!0';
+    }
+    if (searchPaymentStatus >= 0) {
+      queryParams.paymentStatus = searchPaymentStatus;
+    } else {
+      queryParams.paymentStatus = '!0';
+    }
+    if ($scope.startDate && $scope.endDate) {
+      const start = new Date($scope.startDate);
+      const end = new Date($scope.endDate);
+      const diff = end.getTime() - start.getTime();
+      if (diff >= 0) {
+        queryParams.orderedAt = `${$scope.startDate}~${$scope.endDate}`;
+      }
+    }
+    urlParams.q = Object.keys(queryParams).map((p) => `${p}:${queryParams[p]}`).join(',');
+    // urlParams.q = 'status:!0,paymentStatus:!0,roleType:buyer';
+  };
+  $scope.datatablesLoaded = () => {
+    $('table').css('width', '100%');
+    $compile(angular.element($('table')))($scope);
+  };
 });
 
 orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, $http, $state, $translate, boUtils) => {
@@ -150,7 +248,7 @@ orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, 
   };
 });
 
-orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $state, $translate, boUtils, convertUtil, order) => {
+orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $state, $translate, boUtils, convertUtil, orderCommons, order) => {
   $scope.contentTitle = $translate.instant('order.detail.title');
   $scope.contentSubTitle = 'Order Detail';
   $scope.breadcrumb = [
@@ -170,6 +268,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   $rootScope.initAll($scope, $state.current.name);
 
   order.createdAt = boUtils.formatDate(order.createdAt);
+  order.orderedAt = boUtils.formatDate(order.orderedAt);
   order.finalShippingCostKRW = order.finalShippingCostKRW && Number(order.finalShippingCostKRW);
   (order.orderProducts || []).forEach((p) => {
     if (boUtils.isString(p.product.id)) {
@@ -194,6 +293,9 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $scope.paymentLogs = _.groupBy(res.data.logs, 'paymentId');
     $scope.notes = _.filter(res.data.logs, { type: 1000 }).sort((a, b) => (a.id < b.id));
   });
+
+  $scope.allStatus = orderCommons.allStatus;
+  $scope.allPaymentStatus = orderCommons.allPaymentStatus;
 
   $scope.translateOrderStatus = (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`);
   $scope.translateOrderPaymentStatus = (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`);

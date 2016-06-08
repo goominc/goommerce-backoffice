@@ -40,7 +40,15 @@
                       </div>
                       <div class="row static-info">
                         <div class="col-md-5 name">
-                          Order Time:
+                          주문 생성 시각:
+                        </div>
+                        <div class="col-md-7 value">
+                          {{order.createdAt}}
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-5 name">
+                          시작(결제완료) 시각:
                         </div>
                         <div class="col-md-7 value">
                           {{order.orderedAt || order.createdAt}}
@@ -48,43 +56,31 @@
                       </div>
                       <div class="row static-info">
                         <div class="col-md-5 name">
-                          Order Status:
+                          주문 상태:
                         </div>
                         <div class="col-md-7 value">
                           <div class="form-group">
                             <select class="form-control" id="sel1" data-ng-model="order.status" convert-to-number>
-                              <option value="0">{{translateOrderStatus(0)}}</option>
-                              <option value="100">{{translateOrderStatus(100)}}</option>
-                              <option value="101">{{translateOrderStatus(101)}}</option>
-                              <option value="102">{{translateOrderStatus(102)}}</option>
-                              <option value="200">{{translateOrderStatus(200)}}</option>
-                              <option value="201">{{translateOrderStatus(201)}}</option>
-                              <option value="202">{{translateOrderStatus(202)}}</option>
-                              <option value="203">{{translateOrderStatus(203)}}</option>
-                              <option value="300">{{translateOrderStatus(300)}}</option>
-                              <option value="400">{{translateOrderStatus(400)}}</option>
+                              <option data-ng-repeat="s in allStatus" value="{{s}}">{{translateOrderStatus(s)}}</option>
                             </select>
                           </div>
                         </div>
                       </div>
                       <div class="row static-info">
                         <div class="col-md-5 name">
-                          Payment Status:
+                          결제 상태:
                         </div>
                         <div class="col-md-7 value">
                           <div class="form-group">
                             <select class="form-control" data-ng-model="order.paymentStatus" convert-to-number>
-                              <option value="0">{{translateOrderPaymentStatus(0)}}</option>
-                              <option value="1">{{translateOrderPaymentStatus(1)}}</option>
-                              <option value="100">{{translateOrderPaymentStatus(100)}}</option>
-                              <option value="200">{{translateOrderPaymentStatus(200)}}</option>
+                              <option data-ng-repeat="p in allPaymentStatus" value="{{p}}">{{translateOrderPaymentStatus(p)}}</option>
                             </select>
                           </div>
                         </div>
                       </div>
                       <div class="row static-info">
                         <div class="col-md-5 name">
-                          Settlement Status:
+                          정산 상태:
                         </div>
                         <div class="col-md-7 value">
                           <div class="form-group">

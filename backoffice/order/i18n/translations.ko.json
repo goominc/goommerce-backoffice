@@ -16,6 +16,7 @@
       "buyerNameColumn": "주문자 이름",
       "buyerTelColumn": "주문자 전화번호",
       "createdAtColumn": "주문 생성 시각",
+      "orderedAtColumn": "주문 시작 시각",
       "paymentStatusColumn": "결제 상태",
       "priceColumn": "주문가격",
       "startProcessing": "주문처리",
