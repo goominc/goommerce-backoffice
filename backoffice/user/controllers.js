@@ -446,6 +446,7 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
   $rootScope.initAll($scope, $state.current.name);
 
   const init = (user) => {
+    user.lastLoginAt = boUtils.formatDate(user.lastLoginAt);
     $scope.user = user;
 
     $scope.userFields = [

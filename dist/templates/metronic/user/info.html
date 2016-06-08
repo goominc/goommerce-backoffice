@@ -54,6 +54,14 @@
                       <a data-ng-if="user.data.bizImage.url" href="{{user.data.bizImage.url}}" target="_blank">새 창에서 열어서 확인</a>
                     </div>
                   </div>
+                  <div class="form-group">
+                    <label class="col-md-2 control-label">
+                      마지막 로그인 시각
+                    </label>
+                    <div class="col-md-10">
+                      {{user.lastLoginAt}}
+                    </div>
+                  </div>
                 </div>
               </form>
             </div>
