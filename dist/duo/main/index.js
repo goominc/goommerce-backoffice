@@ -3084,6 +3084,31 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     };
   };
 
+  $scope.getDates = function (num) {
+    var today = moment();
+    var dates = [];
+    for (var i = 0; i < num; i++) {
+      dates.push(today.format('YYYY-MM-DD'));
+      today.subtract(1, 'd');
+    }
+    return dates;
+  };
+  $scope.calcShipmentTotal = function (shipment) {
+    return (+shipment.unitKRW || 0) * (+shipment.weight || 0) + +shipment.boxKRW;
+  };
+  $scope.addShipment = function (shipment) {
+    shipment.totalKRW = $scope.calcShipmentTotal(shipment);
+    $http.post('/api/v1/orders/' + order.id + '/shipments', shipment).then(function (res) {
+      $state.reload();
+    });
+  };
+  $scope.shipmentProviderText = function (provider) {
+    if (provider === 0) return 'CJ';
+    if (provider === 104) return '영통';
+    if (provider === 105) return '판다';
+    return provider;
+  };
+
   $scope.exportPackingList = function () {
     var CLIENT_ID = '352586701861-20pb7c3qlp7klemfap5qfms0hl0eshrv.apps.googleusercontent.com';
 

@@ -296,6 +296,73 @@
                   <div class="portlet grey-cascade box">
                     <div class="portlet-title">
                       <div class="caption">
+                        <i class="fa fa-cogs"></i>배송 정보
+                      </div>
+                    </div>
+                    <div class="portlet-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover table-bordered table-striped">
+                          <thead>
+                            <tr>
+                              <th width="15%">배송일자</th>
+                              <th width="10%">배송업체</th>
+                              <th width="10%">배송비/KG</th>
+                              <th width="10%">KG</th>
+                              <th width="10%">BOX</th>
+                              <th width="10%">총 배송비</th>
+                              <th width="25%">송장번호</th>
+                              <th width="10%"></th>
+                            </tr>
+                            <tr>
+                              <th>
+                                <select class="form-control" data-ng-model="newShipment.startDate">
+                                  <option data-ng-repeat="date in getDates(10)">{{date}}</option>
+                                </select>
+                              </th>
+                              <th>
+                                <select class="form-control" data-ng-model="newShipment.provider" convert-to-number>
+                                  <option value="0" ng-if="order.address.countryCode === 'KR'">CJ</option>
+                                  <option value="104" ng-if="order.address.countryCode !== 'KR'">영통</option>
+                                  <option value="105" ng-if="order.address.countryCode !== 'KR'">판다</option>
+                                </select>
+                              </th>
+                              <th><input class="form-control" string-to-number data-ng-model="newShipment.unitKRW"/></th>
+                              <th><input class="form-control" data-ng-model="newShipment.weight"/></th>
+                              <th><input class="form-control" string-to-number data-ng-model="newShipment.boxKRW"/></th>
+                              <th>{{calcShipmentTotal(newShipment || {})}}</th>
+                              <th><input class="form-control" data-ng-model="newShipment.trackingNumber"/></th>
+                              <th>
+                                <button class="btn blue" data-ng-click="addShipment(newShipment)">
+                                  <i class="fa fa-plus"></i> 추가
+                                </button>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody class="cell-center">
+                            <tr data-ng-repeat="row in order.shipments">
+                              <td>{{row.startDate.substr(0, 10)}}</td>
+                              <td>{{shipmentProviderText(row.provider)}}</td>
+                              <td>{{row.unitKRW}}</td>
+                              <td>{{row.weight}}</td>
+                              <td>{{row.boxKRW}}</td>
+                              <td>{{row.totalKRW}}</td>
+                              <td>{{row.trackingNumber}}</td>
+                              <td>
+                                <button class="btn blue" data-ng-click="updateShipment(row)">
+                                  <i class="fa fa-check"></i> 저장
+                                </button>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="portlet grey-cascade box">
+                    <div class="portlet-title">
+                      <div class="caption">
                         <i class="fa fa-cogs"></i>주문 수정
                       </div>
                       <div class="actions btn-set">
