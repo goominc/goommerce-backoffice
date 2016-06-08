@@ -435,7 +435,8 @@
                             <th width="5%">상태</th>
                             <th width="5%">요청자</th>
                             <th width="10%">시간</th>
-                            <th width="10%"></th>
+                            <th width="5%"></th>
+                            <th width="5%"></th>
                           </tr>
                           </thead>
                           <tbody class="cell-center">
@@ -475,6 +476,22 @@
                                 <button class="btn blue" data-ng-click="popupRefund(row)">
                                   <i class="fa fa-eject"></i> 환불
                                 </button>
+                              </div>
+                            </td>
+                            <td>
+                              <div ng-if="row.type === 0 && (row.data.P_TYPE || row.data.payMethod).toUpperCase() === 'CARD'">
+                                <form action="https://iniweb.inicis.com/app/publication/apReceipt.jsp" accept-charset="euc-kr" target="_blank">
+                                  <input type="hidden" name="noTid" value="{{row.tid}}" />
+                                  <input type="hidden" name="noMethod" value="1" />
+                                  <input type="hidden" name="clpaymethod" value="0" />
+                                  <input type="hidden" name="rt" value="1" />
+                                  <input type="hidden" name="valFlg" value="1" />
+                                  <input type="hidden" name="nmBuyer" value="{{row.data.P_UNAME || row.data.buyerName}}" />
+                                  <input type="hidden" name="prGoods" value="{{row.data.P_AMT || row.data.TotPrice}}" />
+                                  <button class="btn blue">
+                                    <i class="fa fa-eject"></i> 영수증
+                                  </button>
+                                </form>
                               </div>
                             </td>
                           </tr>
