@@ -2319,7 +2319,6 @@ directiveModule.directive('boDatatables', function ($http, $compile, $parse, dat
           // 2016. 06. 08. [heekyu] FIXME if multiple datatables in a page?
           var searchValue = $('.dataTables_filter input').val();
           var pageStart = table.DataTable().page.info().start;
-          console.log(dataTables.storeKey);
           datatableCommons.saveSearchParams(dataTables, searchValue, pageStart);
         });
         if (attr.directiveLoad && scope[attr.directiveLoad]) {
