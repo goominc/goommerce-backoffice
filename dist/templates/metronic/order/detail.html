@@ -515,6 +515,48 @@
                     </div>
                   </div>
                 </div>
+                <div class="col-md-12">
+                  <div class="portlet grey-cascade box">
+                    <div class="portlet-title">
+                      <div class="caption">
+                        <i class="fa fa-cogs"></i>NOTES
+                      </div>
+                    </div>
+                    <div class="portlet-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover table-bordered table-striped">
+                          <thead>
+                            <tr>
+                              <th colspan="2"><input class="form-control" data-ng-model="newNote"/></th>
+                              <th width="10%">
+                                <button class="btn blue" data-ng-click="addNote(newNote)">
+                                  <i class="fa fa-plus"></i> 추가
+                                </button>
+                              </th>
+                            </tr>
+                            <tr>
+                              <th width="10%">시간</th>
+                              <th width="70%">메세지</th>
+                              <th width="10%">요청자</th>
+                            </tr>
+                          </thead>
+                          <tbody class="cell-center">
+                          <tr data-ng-repeat="row in notes">
+                            <td>
+                              {{row.createdAt}}
+                            </td>
+                            <td>
+                              {{row.data.message}}
+                            </td>
+                            <td>
+                              {{row.requester.name.ko || row.requester.email}}
+                            </td>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

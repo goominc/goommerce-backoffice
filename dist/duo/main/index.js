@@ -2860,6 +2860,9 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
       return l.createdAt = boUtils.formatDate(l.createdAt);
     });
     $scope.paymentLogs = _.groupBy(res.data.logs, 'paymentId');
+    $scope.notes = _.filter(res.data.logs, { type: 1000 }).sort(function (a, b) {
+      return a.id < b.id;
+    });
   });
 
   $scope.translateOrderStatus = function (status) {
@@ -2923,6 +2926,15 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     }
   };
 
+  $scope.addNote = function (message) {
+    $http.post('/api/v1/orders/' + order.id + '/logs', {
+      type: 1000,
+      data: { message: message }
+    }).then(function (res) {
+      $state.reload();
+    });
+  };
+
   $scope.popupRefund = function (payment) {
     $scope.refundPayment = payment;
     $('#order_refund_modal').modal();
@@ -2939,7 +2951,6 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
       accountHolder: accountHolder,
       bankCode: bankCode
     }).then(function (res) {
-      // TODO: refresh order.
       $state.reload();
     });
   };

@@ -192,6 +192,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   $http.get(`/api/v1/orders/${order.id}/logs`).then((res) => {
     res.data.logs.forEach((l) => (l.createdAt = boUtils.formatDate(l.createdAt)));
     $scope.paymentLogs = _.groupBy(res.data.logs, 'paymentId');
+    $scope.notes = _.filter(res.data.logs, { type: 1000 }).sort((a, b) => (a.id < b.id));
   });
 
   $scope.translateOrderStatus = (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`);
@@ -230,6 +231,15 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     }
   };
 
+  $scope.addNote = (message) => {
+    $http.post(`/api/v1/orders/${order.id}/logs`, {
+      type: 1000,
+      data: { message },
+    }).then((res) => {
+      $state.reload();
+    });
+  };
+
   $scope.popupRefund = (payment) => {
     $scope.refundPayment = payment;
     $('#order_refund_modal').modal();
@@ -246,7 +256,6 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
       accountHolder,
       bankCode,
     }).then((res) => {
-      // TODO: refresh order.
       $state.reload();
     });
   };
