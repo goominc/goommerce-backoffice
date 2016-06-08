@@ -2,26 +2,111 @@
 
 const orderModule = require('./module');
 
-orderModule.factory('orderCommons', () => {
+orderModule.factory('orderCommons', ($rootScope, $compile) => {
+  const allStatus = [
+    0,
+    100,
+    101,
+    102,
+    200,
+    201,
+    202,
+    203,
+    300,
+    400,
+  ];
+  const allPaymentStatus = [
+    0,
+    1,
+    100,
+    200,
+  ];
   return {
-    allStatus: [
-      0,
-      100,
-      101,
-      102,
-      200,
-      201,
-      202,
-      203,
-      300,
-      400,
-    ],
-    allPaymentStatus: [
-      0,
-      1,
-      100,
-      200,
-    ],
+    allStatus,
+    allPaymentStatus,
+    applyFilterSearch: (scope, state, storeKeyPrefix, roleType) => {
+      scope.startDate = _.get($rootScope, `${storeKeyPrefix}.startDate`) || '';
+      scope.endDate =  _.get($rootScope, `${storeKeyPrefix}.endDate`) || '';
+      if (scope.startDate && scope.endDate && new Date(scope.startDate).getTime() > new Date(scope.endDate).getTime()) {
+        window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
+      }
+      const reloadDatatables = () => {
+        $('table').DataTable().ajax.reload();
+      };
+
+      $('#order_start_date').datepicker({ autoclose: true });
+      $('#order_end_date').datepicker({ autoclose: true });
+      $('#order_start_date').on('change', (e) => {
+        _.set($rootScope, `${storeKeyPrefix}.startDate`, $('#order_start_date').val());
+        state.reload();
+        // reloadDatatables();
+      });
+      $('#order_end_date').on('change', (e) => {
+        _.set($rootScope, `${storeKeyPrefix}.endDate`, $('#order_end_date').val());
+        state.reload();
+        // reloadDatatables();
+      });
+
+      scope.allStatus = allStatus.slice(1);
+      scope.allPaymentStatus = allPaymentStatus;
+
+      scope.setStatusFilter = (s) => {
+        _.set($rootScope, `${storeKeyPrefix}.searchOrderStatus`, s);
+        reloadDatatables();
+      };
+      scope.setPaymentStatusFilter = (p) => {
+        _.set($rootScope, `${storeKeyPrefix}.searchPaymentStatus`, p);
+        reloadDatatables();
+      };
+      if (!_.get($rootScope, `${storeKeyPrefix}.searchOrderStatus`)) {
+        scope.setStatusFilter(-1);
+      }
+      if (!_.get($rootScope, `${storeKeyPrefix}.searchPaymentStatus`)) {
+        scope.setPaymentStatusFilter(-1);
+      }
+
+      scope.translateOrderStatus = (status) => {
+        if (status === -1) {
+          return '모든 주문 상태';
+        }
+        return $rootScope.getContentsI18nText(`enum.order.status.${status}`);
+      };
+      scope.translateOrderPaymentStatus = (status) => {
+        if (status === -1) {
+          return '모든 결제 상태';
+        }
+        return $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`);
+      };
+      scope.fnUrlParams = (urlParams) => {
+        const searchOrderStatus = _.get($rootScope, `${storeKeyPrefix}.searchOrderStatus`);
+        const searchPaymentStatus = _.get($rootScope, `${storeKeyPrefix}.searchPaymentStatus`);
+        const queryParams = {};
+        if (roleType) {
+          queryParams.roleType = roleType;
+        }
+        if (searchOrderStatus >= 0) {
+          queryParams.status = searchOrderStatus;
+        } else {
+          queryParams.status = '!0';
+        }
+        if (searchPaymentStatus >= 0) {
+          queryParams.paymentStatus = searchPaymentStatus;
+        }
+        if (scope.startDate && scope.endDate) {
+          const start = new Date(scope.startDate);
+          const end = new Date(scope.endDate);
+          const diff = end.getTime() - start.getTime();
+          if (diff >= 0) {
+            queryParams.orderedAt = `${scope.startDate}~${scope.endDate}`;
+          }
+        }
+        _.merge(urlParams, queryParams);
+      };
+      scope.datatablesLoaded = () => {
+        $('table').css('width', '100%');
+        $compile(angular.element($('table')))(scope);
+      };
+    },
   };
 });
 
@@ -44,8 +129,6 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
     field: 'orders',
     storeKey: 'orderMain',
     // disableFilter: true,
-    // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: '/api/v1/orders?q=status:!0,paymentStatus:!0,roleType:buyer',
     columns: [
       {
         data: 'id',
@@ -89,90 +172,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
     ],
   };
 
-  $scope.startDate = _.get($rootScope, 'state.order.main.startDate') || '';
-  $scope.endDate =  _.get($rootScope, 'state.order.main.endDate') || '';
-  if ($scope.startDate && $scope.endDate && new Date($scope.startDate).getTime() > new Date($scope.endDate).getTime()) {
-    window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
-  }
-
-  const reloadDatatables = () => {
-    $('table').DataTable().ajax.reload();
-  };
-
-  $('#order_start_date').datepicker({ autoclose: true });
-  $('#order_end_date').datepicker({ autoclose: true });
-  $('#order_start_date').on('change', (e) => {
-    _.set($rootScope, 'state.order.main.startDate', $('#order_start_date').val());
-    $state.reload();
-    // reloadDatatables();
-  });
-  $('#order_end_date').on('change', (e) => {
-    _.set($rootScope, 'state.order.main.endDate', $('#order_end_date').val());
-    $state.reload();
-    // reloadDatatables();
-  });
-
-  $scope.allStatus = orderCommons.allStatus.slice(1);
-  $scope.allPaymentStatus = orderCommons.allPaymentStatus;
-
-  $scope.setStatusFilter = (s) => {
-    _.set($rootScope, 'state.order.main.searchOrderStatus', s);
-    reloadDatatables();
-  };
-  $scope.setPaymentStatusFilter = (p) => {
-    _.set($rootScope, 'state.order.main.searchPaymentStatus', p);
-    reloadDatatables();
-  };
-  if (!_.get($rootScope, 'state.order.main.searchOrderStatus')) {
-    $scope.setStatusFilter(-1);
-  }
-  if (!_.get($rootScope, 'state.order.main.searchPaymentStatus')) {
-    $scope.setPaymentStatusFilter(-1);
-  }
-
-  $scope.translateOrderStatus = (status) => {
-    if (status === -1) {
-      return '모든 주문 상태';
-    }
-    return $rootScope.getContentsI18nText(`enum.order.status.${status}`);
-  };
-  $scope.translateOrderPaymentStatus = (status) => {
-    if (status === -1) {
-      return '모든 결제 상태';
-    }
-    return $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`);
-  };
-  $scope.fnUrlParams = (urlParams) => {
-    const searchOrderStatus = _.get($rootScope, 'state.order.main.searchOrderStatus');
-    const searchPaymentStatus = _.get($rootScope, 'state.order.main.searchPaymentStatus');
-    const queryParams = {
-      roleType: 'buyer',
-    };
-    if (searchOrderStatus >= 0) {
-      queryParams.status = searchOrderStatus;
-    } else {
-      queryParams.status = '!0';
-    }
-    if (searchPaymentStatus >= 0) {
-      queryParams.paymentStatus = searchPaymentStatus;
-    } else {
-      queryParams.paymentStatus = '!0';
-    }
-    if ($scope.startDate && $scope.endDate) {
-      const start = new Date($scope.startDate);
-      const end = new Date($scope.endDate);
-      const diff = end.getTime() - start.getTime();
-      if (diff >= 0) {
-        queryParams.orderedAt = `${$scope.startDate}~${$scope.endDate}`;
-      }
-    }
-    urlParams.q = Object.keys(queryParams).map((p) => `${p}:${queryParams[p]}`).join(',');
-    // urlParams.q = 'status:!0,paymentStatus:!0,roleType:buyer';
-  };
-  $scope.datatablesLoaded = () => {
-    $('table').css('width', '100%');
-    $compile(angular.element($('table')))($scope);
-  };
+  orderCommons.applyFilterSearch($scope, $state, 'state.order.main', 'buyer');
 });
 
 orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, $http, $state, $translate, boUtils) => {
@@ -731,7 +731,7 @@ orderModule.controller('OrderCsController', ($scope, $rootScope, $http, $state, 
   $rootScope.initAll($scope, $state.current.name);
 });
 
-orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
+orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $rootScope, $translate, boUtils, orderCommons) => {
   $scope.contentTitle = $translate.instant('order.listBigBuyer.title');
   $scope.breadcrumb = [
     {
@@ -794,6 +794,8 @@ orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $r
       },
     ],
   };
+
+  orderCommons.applyFilterSearch($scope, $state, 'state.order.bigBuyer');
 });
 
 orderModule.controller('OrderSettlementController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
