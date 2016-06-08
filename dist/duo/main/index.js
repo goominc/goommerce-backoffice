@@ -2902,6 +2902,9 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
       return (payMethod || paymethod || P_TYPE || 'VBANK').toUpperCase();
     }
   };
+  $scope.getParent = function (payment) {
+    return _.find(order.payments, { id: payment.parentId });
+  };
 
   $scope.refundOrder = function () {
     if (order.finalTotalKRW === undefined) {

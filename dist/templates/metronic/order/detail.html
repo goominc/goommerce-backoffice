@@ -479,7 +479,7 @@
                               </div>
                             </td>
                             <td>
-                              <div ng-if="row.type === 0 && (row.data.P_TYPE || row.data.payMethod).toUpperCase() === 'CARD'">
+                              <div ng-if="row.type === 0 && paymentMethod(row) === 'CARD'">
                                 <form action="https://iniweb.inicis.com/app/publication/apReceipt.jsp" accept-charset="euc-kr" target="_blank">
                                   <input type="hidden" name="noTid" value="{{row.tid}}" />
                                   <input type="hidden" name="noMethod" value="1" />
@@ -488,6 +488,20 @@
                                   <input type="hidden" name="valFlg" value="1" />
                                   <input type="hidden" name="nmBuyer" value="{{row.data.P_UNAME || row.data.buyerName}}" />
                                   <input type="hidden" name="prGoods" value="{{row.data.P_AMT || row.data.TotPrice}}" />
+                                  <button class="btn blue">
+                                    <i class="fa fa-eject"></i> 영수증
+                                  </button>
+                                </form>
+                              </div>
+                              <div ng-if="row.type === 0 && paymentMethod(row) === 'VBANK'">
+                                <form action="https://iniweb.inicis.com/app/publication/apCashReceipt.jsp" accept-charset="euc-kr" target="_blank">
+                                  <input type="hidden" name="noTid" value="{{getParent(row).tid || row.tid}}" />
+                                  <input type="hidden" name="noMethod" value="1" />
+                                  <input type="hidden" name="clpaymethod" value="22" />
+                                  <input type="hidden" name="rt" value="1" />
+                                  <input type="hidden" name="valFlg" value="1" />
+                                  <input type="hidden" name="nmBuyer" value="{{row.data.P_UNAME || getParent(row).data.buyerName}}" />
+                                  <input type="hidden" name="prGoods" value="{{row.data.P_AMT || getParent(row).data.TotPrice}}" />
                                   <button class="btn blue">
                                     <i class="fa fa-eject"></i> 영수증
                                   </button>

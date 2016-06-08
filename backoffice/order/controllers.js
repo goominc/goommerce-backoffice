@@ -213,6 +213,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
       return (payMethod || paymethod || P_TYPE || 'VBANK').toUpperCase();
     }
   }
+  $scope.getParent = (payment) => _.find(order.payments, { id: payment.parentId });
 
   $scope.refundOrder = () => {
     if (order.finalTotalKRW === undefined) {
