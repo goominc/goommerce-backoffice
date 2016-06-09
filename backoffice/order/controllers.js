@@ -294,6 +294,15 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $scope.notes = _.filter(res.data.logs, { type: 1000 }).sort((a, b) => (a.id < b.id));
   });
 
+  if (order.address.countryCode === 'KR') {
+    $scope.newShipment = {
+      provider: 0,
+      unitKRW: 0,
+      weight: 0,
+      boxKRW: 3300,
+    };
+  }
+
   $scope.allStatus = orderCommons.allStatus;
   $scope.allPaymentStatus = orderCommons.allPaymentStatus;
 
