@@ -221,6 +221,10 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
               name: 'ZH-CN',
               sref: 'cms.pureHtml({name: "desktop_site_keywords_zh-cn"})',
             },
+            {
+              name: 'ZH-TW',
+              sref: 'cms.pureHtml({name: "desktop_site_keywords_zh-tw"})',
+            },
           ],
         },
         {
@@ -235,6 +239,10 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
               name: 'ZH-CN',
               sref: 'cms.pureHtml({name: "desktop_shipping_policy_zh-cn"})',
             },
+            {
+              name: 'ZH-TW',
+              sref: 'cms.pureHtml({name: "desktop_shipping_policy_zh-tw"})',
+            },
           ],
         },
         {
@@ -248,6 +256,10 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
             {
               name: 'ZH-CN',
               sref: 'cms.pureHtml({name: "mobile_shipping_policy_zh-cn"})',
+            },
+            {
+              name: 'ZH-TW',
+              sref: 'cms.pureHtml({name: "mobile_shipping_policy_zh-tw"})',
             },
           ],
         },
