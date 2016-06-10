@@ -2958,6 +2958,15 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     });
   });
 
+  if (order.address.countryCode === 'KR') {
+    $scope.newShipment = {
+      provider: 0,
+      unitKRW: 0,
+      weight: 0,
+      boxKRW: 3300
+    };
+  }
+
   $scope.allStatus = orderCommons.allStatus;
   $scope.allPaymentStatus = orderCommons.allPaymentStatus;
 
@@ -6688,6 +6697,15 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
   };
   init(user);
 
+  $http.get('/api/v1/users/' + user.id + '/logs').then(function (res) {
+    res.data.logs.forEach(function (l) {
+      return l.createdAt = boUtils.formatDate(l.createdAt);
+    });
+    $scope.notes = _.filter(res.data.logs, { type: 0 }).sort(function (a, b) {
+      return a.id < b.id;
+    });
+  });
+
   $scope.save = function () {
     convertUtil.copyFieldObj($scope.userFields, $scope.user);
     $http.put('/api/v1/users/' + $scope.user.id, _.pick($scope.user, 'data', 'inipay')).then(function (res) {
@@ -6698,6 +6716,15 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
 
   $scope.openBizImage = function () {
     $('#user_biz_image').modal();
+  };
+
+  $scope.addNote = function (message) {
+    $http.post('/api/v1/users/' + user.id + '/logs', {
+      type: 0,
+      data: { message: message }
+    }).then(function (res) {
+      $state.reload();
+    });
   };
 
   $('#image-upload-button').on('change', function (changeEvent) {

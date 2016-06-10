@@ -472,6 +472,11 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
   };
   init(user);
 
+  $http.get(`/api/v1/users/${user.id}/logs`).then((res) => {
+    res.data.logs.forEach((l) => (l.createdAt = boUtils.formatDate(l.createdAt)));
+    $scope.notes = _.filter(res.data.logs, { type: 0 }).sort((a, b) => (a.id < b.id));
+  });
+
   $scope.save = () => {
     convertUtil.copyFieldObj($scope.userFields, $scope.user);
     $http.put(`/api/v1/users/${$scope.user.id}`, _.pick($scope.user, 'data', 'inipay')).then((res) => {
@@ -482,6 +487,15 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
 
   $scope.openBizImage = () => {
     $('#user_biz_image').modal();
+  };
+
+  $scope.addNote = (message) => {
+    $http.post(`/api/v1/users/${user.id}/logs`, {
+      type: 0,
+      data: { message },
+    }).then((res) => {
+      $state.reload();
+    });
   };
 
   $('#image-upload-button').on('change', function (changeEvent) {
