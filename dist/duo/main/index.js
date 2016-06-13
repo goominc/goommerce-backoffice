@@ -2958,7 +2958,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     });
   });
 
-  if (order.address.countryCode === 'KR') {
+  if (_.get(order, 'address.countryCode', 'KR') === 'KR') {
     $scope.newShipment = {
       provider: 0,
       unitKRW: 0,

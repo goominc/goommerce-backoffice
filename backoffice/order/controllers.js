@@ -294,7 +294,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $scope.notes = _.filter(res.data.logs, { type: 1000 }).sort((a, b) => (a.id < b.id));
   });
 
-  if (order.address.countryCode === 'KR') {
+  if (_.get(order, 'address.countryCode', 'KR') === 'KR') {
     $scope.newShipment = {
       provider: 0,
       unitKRW: 0,
