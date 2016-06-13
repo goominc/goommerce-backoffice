@@ -40,10 +40,10 @@
                       </div>
                       <div class="row static-info">
                         <div class="col-md-5 name">
-                          주문 생성 시각:
+                          주문 처리/정산 날짜:
                         </div>
                         <div class="col-md-7 value">
-                          {{order.createdAt}}
+                          {{(order.processedDate || "").substring(5, 10)}}
                         </div>
                       </div>
                       <div class="row static-info">
@@ -51,7 +51,7 @@
                           시작(결제완료) 시각:
                         </div>
                         <div class="col-md-7 value">
-                          {{order.orderedAt || order.createdAt}}
+                          {{order.orderedAt}}
                         </div>
                       </div>
                       <div class="row static-info">
