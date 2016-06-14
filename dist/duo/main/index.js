@@ -2865,7 +2865,7 @@ orderModule.controller('OrderListBeforePaymentController', function ($scope, $ro
     storeKey: 'orderBeforePayment',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: '/api/v1/orders?q=status:0,paymentStatus:200',
+    url: '/api/v1/orders?status=0&paymentStatus=200',
     columns: [{
       data: 'id',
       render: function render(id) {
