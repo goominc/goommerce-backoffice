@@ -2995,8 +2995,9 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
       var amt_input = _payment$data.amt_input;
       var P_AMT = _payment$data.P_AMT;
       var PRTC_Price = _payment$data.PRTC_Price;
+      var P_KOR_AMT = _payment$data.P_KOR_AMT;
 
-      return Number(TotPrice || amt_input || P_AMT || PRTC_Price || 0);
+      return Number(TotPrice || amt_input || P_KOR_AMT || P_AMT || PRTC_Price || 0);
     }
     return 0;
   };
