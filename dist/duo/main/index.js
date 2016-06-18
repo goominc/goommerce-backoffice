@@ -1557,6 +1557,9 @@ brandModule.controller('BrandEditController', function ($scope, $http, $q, $stat
       $(e.target).val('');
     }
   };
+  $scope.installedApp = function (user) {
+    return _.isEmpty(_.get(user.devices, 'onesignal')) ? 'X' : 'O';
+  };
 });
 
 brandModule.controller('BrandInquiryListController', function ($scope, $http, $rootScope, $state, $translate) {

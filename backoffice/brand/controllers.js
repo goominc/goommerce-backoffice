@@ -326,6 +326,9 @@ brandModule.controller('BrandEditController', ($scope, $http, $q, $state, $rootS
       $(e.target).val('');
     }
   };
+  $scope.installedApp = (user) => {
+    return _.isEmpty(_.get(user.devices, 'onesignal')) ? 'X' : 'O';
+  };
 });
 
 brandModule.controller('BrandInquiryListController', ($scope, $http, $rootScope, $state, $translate) => {

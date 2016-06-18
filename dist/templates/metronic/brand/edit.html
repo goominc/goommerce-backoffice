@@ -27,7 +27,7 @@
                     <label class="col-md-2 control-label">Owner</label>
                     <div class="col-md-10">
                       <button class="btn btn-circle btn-default" data-ng-repeat="owner in owners">
-                        {{owner.email}} <i class="fa fa-remove" data-ng-click="removeMember(owner, 'owner')"></i>
+                        {{owner.email}}({{installedApp(owner)}})<i class="fa fa-remove" data-ng-click="removeMember(owner, 'owner')"></i>
                       </button>
                     </div>
                   </div>
@@ -35,7 +35,7 @@
                     <label class="col-md-2 control-label">Staff</label>
                     <div class="col-md-10">
                       <button class="btn btn-circle btn-default" data-ng-repeat="staff in staffs">
-                        {{staff.email}} <i class="fa fa-remove" data-ng-click="removeMember(staff, 'staff')"></i>
+                        {{staff.email}}({{installedApp(staff)}})<i class="fa fa-remove" data-ng-click="removeMember(staff, 'staff')"></i>
                       </button>
                     </div>
                   </div>
