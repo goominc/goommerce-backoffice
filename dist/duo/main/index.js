@@ -2281,6 +2281,7 @@ directiveModule.factory('datatableCommons', function ($compile, $rootScope) {
       if (dataTables.disableFilter) {
         options.bFilter = false;
       }
+      // options.columns.forEach((option) => option.bSortable = !!option.bSortable);
       if (dataTables.storeKey) {
         var searchValue = _.get($rootScope.state, 'datatables.' + dataTables.storeKey + '.searchValue');
         var pageStart = _.get($rootScope.state, 'datatables.' + dataTables.storeKey + '.pageStart');
@@ -2377,7 +2378,7 @@ directiveModule.directive('boServerDatatables', function ($http, $compile, datat
       options.ajax = function (data, callback, settings) {
         var urlParams = _extends({}, scope.urlParams);
         if (scope.fnUrlParams) {
-          scope.fnUrlParams({ urlParams: urlParams });
+          scope.fnUrlParams({ urlParams: urlParams, storeKey: dataTables.storeKey });
         }
         urlParams.offset = data.start;
         urlParams.limit = data.length;
@@ -3597,7 +3598,6 @@ orderModule.controller('OrderGodoController', function ($scope, $http, $state, $
   function updateDatatables() {
     var start = moment($scope.activeMonth).startOf('month').subtract(7, 'd').format('YYYY-MM-DD');
     var end = moment($scope.activeMonth).endOf('month').subtract(7, 'd').format('YYYY-MM-DD');
-    console.log(start, end);
     $scope.orderDatatables = {
       field: 'orders',
       storeKey: 'orderGodo',
@@ -6251,6 +6251,40 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     name: $translate.instant('user.manage.title')
   }];
   $rootScope.initAll($scope, $state.current.name);
+
+  $('#user_start_date').datepicker({ autoclose: true });
+  $('#user_end_date').datepicker({ autoclose: true });
+  $('#user_start_date').on('change', function (e) {
+    _.set($rootScope, 'state.userMain.startDate', $('#user_start_date').val());
+    $state.reload();
+    // reloadDatatables();
+  });
+  $('#user_end_date').on('change', function (e) {
+    _.set($rootScope, 'state.userMain.endDate', $('#user_end_date').val());
+    $state.reload();
+    // reloadDatatables();
+  });
+
+  $scope.fnUrlParams = function (urlParams, storeKey) {
+    if (!storeKey) {
+      return;
+    }
+    var queryParams = {};
+    var startDate = _.get($rootScope.state, storeKey + '.startDate');
+    var endDate = _.get($rootScope.state, storeKey + '.endDate');
+    if (startDate && endDate) {
+      var start = new Date(startDate);
+      var end = new Date(endDate);
+      var diff = end.getTime() - start.getTime();
+      if (diff >= 0) {
+        queryParams.start = startDate;
+        queryParams.end = endDate;
+      } else {
+        window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
+      }
+    }
+    _.merge(urlParams, queryParams);
+  };
 
   $scope.tabName = $state.params.tabName || '';
   $scope.changeTab = function (tabName) {

@@ -27,6 +27,7 @@ directiveModule.factory('datatableCommons', ($compile, $rootScope) => {
       if (dataTables.disableFilter) {
         options.bFilter = false;
       }
+      // options.columns.forEach((option) => option.bSortable = !!option.bSortable);
       if (dataTables.storeKey) {
         const searchValue = _.get($rootScope.state, `datatables.${dataTables.storeKey}.searchValue`);
         const pageStart = _.get($rootScope.state, `datatables.${dataTables.storeKey}.pageStart`);
@@ -123,7 +124,7 @@ directiveModule.directive('boServerDatatables', ($http, $compile, datatableCommo
       options.ajax = (data, callback, settings) => {
         const urlParams = { ...scope.urlParams };
         if (scope.fnUrlParams) {
-          scope.fnUrlParams({ urlParams });
+          scope.fnUrlParams({ urlParams, storeKey: dataTables.storeKey });
         }
         urlParams.offset = data.start;
         urlParams.limit = data.length;

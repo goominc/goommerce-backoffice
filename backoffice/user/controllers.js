@@ -16,6 +16,40 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
   ];
   $rootScope.initAll($scope, $state.current.name);
 
+  $('#user_start_date').datepicker({ autoclose: true });
+  $('#user_end_date').datepicker({ autoclose: true });
+  $('#user_start_date').on('change', (e) => {
+    _.set($rootScope, 'state.userMain.startDate', $('#user_start_date').val());
+    $state.reload();
+    // reloadDatatables();
+  });
+  $('#user_end_date').on('change', (e) => {
+    _.set($rootScope, 'state.userMain.endDate', $('#user_end_date').val());
+    $state.reload();
+    // reloadDatatables();
+  });
+
+  $scope.fnUrlParams = (urlParams, storeKey) => {
+    if (!storeKey) {
+      return;
+    }
+    const queryParams = {};
+    const startDate = _.get($rootScope.state, `${storeKey}.startDate`);
+    const endDate = _.get($rootScope.state, `${storeKey}.endDate`);
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diff = end.getTime() - start.getTime();
+      if (diff >= 0) {
+        queryParams.start = startDate;
+        queryParams.end = endDate;
+      } else {
+        window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
+      }
+    }
+    _.merge(urlParams, queryParams);
+  };
+
   $scope.tabName = $state.params.tabName || '';
   $scope.changeTab = (tabName) => {
     if (!tabName) {

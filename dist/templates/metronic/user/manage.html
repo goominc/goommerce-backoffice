@@ -11,6 +11,12 @@
         <div class="col-md-12">
           <div class="portlet light">
             <div class="portlet-title">
+              <div style="float: left; margin-right: 20px;" class="input-group input-large date-picker input-daterange">
+                <input type="text" class="form-control" id="user_start_date" data-date-format="yyyy-mm-dd" data-ng-model="state.userMain.startDate">
+                  <span class="input-group-addon">
+                  to </span>
+                <input type="text" class="form-control" id="user_end_date" data-date-format="yyyy-mm-dd" data-ng-model="state.userMain.endDate">
+              </div>
               <div class="actions btn-set">
                 <button class="btn blue" data-toggle="modal" data-ng-click="newUseris('admin')" data-target="#user_manage_create_user">
                   <i class="fa fa-plus"></i> {{'user.createUser.admin' | translate}}
@@ -25,7 +31,14 @@
                 <div class="col-md-12">
                   <uib-tabset class="tabbable-bordered">
                     <uib-tab heading="{{'main.word.all' | translate}}" active="tabName === ''" data-ng-click="changeTab('')">
-                      <div data-ng-if="tabName === ''" bo-server-datatables="userDatatables" url="/api/v1/users" url-params="{}" table-render="datatablesLoaded()">
+                      <div
+                        data-ng-if="tabName === ''"
+                        bo-server-datatables="userDatatables"
+                        url="/api/v1/users"
+                        url-params="{}"
+                        table-render="datatablesLoaded()"
+                        fn-url-params="fnUrlParams(urlParams, storeKey)"
+                      >
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -44,7 +57,14 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.noRoleTab' | translate}}" active="tabName === 'noRole'" data-ng-click="changeTab('noRole')">
-                      <div data-ng-if="tabName === 'noRole'" bo-server-datatables="noRoleDatatables" url="/api/v1/users" url-params="{ roles: 'none' }" table-render="datatablesLoaded()">
+                      <div
+                        data-ng-if="tabName === 'noRole'"
+                        bo-server-datatables="noRoleDatatables"
+                        url="/api/v1/users"
+                        url-params="{ roles: 'none' }"
+                        table-render="datatablesLoaded()"
+                        fn-url-params="fnUrlParams(urlParams)"
+                      >
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -64,7 +84,13 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.buyerTab' | translate}}" active="tabName === 'buyer'" data-ng-click="changeTab('buyer')">
-                      <div data-ng-if="tabName === 'buyer'" bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'buyer' }">
+                      <div
+                        data-ng-if="tabName === 'buyer'"
+                        bo-server-datatables="buyerDatatables"
+                        url="/api/v1/users"
+                        url-params="{ roles: 'buyer' }"
+                        fn-url-params="fnUrlParams(urlParams)"
+                      >
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -82,7 +108,13 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.sellerTab' | translate}}" active="tabName === 'seller'" data-ng-click="changeTab('seller')">
-                      <div data-ng-if="tabName === 'seller'" bo-server-datatables="sellerDatatables" url="/api/v1/users" url-params="{ roles: 'owner' }">
+                      <div
+                        data-ng-if="tabName === 'seller'"
+                        bo-server-datatables="sellerDatatables"
+                        url="/api/v1/users"
+                        url-params="{ roles: 'owner' }"
+                        fn-url-params="fnUrlParams(urlParams)"
+                      >
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -99,7 +131,13 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.bigBuyerTab' | translate}}" active="tabName === 'bigBuyer'" data-ng-click="changeTab('bigBuyer')">
-                      <div data-ng-if="tabName === 'bigBuyer'" bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'bigBuyer' }">
+                      <div
+                        data-ng-if="tabName === 'bigBuyer'"
+                        bo-server-datatables="buyerDatatables"
+                        url="/api/v1/users"
+                        url-params="{ roles: 'bigBuyer' }"
+                        fn-url-params="fnUrlParams(urlParams)"
+                      >
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -117,7 +155,13 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.adminTab' | translate}}" active="tabName === 'admin'" data-ng-click="changeTab('admin')">
-                      <div data-ng-if="tabName === 'admin'" bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ roles: 'admin' }">
+                      <div
+                        data-ng-if="tabName === 'admin'"
+                        bo-server-datatables="buyerDatatables"
+                        url="/api/v1/users"
+                        url-params="{ roles: 'admin' }"
+                        fn-url-params="fnUrlParams(urlParams)"
+                      >
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
@@ -135,7 +179,13 @@
                       </div>
                     </uib-tab>
                     <uib-tab heading="{{'user.manage.godoTab' | translate}}" active="tabName === 'godo'" data-ng-click="changeTab('godo')">
-                      <div data-ng-if="tabName === 'godo'" bo-server-datatables="buyerDatatables" url="/api/v1/users" url-params="{ sources: 'godo' }">
+                      <div
+                        data-ng-if="tabName === 'godo'"
+                        bo-server-datatables="buyerDatatables"
+                        url="/api/v1/users"
+                        url-params="{ sources: 'godo' }"
+                        fn-url-params="fnUrlParams(urlParams)"
+                      >
                         <table class="table table-bordered table-hover" style="width: 100%;">
                           <thead>
                           <tr role="row" class="heading">
