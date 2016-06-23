@@ -339,3 +339,21 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="user_buyer_approval">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        바이어 승인
+      </div>
+      <div class="modal-body">
+        <div>ID : {{buyerApprovalUser.id}}</div>
+        <div>{{'main.word.name' | translate}} : {{buyerApprovalUser.name}}</div>
+        <input type="text" style="min-width: 300px; padding: 5px 15px; margin-top: 10px;" data-ng-model="buyerApprovalUser.message" placeholder="승인/거절 메세지" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn blue" data-ng-click="approveUser(buyerApprovalUser)">{{'main.word.approval' | translate}}</button>
+        <button class="btn red" data-ng-click="rejectUser(buyerApprovalUser)">{{'main.word.rejection' | translate}}</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -16,10 +16,12 @@
     },
     "word": {
       "all": "전체",
+      "createdAt": "생성일자",
       "email": "이메일",
       "name": "이름",
       "tel": "전화번호",
-      "createdAt": "생성일자"
+      "approval": "승인",
+      "rejection": "거절"
     }
   }
 }

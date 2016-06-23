@@ -209,7 +209,8 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       },
       {
         data: (data) => data,
-        render: (user) => `<button class="btn blue" data-ng-click="changeToBuyer(${user.id})">바이어 인증</button>`,
+        // render: (user) => `<button class="btn blue" data-ng-click="changeToBuyer(${user.id})">바이어 인증</button>`,
+        render: (user) => `<button class="btn blue" data-ng-click="openBuyerApproval(${user.id})">바이어 인증</button>`
       },
       {
         data: 'createdAt',
@@ -489,6 +490,49 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
         window.alert('fail');
       });
     }
+  };
+
+  $scope.openBuyerApproval = (userId) => {
+    $scope.buyerApprovalUser = $scope.userIdToData[userId];
+    $('#user_buyer_approval').modal();
+  };
+  $scope.closeBuyerApproval = () => {
+    // 2016. 02. 23. [heekyu] modal hide is not work on page reload
+    $('#user_buyer_approval').modal('hide');
+    $('#user_buyer_approval').removeClass('in');
+    $('.modal-backdrop').remove();
+  };
+
+  $scope.approveUser = (user) => {
+    if (!user.message) {
+      window.alert('승인 사유를 입력해 주세요');
+      return;
+    }
+    const body = {
+      result: 'approval',
+      message: user.message,
+    };
+    $http.post(`/api/v1/users/${user.id}/approve`, body).then(() => {
+      window.alert(`${user.name} 승인 완료되었습니다`);
+      $scope.closeBuyerApproval();
+      $state.reload();
+    });
+  };
+
+  $scope.rejectUser = (user) => {
+    if (!user.message) {
+      window.alert('거절 사유를 입력해 주세요');
+      return;
+    }
+    const body = {
+      result: 'rejection',
+      message: user.message,
+    };
+    $http.post(`/api/v1/users/${user.id}/approve`, body).then(() => {
+      window.alert(`${user.name} 반려 되었습니다`);
+      $scope.closeBuyerApproval();
+      $state.reload();
+    });
   };
 });
 

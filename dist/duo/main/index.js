@@ -6203,6 +6203,7 @@ module.exports = {
       "noRoleTab": "미인증",
       "sellerTab": "셀러",
       "godoTab": "고도몰",
+      "inactiveTab": "비활성",
       "title": "사용자"
     },
     "info": {
@@ -6270,8 +6271,9 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       return;
     }
     var queryParams = {};
-    var startDate = _.get($rootScope.state, storeKey + '.startDate');
-    var endDate = _.get($rootScope.state, storeKey + '.endDate');
+    // 2016. 06. 22. [heekyu] start, end is common for all datatables
+    var startDate = _.get($rootScope.state, 'state.userMain.startDate');
+    var endDate = _.get($rootScope.state, 'state.userMain.endDate');
     if (startDate && endDate) {
       var start = new Date(startDate);
       var end = new Date(endDate);
@@ -6453,13 +6455,48 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       data: function data(_data15) {
         return _data15;
       },
+      // render: (user) => `<button class="btn blue" data-ng-click="changeToBuyer(${user.id})">바이어 인증</button>`,
       render: function render(user) {
-        return '<button class="btn blue" data-ng-click="changeToBuyer(' + user.id + ')">바이어 인증</button>';
+        return '<button class="btn blue" data-ng-click="openBuyerApproval(' + user.id + ')">바이어 인증</button>';
       }
     }, {
       data: 'createdAt',
       render: function render(data) {
         return boUtils.formatDate(data);
+      }
+    }]
+  };
+
+  $scope.inactiveDatatables = {
+    field: 'users',
+    storeKey: 'userInactive',
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+      }
+    }, {
+      data: 'email'
+    }, {
+      data: function data(_data16) {
+        return _data16.name || '';
+      }
+    }, {
+      data: function data(_data17) {
+        return _.get(_data17, 'data.tel') || '';
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }, {
+      data: function data(_data18) {
+        return _data18;
+      },
+      render: function render(user) {
+        $scope.userIdMap[user.id] = user;
+        return '<button class="btn blue" data-ng-click="activateUser($event, ' + user.id + ')">활성화</button>';
       }
     }]
   };
@@ -6675,8 +6712,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
   };
 
   $scope.inactivateUser = function (e, userId) {
-    var user = $scope.userIdMap[userId];
     e.preventDefault();
+    var user = $scope.userIdMap[userId];
     if (window.confirm('유저 ' + (user.name || '') + ' 비활성화 하시겠습니까?')) {
       $http['delete']('/api/v1/users/' + user.id + '/inactivate').then(function () {
         user.isActive = !user.isActive;
@@ -6688,6 +6725,67 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         window.alert('fail');
       });
     }
+  };
+
+  $scope.activateUser = function (e, userId) {
+    e.preventDefault();
+    var user = $scope.userIdMap[userId];
+    if (window.confirm('유저 ' + (user.name || '') + ' 다시 활성화 하시겠습니까?')) {
+      $http.put('/api/v1/users/' + user.id, { isActive: true }).then(function () {
+        /*
+        user.isActive = !user.isActive;
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+        */
+        $('.tabbable-bordered').find('table').DataTable().ajax.reload();
+      }, function () {
+        window.alert('fail');
+      });
+    }
+  };
+
+  $scope.openBuyerApproval = function (userId) {
+    $scope.buyerApprovalUser = $scope.userIdToData[userId];
+    $('#user_buyer_approval').modal();
+  };
+  $scope.closeBuyerApproval = function () {
+    // 2016. 02. 23. [heekyu] modal hide is not work on page reload
+    $('#user_buyer_approval').modal('hide');
+    $('#user_buyer_approval').removeClass('in');
+    $('.modal-backdrop').remove();
+  };
+
+  $scope.approveUser = function (user) {
+    if (!user.message) {
+      window.alert('승인 사유를 입력해 주세요');
+      return;
+    }
+    var body = {
+      result: 'approval',
+      message: user.message
+    };
+    $http.post('/api/v1/users/' + user.id + '/approve', body).then(function () {
+      window.alert(user.name + ' 승인 완료되었습니다');
+      $scope.closeBuyerApproval();
+      $state.reload();
+    });
+  };
+
+  $scope.rejectUser = function (user) {
+    if (!user.message) {
+      window.alert('거절 사유를 입력해 주세요');
+      return;
+    }
+    var body = {
+      result: 'rejection',
+      message: user.message
+    };
+    $http.post('/api/v1/users/' + user.id + '/approve', body).then(function () {
+      window.alert(user.name + ' 반려 되었습니다');
+      $scope.closeBuyerApproval();
+      $state.reload();
+    });
   };
 });
 
@@ -6813,10 +6911,12 @@ module.exports = {
     },
     "word": {
       "all": "전체",
+      "createdAt": "생성일자",
       "email": "이메일",
       "name": "이름",
       "tel": "전화번호",
-      "createdAt": "생성일자"
+      "approval": "승인",
+      "rejection": "거절"
     }
   }
 };
