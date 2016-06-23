@@ -202,6 +202,30 @@
                         </table>
                       </div>
                     </uib-tab>
+                    <uib-tab heading="{{'user.manage.inactiveTab' | translate}}" active="tabName === 'inactive'" data-ng-click="changeTab('inactive')">
+                      <div
+                        data-ng-if="tabName === 'inactive'"
+                        bo-server-datatables="inactiveDatatables"
+                        url="/api/v1/users"
+                        url-params="{ active: 'false' }"
+                        table-render="datatablesLoaded()"
+                        fn-url-params="fnUrlParams(urlParams)"
+                      >
+                        <table class="table table-bordered table-hover" style="width: 100%;">
+                        <thead>
+                        <tr role="row" class="heading">
+                          <td>ID</td>
+                          <td>{{'main.word.email' | translate}}</td>
+                          <td>{{'main.word.name' | translate}}</td>
+                          <td>{{'main.word.tel' | translate}}</td>
+                          <td>{{'main.word.createdAt' | translate}}</td>
+                          <td></td>
+                        </tr>
+                        </thead>
+                        <tbody class="cell-center"></tbody>
+                        </table>
+                      </div>
+                    </uib-tab>
                   </uib-tabset>
                 </div>
               </div>

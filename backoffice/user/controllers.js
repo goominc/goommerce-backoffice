@@ -34,8 +34,9 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       return;
     }
     const queryParams = {};
-    const startDate = _.get($rootScope.state, `${storeKey}.startDate`);
-    const endDate = _.get($rootScope.state, `${storeKey}.endDate`);
+    // 2016. 06. 22. [heekyu] start, end is common for all datatables
+    const startDate = _.get($rootScope.state, `state.userMain.startDate`);
+    const endDate = _.get($rootScope.state, `state.userMain.endDate`);
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
@@ -213,6 +214,39 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       {
         data: 'createdAt',
         render: (data) => boUtils.formatDate(data),
+      },
+    ],
+  };
+
+  $scope.inactiveDatatables = {
+    field: 'users',
+    storeKey: 'userInactive',
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return `<a ui-sref="user.info({ userId: ${id} })">${id}</a>`;
+        },
+      },
+      {
+        data: 'email',
+      },
+      {
+        data: (data) => data.name || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.tel') || '',
+      },
+      {
+        data: 'createdAt',
+        render: (data) => boUtils.formatDate(data),
+      },
+      {
+        data: (data) => data,
+        render: (user) => {
+          $scope.userIdMap[user.id] = user;
+          return `<button class="btn blue" data-ng-click="activateUser($event, ${user.id})">활성화</button>`;
+        },
       },
     ],
   };
@@ -424,14 +458,32 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
   };
 
   $scope.inactivateUser = (e, userId) => {
-    const user = $scope.userIdMap[userId];
     e.preventDefault();
+    const user = $scope.userIdMap[userId];
     if (window.confirm(`유저 ${user.name || ''} 비활성화 하시겠습니까?`)) {
       $http.delete(`/api/v1/users/${user.id}/inactivate`).then(() => {
         user.isActive = !user.isActive;
         if (!$scope.$$phase) {
           $scope.$apply();
         }
+        $('.tabbable-bordered').find('table').DataTable().ajax.reload();
+      }, () => {
+        window.alert('fail');
+      });
+    }
+  };
+
+  $scope.activateUser = (e, userId) => {
+    e.preventDefault();
+    const user = $scope.userIdMap[userId];
+    if (window.confirm(`유저 ${user.name || ''} 다시 활성화 하시겠습니까?`)) {
+      $http.put(`/api/v1/users/${user.id}`, { isActive: true }).then(() => {
+        /*
+        user.isActive = !user.isActive;
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+        */
         $('.tabbable-bordered').find('table').DataTable().ajax.reload();
       }, () => {
         window.alert('fail');
