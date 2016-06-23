@@ -29,14 +29,11 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
     // reloadDatatables();
   });
 
-  $scope.fnUrlParams = (urlParams, storeKey) => {
-    if (!storeKey) {
-      return;
-    }
+  $scope.fnUrlParams = (urlParams) => {
     const queryParams = {};
     // 2016. 06. 22. [heekyu] start, end is common for all datatables
-    const startDate = _.get($rootScope.state, `state.userMain.startDate`);
-    const endDate = _.get($rootScope.state, `state.userMain.endDate`);
+    const startDate = _.get($rootScope.state, `userMain.startDate`);
+    const endDate = _.get($rootScope.state, `userMain.endDate`);
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
