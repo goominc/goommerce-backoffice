@@ -6830,11 +6830,16 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
   };
   init(user);
 
+  $scope.noteType = {
+    0: '-',
+    100: '승인',
+    101: '거절'
+  };
   $http.get('/api/v1/users/' + user.id + '/logs').then(function (res) {
     res.data.logs.forEach(function (l) {
       return l.createdAt = boUtils.formatDate(l.createdAt);
     });
-    $scope.notes = _.filter(res.data.logs, { type: 0 }).sort(function (a, b) {
+    $scope.notes = res.data.logs.sort(function (a, b) {
       return a.id < b.id;
     });
   });

@@ -599,9 +599,14 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
   };
   init(user);
 
+  $scope.noteType = {
+    0: '-',
+    100: '승인',
+    101: '거절',
+  };
   $http.get(`/api/v1/users/${user.id}/logs`).then((res) => {
     res.data.logs.forEach((l) => (l.createdAt = boUtils.formatDate(l.createdAt)));
-    $scope.notes = _.filter(res.data.logs, { type: 0 }).sort((a, b) => (a.id < b.id));
+    $scope.notes = res.data.logs.sort((a, b) => (a.id < b.id));
   });
 
   $scope.save = () => {
