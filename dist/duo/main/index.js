@@ -1209,6 +1209,7 @@ module.exports = {
     },
     "edit": {
       "nameLabel": "브랜드명",
+      "pathnameLabel": "브랜드 페이지 주소",
       "bizNameLabel": "사업자명",
       "bizNumberLabel": "사업자 번호",
       "accountBankLabel": "은행",
@@ -1513,7 +1514,7 @@ brandModule.controller('BrandEditController', function ($scope, $http, $q, $stat
     if ($scope.buildingMap && $scope.buildingMap[$scope.buildingId]) {
       _.set($scope.brand, 'data.location.building', _.pick($scope.buildingMap[$scope.buildingId], ['id', 'name']));
     }
-    var requestBrand = _.pick($scope.brand, 'name', 'data');
+    var requestBrand = _.pick($scope.brand, ['name', 'data', 'pathname']);
     var promise = undefined;
     if ($state.params.brandId) {
       promise = $http.put('/api/v1/brands/' + $scope.brand.id, requestBrand);

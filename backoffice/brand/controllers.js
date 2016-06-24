@@ -282,7 +282,7 @@ brandModule.controller('BrandEditController', ($scope, $http, $q, $state, $rootS
     if ($scope.buildingMap && $scope.buildingMap[$scope.buildingId]) {
       _.set($scope.brand, 'data.location.building', _.pick($scope.buildingMap[$scope.buildingId], ['id', 'name']));
     }
-    const requestBrand = _.pick($scope.brand, 'name', 'data');
+    const requestBrand = _.pick($scope.brand, ['name', 'data', 'pathname']);
     let promise;
     if ($state.params.brandId) {
       promise = $http.put(`/api/v1/brands/${$scope.brand.id}`, requestBrand);
