@@ -56,6 +56,9 @@
                       <div data-ng-if="brand.pathname">
                         <a target="_blank" href="/{{brand.pathname}}">브랜드 페이지 바로가기</a>
                       </div>
+                      <div data-ng-if="!brand.pathname">
+                        <a target="_blank" href="/brands/{{brand.id}}">브랜드 페이지 바로가기</a>
+                      </div>
                     </div>
                   </div>
                   <div class="form-group">
