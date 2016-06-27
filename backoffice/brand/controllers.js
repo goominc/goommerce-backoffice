@@ -70,24 +70,38 @@ brandModule.controller('BrandMainController', ($scope, $http, $element, $compile
         orderable: false,
       },
       {
-        data: (data) => $http.get(`/api/v1/brands/${data.id}/members`).then((res) => {
-          for (let i = 0; i < (res.data || []).length; i++) {
-            const user = res.data[i];
-            for (let j = 0; j < (user.roles || []).length; j++) {
-              const role = user.roles[j];
-              if (role.type === 'owner' && +_.get(role, 'brand.id') === +data.id) {
-                const node = $(`#${data.id} td`).eq(9);
-                node.html(`<a ui-sref="user.info({ userId: ${user.id} })">${user.email}</a>`);
-                $compile(node)($scope);
-                return user;
+        data: (data) => data,
+        render: (data) => {
+          const users = _.get(data, 'summary.users');
+          if (users && users.length) {
+            for (let i = 0; i < users.length; i++) {
+              const user = users[i];
+              for (let j = 0; j < (user.roles || []).length; j++) {
+                const role = user.roles[j];
+                if (role.type === 'owner' && _.get(role, 'brand.id') === data.id) {
+                  return `<a ui-sref="user.info({userId: ${user.id}})">${user.email}</a>`;
+                }
               }
             }
           }
-          return {};
-        }),
-        render: () => {
           return '';
         },
+        orderable: false,
+      },
+      {
+        data: (data) => data,
+        render: (data) => {
+          const productSummary = _.get(data, 'summary.product');
+          if (!productSummary) {
+            return '';
+          }
+          return `
+            총 ${productSummary.cnt} 개 상품<br />
+            ${boUtils.formatDate(productSummary.lastProductCreatedAt)}<br/>
+            <a ui-sref="product.edit({productId: ${productSummary.lastProductId}})">${productSummary.lastProductId}</a>
+          `;
+        },
+        orderable: false,
       },
     ],
   };

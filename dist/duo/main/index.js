@@ -1325,25 +1325,36 @@ brandModule.controller('BrandMainController', function ($scope, $http, $element,
       orderable: false
     }, {
       data: function data(_data8) {
-        return $http.get('/api/v1/brands/' + _data8.id + '/members').then(function (res) {
-          for (var i = 0; i < (res.data || []).length; i++) {
-            var user = res.data[i];
+        return _data8;
+      },
+      render: function render(data) {
+        var users = _.get(data, 'summary.users');
+        if (users && users.length) {
+          for (var i = 0; i < users.length; i++) {
+            var user = users[i];
             for (var j = 0; j < (user.roles || []).length; j++) {
               var role = user.roles[j];
-              if (role.type === 'owner' && +_.get(role, 'brand.id') === +_data8.id) {
-                var node = $('#' + _data8.id + ' td').eq(9);
-                node.html('<a ui-sref="user.info({ userId: ' + user.id + ' })">' + user.email + '</a>');
-                $compile(node)($scope);
-                return user;
+              if (role.type === 'owner' && _.get(role, 'brand.id') === data.id) {
+                return '<a ui-sref="user.info({userId: ' + user.id + '})">' + user.email + '</a>';
               }
             }
           }
-          return {};
-        });
-      },
-      render: function render() {
+        }
         return '';
-      }
+      },
+      orderable: false
+    }, {
+      data: function data(_data9) {
+        return _data9;
+      },
+      render: function render(data) {
+        var productSummary = _.get(data, 'summary.product');
+        if (!productSummary) {
+          return '';
+        }
+        return '\n            총 ' + productSummary.cnt + ' 개 상품<br />\n            ' + boUtils.formatDate(productSummary.lastProductCreatedAt) + '<br/>\n            <a ui-sref="product.edit({productId: ' + productSummary.lastProductId + '})">' + productSummary.lastProductId + '</a>\n          ';
+      },
+      orderable: false
     }]
   };
 
@@ -1446,8 +1457,8 @@ brandModule.controller('BrandEditController', function ($scope, $http, $q, $stat
       }, {
         data: 'email'
       }, {
-        data: function data(_data9) {
-          return _data9;
+        data: function data(_data10) {
+          return _data10;
         },
         render: function render(user) {
           return userUtil.getRoleName(user);
@@ -1588,16 +1599,16 @@ brandModule.controller('BrandInquiryListController', function ($scope, $http, $r
         return '<a ui-sref="brand.inquiry.info({inquiryId: ' + id + '})">' + id + '</a>';
       }
     }, {
-      data: function data(_data10) {
-        return _.get(_data10, 'data.name') || '';
-      }
-    }, {
       data: function data(_data11) {
-        return _.get(_data11, 'data.contactName') || '';
+        return _.get(_data11, 'data.name') || '';
       }
     }, {
       data: function data(_data12) {
-        return _.get(_data12, 'data.tel') || '';
+        return _.get(_data12, 'data.contactName') || '';
+      }
+    }, {
+      data: function data(_data13) {
+        return _.get(_data13, 'data.tel') || '';
       }
     }, {
       data: 'id',
@@ -4421,9 +4432,15 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       orderable: false
     }, {
       data: function data(product) {
-        return _.get(product, 'brand.name.ko') || '';
+        return product;
       },
-      orderable: false
+      orderable: false,
+      render: function render(product) {
+        var brandId = _.get(product, 'brand.id');
+        var brandName = _.get(product, 'brand.name.ko') || '';
+        if (!brandId) return brandName;
+        return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandName + '</a>';
+      }
     }, {
       data: function data(product) {
         return product.sku || '';
