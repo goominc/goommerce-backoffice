@@ -940,7 +940,6 @@ orderModule.controller('OrderGodoController', ($scope, $http, $state, $rootScope
   function updateDatatables() {
     const start = moment($scope.activeMonth).startOf('month').subtract(7, 'd').format('YYYY-MM-DD');
     const end = moment($scope.activeMonth).endOf('month').subtract(7, 'd').format('YYYY-MM-DD');
-    console.log(start, end);
     $scope.orderDatatables = {
       field: 'orders',
       storeKey: 'orderGodo',
