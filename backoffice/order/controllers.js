@@ -599,13 +599,11 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
           endColumnIndex,
         },
       });
-      gapi.client.sheets.spreadsheets.create({
-        properties: { title: `${order.id}-주문리스트` },
-        sheets: [{
-          data: [{
-            startRow: 0,
-            startColumn: 0,
-            rowData: [{
+      const rowData = () => {
+        const countryCode = _.get(order.address, 'countryCode', 'KR').toUpperCase();
+        if (countryCode === 'KR') {
+          return [
+            {
               values: [
                 {
                   userEnteredValue: { stringValue: '주문 리스트' },
@@ -617,7 +615,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
             }, {
               values: [
                 { userEnteredValue: { stringValue: '주문일' } },
-                { userEnteredValue: { stringValue: order.orderedAt } },
+                { userEnteredValue: { stringValue: order.orderedAt.substr(0, 10) } },
               ]
             }, {
               values: [
@@ -672,7 +670,225 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
                 { userEnteredValue: { stringValue: op.quantity.toString() } },
                 { userEnteredValue: { stringValue: _.get(op, 'finalQuantity', '').toString() } },
               ]
-            }))],
+            }))
+          ];
+        } else if (countryCode === 'CN') {
+          return [
+            {
+              values: [
+                {
+                  userEnteredValue: { stringValue: '订单目录' },
+                  userEnteredFormat: { horizontalAlignment: 'CENTER' },
+                },
+              ]
+            }, {
+              // blank line
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '订单日期' } },
+                { userEnteredValue: { stringValue: order.orderedAt.substr(0, 10) } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '姓名' } },
+                { userEnteredValue: { stringValue: _.get(order.address, 'detail.name', '') } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '邮箱' } },
+                { userEnteredValue: { stringValue: _.get($scope.user, 'email', '') } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '订单号' } },
+                { userEnteredValue: { stringValue: _.get(order, 'id', '').toString() } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '国家' } },
+                { userEnteredValue: { stringValue: 'China' } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '地址' } },
+                { userEnteredValue: { stringValue: `${_.get(order.address, 'detail.address.base', '')} ${_.get(order.address, 'detail.address.detail', '')}` } },
+              ]
+            }, {
+              // blank line
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '* 由于批发市场的特殊性，不能立刻确认库存情况. 您可以在网站测上面“我的Linkshops-请单详情” 里面确认取货结果。' } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '号码' } },
+                { userEnteredValue: { stringValue: '品牌' } },
+                { userEnteredValue: { stringValue: '商品编号' } },
+                { userEnteredValue: { stringValue: '颜色' } },
+                { userEnteredValue: { stringValue: '尺码' } },
+                { userEnteredValue: { stringValue: '订货数量' } },
+                { userEnteredValue: { stringValue: '取货数量' } },
+              ]
+            }, ...order.orderProducts.map((op, index) => ({
+              values: [
+                { userEnteredValue: { stringValue: (index + 1).toString() } },
+                { userEnteredValue: { stringValue: op.brand.name.ko } },
+                { userEnteredValue: { stringValue: op.product.id.toString() } },
+                { userEnteredValue: { stringValue: op.productVariant.data.color } },
+                { userEnteredValue: { stringValue: op.productVariant.data.size } },
+                { userEnteredValue: { stringValue: op.quantity.toString() } },
+                { userEnteredValue: { stringValue: _.get(op, 'finalQuantity', '').toString() } },
+              ]
+            }))
+          ];
+        } else if (countryCode === 'TW' || countryCode === 'MO' || countryCode === 'HK') {
+          const country = countryCode === 'TW' ? 'Taiwan' : (countryCode === 'MO' ? 'Macau' : 'Hong-Kong');
+          return [
+            {
+              values: [
+                {
+                  userEnteredValue: { stringValue: '訂單目錄' },
+                  userEnteredFormat: { horizontalAlignment: 'CENTER' },
+                },
+              ]
+            }, {
+              // blank line
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '訂單日期' } },
+                { userEnteredValue: { stringValue: order.orderedAt.substr(0, 10) } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '姓名' } },
+                { userEnteredValue: { stringValue: _.get(order.address, 'detail.name', '') } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '郵箱' } },
+                { userEnteredValue: { stringValue: _.get($scope.user, 'email', '') } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '訂單號' } },
+                { userEnteredValue: { stringValue: _.get(order, 'id', '').toString() } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '國家' } },
+                { userEnteredValue: { stringValue: country } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '地址' } },
+                { userEnteredValue: { stringValue: `${_.get(order.address, 'detail.address.base', '')} ${_.get(order.address, 'detail.address.detail', '')}` } },
+              ]
+            }, {
+              // blank line
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '* 由於批發市場的特殊性，不能立刻確認庫存情況。您可以在網站右側上面“我的Linkshops-訂單詳情” 裡面確認取貨結果。' } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '號碼' } },
+                { userEnteredValue: { stringValue: '品牌' } },
+                { userEnteredValue: { stringValue: '商品編號' } },
+                { userEnteredValue: { stringValue: '顏色' } },
+                { userEnteredValue: { stringValue: '尺碼' } },
+                { userEnteredValue: { stringValue: '訂貨數量' } },
+                { userEnteredValue: { stringValue: '取貨數量' } },
+              ]
+            }, ...order.orderProducts.map((op, index) => ({
+              values: [
+                { userEnteredValue: { stringValue: (index + 1).toString() } },
+                { userEnteredValue: { stringValue: op.brand.name.ko } },
+                { userEnteredValue: { stringValue: op.product.id.toString() } },
+                { userEnteredValue: { stringValue: op.productVariant.data.color } },
+                { userEnteredValue: { stringValue: op.productVariant.data.size } },
+                { userEnteredValue: { stringValue: op.quantity.toString() } },
+                { userEnteredValue: { stringValue: _.get(op, 'finalQuantity', '').toString() } },
+              ]
+            }))
+          ];
+        } else {
+          return [
+            {
+              values: [
+                {
+                  userEnteredValue: { stringValue: 'ORDER LIST' },
+                  userEnteredFormat: { horizontalAlignment: 'CENTER' },
+                },
+              ]
+            }, {
+              // blank line
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: 'Order date' } },
+                { userEnteredValue: { stringValue: order.orderedAt.substr(0, 10) } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: 'Name' } },
+                { userEnteredValue: { stringValue: _.get(order.address, 'detail.name', '') } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: 'E-mail' } },
+                { userEnteredValue: { stringValue: _.get($scope.user, 'email', '') } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: 'Order No' } },
+                { userEnteredValue: { stringValue: _.get(order, 'id', '').toString() } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: 'Country' } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: 'Address' } },
+                { userEnteredValue: { stringValue: `${_.get(order.address, 'detail.address.base', '')} ${_.get(order.address, 'detail.address.detail', '')}` } },
+              ]
+            }, {
+              // blank line
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: '* Since we can not check the wholesale market inventory in real time, the number of delivered item can be different than you have ordered. Please check the final quantity @ linkshops.com' } },
+              ]
+            }, {
+              values: [
+                { userEnteredValue: { stringValue: 'NO' } },
+                { userEnteredValue: { stringValue: 'Brand' } },
+                { userEnteredValue: { stringValue: 'Product ID' } },
+                { userEnteredValue: { stringValue: 'Color' } },
+                { userEnteredValue: { stringValue: 'Size' } },
+                { userEnteredValue: { stringValue: 'Order QTY' } },
+                { userEnteredValue: { stringValue: 'Final QTY' } },
+              ]
+            }, ...order.orderProducts.map((op, index) => ({
+              values: [
+                { userEnteredValue: { stringValue: (index + 1).toString() } },
+                { userEnteredValue: { stringValue: op.brand.name.ko } },
+                { userEnteredValue: { stringValue: op.product.id.toString() } },
+                { userEnteredValue: { stringValue: op.productVariant.data.color } },
+                { userEnteredValue: { stringValue: op.productVariant.data.size } },
+                { userEnteredValue: { stringValue: op.quantity.toString() } },
+                { userEnteredValue: { stringValue: _.get(op, 'finalQuantity', '').toString() } },
+              ]
+            }))
+          ];
+        }
+      };
+
+      gapi.client.sheets.spreadsheets.create({
+        properties: { title: `${order.id}-주문리스트` },
+        sheets: [{
+          data: [{
+            startRow: 0,
+            startColumn: 0,
+            rowData: rowData(),
           }],
         }],
       }).then(({ result: { spreadsheetId, sheets } }) => {
