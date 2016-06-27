@@ -30,7 +30,8 @@
       "title": "주문상세",
       "refundTitle": "환불",
       "saveButton": "저장",
-      "logisticsButton": "물류팀"
+      "logisticsButton": "물류팀",
+      "orderListButton": "고객용 패킹리스트"
     },
     "beforePayment": {
       "title": "무통장 입금 대기",

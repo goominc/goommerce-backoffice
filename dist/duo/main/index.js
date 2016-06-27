@@ -2619,7 +2619,8 @@ module.exports = {
       "title": "주문상세",
       "refundTitle": "환불",
       "saveButton": "저장",
-      "logisticsButton": "물류팀"
+      "logisticsButton": "물류팀",
+      "orderListButton": "고객용 패킹리스트"
     },
     "beforePayment": {
       "title": "무통장 입금 대기",
@@ -3026,7 +3027,6 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
       return;
     }
     var amount = +order.totalPaid.amount - +order.finalTotalKRW - order.totalRefuned;
-    console.log(amount);
     var payments = _.filter(order.payments, function (p) {
       return p.type === 0 && p.status === 0;
     });
@@ -3217,6 +3217,106 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
         });
       }).then(function (_ref2) {
         var spreadsheetId = _ref2.result.spreadsheetId;
+
+        window.open('https://docs.google.com/spreadsheets/d/' + spreadsheetId);
+      }).then(undefined, function (response) {
+        console.log('Error: ' + response.result.error.message);
+      });
+    }
+
+    gapi.auth.authorize({ client_id: CLIENT_ID, scope: SCOPES, immediate: false }, handleAuthResult);
+  };
+
+  $scope.exportOrderList = function () {
+    var CLIENT_ID = '352586701861-20pb7c3qlp7klemfap5qfms0hl0eshrv.apps.googleusercontent.com';
+
+    var SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
+
+    function checkAuth() {
+      gapi.auth.authorize({
+        'client_id': CLIENT_ID,
+        'scope': SCOPES.join(' '),
+        'immediate': true
+      }, handleAuthResult);
+    }
+
+    function handleAuthResult(authResult) {
+      if (authResult && !authResult.error) {
+        // Hide auth UI, then load client library.
+        loadSheetsApi();
+      } else {
+        // Show auth UI, allowing the user to initiate authorization by
+        // clicking authorize button.
+      }
+    }
+
+    function loadSheetsApi() {
+      var discoveryUrl = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+      gapi.client.load(discoveryUrl).then(run);
+    }
+
+    function run() {
+      var mergeCells = function mergeCells(sheetId, startColumnIndex, startRowIndex, endColumnIndex, endRowIndex) {
+        return {
+          range: {
+            sheetId: sheetId,
+            startRowIndex: startRowIndex,
+            endRowIndex: endRowIndex,
+            startColumnIndex: startColumnIndex,
+            endColumnIndex: endColumnIndex
+          }
+        };
+      };
+      gapi.client.sheets.spreadsheets.create({
+        properties: { title: order.id + '-주문리스트' },
+        sheets: [{
+          data: [{
+            startRow: 0,
+            startColumn: 0,
+            rowData: [{
+              values: [{
+                userEnteredValue: { stringValue: '주문 리스트' },
+                userEnteredFormat: { horizontalAlignment: 'CENTER' }
+              }]
+            }, {
+              // blank line
+            }, {
+              values: [{ userEnteredValue: { stringValue: '주문일' } }, { userEnteredValue: { stringValue: order.orderedAt } }]
+            }, {
+              values: [{ userEnteredValue: { stringValue: '고객명' } }, { userEnteredValue: { stringValue: _.get(order.address, 'detail.name', '') } }]
+            }, {
+              values: [{ userEnteredValue: { stringValue: '이메일' } }, { userEnteredValue: { stringValue: _.get($scope.user, 'email', '') } }]
+            }, {
+              values: [{ userEnteredValue: { stringValue: '주문번호' } }, { userEnteredValue: { stringValue: _.get(order, 'id', '').toString() } }]
+            }, {
+              values: [{ userEnteredValue: { stringValue: '국가' } }, { userEnteredValue: { stringValue: '대한민국' } }]
+            }, {
+              values: [{ userEnteredValue: { stringValue: '배송지' } }, { userEnteredValue: { stringValue: _.get(order.address, 'detail.address.base', '') + ' ' + _.get(order.address, 'detail.address.detail', '') } }]
+            }, {
+              // blank line
+            }, {
+              values: [{ userEnteredValue: { stringValue: ' *도매 시장의 특성상 주문수량과 상이할 수 있습니다. 최종 수량은 링크샵스 홈페이지 내주문에서 확인해주세요.' } }]
+            }, {
+              values: [{ userEnteredValue: { stringValue: 'NO' } }, { userEnteredValue: { stringValue: '브랜드' } }, { userEnteredValue: { stringValue: '상품번호' } }, { userEnteredValue: { stringValue: '상품명' } }, { userEnteredValue: { stringValue: '컬러' } }, { userEnteredValue: { stringValue: '사이즈' } }, { userEnteredValue: { stringValue: '주문수량' } }, { userEnteredValue: { stringValue: '최종수량' } }]
+            }].concat(_toConsumableArray(order.orderProducts.map(function (op, index) {
+              return {
+                values: [{ userEnteredValue: { stringValue: (index + 1).toString() } }, { userEnteredValue: { stringValue: op.brand.name.ko } }, { userEnteredValue: { stringValue: op.product.id.toString() } }, { userEnteredValue: { stringValue: op.product.name.ko } }, { userEnteredValue: { stringValue: op.productVariant.data.color } }, { userEnteredValue: { stringValue: op.productVariant.data.size } }, { userEnteredValue: { stringValue: op.quantity.toString() } }, { userEnteredValue: { stringValue: _.get(op, 'finalQuantity', '').toString() } }]
+              };
+            })))
+          }]
+        }]
+      }).then(function (_ref3) {
+        var _ref3$result = _ref3.result;
+        var spreadsheetId = _ref3$result.spreadsheetId;
+        var sheets = _ref3$result.sheets;
+
+        var sheetId = sheets[0].properties.sheetId;
+        return gapi.client.sheets.spreadsheets.batchUpdate({
+          spreadsheetId: spreadsheetId,
+          requests: [{ mergeCells: mergeCells(sheetId, 0, 0, 8, 1) }, { mergeCells: mergeCells(sheetId, 1, 2, 8, 3) }, { mergeCells: mergeCells(sheetId, 1, 3, 8, 4) }, { mergeCells: mergeCells(sheetId, 1, 4, 8, 5) }, { mergeCells: mergeCells(sheetId, 1, 5, 8, 6) }, { mergeCells: mergeCells(sheetId, 1, 6, 8, 7) }, { mergeCells: mergeCells(sheetId, 1, 7, 8, 8) }, { mergeCells: mergeCells(sheetId, 0, 9, 8, 10) }]
+        });
+      }).then(function (_ref4) {
+        var spreadsheetId = _ref4.result.spreadsheetId;
 
         window.open('https://docs.google.com/spreadsheets/d/' + spreadsheetId);
       }).then(undefined, function (response) {
@@ -3740,10 +3840,10 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
               }]
             };
           })
-        }).then(function (_ref3) {
-          var _ref3$result = _ref3.result;
-          var spreadsheetId = _ref3$result.spreadsheetId;
-          var sheets = _ref3$result.sheets;
+        }).then(function (_ref5) {
+          var _ref5$result = _ref5.result;
+          var spreadsheetId = _ref5$result.spreadsheetId;
+          var sheets = _ref5$result.sheets;
           return gapi.client.sheets.spreadsheets.batchUpdate({
             spreadsheetId: spreadsheetId,
             requests: sheets.map(function (s) {
@@ -3752,8 +3852,8 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
               };
             })
           });
-        }).then(function (_ref4) {
-          var spreadsheetId = _ref4.result.spreadsheetId;
+        }).then(function (_ref6) {
+          var spreadsheetId = _ref6.result.spreadsheetId;
 
           window.open('https://docs.google.com/spreadsheets/d/' + spreadsheetId);
         }).then(undefined, function (response) {
