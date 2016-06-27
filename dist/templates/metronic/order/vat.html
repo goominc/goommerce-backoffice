@@ -21,15 +21,22 @@
           <div class="portlet light">
             <div class="portlet-body">
               <div bo-datatables="orderDatatables">
-                <table class="table table-bordered table-hover">
+                <table style="width: 100%" class="table table-bordered table-hover">
                   <thead>
                   <tr role="row" class="heading">
-                    <td>ID</td>
-                    <td>{{'order.common.brandName' | translate}}</td>
-                    <td>{{'order.common.vat' | translate}}</td>
+                    <th>ID</th>
+                    <th>{{'order.common.brandName' | translate}}</th>
+                    <th>{{'order.common.productPrice' | translate}}</th>
+                    <th>{{'order.common.vat' | translate}}</th>
+                    <th>{{'order.common.total' | translate}}</th>
+                    <th>{{'order.orderProduct.bank.name' | translate}}</th>
+                    <th>{{'order.orderProduct.bank.accountNumber' | translate}}</th>
+                    <th>{{'order.orderProduct.bank.accountHolder' | translate}}</th>
+                    <th>{{'brand.edit.buildingLabel' | translate}}</th>
+                    <th>{{'main.word.tel' | translate}}</th>
                   </tr>
                   </thead>
-                  <tbody></tbody>
+                  <tbody class="cell-center"></tbody>
                 </table>
               </div>
             </div>

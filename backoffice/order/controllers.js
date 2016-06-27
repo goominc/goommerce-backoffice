@@ -1362,10 +1362,45 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
         },
       },
       {
-        data: (data) => _.get(data, 'brand.name.ko', ''),
+        data: (data) => data,
+        orderable: false,
+        render: (data) => {
+          const brandId = _.get(data, 'brand.id', '');
+          if (!brandId) return '';
+          return `<a ui-sref="brand.edit({ brandId: ${_.get(data, 'brand.id', '')}})">${_.get(data, 'brand.name.ko', '')}</a>`;
+        },
       },
       {
-        data: (data) => _.get(data, 'vatKRW', ''),
+        data: (data) => +(_.get(data, 'subTotalKRW', 0)),
+        orderable: false,
+      },
+      {
+        data: (data) => +(_.get(data, 'vatKRW', 0)),
+        orderable: false,
+      },
+      {
+        data: (data) => (+(_.get(data, 'subTotalKRW')) + +(_.get(data, 'vatKRW', 0))),
+        orderable: false,
+      },
+      {
+        data: (data) => _.get(data, 'brand.data.bank.name') || '',
+        orderable: false,
+      },
+      {
+        data: (data) => _.get(data, 'brand.data.bank.accountNumber') || '',
+        orderable: false,
+      },
+      {
+        data: (data) => _.get(data, 'brand.data.bank.accountHolder') || '',
+        orderable: false,
+      },
+      {
+        data: (data) => boUtils.getBuildingName(data.brand),
+        orderable: false,
+      },
+      {
+        data: (data) => _.get(data, 'brand.data.tel', ''),
+        orderable: false,
       },
     ],
   };

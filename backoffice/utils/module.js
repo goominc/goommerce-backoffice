@@ -5,6 +5,8 @@ utilModule.factory('boUtils', ($http) => {
   const isString = (v) => {
     return typeof v === 'string' || v instanceof String;
   };
+  const getBuildingName = (brand) =>
+    `${_.get(brand, 'data.location.building.name.ko', '')} ${_.get(brand, 'data.location.floor', '')} ${_.get(brand, 'data.location.flatNumber', '')}호`;
   return {
     // http://stackoverflow.com/questions/111529/create-query-parameters-in-javascript
     encodeQueryData : (url, data) => {
@@ -88,6 +90,7 @@ utilModule.factory('boUtils', ($http) => {
         (err) => window.alert(err)
       );
     },
+    getBuildingName,
     getNameWithAllBuildingInfo: (brand) => {
       // format: 'Name (Building Floor FlatNumber)'
       const data = brand && brand.data;
@@ -96,7 +99,7 @@ utilModule.factory('boUtils', ($http) => {
         return '';
       }
 
-      return `${name.ko} ( ${_.get(brand, 'data.location.building.name.ko')} ${_.get(brand, 'data.location.floor')} ${_.get(brand, 'data.location.flatNumber')}호 )`; // eslint-disable-line
+      return `${name.ko} ( ${getBuildingName(brand)} )`; // eslint-disable-line
     },
     startProgressBar: () => {
       Metronic.blockUI({target: '#bo-content-container', boxed: true});

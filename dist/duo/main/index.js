@@ -554,6 +554,9 @@ utilModule.factory('boUtils', function ($http) {
   var isString = function isString(v) {
     return typeof v === 'string' || v instanceof String;
   };
+  var getBuildingName = function getBuildingName(brand) {
+    return _.get(brand, 'data.location.building.name.ko', '') + ' ' + _.get(brand, 'data.location.floor', '') + ' ' + _.get(brand, 'data.location.flatNumber', '') + '호';
+  };
   return {
     // http://stackoverflow.com/questions/111529/create-query-parameters-in-javascript
     encodeQueryData: function encodeQueryData(url, data) {
@@ -637,6 +640,7 @@ utilModule.factory('boUtils', function ($http) {
         return window.alert(err);
       });
     },
+    getBuildingName: getBuildingName,
     getNameWithAllBuildingInfo: function getNameWithAllBuildingInfo(brand) {
       // format: 'Name (Building Floor FlatNumber)'
       var data = brand && brand.data;
@@ -645,7 +649,7 @@ utilModule.factory('boUtils', function ($http) {
         return '';
       }
 
-      return name.ko + ' ( ' + _.get(brand, 'data.location.building.name.ko') + ' ' + _.get(brand, 'data.location.floor') + ' ' + _.get(brand, 'data.location.flatNumber') + '호 )'; // eslint-disable-line
+      return name.ko + ' ( ' + getBuildingName(brand) + ' )'; // eslint-disable-line
     },
     startProgressBar: function startProgressBar() {
       Metronic.blockUI({ target: '#bo-content-container', boxed: true });
@@ -2597,6 +2601,7 @@ module.exports = {
       "handlingFee": "사입비",
       "commission": "수수료",
       "brandName": "브랜드명",
+      "productPrice": "상품가격",
       "vat": "부가세"
     },
     "main": {
@@ -3863,12 +3868,54 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
       }
     }, {
       data: function data(_data45) {
-        return _.get(_data45, 'brand.name.ko', '');
+        return _data45;
+      },
+      orderable: false,
+      render: function render(data) {
+        var brandId = _.get(data, 'brand.id', '');
+        if (!brandId) return '';
+        return '<a ui-sref="brand.edit({ brandId: ' + _.get(data, 'brand.id', '') + '})">' + _.get(data, 'brand.name.ko', '') + '</a>';
       }
     }, {
       data: function data(_data46) {
-        return _.get(_data46, 'vatKRW', '');
-      }
+        return +_.get(_data46, 'subTotalKRW', 0);
+      },
+      orderable: false
+    }, {
+      data: function data(_data47) {
+        return +_.get(_data47, 'vatKRW', 0);
+      },
+      orderable: false
+    }, {
+      data: function data(_data48) {
+        return +_.get(_data48, 'subTotalKRW') + +_.get(_data48, 'vatKRW', 0);
+      },
+      orderable: false
+    }, {
+      data: function data(_data49) {
+        return _.get(_data49, 'brand.data.bank.name') || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data50) {
+        return _.get(_data50, 'brand.data.bank.accountNumber') || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data51) {
+        return _.get(_data51, 'brand.data.bank.accountHolder') || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data52) {
+        return boUtils.getBuildingName(_data52.brand);
+      },
+      orderable: false
+    }, {
+      data: function data(_data53) {
+        return _.get(_data53, 'brand.data.tel', '');
+      },
+      orderable: false
     }]
   };
 
@@ -3995,8 +4042,8 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
         return _.get(date, 'processedDate', '').substring(0, 10);
       }
     }, {
-      data: function data(_data47) {
-        return _.get(_data47, 'vatKRW', '');
+      data: function data(_data54) {
+        return _.get(_data54, 'vatKRW', '');
       }
     }]
   };

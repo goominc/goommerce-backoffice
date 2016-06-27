@@ -8,6 +8,7 @@
       "handlingFee": "사입비",
       "commission": "수수료",
       "brandName": "브랜드명",
+      "productPrice": "상품가격",
       "vat": "부가세"
     },
     "main": {
