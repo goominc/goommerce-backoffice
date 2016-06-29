@@ -52,7 +52,7 @@
                       <td class="cms-simple-sortable-pointer">{{$index+1}}</td>
                       <td><input data-ng-model="row.link" /></td>
                       <td style="text-align: left;">
-                        <img width="auto" height="150px" data-ng-src="{{row.image.url}}" />
+                        <img width="auto" height="auto" style="max-width:600px;max-height:400px;" data-ng-src="{{row.image.url}}" />
                       </td>
                       <td></td>
                       <td><button class="btn red" data-ng-click="removeRow($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></td>

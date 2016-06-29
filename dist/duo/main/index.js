@@ -256,15 +256,11 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       }, {
         name: $translate.instant('cms.mMainBanner'),
         sref: 'cms.simple({name: "mobile_main_banner"})'
+      }, {
+        name: $translate.instant('cms.dTopBanner'),
+        sref: 'cms.simple({name: "desktop_top_banner"})'
       }]
-    },
-    /*
-    {
-      name: $translate.instant('cms.dTopBanner'),
-      sref: 'cms.simple({name: "desktop_top_banner"})'
-    },
-    */
-    {
+    }, {
       name: $translate.instant('cms.dSiteKeywords'),
       sref: '',
       children: [{
