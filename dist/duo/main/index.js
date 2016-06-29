@@ -3699,39 +3699,42 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
   }];
 
   $('.date-picker').datepicker({ autoclose: true });
-  $('.date-picker input').on('change', function (e) {
-    $scope.activeDate = $('.date-picker input').val();
-    updateDatatables();
+  var isReload = false;
+  $('.date-picker').on('change', function (e) {
+    // 2016. 06. 29. [heekyu] why event multiple times?
+    if (!isReload) {
+      isReload = true;
+      _.set($rootScope.state, 'orderSettlement.activeDate', $('.date-picker input').val());
+      $state.reload();
+    }
   });
   var today = moment();
-  $scope.activeDate = today.format('YYYY-MM-DD');
-  /*
-    const maxDays = 10;
-    $scope.dates = [];
-    for (let i = 0; i < maxDays; i++) {
-      $scope.dates.push(today.format('YYYY-MM-DD'));
-      today.subtract(1, 'd');
-    }
-    $scope.activeDate = $scope.dates[0];
-    */
-  $scope.setDate = function (date) {
-    $scope.activeDate = date;
-    updateDatatables();
-  };
+  if (!_.get($rootScope.state, 'orderSettlement.activeDate')) {
+    _.set($rootScope.state, 'orderSettlement.activeDate', today.format('YYYY-MM-DD'));
+  }
+  $('.date-picker input').val($rootScope.state.orderSettlement.activeDate);
+  // $scope.activeDate = today.format('YYYY-MM-DD');
   $scope.done = function () {
-    $http.put('/api/v1/orders/settlement/' + $scope.activeDate).then(function () {
+    var activeDate = _.get($rootScope.state, 'orderSettlement.activeDate');
+    if (!activeDate) {
+      window.alert('날짜를 선택해 주세요');
+      return;
+    }
+    $http.put('/api/v1/orders/settlement/' + activeDate).then(function () {
       window.alert('정산(출금) 내역이 정상적으로 업데이트 되었습니다.');
       $state.reload();
     });
   };
 
   function updateDatatables() {
+    var activeDate = _.get($rootScope.state, 'orderSettlement.activeDate');
     $scope.orderDatatables = {
       field: 'orders',
       storeKey: 'orderSettlement',
       // disableFilter: true,
       // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-      url: '/api/v1/orders/settlement/' + $scope.activeDate,
+      // url: '/api/v1/orders/settlement/' + $scope.activeDate,
+      url: '/api/v1/orders/settlement/' + activeDate,
       columns: [{
         data: 'orderId',
         render: function render(orderId) {
