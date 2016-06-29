@@ -66,6 +66,8 @@
         "accountNumber": "계좌번호",
       },
       "totalColumn": "금액",
+      "totalSaledColumn": "매출금액",
+      "totalWillPayColumn": "출금예정금액",
       "dateColumn": "주문날짜",
       "buyerIdColumn": "바이어ID",
     },

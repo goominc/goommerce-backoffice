@@ -1186,9 +1186,14 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
   let isReload = false;
   $('.date-picker').on('change', (e) => {
     // 2016. 06. 29. [heekyu] why event multiple times?
+    const value = $('.date-picker input').val();
+    if (!value || value === _.get($rootScope.state, 'orderSettlement.activeDate')) {
+      $('.date-picker input').val(_.get($rootScope.state, 'orderSettlement.activeDate'));
+      return;
+    }
     if (!isReload) {
       isReload = true;
-      _.set($rootScope.state, 'orderSettlement.activeDate', $('.date-picker input').val());
+      _.set($rootScope.state, 'orderSettlement.activeDate', value);
       $state.reload();
     }
   });
@@ -1245,6 +1250,9 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
         },
         {
           data: (data) => _.get(data, 'brand.data.bank.accountNumber', ''),
+        },
+        {
+          data: (data) => _.get(data, 'originalPriceKRW', '0'),
         },
         {
           data: (data) => _.get(data, 'finalTotalKRW', '0'),

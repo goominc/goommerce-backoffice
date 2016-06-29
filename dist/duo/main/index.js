@@ -2666,6 +2666,8 @@ module.exports = {
         "accountNumber": "계좌번호",
       },
       "totalColumn": "금액",
+      "totalSaledColumn": "매출금액",
+      "totalWillPayColumn": "출금예정금액",
       "dateColumn": "주문날짜",
       "buyerIdColumn": "바이어ID",
     },
@@ -3702,9 +3704,14 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
   var isReload = false;
   $('.date-picker').on('change', function (e) {
     // 2016. 06. 29. [heekyu] why event multiple times?
+    var value = $('.date-picker input').val();
+    if (!value || value === _.get($rootScope.state, 'orderSettlement.activeDate')) {
+      $('.date-picker input').val(_.get($rootScope.state, 'orderSettlement.activeDate'));
+      return;
+    }
     if (!isReload) {
       isReload = true;
-      _.set($rootScope.state, 'orderSettlement.activeDate', $('.date-picker input').val());
+      _.set($rootScope.state, 'orderSettlement.activeDate', value);
       $state.reload();
     }
   });
@@ -3765,11 +3772,15 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
         }
       }, {
         data: function data(_data38) {
-          return _.get(_data38, 'finalTotalKRW', '0');
+          return _.get(_data38, 'originalPriceKRW', '0');
         }
       }, {
         data: function data(_data39) {
-          return _.get(_data39, 'brand.data.bank.accountHolder', '');
+          return _.get(_data39, 'finalTotalKRW', '0');
+        }
+      }, {
+        data: function data(_data40) {
+          return _.get(_data40, 'brand.data.bank.accountHolder', '');
         }
       }, {
         data: 'buyerId',
@@ -3827,20 +3838,20 @@ orderModule.controller('OrderGodoController', function ($scope, $http, $state, $
           return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
         }
       }, {
-        data: function data(_data40) {
-          return _.get(_data40, 'processedDate', '').substring(0, 10);
-        }
-      }, {
         data: function data(_data41) {
-          return _.get(_data41, 'finalTotalKRW', '');
+          return _.get(_data41, 'processedDate', '').substring(0, 10);
         }
       }, {
         data: function data(_data42) {
-          return _.get(_data42, 'finalHandlingFeeKRW', '');
+          return _.get(_data42, 'finalTotalKRW', '');
         }
       }, {
         data: function data(_data43) {
-          return _.get(_data43, 'commissionKRW', '');
+          return _.get(_data43, 'finalHandlingFeeKRW', '');
+        }
+      }, {
+        data: function data(_data44) {
+          return _.get(_data44, 'commissionKRW', '');
         }
       }]
     };
@@ -3870,15 +3881,15 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders/vat/' + $scope.month,
     columns: [{
-      data: function data(_data44) {
-        return _.get(_data44, 'brand.id', '');
+      data: function data(_data45) {
+        return _.get(_data45, 'brand.id', '');
       },
       render: function render(id) {
         return '<a ui-sref="order.brandVat({brandId:' + id + ',month:\'' + $scope.month + '\'})">' + id + '</a>';
       }
     }, {
-      data: function data(_data45) {
-        return _data45;
+      data: function data(_data46) {
+        return _data46;
       },
       orderable: false,
       render: function render(data) {
@@ -3887,43 +3898,43 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
         return '<a ui-sref="brand.edit({ brandId: ' + _.get(data, 'brand.id', '') + '})">' + _.get(data, 'brand.name.ko', '') + '</a>';
       }
     }, {
-      data: function data(_data46) {
-        return +_.get(_data46, 'subTotalKRW', 0);
-      },
-      orderable: false
-    }, {
       data: function data(_data47) {
-        return +_.get(_data47, 'vatKRW', 0);
+        return +_.get(_data47, 'subTotalKRW', 0);
       },
       orderable: false
     }, {
       data: function data(_data48) {
-        return +_.get(_data48, 'subTotalKRW') + +_.get(_data48, 'vatKRW', 0);
+        return +_.get(_data48, 'vatKRW', 0);
       },
       orderable: false
     }, {
       data: function data(_data49) {
-        return _.get(_data49, 'brand.data.bank.name') || '';
+        return +_.get(_data49, 'subTotalKRW') + +_.get(_data49, 'vatKRW', 0);
       },
       orderable: false
     }, {
       data: function data(_data50) {
-        return _.get(_data50, 'brand.data.bank.accountNumber') || '';
+        return _.get(_data50, 'brand.data.bank.name') || '';
       },
       orderable: false
     }, {
       data: function data(_data51) {
-        return _.get(_data51, 'brand.data.bank.accountHolder') || '';
+        return _.get(_data51, 'brand.data.bank.accountNumber') || '';
       },
       orderable: false
     }, {
       data: function data(_data52) {
-        return boUtils.getBuildingName(_data52.brand);
+        return _.get(_data52, 'brand.data.bank.accountHolder') || '';
       },
       orderable: false
     }, {
       data: function data(_data53) {
-        return _.get(_data53, 'brand.data.tel', '');
+        return boUtils.getBuildingName(_data53.brand);
+      },
+      orderable: false
+    }, {
+      data: function data(_data54) {
+        return _.get(_data54, 'brand.data.tel', '');
       },
       orderable: false
     }]
@@ -4069,63 +4080,63 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders/vat/brands/' + brandId + '/' + month,
     columns: [{
-      data: function data(_data54) {
-        return moment(_data54.orderedAt).format('YYYY-MM-DD');
+      data: function data(_data55) {
+        return moment(_data55.orderedAt).format('YYYY-MM-DD');
       }
     }, {
-      data: function data(_data55) {
-        return _.get(_data55, 'orderProducts.0.brand.id', '');
+      data: function data(_data56) {
+        return _.get(_data56, 'orderProducts.0.brand.id', '');
       },
       render: function render(brandId) {
         return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandId + '</a>';
       }
     }, {
-      data: function data(_data56) {
-        return _.get(_data56, 'orderProducts.0.brand.name.ko', '');
-      }
-    }, {
       data: function data(_data57) {
-        return _.get(_data57, 'buyerName', '');
+        return _.get(_data57, 'orderProducts.0.brand.name.ko', '');
       }
     }, {
       data: function data(_data58) {
-        return orderSubTotal(_data58);
+        return _.get(_data58, 'buyerName', '');
       }
     }, {
       data: function data(_data59) {
-        return '0';
+        return orderSubTotal(_data59);
       }
     }, {
       data: function data(_data60) {
-        return orderSubTotal(_data60);
+        return '0';
       }
     }, {
       data: function data(_data61) {
-        return orderSubTotal(_data61).mul(0.1);
+        return orderSubTotal(_data61);
       }
     }, {
       data: function data(_data62) {
-        return orderSubTotal(_data62).mul(1.1);
+        return orderSubTotal(_data62).mul(0.1);
       }
     }, {
       data: function data(_data63) {
-        return '';
+        return orderSubTotal(_data63).mul(1.1);
       }
     }, {
       data: function data(_data64) {
-        return orderSettledTotal(_data64);
-      }
-    }, {
-      data: function data(_data65) {
-        return orderSubTotal(_data65).mul(1.1).sub(orderSettledTotal(_data65));
-      }
-    }, {
-      data: function data(_data66) {
         return '';
       }
     }, {
+      data: function data(_data65) {
+        return orderSettledTotal(_data65);
+      }
+    }, {
+      data: function data(_data66) {
+        return orderSubTotal(_data66).mul(1.1).sub(orderSettledTotal(_data66));
+      }
+    }, {
       data: function data(_data67) {
-        return _.get(_data67, 'id', '');
+        return '';
+      }
+    }, {
+      data: function data(_data68) {
+        return _.get(_data68, 'id', '');
       },
       render: function render(id) {
         return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
