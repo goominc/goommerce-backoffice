@@ -116,7 +116,7 @@
                           이메일:
                         </div>
                         <div class="col-md-7 value">
-                          {{user.email}}
+                          <a ui-sref="user.info({userId: user.id})">{{user.email}}</a>
                         </div>
                       </div>
                       <div class="row static-info">
