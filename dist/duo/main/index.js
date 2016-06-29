@@ -4042,6 +4042,27 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
   }];
   $rootScope.initAll($scope, $state.current.name);
 
+  function orderSubTotal(order) {
+    var total = new Decimal(0);
+    _.forEach(order.orderProducts, function (o) {
+      return total = total.add(new Decimal(o.finalTotalKRW));
+    });
+    _.forEach(order.adjustments, function (o) {
+      return total = total.add(new Decimal(o.finalKRW));
+    });
+    return total;
+  }
+  function orderSettledTotal(order) {
+    var total = new Decimal(0);
+    _.forEach(order.orderProducts, function (o) {
+      return total = total.add(new Decimal(o.settledKRW || 0));
+    });
+    _.forEach(order.adjustments, function (o) {
+      return total = total.add(new Decimal(o.settledKRW || 0));
+    });
+    return total;
+  }
+
   $scope.orderDatatables = {
     field: 'list',
     storeKey: 'orderBrandVat',
@@ -4049,12 +4070,66 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders/vat/brands/' + brandId + '/' + month,
     columns: [{
-      data: function data(date) {
-        return _.get(date, 'processedDate', '').substring(0, 10);
+      data: function data(_data54) {
+        return moment(_data54.orderedAt).format('YYYY-MM-DD');
       }
     }, {
-      data: function data(_data54) {
-        return _.get(_data54, 'vatKRW', '');
+      data: function data(_data55) {
+        return _.get(_data55, 'orderProducts.0.brand.id', '');
+      },
+      render: function render(brandId) {
+        return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandId + '</a>';
+      }
+    }, {
+      data: function data(_data56) {
+        return _.get(_data56, 'orderProducts.0.brand.name.ko', '');
+      }
+    }, {
+      data: function data(_data57) {
+        return _.get(_data57, 'buyerName', '');
+      }
+    }, {
+      data: function data(_data58) {
+        return orderSubTotal(_data58);
+      }
+    }, {
+      data: function data(_data59) {
+        return '0';
+      }
+    }, {
+      data: function data(_data60) {
+        return orderSubTotal(_data60);
+      }
+    }, {
+      data: function data(_data61) {
+        return orderSubTotal(_data61).mul(0.1);
+      }
+    }, {
+      data: function data(_data62) {
+        return orderSubTotal(_data62).mul(1.1);
+      }
+    }, {
+      data: function data(_data63) {
+        return '';
+      }
+    }, {
+      data: function data(_data64) {
+        return orderSettledTotal(_data64);
+      }
+    }, {
+      data: function data(_data65) {
+        return orderSubTotal(_data65).mul(1.1).sub(orderSettledTotal(_data65));
+      }
+    }, {
+      data: function data(_data66) {
+        return '';
+      }
+    }, {
+      data: function data(_data67) {
+        return _.get(_data67, 'id', '');
+      },
+      render: function render(id) {
+        return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
       }
     }]
   };

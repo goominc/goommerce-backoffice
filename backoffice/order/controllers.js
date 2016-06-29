@@ -1534,6 +1534,19 @@ orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootS
   ];
   $rootScope.initAll($scope, $state.current.name);
 
+  function orderSubTotal(order) {
+    let total = new Decimal(0);
+    _.forEach(order.orderProducts, (o) => (total = total.add(new Decimal(o.finalTotalKRW))));
+    _.forEach(order.adjustments, (o) => (total = total.add(new Decimal(o.finalKRW))));
+    return total;
+  }
+  function orderSettledTotal(order) {
+    let total = new Decimal(0);
+    _.forEach(order.orderProducts, (o) => (total = total.add(new Decimal(o.settledKRW || 0))));
+    _.forEach(order.adjustments, (o) => (total = total.add(new Decimal(o.settledKRW || 0))));
+    return total;
+  }
+
   $scope.orderDatatables = {
     field: 'list',
     storeKey: 'orderBrandVat',
@@ -1542,10 +1555,52 @@ orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootS
     url: `/api/v1/orders/vat/brands/${brandId}/${month}`,
     columns: [
       {
-        data: (date) => _.get(date, 'processedDate', '').substring(0, 10)
+        data: (data) => moment(data.orderedAt).format('YYYY-MM-DD'),
       },
       {
-        data: (data) => _.get(data, 'vatKRW', ''),
+        data: (data) => _.get(data, 'orderProducts.0.brand.id', ''),
+        render: (brandId) => {
+          return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandId + '</a>'
+        },
+      },
+      {
+        data: (data) => _.get(data, 'orderProducts.0.brand.name.ko', ''),
+      },
+      {
+        data: (data) => _.get(data, 'buyerName', ''),
+      },
+      {
+        data: (data) => orderSubTotal(data),
+      },
+      {
+        data: (data) => '0',
+      },
+      {
+        data: (data) => orderSubTotal(data),
+      },
+      {
+        data: (data) => orderSubTotal(data).mul(0.1),
+      },
+      {
+        data: (data) => orderSubTotal(data).mul(1.1),
+      },
+      {
+        data: (data) => '',
+      },
+      {
+        data: (data) => orderSettledTotal(data),
+      },
+      {
+        data: (data) => orderSubTotal(data).mul(1.1).sub(orderSettledTotal(data)),
+      },
+      {
+        data: (data) => '',
+      },
+      {
+        data: (data) => _.get(data, 'id', ''),
+        render: (id) => {
+          return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>'
+        }
       },
     ],
   };
