@@ -21,7 +21,7 @@
                 <a data-ng-click="done()">
                   <button class="btn blue"><i class="fa fa-check"></i> {{'order.settlement.done' | translate}}</button>
                 </a>
-                <a ng-href="/api/v1/orders/settlement/{{activeDate}}?format=csv&access_token={{state.auth.bearer}}">
+                <a ng-href="/api/v1/orders/settlement/{{state.orderSettlement.activeDate}}?format=csv&access_token={{state.auth.bearer}}">
                   <button class="btn blue"><i class="fa fa-check"></i> {{'order.uncle.download' | translate}}</button>
                 </a>
               </div>
