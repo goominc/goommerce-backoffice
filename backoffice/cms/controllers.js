@@ -236,6 +236,8 @@ cmsModule.controller('CmsMainCategoryController', ($scope, $rootScope, $http, $s
     $http.post('/api/v1/cms', { name: cmsName, data: jstreeDataToCmsData() }).then(() => {
       window.alert('saved successfully');
       $state.reload();
+    }, () => {
+      window.alert('fail. check your admin permission');
     });
   };
 });
@@ -247,6 +249,8 @@ cmsModule.controller('CmsPureHtmlController', ($scope, $http, $rootScope, $state
     $scope.cmsData = res.data;
     const data = res.data.data;
     $('#summernote').code(`${data}`);
+  }, () => {
+    window.alert('failed to load data');
   });
 
   $scope.save = () => {
@@ -254,7 +258,7 @@ cmsModule.controller('CmsPureHtmlController', ($scope, $http, $rootScope, $state
     $http.post('/api/v1/cms', { name, data: { name, data } }).then(() => {
       window.alert('saved successfully');
     }, () => {
-      window.alert('fail');
+      window.alert('fail. check your admin permission');
     });
   };
 });
