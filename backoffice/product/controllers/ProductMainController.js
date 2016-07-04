@@ -17,15 +17,17 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
   ];
   $rootScope.initAll($scope, $state.current.name);
 
-  $scope.startDate = $state.params.start || '';
-  $scope.endDate = $state.params.end || '';
+  const storeKey = 'state.product.main';
+  boUtils.initDateBetween($('#product_createdAt_start'), $('#product_createdAt_end'), $state, storeKey);
+
+  $scope.startDate = _.get($rootScope, `${storeKey}.startDate`) || '';
+  $scope.endDate =_.get($rootScope, `${storeKey}.endDate`) || '';
   if ($scope.startDate && $scope.endDate && new Date($scope.startDate).getTime() > new Date($scope.endDate).getTime()) {
     window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
   }
 
   $scope.productIdMap = {};
 
-  const storeKey = 'products';
   $scope.productDatatables = {
     field: 'products',
     storeKey, // 2016. 05. 24. [heekyu] Case 262
@@ -111,15 +113,6 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
       });
     }
   };
-
-  $('#product_createdAt_start').datepicker({ autoclose: true });
-  $('#product_createdAt_end').datepicker({ autoclose: true });
-  $('#product_createdAt_start').on('change', (e) => {
-    $state.go('product.main', _.merge({}, $state.params, { start: $('#product_createdAt_start').val() }));
-  });
-  $('#product_createdAt_end').on('change', (e) => {
-    $state.go('product.main', _.merge({}, $state.params, { end: $('#product_createdAt_end').val() }));
-  });
 
   $scope.fnUrlParams = (urlParams) => {
     if (!$scope.startDate || !$scope.endDate) {
