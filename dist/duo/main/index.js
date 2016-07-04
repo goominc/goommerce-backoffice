@@ -3963,7 +3963,7 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
       }
     }, {
       data: function data(_data48) {
-        return +_.get(_data48, 'subTotalKRW', 0);
+        return _.sum([_data48.subTotalKRW, _data48.adjustmentKRW]);
       },
       orderable: false
     }, {
@@ -3973,7 +3973,7 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
       orderable: false
     }, {
       data: function data(_data50) {
-        return +_.get(_data50, 'subTotalKRW') + +_.get(_data50, 'vatKRW', 0);
+        return _.sum([_data50.subTotalKRW, _data50.adjustmentKRW, _data50.vatKRW]);
       },
       orderable: false
     }, {

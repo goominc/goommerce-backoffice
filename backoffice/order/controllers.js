@@ -1419,7 +1419,7 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
         },
       },
       {
-        data: (data) => +(_.get(data, 'subTotalKRW', 0)),
+        data: (data) => _.sum([data.subTotalKRW, data.adjustmentKRW]),
         orderable: false,
       },
       {
@@ -1427,7 +1427,7 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
         orderable: false,
       },
       {
-        data: (data) => (+(_.get(data, 'subTotalKRW')) + +(_.get(data, 'vatKRW', 0))),
+        data: (data) => _.sum([data.subTotalKRW, data.adjustmentKRW, data.vatKRW]),
         orderable: false,
       },
       {
