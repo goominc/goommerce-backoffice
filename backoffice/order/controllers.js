@@ -412,7 +412,8 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     return dates;
   };
   $scope.calcShipmentTotal = (shipment) => {
-    return (+shipment.unitKRW || 0) * (+shipment.weight || 0) + +shipment.boxKRW;
+    const sum = new Decimal((+shipment.unitKRW || 0) * (+shipment.weight || 0) + +shipment.boxKRW);
+    return sum.div(10).round().mul(10).toNumber();
   };
   $scope.addShipment = (shipment) => {
     shipment.totalKRW = $scope.calcShipmentTotal(shipment);

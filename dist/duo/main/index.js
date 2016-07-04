@@ -3130,7 +3130,8 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     return dates;
   };
   $scope.calcShipmentTotal = function (shipment) {
-    return (+shipment.unitKRW || 0) * (+shipment.weight || 0) + +shipment.boxKRW;
+    var sum = new Decimal((+shipment.unitKRW || 0) * (+shipment.weight || 0) + +shipment.boxKRW);
+    return sum.div(10).round().mul(10).toNumber();
   };
   $scope.addShipment = function (shipment) {
     shipment.totalKRW = $scope.calcShipmentTotal(shipment);
