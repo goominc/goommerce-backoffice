@@ -178,6 +178,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
       },
       {
         data: (data) => _.get(data, 'method', ''),
+        render: (method) => $rootScope.getContentsI18nText(`enum.payment.method.${method}`),
       },
       {
         data: (data) => (+data.totalKRW).format(),

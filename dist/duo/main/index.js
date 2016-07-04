@@ -2889,6 +2889,9 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
     }, {
       data: function data(_data) {
         return _.get(_data, 'method', '');
+      },
+      render: function render(method) {
+        return $rootScope.getContentsI18nText('enum.payment.method.' + method);
       }
     }, {
       data: function data(_data2) {
