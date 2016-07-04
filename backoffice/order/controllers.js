@@ -2,7 +2,7 @@
 
 const orderModule = require('./module');
 
-orderModule.factory('orderCommons', ($rootScope, $compile) => {
+orderModule.factory('orderCommons', ($rootScope, $compile, boUtils) => {
   const allStatus = [
     0,
     100,
@@ -34,15 +34,19 @@ orderModule.factory('orderCommons', ($rootScope, $compile) => {
     allPaymentStatus,
     allPaymentMethods,
     applyFilterSearch: (scope, state, storeKeyPrefix, roleType) => {
+      const reloadDatatables = () => {
+        $('table').DataTable().ajax.reload();
+      };
+
+      boUtils.initDateBetween($('#order_start_date'), $('#order_end_date'), state, storeKeyPrefix);
+
       scope.startDate = _.get($rootScope, `${storeKeyPrefix}.startDate`) || '';
       scope.endDate =  _.get($rootScope, `${storeKeyPrefix}.endDate`) || '';
       if (scope.startDate && scope.endDate && new Date(scope.startDate).getTime() > new Date(scope.endDate).getTime()) {
         window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
       }
-      const reloadDatatables = () => {
-        $('table').DataTable().ajax.reload();
-      };
 
+      /*
       $('#order_start_date').datepicker({ autoclose: true });
       $('#order_end_date').datepicker({ autoclose: true });
       $('#order_start_date').on('change', (e) => {
@@ -55,6 +59,7 @@ orderModule.factory('orderCommons', ($rootScope, $compile) => {
         state.reload();
         // reloadDatatables();
       });
+      */
 
       scope.allStatus = allStatus.slice(1);
       scope.allPaymentStatus = allPaymentStatus;

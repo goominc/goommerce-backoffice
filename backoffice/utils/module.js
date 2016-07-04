@@ -1,7 +1,9 @@
 
-const utilModule = angular.module('backoffice.utils', []);
+const utilModule = angular.module('backoffice.utils', [
+  'ngCookies',
+]);
 
-utilModule.factory('boUtils', ($http) => {
+utilModule.factory('boUtils', ($http, $rootScope, $cookies) => {
   const isString = (v) => {
     return typeof v === 'string' || v instanceof String;
   };
@@ -116,6 +118,32 @@ utilModule.factory('boUtils', ($http) => {
         return `${str.substring(0, maxLen)}...`;
       }
       return str;
+    },
+    initDateBetween: (startElem, endElem, state, storeKey) => {
+      const cookieStartKey = `date-${storeKey}-start`;
+      const cookieEndKey = `date-${storeKey}-end`;
+      const startValue = $cookies.get(cookieStartKey);
+      const endValue = $cookies.get(cookieEndKey);
+      _.set($rootScope, `${storeKey}.startDate`, startValue || '');
+      _.set($rootScope, `${storeKey}.endDate`, endValue || '');
+      startElem.datepicker({ autoclose: true });
+      endElem.datepicker({ autoclose: true });
+      startElem.on('change', () => {
+        const newValue = startElem.val();
+        $cookies.put(cookieStartKey, newValue);
+        if (newValue && endValue && new Date(newValue).getTime() > new Date(endValue).getTime()) {
+          $cookies.put(cookieEndKey, newValue);
+        }
+        state.reload();
+      });
+      endElem.on('change', () => {
+        const newValue = endElem.val();
+        $cookies.put(cookieEndKey, newValue);
+        if (startValue && newValue && new Date(startValue).getTime() > new Date(newValue).getTime()) {
+          $cookies.put(cookieStartKey, newValue);
+        }
+        state.reload();
+      });
     },
   };
 });
