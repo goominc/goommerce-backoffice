@@ -64,13 +64,13 @@
       "bank": {
         "name": "은행",
         "accountHolder": "예금주",
-        "accountNumber": "계좌번호",
+        "accountNumber": "계좌번호"
       },
       "totalColumn": "금액",
       "totalSaledColumn": "매출금액",
       "totalWillPayColumn": "출금예정금액",
       "dateColumn": "주문날짜",
-      "buyerIdColumn": "바이어ID",
+      "buyerIdColumn": "바이어ID"
     },
     "uncle": {
       "title": "삼촌주문목록",

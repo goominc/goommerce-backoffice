@@ -17,11 +17,11 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
   ];
   $rootScope.initAll($scope, $state.current.name);
 
-  const storeKey = 'state.product.main';
-  boUtils.initDateBetween($('#product_createdAt_start'), $('#product_createdAt_end'), $state, storeKey);
+  const cookieKey = 'state.product.main';
+  boUtils.initDateBetween($('#product_createdAt_start'), $('#product_createdAt_end'), $state, cookieKey);
 
-  $scope.startDate = _.get($rootScope, `${storeKey}.startDate`) || '';
-  $scope.endDate =_.get($rootScope, `${storeKey}.endDate`) || '';
+  $scope.startDate = _.get($rootScope, `${cookieKey}.startDate`) || '';
+  $scope.endDate =_.get($rootScope, `${cookieKey}.endDate`) || '';
   if ($scope.startDate && $scope.endDate && new Date($scope.startDate).getTime() > new Date($scope.endDate).getTime()) {
     window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
   }
@@ -30,7 +30,7 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
 
   $scope.productDatatables = {
     field: 'products',
-    storeKey, // 2016. 05. 24. [heekyu] Case 262
+    storeKey: 'products', // 2016. 05. 24. [heekyu] Case 262
     // disableFilter: true,
     columns: [
       {

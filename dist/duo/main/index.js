@@ -544,9 +544,9 @@ require('./controllers.js');
 16: [function(require, module, exports) {
 'use strict';
 
-var utilModule = angular.module('backoffice.utils', []);
+var utilModule = angular.module('backoffice.utils', ['ngCookies']);
 
-utilModule.factory('boUtils', function ($http) {
+utilModule.factory('boUtils', function ($http, $rootScope, $cookies) {
   var isString = function isString(v) {
     return typeof v === 'string' || v instanceof String;
   };
@@ -664,6 +664,32 @@ utilModule.factory('boUtils', function ($http) {
         return str.substring(0, maxLen) + '...';
       }
       return str;
+    },
+    initDateBetween: function initDateBetween(startElem, endElem, state, storeKey) {
+      var cookieStartKey = 'date-' + storeKey + '-start';
+      var cookieEndKey = 'date-' + storeKey + '-end';
+      var startValue = $cookies.get(cookieStartKey);
+      var endValue = $cookies.get(cookieEndKey);
+      _.set($rootScope, storeKey + '.startDate', startValue || '');
+      _.set($rootScope, storeKey + '.endDate', endValue || '');
+      startElem.datepicker({ autoclose: true });
+      endElem.datepicker({ autoclose: true });
+      startElem.on('change', function () {
+        var newValue = startElem.val();
+        $cookies.put(cookieStartKey, newValue);
+        if (newValue && endValue && new Date(newValue).getTime() > new Date(endValue).getTime()) {
+          $cookies.put(cookieEndKey, newValue);
+        }
+        state.reload();
+      });
+      endElem.on('change', function () {
+        var newValue = endElem.val();
+        $cookies.put(cookieEndKey, newValue);
+        if (startValue && newValue && new Date(startValue).getTime() > new Date(newValue).getTime()) {
+          $cookies.put(cookieStartKey, newValue);
+        }
+        state.reload();
+      });
     }
   };
 });
@@ -2106,6 +2132,8 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
     $http.post('/api/v1/cms', { name: cmsName, data: jstreeDataToCmsData() }).then(function () {
       window.alert('saved successfully');
       $state.reload();
+    }, function () {
+      window.alert('fail. check your admin permission');
     });
   };
 });
@@ -2117,6 +2145,8 @@ cmsModule.controller('CmsPureHtmlController', function ($scope, $http, $rootScop
     $scope.cmsData = res.data;
     var data = res.data.data;
     $('#summernote').code('' + data);
+  }, function () {
+    window.alert('failed to load data');
   });
 
   $scope.save = function () {
@@ -2124,7 +2154,7 @@ cmsModule.controller('CmsPureHtmlController', function ($scope, $http, $rootScop
     $http.post('/api/v1/cms', { name: name, data: { name: name, data: data } }).then(function () {
       window.alert('saved successfully');
     }, function () {
-      window.alert('fail');
+      window.alert('fail. check your admin permission');
     });
   };
 });
@@ -2664,13 +2694,13 @@ module.exports = {
       "bank": {
         "name": "은행",
         "accountHolder": "예금주",
-        "accountNumber": "계좌번호",
+        "accountNumber": "계좌번호"
       },
       "totalColumn": "금액",
       "totalSaledColumn": "매출금액",
       "totalWillPayColumn": "출금예정금액",
       "dateColumn": "주문날짜",
-      "buyerIdColumn": "바이어ID",
+      "buyerIdColumn": "바이어ID"
     },
     "uncle": {
       "title": "삼촌주문목록",
@@ -2708,7 +2738,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var orderModule = require('./module');
 
-orderModule.factory('orderCommons', function ($rootScope, $compile) {
+orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
   var allStatus = [0, 100, 101, 102, 200, 201, 202, 203, 300, 400];
   var allPaymentStatus = [0, 1, 100, 200];
   var allPaymentMethods = [0, 1, 2, 3, 4, 5];
@@ -2717,27 +2747,32 @@ orderModule.factory('orderCommons', function ($rootScope, $compile) {
     allPaymentStatus: allPaymentStatus,
     allPaymentMethods: allPaymentMethods,
     applyFilterSearch: function applyFilterSearch(scope, state, storeKeyPrefix, roleType) {
+      var reloadDatatables = function reloadDatatables() {
+        $('table').DataTable().ajax.reload();
+      };
+
+      boUtils.initDateBetween($('#order_start_date'), $('#order_end_date'), state, storeKeyPrefix);
+
       scope.startDate = _.get($rootScope, storeKeyPrefix + '.startDate') || '';
       scope.endDate = _.get($rootScope, storeKeyPrefix + '.endDate') || '';
       if (scope.startDate && scope.endDate && new Date(scope.startDate).getTime() > new Date(scope.endDate).getTime()) {
         window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
       }
-      var reloadDatatables = function reloadDatatables() {
-        $('table').DataTable().ajax.reload();
-      };
 
+      /*
       $('#order_start_date').datepicker({ autoclose: true });
       $('#order_end_date').datepicker({ autoclose: true });
-      $('#order_start_date').on('change', function (e) {
-        _.set($rootScope, storeKeyPrefix + '.startDate', $('#order_start_date').val());
+      $('#order_start_date').on('change', (e) => {
+        _.set($rootScope, `${storeKeyPrefix}.startDate`, $('#order_start_date').val());
         state.reload();
         // reloadDatatables();
       });
-      $('#order_end_date').on('change', function (e) {
-        _.set($rootScope, storeKeyPrefix + '.endDate', $('#order_end_date').val());
+      $('#order_end_date').on('change', (e) => {
+        _.set($rootScope, `${storeKeyPrefix}.endDate`, $('#order_end_date').val());
         state.reload();
         // reloadDatatables();
       });
+      */
 
       scope.allStatus = allStatus.slice(1);
       scope.allPaymentStatus = allPaymentStatus;
@@ -4518,18 +4553,20 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
   }];
   $rootScope.initAll($scope, $state.current.name);
 
-  $scope.startDate = $state.params.start || '';
-  $scope.endDate = $state.params.end || '';
+  var cookieKey = 'state.product.main';
+  boUtils.initDateBetween($('#product_createdAt_start'), $('#product_createdAt_end'), $state, cookieKey);
+
+  $scope.startDate = _.get($rootScope, cookieKey + '.startDate') || '';
+  $scope.endDate = _.get($rootScope, cookieKey + '.endDate') || '';
   if ($scope.startDate && $scope.endDate && new Date($scope.startDate).getTime() > new Date($scope.endDate).getTime()) {
     window.alert('시작 날짜가 종료 날짜와 같거나 더 작아야 합니다');
   }
 
   $scope.productIdMap = {};
 
-  var storeKey = 'products';
   $scope.productDatatables = {
     field: 'products',
-    storeKey: storeKey, // 2016. 05. 24. [heekyu] Case 262
+    storeKey: 'products', // 2016. 05. 24. [heekyu] Case 262
     // disableFilter: true,
     columns: [{
       data: 'id',
@@ -4608,15 +4645,6 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       });
     }
   };
-
-  $('#product_createdAt_start').datepicker({ autoclose: true });
-  $('#product_createdAt_end').datepicker({ autoclose: true });
-  $('#product_createdAt_start').on('change', function (e) {
-    $state.go('product.main', _.merge({}, $state.params, { start: $('#product_createdAt_start').val() }));
-  });
-  $('#product_createdAt_end').on('change', function (e) {
-    $state.go('product.main', _.merge({}, $state.params, { end: $('#product_createdAt_end').val() }));
-  });
 
   $scope.fnUrlParams = function (urlParams) {
     if (!$scope.startDate || !$scope.endDate) {
@@ -6630,18 +6658,21 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
   }];
   $rootScope.initAll($scope, $state.current.name);
 
+  boUtils.initDateBetween($('#user_start_date'), $('#user_end_date'), $state, 'state.userMain');
+  /*
   $('#user_start_date').datepicker({ autoclose: true });
   $('#user_end_date').datepicker({ autoclose: true });
-  $('#user_start_date').on('change', function (e) {
+  $('#user_start_date').on('change', (e) => {
     _.set($rootScope, 'state.userMain.startDate', $('#user_start_date').val());
     $state.reload();
     // reloadDatatables();
   });
-  $('#user_end_date').on('change', function (e) {
+  $('#user_end_date').on('change', (e) => {
     _.set($rootScope, 'state.userMain.endDate', $('#user_end_date').val());
     $state.reload();
     // reloadDatatables();
   });
+  */
 
   $scope.fnUrlParams = function (urlParams) {
     var queryParams = {};

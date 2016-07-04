@@ -16,6 +16,8 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
   ];
   $rootScope.initAll($scope, $state.current.name);
 
+  boUtils.initDateBetween($('#user_start_date'), $('#user_end_date'), $state, 'state.userMain');
+  /*
   $('#user_start_date').datepicker({ autoclose: true });
   $('#user_end_date').datepicker({ autoclose: true });
   $('#user_start_date').on('change', (e) => {
@@ -28,6 +30,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
     $state.reload();
     // reloadDatatables();
   });
+  */
 
   $scope.fnUrlParams = (urlParams) => {
     const queryParams = {};
