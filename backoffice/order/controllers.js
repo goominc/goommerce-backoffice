@@ -1563,7 +1563,7 @@ orderModule.controller('OrderVatController', ($scope, $http, $state, $rootScope,
   };
 });
 
-orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
+orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootScope, $translate, boUtils, brand) => {
   const { month, brandId } = $state.params;
 
   $scope.contentTitle = $translate.instant('order.vat.title');
@@ -1606,13 +1606,12 @@ orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootS
         data: (data) => moment(data.orderedAt).format('YYYY-MM-DD'),
       },
       {
-        data: (data) => _.get(data, 'orderProducts.0.brand.id', ''),
-        render: (brandId) => {
+        render: () => {
           return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandId + '</a>'
         },
       },
       {
-        data: (data) => _.get(data, 'orderProducts.0.brand.name.ko', ''),
+        data: () => _.get(brand, 'name.ko', ''),
       },
       {
         data: (data) => _.get(data, 'buyerName', ''),

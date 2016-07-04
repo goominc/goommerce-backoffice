@@ -57,6 +57,13 @@ orderModule.config(($stateProvider) => {
       url: '/brandVat/:brandId/:month',
       templateUrl: templateRoot + '/order/brandVat.html',
       controller: 'OrderBrandVatController',
+      resolve: {
+        brand: ($http, $rootScope, $stateParams) => {
+          return $http.get('/api/v1/brands/' + $stateParams.brandId).then((res) => {
+            return res.data;
+          });
+        },
+      },
     })
     .state('order.cs', {
       url: '/cs',

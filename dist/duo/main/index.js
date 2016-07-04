@@ -2591,7 +2591,14 @@ orderModule.config(function ($stateProvider) {
   }).state('order.brandVat', {
     url: '/brandVat/:brandId/:month',
     templateUrl: templateRoot + '/order/brandVat.html',
-    controller: 'OrderBrandVatController'
+    controller: 'OrderBrandVatController',
+    resolve: {
+      brand: function brand($http, $rootScope, $stateParams) {
+        return $http.get('/api/v1/brands/' + $stateParams.brandId).then(function (res) {
+          return res.data;
+        });
+      }
+    }
   }).state('order.cs', {
     url: '/cs',
     templateUrl: templateRoot + '/order/cs.html',
@@ -4099,7 +4106,7 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
   };
 });
 
-orderModule.controller('OrderBrandVatController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+orderModule.controller('OrderBrandVatController', function ($scope, $http, $state, $rootScope, $translate, boUtils, brand) {
   var _$state$params = $state.params;
   var month = _$state$params.month;
   var brandId = _$state$params.brandId;
@@ -4148,19 +4155,24 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
         return moment(_data56.orderedAt).format('YYYY-MM-DD');
       }
     }, {
-      data: function data(_data57) {
-        return _.get(_data57, 'orderProducts.0.brand.id', '');
-      },
-      render: function render(brandId) {
+      render: function render() {
         return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandId + '</a>';
       }
     }, {
+      data: function data() {
+        return _.get(brand, 'name.ko', '');
+      }
+    }, {
+      data: function data(_data57) {
+        return _.get(_data57, 'buyerName', '');
+      }
+    }, {
       data: function data(_data58) {
-        return _.get(_data58, 'orderProducts.0.brand.name.ko', '');
+        return orderSubTotal(_data58);
       }
     }, {
       data: function data(_data59) {
-        return _.get(_data59, 'buyerName', '');
+        return '0';
       }
     }, {
       data: function data(_data60) {
@@ -4168,39 +4180,31 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
       }
     }, {
       data: function data(_data61) {
-        return '0';
+        return orderSubTotal(_data61).mul(0.1);
       }
     }, {
       data: function data(_data62) {
-        return orderSubTotal(_data62);
+        return orderSubTotal(_data62).mul(1.1);
       }
     }, {
       data: function data(_data63) {
-        return orderSubTotal(_data63).mul(0.1);
+        return '';
       }
     }, {
       data: function data(_data64) {
-        return orderSubTotal(_data64).mul(1.1);
+        return orderSettledTotal(_data64);
       }
     }, {
       data: function data(_data65) {
-        return '';
+        return orderSubTotal(_data65).mul(1.1).sub(orderSettledTotal(_data65));
       }
     }, {
       data: function data(_data66) {
-        return orderSettledTotal(_data66);
-      }
-    }, {
-      data: function data(_data67) {
-        return orderSubTotal(_data67).mul(1.1).sub(orderSettledTotal(_data67));
-      }
-    }, {
-      data: function data(_data68) {
         return '';
       }
     }, {
-      data: function data(_data69) {
-        return _.get(_data69, 'id', '');
+      data: function data(_data67) {
+        return _.get(_data67, 'id', '');
       },
       render: function render(id) {
         return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
