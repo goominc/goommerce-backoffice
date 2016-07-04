@@ -41,6 +41,18 @@
                   </li>
                 </ul>
               </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-default">{{translateOrderPaymentMethod(state.order.main.searchPaymentMethod)}}</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li>
+                    <a data-ng-click="setPaymentMethodFilter(-1)">{{translateOrderPaymentMethod(-1)}}</a>
+                  </li>
+                  <li data-ng-repeat="p in allPaymentMethods">
+                    <a data-ng-click="setPaymentMethodFilter(p)">{{translateOrderPaymentMethod(p)}}</a>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -60,6 +72,7 @@
                     <td>ID</td>
                     <td>{{'order.main.statusColumn' | translate}}</td>
                     <td>{{'order.main.orderedAtColumn' | translate}}</td>
+                    <td>{{'order.main.paymethodColumn' | translate}}</td>
                     <td>{{'order.main.priceColumn' | translate}}</td>
                     <td>{{'order.main.paymentStatusColumn' | translate}}</td>
                     <td>{{'order.main.buyerIdColumn' | translate}}</td>

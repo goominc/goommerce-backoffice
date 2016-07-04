@@ -21,9 +21,18 @@ orderModule.factory('orderCommons', ($rootScope, $compile) => {
     100,
     200,
   ];
+  const allPaymentMethods = [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+  ];
   return {
     allStatus,
     allPaymentStatus,
+    allPaymentMethods,
     applyFilterSearch: (scope, state, storeKeyPrefix, roleType) => {
       scope.startDate = _.get($rootScope, `${storeKeyPrefix}.startDate`) || '';
       scope.endDate =  _.get($rootScope, `${storeKeyPrefix}.endDate`) || '';
@@ -49,6 +58,7 @@ orderModule.factory('orderCommons', ($rootScope, $compile) => {
 
       scope.allStatus = allStatus.slice(1);
       scope.allPaymentStatus = allPaymentStatus;
+      scope.allPaymentMethods = allPaymentMethods;
 
       scope.setStatusFilter = (s) => {
         _.set($rootScope, `${storeKeyPrefix}.searchOrderStatus`, s);
@@ -58,11 +68,18 @@ orderModule.factory('orderCommons', ($rootScope, $compile) => {
         _.set($rootScope, `${storeKeyPrefix}.searchPaymentStatus`, p);
         reloadDatatables();
       };
+      scope.setPaymentMethodFilter = (p) => {
+        _.set($rootScope, `${storeKeyPrefix}.searchPaymentMethod`, p);
+        reloadDatatables();
+      };
       if (!_.get($rootScope, `${storeKeyPrefix}.searchOrderStatus`)) {
         scope.setStatusFilter(-1);
       }
       if (!_.get($rootScope, `${storeKeyPrefix}.searchPaymentStatus`)) {
         scope.setPaymentStatusFilter(-1);
+      }
+      if (!_.get($rootScope, `${storeKeyPrefix}.searchPaymentMethod`)) {
+        scope.setPaymentMethodFilter(-1);
       }
 
       scope.translateOrderStatus = (status) => {
@@ -77,9 +94,16 @@ orderModule.factory('orderCommons', ($rootScope, $compile) => {
         }
         return $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`);
       };
+      scope.translateOrderPaymentMethod = (method) => {
+        if (method === -1) {
+          return '모든 결제 방법';
+        }
+        return $rootScope.getContentsI18nText(`enum.payment.method.${method}`);
+      };
       scope.fnUrlParams = (urlParams) => {
         const searchOrderStatus = _.get($rootScope, `${storeKeyPrefix}.searchOrderStatus`);
         const searchPaymentStatus = _.get($rootScope, `${storeKeyPrefix}.searchPaymentStatus`);
+        const searchPaymentMethod = _.get($rootScope, `${storeKeyPrefix}.searchPaymentMethod`);
         const queryParams = {};
         if (roleType) {
           queryParams.roleType = roleType;
@@ -91,6 +115,9 @@ orderModule.factory('orderCommons', ($rootScope, $compile) => {
         }
         if (searchPaymentStatus >= 0) {
           queryParams.paymentStatus = searchPaymentStatus;
+        }
+        if (searchPaymentMethod >= 0) {
+          queryParams.method = searchPaymentMethod;
         }
         if (scope.startDate && scope.endDate) {
           const start = new Date(scope.startDate);
@@ -143,6 +170,9 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
       {
         data: 'orderedAt',
         render: (data) => data ? boUtils.formatDate(data) : '',
+      },
+      {
+        data: (data) => _.get(data, 'method', ''),
       },
       {
         data: (data) => (+data.totalKRW).format(),

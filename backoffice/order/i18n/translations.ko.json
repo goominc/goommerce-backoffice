@@ -23,6 +23,7 @@
       "startProcessing": "주문처리",
       "statusColumn": "주문 상태",
       "sourceColumn": "가입경로",
+      "paymethodColumn": "결제수단",
       "title": "주문현황"
     },
     "detail": {
