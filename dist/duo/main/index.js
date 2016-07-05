@@ -4116,6 +4116,9 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
     sref: 'dashboard',
     name: $translate.instant('dashboard.home')
   }, {
+    sref: 'order.main',
+    name: $translate.instant('order.main.title')
+  }, {
     sref: 'order.vat({month:"' + month + '"})',
     name: $translate.instant('order.vat.title')
   }, {
@@ -4701,7 +4704,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     XXX: ['Free', 'XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL'],
     Feet: getFeetSizes(225, 5, 290),
     '허리': getFeetSizes(25, 1, 32),
-    '여자옷': getFeetSizes(44, 11, 88)
+    '여자옷': getFeetSizes(44, 11, 88),
+    '모자': [46, 48, 50]
   };
   $scope.variantKinds = [{ name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors }, { name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes }];
   $scope.favoriteCategories = [{ name: '여성', categories: [{ name: '티셔츠', id: 53 }, { name: '원피스', id: 109 }, { name: '니트웨어', id: 77 }, { name: '스커트', id: 47 }, { name: '코트', id: 58 }] }, { name: '남성', categories: [{ name: '티셔츠', id: 184 }, { name: '셔츠', id: 185 }, { name: '바지', id: 187 }, { name: '자켓', id: 196 }, { name: '점퍼', id: 197 }] }];
@@ -5447,9 +5451,12 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   */
   $scope.newProductVariant = { data: {} };
   $scope.addProductVariant = function (newProductVariant) {
-    if (!newProductVariant.sku || newProductVariant.sku === '') {
-      window.alert('sku must be valid string');
+    if (!newProductVariant.data || !newProductVariant.data.color || !newProductVariant.data.size) {
+      window.alert('insert color and/or size');
       return;
+    }
+    if (!newProductVariant.sku || newProductVariant.sku === '') {
+      newProductVariant.sku = 'autogen-' + newProductVariant.data.color + '-' + newProductVariant.data.size;
     }
     if ($scope.productVariantsMap[newProductVariant.sku]) {
       window.alert(newProductVariant.sku + ' already exists');

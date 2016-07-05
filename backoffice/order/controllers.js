@@ -1573,6 +1573,10 @@ orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootS
       name: $translate.instant('dashboard.home'),
     },
     {
+      sref: 'order.main',
+      name: $translate.instant('order.main.title'),
+    },
+    {
       sref: `order.vat({month:"${month}"})`,
       name: $translate.instant('order.vat.title'),
     },
