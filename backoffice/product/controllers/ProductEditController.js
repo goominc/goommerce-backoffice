@@ -30,6 +30,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     Feet: getFeetSizes(225, 5, 290),
     '허리': getFeetSizes(25, 1, 32),
     '여자옷': getFeetSizes(44, 11, 88),
+    '모자': [46, 48, 50],
   };
   $scope.variantKinds = [
     {name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors},
@@ -697,9 +698,12 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
 */
   $scope.newProductVariant = { data: {} };
   $scope.addProductVariant = (newProductVariant) => {
-    if (!newProductVariant.sku || newProductVariant.sku === '') {
-      window.alert('sku must be valid string');
+    if (!newProductVariant.data || !newProductVariant.data.color || !newProductVariant.data.size) {
+      window.alert('insert color and/or size');
       return;
+    }
+    if (!newProductVariant.sku || newProductVariant.sku === '') {
+      newProductVariant.sku = `autogen-${newProductVariant.data.color}-${newProductVariant.data.size}`;
     }
     if ($scope.productVariantsMap[newProductVariant.sku]) {
       window.alert(newProductVariant.sku + ' already exists');
