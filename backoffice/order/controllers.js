@@ -1038,7 +1038,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
             values: [
               { userEnteredValue: { stringValue: 'NO' } },
               { userEnteredValue: { stringValue: '브랜드' } },
-              { userEnteredValue: { stringValue: '상품번호' } },
+              // { userEnteredValue: { stringValue: '상품번호' } },
               { userEnteredValue: { stringValue: '상품명' } },
               { userEnteredValue: { stringValue: '컬러' } },
               { userEnteredValue: { stringValue: '사이즈' } },
@@ -1050,13 +1050,13 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
             values: [
               { userEnteredValue: { stringValue: (index + 1).toString() } },
               { userEnteredValue: { stringValue: op.brand.name.ko } },
-              { userEnteredValue: { stringValue: op.product.id.toString() } },
+              // { userEnteredValue: { stringValue: op.product.id.toString() } },
               { userEnteredValue: { stringValue: op.product.name.ko } },
               { userEnteredValue: { stringValue: op.productVariant.data.color } },
               { userEnteredValue: { stringValue: op.productVariant.data.size } },
               { userEnteredValue: { stringValue: op.quantity.toString() } },
               { userEnteredValue: { stringValue: _.get(op, 'finalQuantity', '').toString() } },
-              { userEnteredValue: { stringValue: _.get(op, 'finalTotalKRW', '').toString() } },
+              { userEnteredValue: { stringValue: (+_.get(op, 'finalTotalKRW', 0)).format(0, 3) } },
             ]
           })), {
             // blank line
@@ -1069,38 +1069,38 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
           }, {
             values: [
               { userEnteredValue: { stringValue: '상품가격' } },
-              { userEnteredValue: { stringValue: _.get(order, 'subtotalKRW', '').toString() } },
-              { userEnteredValue: { stringValue: _.get(order, 'finalSubtotalKRW', '').toString() } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'subtotalKRW', 0)).format(0, 3) } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'finalSubtotalKRW', 0)).format(0, 3) } },
             ]
           }, {
             values: [
               { userEnteredValue: { stringValue: '세금' } },
-              { userEnteredValue: { stringValue: _.get(order, 'taxKRW', '').toString() } },
-              { userEnteredValue: { stringValue: _.get(order, 'finalTaxKRW', '').toString() } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'taxKRW', 0)).format(0, 3) } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'finalTaxKRW', 0)).format(0, 3) } },
             ]
           }, {
             values: [
               { userEnteredValue: { stringValue: '사입비' } },
-              { userEnteredValue: { stringValue: _.get(order, 'handlingFeeKRW', '').toString() } },
-              { userEnteredValue: { stringValue: _.get(order, 'finalHandlingFeeKRW', '').toString() } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'handlingFeeKRW', 0)).format(0, 3) } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'finalHandlingFeeKRW', 0)).format(0, 3) } },
             ]
           }, {
             values: [
               { userEnteredValue: { stringValue: '운송비' } },
-              { userEnteredValue: { stringValue: _.get(order, 'shippingCostKRW', '').toString() } },
-              { userEnteredValue: { stringValue: _.get(order, 'finalShippingCostKRW', '').toString() } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'shippingCostKRW', 0)).format(0, 3) } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'finalShippingCostKRW', 0)).format(0, 3) } },
             ]
           }, {
             values: [
               { userEnteredValue: { stringValue: '가격조정' } },
-              { userEnteredValue: { stringValue: _.get(order, 'adjustmentTotalKRW', '').toString() } },
-              { userEnteredValue: { stringValue: _.get(order, 'finalAdjustmentTotalKRW', '').toString() } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'adjustmentTotalKRW', 0)).format(0, 3) } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'finalAdjustmentTotalKRW', 0)).format(0, 3) } },
             ]
           }, {
             values: [
               { userEnteredValue: { stringValue: '전체금액' } },
-              { userEnteredValue: { stringValue: _.get(order, 'totalKRW', '').toString() } },
-              { userEnteredValue: { stringValue: _.get(order, 'finalTotalKRW', '').toString() } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'totalKRW', 0)).format(0, 3) } },
+              { userEnteredValue: { stringValue: (+_.get(order, 'finalTotalKRW', 0)).format(0, 3) } },
             ]
           }, {
             // blank line
