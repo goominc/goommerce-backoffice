@@ -173,6 +173,10 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       key: 'product.imageUpload',
       name: $translate.instant('product.imageUpload.title'),
       sref: 'product.imageUpload'
+    }, {
+      key: 'product.smarket',
+      name: 'S마켓',
+      sref: 'product.smarket'
     }]
   }, {
     key: 'order', // TODO get key from router
@@ -4293,6 +4297,10 @@ productModule.config(function ($stateProvider) {
     url: '/image-upload',
     templateUrl: templateRoot + '/product/image-upload.html',
     controller: 'ProductImageUploadController'
+  }).state('product.smarket', {
+    url: '/smarket',
+    templateUrl: templateRoot + '/product/smarket.html',
+    controller: 'SMarketController'
   });
 });
 
@@ -4477,8 +4485,9 @@ require('./controllers/ProductEditController');
 require('./controllers/CategoryEditController');
 require('./controllers/ProductBatchUploadController');
 require('./controllers/ProductImageUploadController');
+require('./controllers/SMarketController');
 // END module require js
-}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":36,"./i18n/translations.ko.json":37,"./controllers/ProductMainController":38,"./controllers/ProductEditController":39,"./controllers/CategoryEditController":40,"./controllers/ProductBatchUploadController":41,"./controllers/ProductImageUploadController":42}],
+}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":36,"./i18n/translations.ko.json":37,"./controllers/ProductMainController":38,"./controllers/ProductEditController":39,"./controllers/CategoryEditController":40,"./controllers/ProductBatchUploadController":41,"./controllers/ProductImageUploadController":42,"./controllers/SMarketController":43}],
 36: [function(require, module, exports) {
 module.exports = {
   "product": {
@@ -6305,6 +6314,49 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
   };
 });
 }, {"../module":10}],
+43: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var productModule = require('../module.js');
+
+productModule.controller('SMarketController', function ($scope, $http) {
+  $scope.smarketDatatables = {
+    field: 'products',
+    storeKey: 'smarket',
+    columns: [{
+      data: 'gid'
+    }, {
+      data: 'storeName'
+    }, {
+      data: function data(_data) {
+        return _.get(_data, 'data.goodsName', '');
+      }
+    }, {
+      data: function data(_data2) {
+        return _.get(_data2, 'data.goodsPrice', '');
+      }
+    }, {
+      data: function data(_data3) {
+        return _.get(_data3, 'data.color', '');
+      }
+    }, {
+      data: function data(_data4) {
+        var images = (_.get(_data4, 'data.goodsImages') || []).map(function (img) {
+          return '' + (img.imageUrl || '') + (img.filename || '');
+        });
+        return images;
+      },
+      render: function render(images) {
+        return images.map(function (image) {
+          return '<img width="100" src=' + image + ' />';
+        }).join('');
+      }
+    }]
+  };
+});
+}, {"../module.js":10}],
 11: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
@@ -6337,14 +6389,14 @@ module.exports = textModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":43,"./i18n/translations.ko.json":44,"./controllers.js":45}],
-43: [function(require, module, exports) {
+}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":44,"./i18n/translations.ko.json":45,"./controllers.js":46}],
+44: [function(require, module, exports) {
 module.exports = {
 
 }
 ;
 }, {}],
-44: [function(require, module, exports) {
+45: [function(require, module, exports) {
 module.exports = {
   "text": {
     "title": "국제화"
@@ -6352,7 +6404,7 @@ module.exports = {
 }
 ;
 }, {}],
-45: [function(require, module, exports) {
+46: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -6601,13 +6653,13 @@ userModule.factory('userUtil', function () {
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":46,"./i18n/translations.ko.json":47,"./controllers.js":48}],
-46: [function(require, module, exports) {
+}, {"../third_party/angular-translate":12,"./i18n/translations.en.json":47,"./i18n/translations.ko.json":48,"./controllers.js":49}],
+47: [function(require, module, exports) {
 module.exports = {
 
 };
 }, {}],
-47: [function(require, module, exports) {
+48: [function(require, module, exports) {
 module.exports = {
   "user": {
     "createUser": {
@@ -6655,7 +6707,7 @@ module.exports = {
 }
 ;
 }, {}],
-48: [function(require, module, exports) {
+49: [function(require, module, exports) {
 'use strict';
 
 var userModule = require('./module');

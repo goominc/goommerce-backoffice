@@ -96,6 +96,11 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: $translate.instant('product.imageUpload.title'),
           sref: 'product.imageUpload',
         },
+        {
+          key: 'product.smarket',
+          name: 'S마켓',
+          sref: 'product.smarket',
+        },
       ],
     },
     {

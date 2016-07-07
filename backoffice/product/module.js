@@ -83,6 +83,11 @@ productModule.config(($stateProvider) => {
       url: '/image-upload',
       templateUrl: templateRoot + '/product/image-upload.html',
       controller: 'ProductImageUploadController',
+    })
+    .state('product.smarket', {
+      url: '/smarket',
+      templateUrl: templateRoot + '/product/smarket.html',
+      controller: 'SMarketController',
     });
 });
 
@@ -186,4 +191,5 @@ require('./controllers/ProductEditController');
 require('./controllers/CategoryEditController');
 require('./controllers/ProductBatchUploadController');
 require('./controllers/ProductImageUploadController');
+require('./controllers/SMarketController');
 // END module require js
