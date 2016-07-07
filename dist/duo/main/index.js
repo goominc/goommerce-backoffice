@@ -3616,7 +3616,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
           values: [{ userEnteredValue: { stringValue: 'ID' } }, { userEnteredValue: { stringValue: 'TID' } }, { userEnteredValue: { stringValue: 'TYPE' } }, { userEnteredValue: { stringValue: '가격' } }, { userEnteredValue: { stringValue: '결제수단' } }, { userEnteredValue: { stringValue: '상태' } }]
         }], _toConsumableArray(order.payments.map(function (p, index) {
           return {
-            values: [{ userEnteredValue: { stringValue: p.id.toString() } }, { userEnteredValue: { stringValue: p.tid } }, { userEnteredValue: { stringValue: $scope.translatePaymentType(p.type) } }, { userEnteredValue: { stringValue: $scope.paymentAmount(p).toString() } }, { userEnteredValue: { stringValue: p.type === 0 ? $scope.translatePaymentMethod(p.method) : '' } }, { userEnteredValue: { stringValue: $scope.translatePaymentStatus(p.status) } }]
+            values: [{ userEnteredValue: { stringValue: p.id.toString() } }, { userEnteredValue: { stringValue: p.tid } }, { userEnteredValue: { stringValue: $scope.translatePaymentType(p.type) } }, { userEnteredValue: { stringValue: (+$scope.paymentAmount(p)).format(0, 3) } }, { userEnteredValue: { stringValue: p.type === 0 ? $scope.translatePaymentMethod(p.method) : '' } }, { userEnteredValue: { stringValue: $scope.translatePaymentStatus(p.status) } }]
           };
         })));
       };

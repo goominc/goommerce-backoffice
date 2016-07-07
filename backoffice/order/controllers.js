@@ -1118,7 +1118,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
               { userEnteredValue: { stringValue: p.id.toString() } },
               { userEnteredValue: { stringValue: p.tid } },
               { userEnteredValue: { stringValue: $scope.translatePaymentType(p.type) } },
-              { userEnteredValue: { stringValue: $scope.paymentAmount(p).toString() } },
+              { userEnteredValue: { stringValue: (+$scope.paymentAmount(p)).format(0, 3) } },
               { userEnteredValue: { stringValue: p.type === 0 ? $scope.translatePaymentMethod(p.method) : '' } },
               { userEnteredValue: { stringValue: $scope.translatePaymentStatus(p.status) } },
             ]
