@@ -41,6 +41,18 @@
                   </li>
                 </ul>
               </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-default">{{translateOrderSettlementStatus(state.order.bigBuyer.searchSettlementStatus)}}</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li>
+                    <a data-ng-click="setSettlementStatusFilter(-1)">{{translateOrderSettlementStatus(-1)}}</a>
+                  </li>
+                  <li data-ng-repeat="p in allSettlementStatus">
+                    <a data-ng-click="setSettlementStatusFilter(p)">{{translateOrderSettlementStatus(p)}}</a>
+                  </li>
+                </ul>
+              </div>
             </div>
             <div class="portlet-body">
               <div
@@ -58,6 +70,7 @@
                     <td>{{'order.main.createdAtColumn' | translate}}</td>
                     <td>{{'order.main.priceColumn' | translate}}</td>
                     <td>{{'order.main.paymentStatusColumn' | translate}}</td>
+                    <td>{{'order.main.settlementStatusColumn' | translate}}</td>
                     <td>{{'order.main.buyerIdColumn' | translate}}</td>
                     <td>{{'order.main.buyerNameColumn' | translate}}</td>
                     <td>{{'order.main.buyerTelColumn' | translate}}</td>

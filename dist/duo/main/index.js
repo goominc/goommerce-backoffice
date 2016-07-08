@@ -2664,6 +2664,7 @@ module.exports = {
       "createdAtColumn": "주문 생성 시각",
       "orderedAtColumn": "주문 시작 시각",
       "paymentStatusColumn": "결제 상태",
+      "settlementStatusColumn": "정산 상태",
       "priceColumn": "주문가격",
       "startProcessing": "주문처리",
       "statusColumn": "주문 상태",
@@ -2757,10 +2758,12 @@ orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
   var allStatus = [0, 100, 101, 102, 200, 201, 202, 203, 300, 400];
   var allPaymentStatus = [0, 1, 100, 200];
   var allPaymentMethods = [0, 1, 2, 3, 4, 5];
+  var allSettlementStatus = [0, 100];
   return {
     allStatus: allStatus,
     allPaymentStatus: allPaymentStatus,
     allPaymentMethods: allPaymentMethods,
+    allSettlementStatus: allSettlementStatus,
     applyFilterSearch: function applyFilterSearch(scope, state, storeKeyPrefix, roleType) {
       var reloadDatatables = function reloadDatatables() {
         $('table').DataTable().ajax.reload();
@@ -2792,6 +2795,7 @@ orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
       scope.allStatus = allStatus.slice(1);
       scope.allPaymentStatus = allPaymentStatus;
       scope.allPaymentMethods = allPaymentMethods;
+      scope.allSettlementStatus = allSettlementStatus;
 
       scope.setStatusFilter = function (s) {
         _.set($rootScope, storeKeyPrefix + '.searchOrderStatus', s);
@@ -2805,6 +2809,10 @@ orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
         _.set($rootScope, storeKeyPrefix + '.searchPaymentMethod', p);
         reloadDatatables();
       };
+      scope.setSettlementStatusFilter = function (p) {
+        _.set($rootScope, storeKeyPrefix + '.searchSettlementStatus', p);
+        reloadDatatables();
+      };
       if (!_.get($rootScope, storeKeyPrefix + '.searchOrderStatus')) {
         scope.setStatusFilter(-1);
       }
@@ -2813,6 +2821,9 @@ orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
       }
       if (!_.get($rootScope, storeKeyPrefix + '.searchPaymentMethod')) {
         scope.setPaymentMethodFilter(-1);
+      }
+      if (!_.get($rootScope, storeKeyPrefix + '.searchSettlementStatus')) {
+        scope.setSettlementStatusFilter(-1);
       }
 
       scope.translateOrderStatus = function (status) {
@@ -2833,10 +2844,17 @@ orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
         }
         return $rootScope.getContentsI18nText('enum.payment.method.' + method);
       };
+      scope.translateOrderSettlementStatus = function (status) {
+        if (status === -1) {
+          return '모든 정산 상태';
+        }
+        return $rootScope.getContentsI18nText('enum.order.settlementStatus.' + status);
+      };
       scope.fnUrlParams = function (urlParams) {
         var searchOrderStatus = _.get($rootScope, storeKeyPrefix + '.searchOrderStatus');
         var searchPaymentStatus = _.get($rootScope, storeKeyPrefix + '.searchPaymentStatus');
         var searchPaymentMethod = _.get($rootScope, storeKeyPrefix + '.searchPaymentMethod');
+        var searchSettlementStatus = _.get($rootScope, storeKeyPrefix + '.searchSettlementStatus');
         var queryParams = {};
         if (roleType) {
           queryParams.roleType = roleType;
@@ -2851,6 +2869,9 @@ orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
         }
         if (searchPaymentMethod >= 0) {
           queryParams.method = searchPaymentMethod;
+        }
+        if (searchSettlementStatus >= 0) {
+          queryParams.settlementStatus = searchSettlementStatus;
         }
         if (scope.startDate && scope.endDate) {
           var start = new Date(scope.startDate);
@@ -2916,6 +2937,11 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
       data: 'paymentStatus',
       render: function render(status) {
         return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
+      }
+    }, {
+      data: 'settlementStatus',
+      render: function render(status) {
+        return $rootScope.getContentsI18nText('enum.order.settlementStatus.' + status);
       }
     }, {
       data: 'buyerId',
@@ -3875,6 +3901,11 @@ orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $
       data: 'paymentStatus',
       render: function render(status) {
         return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
+      }
+    }, {
+      data: 'settlementStatus',
+      render: function render(status) {
+        return $rootScope.getContentsI18nText('enum.order.settlementStatus.' + status);
       }
     }, {
       data: 'buyerId',
