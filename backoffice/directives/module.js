@@ -14,9 +14,12 @@ directiveModule.factory('datatableCommons', ($compile, $rootScope) => {
           [10, 20, 50, 100, 150],  // change per page values here
         ],
         // data: realData, need implement
-        ..._.pick(dataTables, ['columns', 'data', 'order', 'oSearch', 'pageLength']),
-        fnCreatedRow: (nRow) => {
+        ..._.pick(dataTables, ['columns', 'data', 'order', 'oSearch', 'pageLength', 'createdRow']),
+        fnCreatedRow: (nRow, aData, iDataIndex) => {
           $compile(nRow)(scope);
+          if (dataTables.fnCreatedRow) {
+            dataTables.fnCreatedRow(nRow, aData, iDataIndex);
+          }
         },
         fnRowCallback: (nRow, aData) => {
           $(nRow).attr("id", aData.id);

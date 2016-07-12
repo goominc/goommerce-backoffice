@@ -2318,9 +2318,12 @@ directiveModule.factory('datatableCommons', function ($compile, $rootScope) {
     getOptions: function getOptions(scope, dataTables) {
       var options = _extends({
         lengthMenu: [[10, 20, 50, 100, 150], [10, 20, 50, 100, 150]]
-      }, _.pick(dataTables, ['columns', 'data', 'order', 'oSearch', 'pageLength']), {
-        fnCreatedRow: function fnCreatedRow(nRow) {
+      }, _.pick(dataTables, ['columns', 'data', 'order', 'oSearch', 'pageLength', 'createdRow']), {
+        fnCreatedRow: function fnCreatedRow(nRow, aData, iDataIndex) {
           $compile(nRow)(scope);
+          if (dataTables.fnCreatedRow) {
+            dataTables.fnCreatedRow(nRow, aData, iDataIndex);
+          }
         },
         fnRowCallback: function fnRowCallback(nRow, aData) {
           $(nRow).attr("id", aData.id);
@@ -3922,7 +3925,24 @@ orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $
       }
     }, {
       data: 'email'
-    }]
+    }],
+    fnCreatedRow: function fnCreatedRow(nRow, aData, iDataIndex) {
+      if (aData.status === 100) {} else if (aData.status === 101) {
+        $(nRow).css('background-color', 'rgb(219,219,219)');
+      } else if (aData.status === 102) {
+        $(nRow).css('background-color', 'rgb(255,185,185)');
+      } else if (aData.status === 200) {
+        $(nRow).css('background-color', 'rgb(198,190,250)');
+      } else if (aData.status === 201) {
+        $(nRow).css('background-color', 'rgb(208,216,232)');
+      } else if (aData.status === 202) {
+        $(nRow).css('background-color', 'rgb(211,147,227)');
+      } else if (aData.status === 203) {
+        $(nRow).css('background-color', 'rgb(179,102,255)');
+      } else if (aData.status === 300) {
+        $(nRow).css('background-color', 'rgb(255,185,187)');
+      }
+    }
   };
 
   orderCommons.applyFilterSearch($scope, $state, 'state.order.bigBuyer');
