@@ -233,6 +233,24 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         data: (data) => _.get(data, 'data.affiliate.source') || '',
       },
     ],
+    fnCreatedRow(nRow, aData, iDataIndex) {
+      if (aData.status === 100) {
+      } else if (aData.status === 101) {
+        $(nRow).css('background-color', 'rgb(219,219,219)')
+      } else if (aData.status === 102) {
+        $(nRow).css('background-color', 'rgb(255,185,185)')
+      } else if (aData.status === 200) {
+        $(nRow).css('background-color', 'rgb(198,190,250)')
+      } else if (aData.status === 201) {
+        $(nRow).css('background-color', 'rgb(208,216,232)')
+      } else if (aData.status === 202) {
+        $(nRow).css('background-color', 'rgb(211,147,227)')
+      } else if (aData.status === 203) {
+        $(nRow).css('background-color', 'rgb(179,102,255)')
+      } else if (aData.status === 300) {
+        $(nRow).css('background-color', 'rgb(255,185,187)')
+      }
+    }
   };
 
   orderCommons.applyFilterSearch($scope, $state, 'state.order.main', 'buyer');
