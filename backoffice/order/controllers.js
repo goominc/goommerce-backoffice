@@ -38,7 +38,7 @@ orderModule.factory('orderCommons', ($rootScope, $compile, boUtils) => {
     allPaymentStatus,
     allPaymentMethods,
     allSettlementStatus,
-    applyFilterSearch: (scope, state, storeKeyPrefix, roleType) => {
+    applyFilterSearch: (scope, state, storeKeyPrefix, getRoleType) => {
       const reloadDatatables = () => {
         $('table').DataTable().ajax.reload();
       };
@@ -123,13 +123,14 @@ orderModule.factory('orderCommons', ($rootScope, $compile, boUtils) => {
           return '모든 정산 상태';
         }
         return $rootScope.getContentsI18nText(`enum.order.settlementStatus.${status}`);
-      }
+      };
       scope.fnUrlParams = (urlParams) => {
         const searchOrderStatus = _.get($rootScope, `${storeKeyPrefix}.searchOrderStatus`);
         const searchPaymentStatus = _.get($rootScope, `${storeKeyPrefix}.searchPaymentStatus`);
         const searchPaymentMethod = _.get($rootScope, `${storeKeyPrefix}.searchPaymentMethod`);
         const searchSettlementStatus = _.get($rootScope, `${storeKeyPrefix}.searchSettlementStatus`);
         const queryParams = {};
+        const roleType = getRoleType();
         if (roleType) {
           queryParams.roleType = roleType;
         }
@@ -253,7 +254,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
     }
   };
 
-  orderCommons.applyFilterSearch($scope, $state, 'state.order.main', 'buyer');
+  orderCommons.applyFilterSearch($scope, $state, 'state.order.main', () => 'buyer');
 });
 
 orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, $http, $state, $translate, boUtils) => {
@@ -1408,7 +1409,6 @@ orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $r
     storeKey: 'orderBigBuyer',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    url: '/api/v1/orders/big',
     columns: [
       {
         data: 'id',
@@ -1471,7 +1471,139 @@ orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $r
     }
   };
 
-  orderCommons.applyFilterSearch($scope, $state, 'state.order.bigBuyer');
+  orderCommons.applyFilterSearch($scope, $state, 'state.order.bigBuyer', () => 'bigBuyer');
+});
+
+orderModule.controller('OrderListPriceController', ($scope, $http, $state, $rootScope, $translate, boUtils, orderCommons) => {
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'order.main',
+      name: $translate.instant('order.main.title'),
+    },
+    {
+      sref: 'order.listPrice',
+      name: $translate.instant('order.listPrice.title'),
+    },
+  ];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.roles = {
+    all: { name: null, displayName: '모든 바이어' },
+    buyer: { name: 'buyer', displayName: '바이어' },
+    bigBuyer: { name: 'bigBuyer', displayName: '빅바이어' },
+  };
+  $scope.roleTypes = Object.keys($scope.roles);
+  if (!_.get($rootScope.state, 'order.listPrice.roleType')) {
+    // 2016. 07. 13. [heekyu] default is buyer
+    _.set($rootScope.state, 'order.listPrice.roleType', 'buyer');
+  }
+  $scope.changeRoleType = (role) => {
+    _.set($rootScope.state, 'order.listPrice.roleType', role);
+    $('table').DataTable().ajax.reload();
+  };
+
+  $scope.orderDatatables = {
+    field: 'orders',
+    storeKey: 'orderListPrice',
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>'
+        },
+      },
+      {
+        data: 'status',
+        render: (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`),
+      },
+      {
+        data: (data) => data.orderedAt || data.createdAt,
+        render: (data) => boUtils.formatDate(data),
+      },
+      {
+        data: (data) => _.get(data, 'method', ''),
+        render: (method) => method !== '' ? $rootScope.getContentsI18nText(`enum.payment.method.${method}`) : '-',
+      },
+      {
+        data: 'buyerId',
+        render: (buyerId) => {
+          return '<a ui-sref="user.info({userId: ' + buyerId+ '})">' + buyerId + '</a>'
+        },
+      },
+      {
+        data: (data) => _.get(data, 'name') || '',
+      },
+      {
+        data: (data) => (+(data.finalSubtotalKRW || data.subtotalKRW || 0)).format(),
+      },
+      {
+        data: (data) => {
+          const handlingFee = +(data.finalHandlingFeeKRW || data.handlingFeeKRW || 0);
+          if (!handlingFee) {
+            return 0;
+          }
+          let tax = +(data.finalTaxKRW || data.taxKRW || 0);
+          if (!tax) {
+            return handlingFee.format();
+          }
+          return boUtils.calcTax(handlingFee).supply.format();
+        },
+      },
+      {
+        data: (data) => {
+          let shippingCost = +(data.finalShippingCostKRW || data.shippingCostKRW || 0);
+          if (!shippingCost) {
+            return 0;
+          }
+          let tax = +(data.finalTaxKRW || data.taxKRW || 0);
+          if (!tax) {
+            return shippingCost.format();
+          }
+          return boUtils.calcTax(shippingCost).supply.format();
+        },
+      },
+      {
+        data: (data) => {
+          let handlingFee = +(data.finalHandlingFeeKRW || data.handlingFeeKRW || 0);
+          let shippingCost = +(data.finalShippingCostKRW || data.shippingCostKRW || 0);
+          let tax = +(data.finalTaxKRW || data.taxKRW || 0);
+          if (!tax) {
+            return 0;
+          }
+          tax = new Decimal(tax).add(new Decimal(boUtils.calcTax(handlingFee).tax)).add(new Decimal(boUtils.calcTax(shippingCost).tax));
+          return tax.toNumber().format();
+        },
+      },
+      {
+        data: (data) => (+(data.finalTotalKRW || data.totalKRW || 0)).format(),
+      },
+    ],
+    fnCreatedRow(nRow, aData, iDataIndex) {
+      if (aData.status === 100) {
+      } else if (aData.status === 101) {
+        $(nRow).css('background-color', 'rgb(219,219,219)')
+      } else if (aData.status === 102) {
+        $(nRow).css('background-color', 'rgb(255,185,185)')
+      } else if (aData.status === 200) {
+        $(nRow).css('background-color', 'rgb(198,190,250)')
+      } else if (aData.status === 201) {
+        $(nRow).css('background-color', 'rgb(208,216,232)')
+      } else if (aData.status === 202) {
+        $(nRow).css('background-color', 'rgb(211,147,227)')
+      } else if (aData.status === 203) {
+        $(nRow).css('background-color', 'rgb(179,102,255)')
+      } else if (aData.status === 300) {
+        $(nRow).css('background-color', 'rgb(255,185,187)')
+      }
+    }
+  };
+
+  const getRoleType = () => $scope.roles[$rootScope.state.order.listPrice.roleType].name;
+  orderCommons.applyFilterSearch($scope, $state, 'state.order.listPrice', getRoleType);
 });
 
 orderModule.controller('OrderSettlementController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {

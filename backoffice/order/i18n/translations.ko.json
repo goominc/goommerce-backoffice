@@ -6,6 +6,7 @@
       "processedDate": "주문 날짜",
       "total": "합계",
       "handlingFee": "사입비",
+      "shippingCost": "운송료",
       "commission": "수수료",
       "brandName": "브랜드명",
       "productPrice": "상품가격",
@@ -82,10 +83,14 @@
     },
     "settlement": {
       "title": "회계팀 대량이체",
-      "done": "대량이체 완료",
+      "done": "대량이체 완료"
     },
     "listBigBuyer": {
       "title": "빅바이어주문목록"
+    },
+    "listPrice": {
+      "title": "기장",
+      "finalTotalColumn": "최종 가격"
     },
     "godo": {
       "title": "고도몰"

@@ -29,9 +29,14 @@ orderModule.config(($stateProvider) => {
       controller: 'OrderMainController',
     })
     .state('order.listBigBuyer', {
-      url: 'listBigBuyer',
+      url: '/listBigBuyer',
       templateUrl: templateRoot + '/order/listBigBuyer.html',
       controller: 'OrderListBigBuyerController',
+    })
+    .state('order.listPrice', {
+      url: '/listPrice',
+      templateUrl: templateRoot + '/order/listPrice.html',
+      controller: 'OrderListPriceController',
     })
     .state('order.beforePayment', {
       url: '/before_payment',

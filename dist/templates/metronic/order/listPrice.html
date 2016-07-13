@@ -1,0 +1,130 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="portlet-title">
+              <div style="float: left; margin-right: 20px;" class="input-group input-large date-picker input-daterange">
+                <input type="text" class="form-control" id="order_start_date" data-date-format="yyyy-mm-dd" data-ng-model="state.order.listPrice.startDate">
+                <span class="input-group-addon">
+                  to </span>
+                <input type="text" class="form-control" id="order_end_date" data-date-format="yyyy-mm-dd" data-ng-model="state.order.listPrice.endDate">
+              </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-default">{{translateOrderStatus(state.order.listPrice.searchOrderStatus)}}</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li>
+                    <a data-ng-click="setStatusFilter(-1)">{{translateOrderStatus(-1)}}</a>
+                  </li>
+                  <li data-ng-repeat="s in allStatus">
+                    <a data-ng-click="setStatusFilter(s)">{{translateOrderStatus(s)}}</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-default">{{translateOrderPaymentStatus(state.order.listPrice.searchPaymentStatus)}}</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li>
+                    <a data-ng-click="setPaymentStatusFilter(-1)">{{translateOrderPaymentStatus(-1)}}</a>
+                  </li>
+                  <li data-ng-repeat="p in allPaymentStatus">
+                    <a data-ng-click="setPaymentStatusFilter(p)">{{translateOrderPaymentStatus(p)}}</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-default">{{translateOrderPaymentMethod(state.order.listPrice.searchPaymentMethod)}}</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li>
+                    <a data-ng-click="setPaymentMethodFilter(-1)">{{translateOrderPaymentMethod(-1)}}</a>
+                  </li>
+                  <li data-ng-repeat="p in allPaymentMethods">
+                    <a data-ng-click="setPaymentMethodFilter(p)">{{translateOrderPaymentMethod(p)}}</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-default">{{translateOrderSettlementStatus(state.order.listPrice.searchSettlementStatus)}}</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li>
+                    <a data-ng-click="setSettlementStatusFilter(-1)">{{translateOrderSettlementStatus(-1)}}</a>
+                  </li>
+                  <li data-ng-repeat="p in allSettlementStatus">
+                    <a data-ng-click="setSettlementStatusFilter(p)">{{translateOrderSettlementStatus(p)}}</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-default">{{roles[state.order.listPrice.roleType].displayName}}</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle=dropdown aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li data-ng-repeat="role in roleTypes">
+                    <a data-ng-click="changeRoleType(role)">{{roles[role].displayName}}</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="portlet-body">
+              <div>부가세는 사입비,운송료의 부가세가 합산됩니다.</div>
+              <div style="margin-bottom: 15px;">사입비,운송료는 부가세가 빠진 가격이 표시됩니다.</div>
+              <div
+                bo-server-datatables="orderDatatables"
+                url="/api/v1/orders"
+                url-params="{}"
+                table-render="datatablesLoaded()"
+                fn-url-params="fnUrlParams(urlParams)"
+              >
+                <table class="table table-bordered table-hover">
+                  <thead>
+                  <tr role="row" class="heading">
+                    <td>ID</td>
+                    <td>{{'order.main.statusColumn' | translate}}</td>
+                    <td>{{'order.main.orderedAtColumn' | translate}}</td>
+                    <td>{{'order.main.paymethodColumn' | translate}}</td>
+                    <td>{{'order.main.buyerIdColumn' | translate}}</td>
+                    <td>{{'order.main.buyerNameColumn' | translate}}</td>
+                    <td>{{'order.common.productPrice' | translate}}</td>
+                    <td>{{'order.common.handlingFee' | translate}}</td>
+                    <td>{{'order.common.shippingCost' | translate}}</td>
+                    <td>{{'order.common.vat' | translate}}</td>
+                    <td>{{'order.listPrice.finalTotalColumn' | translate}}</td>
+                  </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->

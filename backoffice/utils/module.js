@@ -128,22 +128,32 @@ utilModule.factory('boUtils', ($http, $rootScope, $cookies) => {
       _.set($rootScope, `${storeKey}.endDate`, endValue || '');
       startElem.datepicker({ autoclose: true });
       endElem.datepicker({ autoclose: true });
+      // 2016. 07. 13. [heekyu] expires in 1 hour
+      const cookieOptions = {
+        expires: moment().add(1, 'hour').toDate(),
+      };
       startElem.on('change', () => {
         const newValue = startElem.val();
-        $cookies.put(cookieStartKey, newValue);
+        $cookies.put(cookieStartKey, newValue, cookieOptions);
         if (newValue && endValue && new Date(newValue).getTime() > new Date(endValue).getTime()) {
-          $cookies.put(cookieEndKey, newValue);
+          $cookies.put(cookieEndKey, newValue, cookieOptions);
         }
         state.reload();
       });
       endElem.on('change', () => {
         const newValue = endElem.val();
-        $cookies.put(cookieEndKey, newValue);
+        $cookies.put(cookieEndKey, newValue, cookieOptions);
         if (startValue && newValue && new Date(startValue).getTime() > new Date(newValue).getTime()) {
-          $cookies.put(cookieStartKey, newValue);
+          $cookies.put(cookieStartKey, newValue, cookieOptions);
         }
         state.reload();
       });
+    },
+    calcTax: (price) => {
+      price = new Decimal(price);
+      const supply = +(price.div(1.1).toFixed(0, Decimal.ROUND_CEIL));
+      const tax = price.sub(new Decimal(supply)).toNumber();
+      return { supply, tax };
     },
   };
 });
