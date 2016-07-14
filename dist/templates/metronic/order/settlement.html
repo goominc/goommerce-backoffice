@@ -21,8 +21,11 @@
                 <a data-ng-click="done()">
                   <button class="btn blue"><i class="fa fa-check"></i> {{'order.settlement.done' | translate}}</button>
                 </a>
-                <a ng-href="/api/v1/orders/settlement/{{state.orderSettlement.activeDate}}?format=csv&access_token={{state.auth.bearer}}">
-                  <button class="btn blue"><i class="fa fa-check"></i> {{'order.uncle.download' | translate}}</button>
+                <a data-ng-click="downloadCsvAll()">
+                  <button class="btn blue"><i class="fa fa-file-text-o"></i> {{'order.settlement.csvAll' | translate}}</button>
+                </a>
+                <a data-ng-click="downloadCsvSelected()">
+                  <button class="btn blue"><i class="fa fa-check"></i> {{'order.settlement.csvSelected' | translate}}</button>
                 </a>
               </div>
             </div>
@@ -35,6 +38,10 @@
                 <table class="table table-bordered table-hover">
                   <thead>
                   <tr role="row" class="heading">
+                    <td class="center">
+                      <input type="checkbox" id="order_product_checkall" checked />
+                      <label for="order_product_checkall" data-ng-click="toggleAll($event)"></label>
+                    </td>
                     <td>{{'order.orderProduct.orderIdColumn' | translate}}</td>
                     <td>{{'order.orderProduct.brandIdColumn' | translate}}</td>
                     <td>{{'order.orderProduct.brandNameColumn' | translate}}</td>
@@ -42,9 +49,11 @@
                     <td>{{'order.orderProduct.bank.name' | translate}}</td>
                     <td>{{'order.orderProduct.bank.accountNumber' | translate}}</td>
                     <td>{{'order.orderProduct.totalSaledColumn' | translate}}</td>
+                    <td>{{'order.orderProduct.totalPaidColumn' | translate}}</td>
                     <td>{{'order.orderProduct.totalWillPayColumn' | translate}}</td>
                     <td>{{'order.orderProduct.bank.accountHolder' | translate}}</td>
                     <td>{{'order.orderProduct.buyerIdColumn' | translate}}</td>
+                    <!--td></td-->
                   </tr>
                   </thead>
                   <tbody></tbody>

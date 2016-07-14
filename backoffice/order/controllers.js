@@ -1623,8 +1623,14 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
     },
   ];
 
-  $('.date-picker').datepicker({ autoclose: true });
+  const today = moment();
+  if (!_.get($rootScope.state, 'orderSettlement.activeDate')) {
+    _.set($rootScope.state, 'orderSettlement.activeDate', today.format('YYYY-MM-DD'));
+  }
   let isReload = false;
+  $('.date-picker').datepicker({ autoclose: true });
+  $('.date-picker').datepicker('setDate', $rootScope.state.orderSettlement.activeDate);
+  // $('.date-picker input').val($rootScope.state.orderSettlement.activeDate);
   $('.date-picker').on('change', (e) => {
     // 2016. 06. 29. [heekyu] why event multiple times?
     const value = $('.date-picker input').val();
@@ -1638,19 +1644,45 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
       $state.reload();
     }
   });
-  const today = moment();
-  if (!_.get($rootScope.state, 'orderSettlement.activeDate')) {
-    _.set($rootScope.state, 'orderSettlement.activeDate', today.format('YYYY-MM-DD'));
-  }
-  $('.date-picker input').val($rootScope.state.orderSettlement.activeDate);
-  // $scope.activeDate = today.format('YYYY-MM-DD');
   $scope.done = () => {
     const activeDate = _.get($rootScope.state, 'orderSettlement.activeDate');
     if (!activeDate) {
       window.alert('날짜를 선택해 주세요');
       return;
     }
-    $http.put(`/api/v1/orders/settlement/${activeDate}`).then(
+    let totalPrice = 0;
+    let totalCount = 0;
+    const allDatas = $('table').dataTable().fnGetData();
+    allDatas.forEach((data) => {
+      const price = +data.finalTotalKRW || 0;
+      if (price !== 0) {
+        totalPrice += price;
+        totalCount++;
+      }
+    });
+    if (totalCount === 0) {
+      window.alert('더 이상 출금할 내역이 없습니다.');
+      return;
+    }
+    if (window.confirm(`${totalCount} 개의 내역, ${totalPrice.format()}원 에 대한 출금 완료 처리를 하시겠습니까?`)) {
+      $http.put(`/api/v1/orders/settlement/${activeDate}`).then(
+        () => {
+          window.alert('정산(출금) 내역이 정상적으로 업데이트 되었습니다.');
+          $state.reload();
+        }
+      );
+    }
+  };
+
+  $scope.doneByItem = (idx) => {
+    const activeDate = _.get($rootScope.state, 'orderSettlement.activeDate');
+    if (!activeDate) {
+      window.alert('날짜를 선택해 주세요');
+      return;
+    }
+    const data = $scope.items[idx];
+    const body = { orderProductIds: data.order_product_ids };
+    $http.put(`/api/v1/orders/settlement/${activeDate}`, body).then(
       () => {
         window.alert('정산(출금) 내역이 정상적으로 업데이트 되었습니다.');
         $state.reload();
@@ -1658,16 +1690,67 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
     );
   };
 
+  const downloadCsv = (items) => {
+    const url = `/api/v1/orders/settlement/${$rootScope.state.orderSettlement.activeDate}/csv?access_token=${$rootScope.state.auth.bearer}`;
+    const body = {};
+    if (items) {
+      body.items = JSON.stringify(items);
+    }
+    boUtils.post(url, body);
+  };
+
+  $scope.downloadCsvAll = () => {
+    downloadCsv();
+  };
+
+  $scope.downloadCsvSelected = () => {
+    const items = [];
+    const keys = Object.keys($scope.items);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const item = $scope.items[key];
+      if ($(`#order_product_${key}`).is(':checked')) {
+        items.push({
+          orderId: item.orderId,
+          brandId: item.brand.id,
+        });
+      }
+    }
+    if (!items.length) {
+      window.alert('선택한 내용이 없습니다.');
+      return;
+    }
+    downloadCsv(items);
+  };
+
+  $scope.toggleAll = (e) => {
+    e.preventDefault();
+    const isChecked = $('#order_product_checkall').is(':checked');
+    $('[id^=order_product_]').prop('checked', !isChecked);
+  };
+
   function updateDatatables() {
     const activeDate = _.get($rootScope.state, 'orderSettlement.activeDate');
+    $scope.items = {};
     $scope.orderDatatables = {
       field: 'orders',
       storeKey: 'orderSettlement',
+      order: [1, 'desc'],
       // disableFilter: true,
-      // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-      // url: '/api/v1/orders/settlement/' + $scope.activeDate,
       url: '/api/v1/orders/settlement/' + activeDate,
       columns: [
+        {
+          data: (data) => data,
+          className: 'dt-center',
+          orderable: false,
+          render: (data) => {
+            $scope.items[data._index] = data;
+            return `
+              <input type="checkbox" id="order_product_${data._index}" checked />
+              <label for="order_product_${data._index}"></label>
+            `;
+          },
+        },
         {
           data: 'orderId',
           render: (orderId) => {
@@ -1693,10 +1776,13 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
           data: (data) => _.get(data, 'brand.data.bank.accountNumber', ''),
         },
         {
-          data: (data) => _.get(data, 'originalPriceKRW', '0'),
+          data: (data) => (+_.get(data, 'originalPriceKRW', 0)).format(),
         },
         {
-          data: (data) => _.get(data, 'finalTotalKRW', '0'),
+          data: (data) => (+_.get(data, 'settledPriceKRW', 0)).format(),
+        },
+        {
+          data: (data) => (+_.get(data, 'finalTotalKRW', '0')).format(),
         },
         {
           data: (data) => _.get(data, 'brand.data.bank.accountHolder', ''),
@@ -1707,6 +1793,15 @@ orderModule.controller('OrderSettlementController', ($scope, $http, $state, $roo
             return '<a ui-sref="user.info({userId: ' + buyerId + '})">' + buyerId + '</a>'
           },
         },
+        /*
+        {
+          data: (data) => data,
+          orderable: false,
+          render: (data) => {
+            return `<button class="btn blue" data-ng-click="doneByItem(${$scope.items.length - 1})">출금완료</button>`;
+          },
+        },
+        */
       ],
     };
   }

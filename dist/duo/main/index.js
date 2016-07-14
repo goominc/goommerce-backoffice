@@ -558,7 +558,7 @@ require('./controllers.js');
 
 var utilModule = angular.module('backoffice.utils', ['ngCookies']);
 
-utilModule.factory('boUtils', function ($http, $rootScope, $cookies) {
+utilModule.factory('boUtils', function ($http, $rootScope, $cookies, boConfig) {
   var isString = function isString(v) {
     return typeof v === 'string' || v instanceof String;
   };
@@ -712,6 +712,35 @@ utilModule.factory('boUtils', function ($http, $rootScope, $cookies) {
       var supply = +price.div(1.1).toFixed(0, Decimal.ROUND_CEIL);
       var tax = price.sub(new Decimal(supply)).toNumber();
       return { supply: supply, tax: tax };
+    },
+    // http://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
+    post: function post(path, params, method) {
+      /* CUSTOM LOGIC */
+      if (path.length && path[0] === '/') {
+        path = '' + boConfig.apiUrl + path;
+      }
+      /* CUSTOM LOGIC */
+      method = method || "post"; // Set method to post by default if not specified.
+
+      // The rest of this code assumes you are not using a library.
+      // It can be made less wordy if you use one.
+      var form = document.createElement("form");
+      form.setAttribute("method", method);
+      form.setAttribute("action", path);
+
+      for (var key in params) {
+        if (params.hasOwnProperty(key)) {
+          var hiddenField = document.createElement("input");
+          hiddenField.setAttribute("type", "hidden");
+          hiddenField.setAttribute("name", key);
+          hiddenField.setAttribute("value", params[key]);
+
+          form.appendChild(hiddenField);
+        }
+      }
+
+      document.body.appendChild(form);
+      form.submit();
     }
   };
 });
@@ -2736,6 +2765,7 @@ module.exports = {
       },
       "totalColumn": "금액",
       "totalSaledColumn": "매출금액",
+      "totalPaidColumn": "출금된금액",
       "totalWillPayColumn": "출금예정금액",
       "dateColumn": "주문날짜",
       "buyerIdColumn": "바이어ID"
@@ -2749,7 +2779,9 @@ module.exports = {
     },
     "settlement": {
       "title": "회계팀 대량이체",
-      "done": "대량이체 완료"
+      "done": "대량이체 완료",
+      "csvAll": "전체 CSV 다운로드",
+      "csvSelected": "선택 CSV 다운로드"
     },
     "listBigBuyer": {
       "title": "빅바이어주문목록"
@@ -4138,8 +4170,14 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
     name: $translate.instant('order.settlement.title')
   }];
 
-  $('.date-picker').datepicker({ autoclose: true });
+  var today = moment();
+  if (!_.get($rootScope.state, 'orderSettlement.activeDate')) {
+    _.set($rootScope.state, 'orderSettlement.activeDate', today.format('YYYY-MM-DD'));
+  }
   var isReload = false;
+  $('.date-picker').datepicker({ autoclose: true });
+  $('.date-picker').datepicker('setDate', $rootScope.state.orderSettlement.activeDate);
+  // $('.date-picker input').val($rootScope.state.orderSettlement.activeDate);
   $('.date-picker').on('change', function (e) {
     // 2016. 06. 29. [heekyu] why event multiple times?
     var value = $('.date-picker input').val();
@@ -4153,72 +4191,149 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
       $state.reload();
     }
   });
-  var today = moment();
-  if (!_.get($rootScope.state, 'orderSettlement.activeDate')) {
-    _.set($rootScope.state, 'orderSettlement.activeDate', today.format('YYYY-MM-DD'));
-  }
-  $('.date-picker input').val($rootScope.state.orderSettlement.activeDate);
-  // $scope.activeDate = today.format('YYYY-MM-DD');
   $scope.done = function () {
     var activeDate = _.get($rootScope.state, 'orderSettlement.activeDate');
     if (!activeDate) {
       window.alert('날짜를 선택해 주세요');
       return;
     }
-    $http.put('/api/v1/orders/settlement/' + activeDate).then(function () {
+    var totalPrice = 0;
+    var totalCount = 0;
+    var allDatas = $('table').dataTable().fnGetData();
+    allDatas.forEach(function (data) {
+      var price = +data.finalTotalKRW || 0;
+      if (price !== 0) {
+        totalPrice += price;
+        totalCount++;
+      }
+    });
+    if (totalCount === 0) {
+      window.alert('더 이상 출금할 내역이 없습니다.');
+      return;
+    }
+    if (window.confirm(totalCount + ' 개의 내역, ' + totalPrice.format() + '원 에 대한 출금 완료 처리를 하시겠습니까?')) {
+      $http.put('/api/v1/orders/settlement/' + activeDate).then(function () {
+        window.alert('정산(출금) 내역이 정상적으로 업데이트 되었습니다.');
+        $state.reload();
+      });
+    }
+  };
+
+  $scope.doneByItem = function (idx) {
+    var activeDate = _.get($rootScope.state, 'orderSettlement.activeDate');
+    if (!activeDate) {
+      window.alert('날짜를 선택해 주세요');
+      return;
+    }
+    var data = $scope.items[idx];
+    var body = { orderProductIds: data.order_product_ids };
+    $http.put('/api/v1/orders/settlement/' + activeDate, body).then(function () {
       window.alert('정산(출금) 내역이 정상적으로 업데이트 되었습니다.');
       $state.reload();
     });
   };
 
+  var downloadCsv = function downloadCsv(items) {
+    var url = '/api/v1/orders/settlement/' + $rootScope.state.orderSettlement.activeDate + '/csv?access_token=' + $rootScope.state.auth.bearer;
+    var body = {};
+    if (items) {
+      body.items = JSON.stringify(items);
+    }
+    boUtils.post(url, body);
+  };
+
+  $scope.downloadCsvAll = function () {
+    downloadCsv();
+  };
+
+  $scope.downloadCsvSelected = function () {
+    var items = [];
+    var keys = Object.keys($scope.items);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      var item = $scope.items[key];
+      if ($('#order_product_' + key).is(':checked')) {
+        items.push({
+          orderId: item.orderId,
+          brandId: item.brand.id
+        });
+      }
+    }
+    if (!items.length) {
+      window.alert('선택한 내용이 없습니다.');
+      return;
+    }
+    downloadCsv(items);
+  };
+
+  $scope.toggleAll = function (e) {
+    e.preventDefault();
+    var isChecked = $('#order_product_checkall').is(':checked');
+    $('[id^=order_product_]').prop('checked', !isChecked);
+  };
+
   function updateDatatables() {
     var activeDate = _.get($rootScope.state, 'orderSettlement.activeDate');
+    $scope.items = {};
     $scope.orderDatatables = {
       field: 'orders',
       storeKey: 'orderSettlement',
+      order: [1, 'desc'],
       // disableFilter: true,
-      // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-      // url: '/api/v1/orders/settlement/' + $scope.activeDate,
       url: '/api/v1/orders/settlement/' + activeDate,
       columns: [{
+        data: function data(_data42) {
+          return _data42;
+        },
+        className: 'dt-center',
+        orderable: false,
+        render: function render(data) {
+          $scope.items[data._index] = data;
+          return '\n              <input type="checkbox" id="order_product_' + data._index + '" checked />\n              <label for="order_product_' + data._index + '"></label>\n            ';
+        }
+      }, {
         data: 'orderId',
         render: function render(orderId) {
           return '<a ui-sref="order.detail({orderId: ' + orderId + '})">' + orderId + '</a>';
         }
       }, {
-        data: function data(_data42) {
-          return _.get(_data42, 'brand.id', '');
+        data: function data(_data43) {
+          return _.get(_data43, 'brand.id', '');
         },
         render: function render(brandId) {
           return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandId + '</a>';
         }
       }, {
-        data: function data(_data43) {
-          return _.get(_data43, 'brand.name.ko', '');
-        }
-      }, {
         data: function data(_data44) {
-          return _.get(_data44, 'brand.data.tel', '');
+          return _.get(_data44, 'brand.name.ko', '');
         }
       }, {
         data: function data(_data45) {
-          return _.get(_data45, 'brand.data.bank.name', '');
+          return _.get(_data45, 'brand.data.tel', '');
         }
       }, {
         data: function data(_data46) {
-          return _.get(_data46, 'brand.data.bank.accountNumber', '');
+          return _.get(_data46, 'brand.data.bank.name', '');
         }
       }, {
         data: function data(_data47) {
-          return _.get(_data47, 'originalPriceKRW', '0');
+          return _.get(_data47, 'brand.data.bank.accountNumber', '');
         }
       }, {
         data: function data(_data48) {
-          return _.get(_data48, 'finalTotalKRW', '0');
+          return (+_.get(_data48, 'originalPriceKRW', 0)).format();
         }
       }, {
         data: function data(_data49) {
-          return _.get(_data49, 'brand.data.bank.accountHolder', '');
+          return (+_.get(_data49, 'settledPriceKRW', 0)).format();
+        }
+      }, {
+        data: function data(_data50) {
+          return (+_.get(_data50, 'finalTotalKRW', '0')).format();
+        }
+      }, {
+        data: function data(_data51) {
+          return _.get(_data51, 'brand.data.bank.accountHolder', '');
         }
       }, {
         data: 'buyerId',
@@ -4229,6 +4344,15 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
     };
   }
 
+  /*
+  {
+    data: (data) => data,
+    orderable: false,
+    render: (data) => {
+      return `<button class="btn blue" data-ng-click="doneByItem(${$scope.items.length - 1})">출금완료</button>`;
+    },
+  },
+  */
   updateDatatables();
 
   $rootScope.initAll($scope, $state.current.name);
@@ -4276,20 +4400,20 @@ orderModule.controller('OrderGodoController', function ($scope, $http, $state, $
           return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
         }
       }, {
-        data: function data(_data50) {
-          return _.get(_data50, 'processedDate', '').substring(0, 10);
-        }
-      }, {
-        data: function data(_data51) {
-          return _.get(_data51, 'finalTotalKRW', '');
-        }
-      }, {
         data: function data(_data52) {
-          return _.get(_data52, 'finalHandlingFeeKRW', '');
+          return _.get(_data52, 'processedDate', '').substring(0, 10);
         }
       }, {
         data: function data(_data53) {
-          return _.get(_data53, 'commissionKRW', '');
+          return _.get(_data53, 'finalTotalKRW', '');
+        }
+      }, {
+        data: function data(_data54) {
+          return _.get(_data54, 'finalHandlingFeeKRW', '');
+        }
+      }, {
+        data: function data(_data55) {
+          return _.get(_data55, 'commissionKRW', '');
         }
       }]
     };
@@ -4319,15 +4443,15 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders/vat/' + $scope.month,
     columns: [{
-      data: function data(_data54) {
-        return _.get(_data54, 'brand.id', '');
+      data: function data(_data56) {
+        return _.get(_data56, 'brand.id', '');
       },
       render: function render(id) {
         return '<a ui-sref="order.brandVat({brandId:' + id + ',month:\'' + $scope.month + '\'})">' + id + '</a>';
       }
     }, {
-      data: function data(_data55) {
-        return _data55;
+      data: function data(_data57) {
+        return _data57;
       },
       orderable: false,
       render: function render(data) {
@@ -4336,43 +4460,43 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
         return '<a ui-sref="brand.edit({ brandId: ' + _.get(data, 'brand.id', '') + '})">' + _.get(data, 'brand.name.ko', '') + '</a>';
       }
     }, {
-      data: function data(_data56) {
-        return _.sum([_data56.subTotalKRW, _data56.adjustmentKRW]);
-      },
-      orderable: false
-    }, {
-      data: function data(_data57) {
-        return +_.get(_data57, 'vatKRW', 0);
-      },
-      orderable: false
-    }, {
       data: function data(_data58) {
-        return _.sum([_data58.subTotalKRW, _data58.adjustmentKRW, _data58.vatKRW]);
+        return _.sum([_data58.subTotalKRW, _data58.adjustmentKRW]);
       },
       orderable: false
     }, {
       data: function data(_data59) {
-        return _.get(_data59, 'brand.data.bank.name') || '';
+        return +_.get(_data59, 'vatKRW', 0);
       },
       orderable: false
     }, {
       data: function data(_data60) {
-        return _.get(_data60, 'brand.data.bank.accountNumber') || '';
+        return _.sum([_data60.subTotalKRW, _data60.adjustmentKRW, _data60.vatKRW]);
       },
       orderable: false
     }, {
       data: function data(_data61) {
-        return _.get(_data61, 'brand.data.bank.accountHolder') || '';
+        return _.get(_data61, 'brand.data.bank.name') || '';
       },
       orderable: false
     }, {
       data: function data(_data62) {
-        return boUtils.getBuildingName(_data62.brand);
+        return _.get(_data62, 'brand.data.bank.accountNumber') || '';
       },
       orderable: false
     }, {
       data: function data(_data63) {
-        return _.get(_data63, 'brand.data.tel', '');
+        return _.get(_data63, 'brand.data.bank.accountHolder') || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data64) {
+        return boUtils.getBuildingName(_data64.brand);
+      },
+      orderable: false
+    }, {
+      data: function data(_data65) {
+        return _.get(_data65, 'brand.data.tel', '');
       },
       orderable: false
     }]
@@ -4521,8 +4645,8 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders/vat/brands/' + brandId + '/' + month,
     columns: [{
-      data: function data(_data64) {
-        return moment(_data64.orderedAt).format('YYYY-MM-DD');
+      data: function data(_data66) {
+        return moment(_data66.orderedAt).format('YYYY-MM-DD');
       }
     }, {
       render: function render() {
@@ -4533,16 +4657,8 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
         return _.get(brand, 'name.ko', '');
       }
     }, {
-      data: function data(_data65) {
-        return _.get(_data65, 'buyerName', '');
-      }
-    }, {
-      data: function data(_data66) {
-        return orderSubTotal(_data66);
-      }
-    }, {
       data: function data(_data67) {
-        return '0';
+        return _.get(_data67, 'buyerName', '');
       }
     }, {
       data: function data(_data68) {
@@ -4550,31 +4666,39 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
       }
     }, {
       data: function data(_data69) {
-        return orderSubTotal(_data69).mul(0.1);
+        return '0';
       }
     }, {
       data: function data(_data70) {
-        return orderSubTotal(_data70).mul(1.1);
+        return orderSubTotal(_data70);
       }
     }, {
       data: function data(_data71) {
-        return '';
+        return orderSubTotal(_data71).mul(0.1);
       }
     }, {
       data: function data(_data72) {
-        return orderSettledTotal(_data72);
+        return orderSubTotal(_data72).mul(1.1);
       }
     }, {
       data: function data(_data73) {
-        return orderSubTotal(_data73).mul(1.1).sub(orderSettledTotal(_data73));
-      }
-    }, {
-      data: function data(_data74) {
         return '';
       }
     }, {
+      data: function data(_data74) {
+        return orderSettledTotal(_data74);
+      }
+    }, {
       data: function data(_data75) {
-        return _.get(_data75, 'id', '');
+        return orderSubTotal(_data75).mul(1.1).sub(orderSettledTotal(_data75));
+      }
+    }, {
+      data: function data(_data76) {
+        return '';
+      }
+    }, {
+      data: function data(_data77) {
+        return _.get(_data77, 'id', '');
       },
       render: function render(id) {
         return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';

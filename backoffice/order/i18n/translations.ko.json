@@ -70,6 +70,7 @@
       },
       "totalColumn": "금액",
       "totalSaledColumn": "매출금액",
+      "totalPaidColumn": "출금된금액",
       "totalWillPayColumn": "출금예정금액",
       "dateColumn": "주문날짜",
       "buyerIdColumn": "바이어ID"
@@ -83,7 +84,9 @@
     },
     "settlement": {
       "title": "회계팀 대량이체",
-      "done": "대량이체 완료"
+      "done": "대량이체 완료",
+      "csvAll": "전체 CSV 다운로드",
+      "csvSelected": "선택 CSV 다운로드"
     },
     "listBigBuyer": {
       "title": "빅바이어주문목록"

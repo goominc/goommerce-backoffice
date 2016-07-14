@@ -3,7 +3,7 @@ const utilModule = angular.module('backoffice.utils', [
   'ngCookies',
 ]);
 
-utilModule.factory('boUtils', ($http, $rootScope, $cookies) => {
+utilModule.factory('boUtils', ($http, $rootScope, $cookies, boConfig) => {
   const isString = (v) => {
     return typeof v === 'string' || v instanceof String;
   };
@@ -154,6 +154,35 @@ utilModule.factory('boUtils', ($http, $rootScope, $cookies) => {
       const supply = +(price.div(1.1).toFixed(0, Decimal.ROUND_CEIL));
       const tax = price.sub(new Decimal(supply)).toNumber();
       return { supply, tax };
+    },
+    // http://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
+    post: (path, params, method) => {
+      /* CUSTOM LOGIC */
+      if (path.length && path[0] === '/') {
+        path = `${boConfig.apiUrl}${path}`;
+      }
+      /* CUSTOM LOGIC */
+      method = method || "post"; // Set method to post by default if not specified.
+
+      // The rest of this code assumes you are not using a library.
+      // It can be made less wordy if you use one.
+      var form = document.createElement("form");
+      form.setAttribute("method", method);
+      form.setAttribute("action", path);
+
+      for(var key in params) {
+        if(params.hasOwnProperty(key)) {
+          var hiddenField = document.createElement("input");
+          hiddenField.setAttribute("type", "hidden");
+          hiddenField.setAttribute("name", key);
+          hiddenField.setAttribute("value", params[key]);
+
+          form.appendChild(hiddenField);
+        }
+      }
+
+      document.body.appendChild(form);
+      form.submit();
     },
   };
 });
