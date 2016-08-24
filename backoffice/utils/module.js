@@ -92,6 +92,24 @@ utilModule.factory('boUtils', ($http, $rootScope, $cookies, boConfig) => {
         (err) => window.alert(err)
       );
     },
+    uploadImage201607: (imageContent) => {
+      return $http.post(`${boConfig.apiUrl}/api/v1/upload/stream`, { file: imageContent }).then(
+        (res) => res,
+        (err) => window.alert(err)
+      );
+    },
+    uploadImageFile201607: (files) => {
+      const formData = new FormData();
+      formData.append('images', files);
+      // return $http.post('/api/v1/upload', formData, {
+      return $http.post('/api/v1/upload', formData, {
+        transformRequest: angular.identity,
+        headers: {'Content-Type': undefined}
+      }).then(
+        (res) => res,
+        (err) => window.alert(err)
+      );
+    },
     getBuildingName,
     getNameWithAllBuildingInfo: (brand) => {
       // format: 'Name (Building Floor FlatNumber)'
