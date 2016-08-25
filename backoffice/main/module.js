@@ -424,7 +424,7 @@ mainModule.controller('LoginModalController', ($scope, $rootScope, $http, $cooki
   $scope.credential = {};
 
   $scope.doLogin = () => {
-    const data = {email: $scope.credential.email, password: $scope.credential.password};
+    const data = { userId: $scope.credential.email, password: $scope.credential.password };
     $http.post('/api/v1/login', data).then((res) => {
       // TODO better way
       $('#login_modal').modal('hide');

@@ -581,7 +581,7 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
 
     $scope.userFields = [
       {title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true},
-      {title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true},
+      {title: $translate.instant('user.info.emailLabel'), obj: $scope.user.userId, key: 'email', isReadOnly: true, isRequired: true},
       {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
       {title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'data.firstName'), isReadOnly: true, isRequired: true},
       {title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false},
