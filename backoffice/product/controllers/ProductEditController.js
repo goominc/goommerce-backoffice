@@ -37,8 +37,10 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     {name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes},
   ];
   $scope.favoriteCategories = [
+    /*
     { name: '여성', categories: [{ name: '티셔츠', id: 53 }, { name: '원피스', id: 109 }, { name: '니트웨어', id: 77 }, { name: '스커트', id: 47 }, { name: '코트', id: 58 }] },
     { name: '남성', categories: [{ name: '티셔츠', id: 184 }, { name: '셔츠', id: 185 }, { name: '바지', id: 187 }, { name: '자켓', id: 196 }, { name: '점퍼', id: 197 }] },
+    */
   ];
   const kindsFromProductVariants = (productVariants) => {
     $scope.variantKinds.forEach((kind) => kind.selected = new Set());
@@ -59,7 +61,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         if (value) {
           kind.selected.add(value.toString());
         } else if (split.length == 2) {
-          kind.selected.add(split[i]);
+          kind.selected.add(split[1]);
         }
       }
     });
@@ -165,19 +167,12 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     },
   ];
   $rootScope.initAll($scope, $state.current.name);
-  /*
-   $scope.names = [
-   {title: $translate.instant('product.edit.labelName.KO'), key: 'ko'},
-   {title: $translate.instant('product.edit.labelName.EN'), key: 'en'},
-   {title: $translate.instant('product.edit.labelName.ZH_CN'), key: 'zh-cn'},
-   {title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh-tw'},
-   ];
-   */
   $scope.inputFields = [
     // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
     {title: 'name', key: 'name.ko', tmpKey: 'name', isRequired: true},
   ];
   $scope.moreFields = [
+    /*
     { title: '구분', enums: ['상의', '원피스', '바지', '치마', '기타'], key: 'data.detail.kind', tmpKey: 'detailKind' },
     { title: '사이즈1', type: 'number', key: 'data.detail.size1', tmpKey: 'detailSize1' },
     { title: '사이즈2', type: 'number', key: 'data.detail.size2', tmpKey: 'detailSize2' },
@@ -194,6 +189,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     { title: '광택감', enums: ['광택있음', '약간있음', '광택없음'], key: 'data.detail.gloss', tmpKey: 'detailGloss' },
     { title: '두께감', enums: ['두꺼움', '적당함', '얇음'], key: 'data.detail.thickness', tmpKey: 'detailThickness' },
     { title: '안감', enums: ['전체안감', '부분안감', '안감없음'], key: 'data.detail.lining', tmpKey: 'detailLining' },
+    */
   ];
 
   $scope.onEnumClick = (event, tmpKey, val) => {
@@ -355,10 +351,12 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
 
   $scope.doSave = () => {
     // 2016. 01. 18. [heekyu] save images
+    /*
     if (!_.get($scope.product, 'brand.id')) {
       window.alert('select brand!');
       return new Promise((resolve, reject) => {});
     }
+    */
     boUtils.startProgressBar();
 
     $scope.tmpObjToProduct();
@@ -375,7 +373,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         return res.product;
       }, (err) => {
         boUtils.stopProgressBar();
-        window.alert('Product Create Fail' + err.data);
+        throw err;
       });
     } else {
       return productUtil.updateProduct($scope.product, $scope.productVariants, $scope.origVariants).then((res) => {
@@ -384,10 +382,8 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         return res.product;
       }, (err) => {
         boUtils.stopProgressBar();
-        console.log(err);
-        window.alert('Product Update Fail' + err.data);
         $scope.origVariants.clear();
-        return err;
+        throw err;
       });
     }
   };
@@ -608,16 +604,22 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       let done = 0;
       for (let i = 0; i < len; i++) {
         const r = new FileReader();
+        const file = imageFiles[i];
+        const metaData = _.pick(file, ['name', 'type']);
+        console.log(metaData);
         r.onload = function(e) {
           imageContents[i] = e.target.result;
-          boUtils.uploadImage(e.target.result, `tmp/product/P(${$scope.product.id || 'add'})-${i}-${Date.now()}`).then((res) => {
+          // boUtils.uploadImage(e.target.result, `tmp/product/P(${$scope.product.id || 'add'})-${i}-${Date.now()}`).then((res) => {
+          boUtils.uploadImage201607(e.target.result, metaData).then((res) => {
+            const resultImage = res.data.images[0];
             uploaded[i] = {
-              url: res.url.slice(5),
-              publicId: res.public_id,
-              version: res.version,
+              url: resultImage.url.substring(resultImage.url.indexOf(':') + 1),
               mainImage: false,
               thumbnail: false,
             };
+            if (resultImage.thumbnails) {
+              uploaded[i].thumbnails = resultImage.thumbnails;
+            }
             done++;
             if (done === len) {
               insertImages(uploaded);
@@ -628,74 +630,15 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
             }
           });
         };
-        r.readAsDataURL(imageFiles[i]);
+        r.readAsBinaryString(file);
       }
     });
   };
 
   setTimeout(() => {
     addMultipleUploadListener();
-    // 2016. 02. 29. [heekyu] I cannot find on load event doing this
-    /*
-    $('.product-image-trash').droppable({
-      accept:'.image-container img',
-      drop: function( event, ui ) {
-        const row = $(event.srcElement).attr('row-index');
-        const imgIndex = $(event.srcElement).attr('img-index');
-        $scope.imageRows[row].images.splice(imgIndex, 1);
-        if (!$scope.$$phase) {
-          $scope.$apply();
-        }
-      }
-    });
-    */
   }, 1000);
-  // 2016. 02. 29. [heekyu] update image selecting UI
-/*
-  $scope.images = [];
 
-  $scope.generateImages = () => {
-    $scope.images.length = 0;
-    if ($scope.product.appImages && $scope.product.appImages.default && $scope.product.appImages.default.length > 0) {
-      $scope.product.appImages.default.map((image) => {
-        image.product = $scope.product;
-        $scope.images.push(image);
-      });
-    }
-    $scope.productVariants.map((productVariant) => {
-      if (productVariant.appImages && productVariant.appImages.default && productVariant.appImages.default.length > 0) {
-        productVariant.appImages.default.map((image) => {
-          image.product = productVariant;
-          $scope.images.push(image);
-        });
-      }
-    });
-  };
-  $scope.generateImages();
-  $scope.imageToProduct = () => {
-    $scope.product.appImages = {default: []};
-    $scope.productVariants.map((productVariant) => {
-      productVariant.appImages = {default: []};
-    });
-    $scope.images.map((image) => {
-      image.product.appImages.default.push(_.omit(image, 'product'));
-    });
-  };
-
-  $scope.imageUploaded = (result) => {
-    $scope.images.push({
-      url: result.url.slice(5),
-      publicId: result.public_id,
-      version: result.version,
-      product: $scope.product,
-      mainImage: false,
-      thumbnail: false,
-    });
-  };
- $scope.removeImage = (index) => {
- $scope.images.splice(index, 1);
- };
-*/
   $scope.newProductVariant = { data: {} };
   $scope.addProductVariant = (newProductVariant) => {
     if (!newProductVariant.data || !newProductVariant.data.color || !newProductVariant.data.size) {

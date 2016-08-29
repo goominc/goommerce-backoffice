@@ -116,10 +116,12 @@ productModule.factory('productUtil', ($http, $q) => {
         return promise.then(() => {
           return result;
         }, (err) => {
-          window.alert(err.data);
+          window.alert(_.get(err, 'data.message', 'error'));
+          throw err;
         });
       }, (err) => {
-        window.alert(err.data);
+        window.alert(_.get(err, 'data.message', 'error'));
+        throw err;
       });
     },
     updateProduct: (product, productVariants, oldProductVariants) => {
@@ -158,9 +160,11 @@ productModule.factory('productUtil', ($http, $q) => {
           return result;
         }, (err) => {
           window.alert(err.data);
+          throw err;
         });
       }, (err) => {
         window.alert(err.data);
+        throw err;
       });
     },
     setObjectValue: (obj, key, value, convert) => {

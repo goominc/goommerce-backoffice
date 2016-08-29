@@ -228,35 +228,36 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       name: $translate.instant('main.mainMenu'),
       sref: 'user.manage'
     }]
-  }, {
+  },
+  /*
+  {
     key: 'brand', // TODO get key from router
     name: $translate.instant('brand.title'),
     sref: 'brand.main',
-    children: [{
-      key: 'brand.main', // TODO get key from router
-      name: $translate.instant('main.mainMenu'),
-      sref: 'brand.main'
-    }, {
-      key: 'brand.inquiry.list',
-      name: $translate.instant('brand.inquiry.title'),
-      sref: 'brand.inquiry.list'
-    }]
-  }, {
+    children: [
+      {
+        key: 'brand.main', // TODO get key from router
+        name: $translate.instant('main.mainMenu'),
+        sref: 'brand.main',
+      },
+      {
+        key: 'brand.inquiry.list',
+        name: $translate.instant('brand.inquiry.title'),
+        sref: 'brand.inquiry.list',
+      },
+    ],
+  },
+  {
     key: 'building',
     name: $translate.instant('building.main.title'),
-    sref: 'building.main'
-  }, {
+    sref: 'building.main',
+  },
+  */
+  {
     key: 'cms', // TODO get key from router
     name: 'CMS',
     sref: 'cms.main_category',
-    children: [
-    /*
-    {
-      name: $translate.instant('cms.mainCategory'),
-      sref: 'cms.main_category',
-    },
-    */
-    {
+    children: [{
       name: 'banners',
       sref: '',
       children: [{
@@ -312,16 +313,20 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
         sref: 'cms.pureHtml({name: "mobile_shipping_policy_zh-tw"})'
       }]
     }]
-  }, {
-    key: 'currency', // TODO get key from router
-    name: $translate.instant('currency.title'),
-    sref: 'currency.main'
-  }, {
-    key: 'text',
-    name: $translate.instant('text.title'),
-    sref: 'text.main'
   }];
 
+  /*
+  {
+    key: 'currency', // TODO get key from router
+    name: $translate.instant('currency.title'),
+    sref: 'currency.main',
+  },
+  {
+    key: 'text',
+    name: $translate.instant('text.title'),
+    sref: 'text.main',
+  },
+  */
   var pageTitleTemplate = '<div class="page-title"><h1>{{contentTitle}} <small data-ng-if="contentSubTitle">{{contentSubTitle}}</small></h1></div>';
   var initContentTitle = function initContentTitle(scope) {
     var elem = $('#contentTitle');
@@ -477,7 +482,7 @@ mainModule.controller('LoginModalController', function ($scope, $rootScope, $htt
   $scope.credential = {};
 
   $scope.doLogin = function () {
-    var data = { email: $scope.credential.email, password: $scope.credential.password };
+    var data = { userId: $scope.credential.email, password: $scope.credential.password };
     $http.post('/api/v1/login', data).then(function (res) {
       // TODO better way
       $('#login_modal').modal('hide');
@@ -642,6 +647,31 @@ utilModule.factory('boUtils', function ($http, $rootScope, $cookies, boConfig) {
         type: 'POST',
         // data: {file: imageContent, upload_preset: 'nd9k8295', public_id: `tmp/batch_image/${productId}-${productVariantId}-${i}`},
         data: { file: imageContent, upload_preset: 'nd9k8295', public_id: publicId }
+      }).then(function (res) {
+        return res;
+      }, function (err) {
+        return window.alert(err);
+      });
+    },
+    uploadImage201607: function uploadImage201607(imageContent, file) {
+      var params = {
+        content: imageContent,
+        metaData: file
+      };
+      var query = 'thumbs=160,320,640';
+      return $http.post(boConfig.apiUrl + '/api/v1/upload/stream?' + query, params).then(function (res) {
+        return res;
+      }, function (err) {
+        return window.alert(err);
+      });
+    },
+    uploadImageFile201607: function uploadImageFile201607(files) {
+      var formData = new FormData();
+      formData.append('images', files);
+      // return $http.post('/api/v1/upload', formData, {
+      return $http.post('/api/v1/upload', formData, {
+        transformRequest: angular.identity,
+        headers: { 'Content-Type': undefined }
       }).then(function (res) {
         return res;
       }, function (err) {
@@ -4842,10 +4872,12 @@ productModule.factory('productUtil', function ($http, $q) {
         return promise.then(function () {
           return result;
         }, function (err) {
-          window.alert(err.data);
+          window.alert(_.get(err, 'data.message', 'error'));
+          throw err;
         });
       }, function (err) {
-        window.alert(err.data);
+        window.alert(_.get(err, 'data.message', 'error'));
+        throw err;
       });
     },
     updateProduct: function updateProduct(product, productVariants, oldProductVariants) {
@@ -4935,9 +4967,11 @@ productModule.factory('productUtil', function ($http, $q) {
           return result;
         }, function (err) {
           window.alert(err.data);
+          throw err;
         });
       }, function (err) {
         window.alert(err.data);
+        throw err;
       });
     },
     setObjectValue: function setObjectValue(obj, key, value, convert) {
@@ -5204,7 +5238,12 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     '모자': [46, 48, 50]
   };
   $scope.variantKinds = [{ name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors }, { name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes }];
-  $scope.favoriteCategories = [{ name: '여성', categories: [{ name: '티셔츠', id: 53 }, { name: '원피스', id: 109 }, { name: '니트웨어', id: 77 }, { name: '스커트', id: 47 }, { name: '코트', id: 58 }] }, { name: '남성', categories: [{ name: '티셔츠', id: 184 }, { name: '셔츠', id: 185 }, { name: '바지', id: 187 }, { name: '자켓', id: 196 }, { name: '점퍼', id: 197 }] }];
+  $scope.favoriteCategories = [
+    /*
+    { name: '여성', categories: [{ name: '티셔츠', id: 53 }, { name: '원피스', id: 109 }, { name: '니트웨어', id: 77 }, { name: '스커트', id: 47 }, { name: '코트', id: 58 }] },
+    { name: '남성', categories: [{ name: '티셔츠', id: 184 }, { name: '셔츠', id: 185 }, { name: '바지', id: 187 }, { name: '자켓', id: 196 }, { name: '점퍼', id: 197 }] },
+    */
+  ];
   var kindsFromProductVariants = function kindsFromProductVariants(productVariants) {
     $scope.variantKinds.forEach(function (kind) {
       return kind.selected = new Set();
@@ -5226,7 +5265,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         if (value) {
           kind.selected.add(value.toString());
         } else if (split.length == 2) {
-          kind.selected.add(split[i]);
+          kind.selected.add(split[1]);
         }
       }
     });
@@ -5379,18 +5418,29 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     name: $translate.instant(initObj.titleKey)
   }];
   $rootScope.initAll($scope, $state.current.name);
-  /*
-   $scope.names = [
-   {title: $translate.instant('product.edit.labelName.KO'), key: 'ko'},
-   {title: $translate.instant('product.edit.labelName.EN'), key: 'en'},
-   {title: $translate.instant('product.edit.labelName.ZH_CN'), key: 'zh-cn'},
-   {title: $translate.instant('product.edit.labelName.ZH_TW'), key: 'zh-tw'},
-   ];
-   */
   $scope.inputFields = [
   // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
   { title: 'name', key: 'name.ko', tmpKey: 'name', isRequired: true }];
-  $scope.moreFields = [{ title: '구분', enums: ['상의', '원피스', '바지', '치마', '기타'], key: 'data.detail.kind', tmpKey: 'detailKind' }, { title: '사이즈1', type: 'number', key: 'data.detail.size1', tmpKey: 'detailSize1' }, { title: '사이즈2', type: 'number', key: 'data.detail.size2', tmpKey: 'detailSize2' }, { title: '사이즈3', type: 'number', key: 'data.detail.size3', tmpKey: 'detailSize3' }, { title: '사이즈4', type: 'number', key: 'data.detail.size4', tmpKey: 'detailSize4' }, { title: '사이즈5', type: 'number', key: 'data.detail.size5', tmpKey: 'detailSize5' }, { title: '사이즈6', type: 'number', key: 'data.detail.size6', tmpKey: 'detailSize6' }, { title: '촬영모델', enums: ['이은지', '임소리', '유영석'], key: 'data.detail.modelName', tmpKey: 'detailModelName' }, { title: '모델착용사이즈', key: 'data.detail.modelSize', tmpKey: 'detailModelSize' }, { title: '원산지', enums: ['없음', '한국', '중국'], key: 'data.detail.origin', tmpKey: 'detailOrigin' }, { title: '촉감', enums: ['까슬함', '적당함', '부드러움'], key: 'data.detail.touch', tmpKey: 'detailTouch' }, { title: '신축성', enums: ['좋음', '약간', '없음'], key: 'data.detail.flexibility', tmpKey: 'detailFlexibility' }, { title: '비침', enums: ['많이비침', '약간비침', '비침없음'], key: 'data.detail.transparency', tmpKey: 'detailTransparency' }, { title: '광택감', enums: ['광택있음', '약간있음', '광택없음'], key: 'data.detail.gloss', tmpKey: 'detailGloss' }, { title: '두께감', enums: ['두꺼움', '적당함', '얇음'], key: 'data.detail.thickness', tmpKey: 'detailThickness' }, { title: '안감', enums: ['전체안감', '부분안감', '안감없음'], key: 'data.detail.lining', tmpKey: 'detailLining' }];
+  $scope.moreFields = [
+    /*
+    { title: '구분', enums: ['상의', '원피스', '바지', '치마', '기타'], key: 'data.detail.kind', tmpKey: 'detailKind' },
+    { title: '사이즈1', type: 'number', key: 'data.detail.size1', tmpKey: 'detailSize1' },
+    { title: '사이즈2', type: 'number', key: 'data.detail.size2', tmpKey: 'detailSize2' },
+    { title: '사이즈3', type: 'number', key: 'data.detail.size3', tmpKey: 'detailSize3' },
+    { title: '사이즈4', type: 'number', key: 'data.detail.size4', tmpKey: 'detailSize4' },
+    { title: '사이즈5', type: 'number', key: 'data.detail.size5', tmpKey: 'detailSize5' },
+    { title: '사이즈6', type: 'number', key: 'data.detail.size6', tmpKey: 'detailSize6' },
+    { title: '촬영모델', enums: ['이은지', '임소리', '유영석'], key: 'data.detail.modelName', tmpKey: 'detailModelName' },
+    { title: '모델착용사이즈', key: 'data.detail.modelSize', tmpKey: 'detailModelSize' },
+    { title: '원산지', enums: ['없음', '한국', '중국'], key: 'data.detail.origin', tmpKey: 'detailOrigin' },
+    { title: '촉감', enums: ['까슬함', '적당함', '부드러움'], key: 'data.detail.touch', tmpKey: 'detailTouch' },
+    { title: '신축성', enums: ['좋음', '약간', '없음'], key: 'data.detail.flexibility', tmpKey: 'detailFlexibility' },
+    { title: '비침', enums: ['많이비침', '약간비침', '비침없음'], key: 'data.detail.transparency', tmpKey: 'detailTransparency' },
+    { title: '광택감', enums: ['광택있음', '약간있음', '광택없음'], key: 'data.detail.gloss', tmpKey: 'detailGloss' },
+    { title: '두께감', enums: ['두꺼움', '적당함', '얇음'], key: 'data.detail.thickness', tmpKey: 'detailThickness' },
+    { title: '안감', enums: ['전체안감', '부분안감', '안감없음'], key: 'data.detail.lining', tmpKey: 'detailLining' },
+    */
+  ];
 
   $scope.onEnumClick = function (event, tmpKey, val) {
     var current = _.get($scope.tmpObj, tmpKey);
@@ -5594,10 +5644,12 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
   $scope.doSave = function () {
     // 2016. 01. 18. [heekyu] save images
+    /*
     if (!_.get($scope.product, 'brand.id')) {
       window.alert('select brand!');
-      return new Promise(function (resolve, reject) {});
+      return new Promise((resolve, reject) => {});
     }
+    */
     boUtils.startProgressBar();
 
     $scope.tmpObjToProduct();
@@ -5612,7 +5664,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         return res.product;
       }, function (err) {
         boUtils.stopProgressBar();
-        window.alert('Product Create Fail' + err.data);
+        throw err;
       });
     } else {
       return productUtil.updateProduct($scope.product, $scope.productVariants, $scope.origVariants).then(function (res) {
@@ -5621,10 +5673,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         return res.product;
       }, function (err) {
         boUtils.stopProgressBar();
-        console.log(err);
-        window.alert('Product Update Fail' + err.data);
         $scope.origVariants.clear();
-        return err;
+        throw err;
       });
     }
   };
@@ -5853,16 +5903,22 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
       var _loop2 = function (i) {
         var r = new FileReader();
+        var file = imageFiles[i];
+        var metaData = _.pick(file, ['name', 'type']);
+        console.log(metaData);
         r.onload = function (e) {
           imageContents[i] = e.target.result;
-          boUtils.uploadImage(e.target.result, 'tmp/product/P(' + ($scope.product.id || 'add') + ')-' + i + '-' + Date.now()).then(function (res) {
+          // boUtils.uploadImage(e.target.result, `tmp/product/P(${$scope.product.id || 'add'})-${i}-${Date.now()}`).then((res) => {
+          boUtils.uploadImage201607(e.target.result, metaData).then(function (res) {
+            var resultImage = res.data.images[0];
             uploaded[i] = {
-              url: res.url.slice(5),
-              publicId: res.public_id,
-              version: res.version,
+              url: resultImage.url.substring(resultImage.url.indexOf(':') + 1),
               mainImage: false,
               thumbnail: false
             };
+            if (resultImage.thumbnails) {
+              uploaded[i].thumbnails = resultImage.thumbnails;
+            }
             done++;
             if (done === len) {
               insertImages(uploaded);
@@ -5873,7 +5929,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
             }
           });
         };
-        r.readAsDataURL(imageFiles[i]);
+        r.readAsBinaryString(file);
       };
 
       for (var i = 0; i < len; i++) {
@@ -5884,67 +5940,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
   setTimeout(function () {
     addMultipleUploadListener();
-    // 2016. 02. 29. [heekyu] I cannot find on load event doing this
-    /*
-    $('.product-image-trash').droppable({
-      accept:'.image-container img',
-      drop: function( event, ui ) {
-        const row = $(event.srcElement).attr('row-index');
-        const imgIndex = $(event.srcElement).attr('img-index');
-        $scope.imageRows[row].images.splice(imgIndex, 1);
-        if (!$scope.$$phase) {
-          $scope.$apply();
-        }
-      }
-    });
-    */
   }, 1000);
-  // 2016. 02. 29. [heekyu] update image selecting UI
-  /*
-    $scope.images = [];
-  
-    $scope.generateImages = () => {
-      $scope.images.length = 0;
-      if ($scope.product.appImages && $scope.product.appImages.default && $scope.product.appImages.default.length > 0) {
-        $scope.product.appImages.default.map((image) => {
-          image.product = $scope.product;
-          $scope.images.push(image);
-        });
-      }
-      $scope.productVariants.map((productVariant) => {
-        if (productVariant.appImages && productVariant.appImages.default && productVariant.appImages.default.length > 0) {
-          productVariant.appImages.default.map((image) => {
-            image.product = productVariant;
-            $scope.images.push(image);
-          });
-        }
-      });
-    };
-    $scope.generateImages();
-    $scope.imageToProduct = () => {
-      $scope.product.appImages = {default: []};
-      $scope.productVariants.map((productVariant) => {
-        productVariant.appImages = {default: []};
-      });
-      $scope.images.map((image) => {
-        image.product.appImages.default.push(_.omit(image, 'product'));
-      });
-    };
-  
-    $scope.imageUploaded = (result) => {
-      $scope.images.push({
-        url: result.url.slice(5),
-        publicId: result.public_id,
-        version: result.version,
-        product: $scope.product,
-        mainImage: false,
-        thumbnail: false,
-      });
-    };
-   $scope.removeImage = (index) => {
-   $scope.images.splice(index, 1);
-   };
-  */
+
   $scope.newProductVariant = { data: {} };
   $scope.addProductVariant = function (newProductVariant) {
     if (!newProductVariant.data || !newProductVariant.data.color || !newProductVariant.data.size) {
@@ -7782,7 +7779,7 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     user.lastLoginAt = boUtils.formatDate(user.lastLoginAt);
     $scope.user = user;
 
-    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'data.firstName'), isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNameLabel'), obj: _.get($scope.user, 'data.bizName'), key: 'data.bizName', isRequired: false }, { title: $translate.instant('user.info.bizNumberLabel'), obj: _.get($scope.user, 'data.bizNumber'), key: 'data.bizNumber', isRequired: false }, { title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false }, { title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false }, { title: $translate.instant('user.info.settlementAliasLabel'), obj: _.get($scope.user, 'data.settlement.alias'), key: 'data.settlement.alias', isRequired: false }, { title: $translate.instant('user.info.orderNameLabel'), obj: _.get($scope.user, 'data.order.name'), key: 'data.order.name', isRequired: false }];
+    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.userId, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'data.firstName'), isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNameLabel'), obj: _.get($scope.user, 'data.bizName'), key: 'data.bizName', isRequired: false }, { title: $translate.instant('user.info.bizNumberLabel'), obj: _.get($scope.user, 'data.bizNumber'), key: 'data.bizNumber', isRequired: false }, { title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false }, { title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false }, { title: $translate.instant('user.info.settlementAliasLabel'), obj: _.get($scope.user, 'data.settlement.alias'), key: 'data.settlement.alias', isRequired: false }, { title: $translate.instant('user.info.orderNameLabel'), obj: _.get($scope.user, 'data.order.name'), key: 'data.order.name', isRequired: false }];
     var roleType = _.get($scope.user, 'roles[0].type');
     var brand = _.get($scope.user, 'roles[0].brand');
     if ((roleType === 'owner' || roleType === 'staff') && brand) {

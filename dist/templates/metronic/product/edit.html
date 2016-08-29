@@ -26,12 +26,12 @@
               <div class="col-md-12">
                 <uib-tabset class="tabbable-bordered">
                   <uib-tab heading="{{'product.edit.tabInfo' | translate}}">
-                    <div class="form-group">
+                    <!--div class="form-group">
                       <label class="col-md-2 control-label">Brand <span class="required"> * </span></label>
                       <div class="col-md-10">
                         <input data-ng-keypress="handleBrandKeyPress($event)" class="form-control" type="text" id="brand_search_input" />
                       </div>
-                    </div>
+                    </div-->
                     <div class="form-group" data-ng-repeat="field in inputFields">
                       <label class="col-md-2 control-label">{{field.title}} <span data-ng-if="field.isRequired" class="required"> * </span> </label>
                       <div class="col-md-10">
@@ -59,7 +59,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="form-group">
+                    <!--div class="form-group">
                       <label class="col-md-2 control-label">{{'product.edit.labelFavoriteCategories' | translate}}</label>
                       <div class="col-md-10">
                         <div class="col-md-12" data-ng-repeat="fc in favoriteCategories">
@@ -75,7 +75,7 @@
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </div-->
                     <div class="form-group" data-ng-if="variantKinds">
                       <label class="col-md-2 control-label">{{'product.edit.labelCombination' | translate}}</label>
                       <div class="col-md-10">

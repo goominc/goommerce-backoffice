@@ -164,6 +164,7 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
         },
       ],
     },
+    /*
     {
       key: 'brand', // TODO get key from router
       name: $translate.instant('brand.title'),
@@ -186,17 +187,12 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
       name: $translate.instant('building.main.title'),
       sref: 'building.main',
     },
+    */
     {
       key: 'cms', // TODO get key from router
       name: 'CMS',
       sref: 'cms.main_category',
       children: [
-        /*
-        {
-          name: $translate.instant('cms.mainCategory'),
-          sref: 'cms.main_category',
-        },
-        */
         {
           name: 'banners',
           sref: '',
@@ -275,6 +271,7 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
         },
       ],
     },
+    /*
     {
       key: 'currency', // TODO get key from router
       name: $translate.instant('currency.title'),
@@ -285,6 +282,7 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
       name: $translate.instant('text.title'),
       sref: 'text.main',
     },
+    */
   ];
 
   const pageTitleTemplate = '<div class="page-title"><h1>{{contentTitle}} <small data-ng-if="contentSubTitle">{{contentSubTitle}}</small></h1></div>';
