@@ -307,7 +307,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        const newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, data: {} };
+        const newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, data: { quantity: 1 } };
         const split = newVariantSKU.split('-');
         let kindPos = split.length - 1;
         for (let i = $scope.variantKinds.length - 1; i >= 0; i--) {
@@ -362,10 +362,8 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     $scope.tmpObjToProduct();
     // $scope.imageToProduct();
     $scope.imageRowsToVariant();
-    // 2016. 05. 18. [heekyu] set default main image for product
-    if (!_.get($scope.product, 'appImages.default[0]')) {
 
-    }
+    $scope.saveEditorContents();
     $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then((res) => {
@@ -509,7 +507,8 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     const colors = Object.keys($scope.variantsByColor);
     for (let i = 0; i < colors.length; i++) {
       const color = colors[i];
-      $scope.variantsByColor[color].share = isImageShared($scope.variantsByColor[color].variants);
+      // $scope.variantsByColor[color].share = isImageShared($scope.variantsByColor[color].variants);
+      $scope.variantsByColor[color].share = true;
     }
   };
   $scope.initImages = () => {
@@ -639,7 +638,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     addMultipleUploadListener();
   }, 1000);
 
-  $scope.newProductVariant = { data: {} };
+  $scope.newProductVariant = { data: { quantity: 1 } };
   $scope.addProductVariant = (newProductVariant) => {
     if (!newProductVariant.data || !newProductVariant.data.color || !newProductVariant.data.size) {
       window.alert('insert color and/or size');
@@ -658,7 +657,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       return;
     }
     */
-    $scope.newProductVariant = {};
+    $scope.newProductVariant = { data: { quantity: 1 } };
     $scope.productVariants.push(newProductVariant);
     $scope.productVariantsMap[newProductVariant.sku] = newProductVariant;
     $scope.initImages();
@@ -738,4 +737,32 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
 
   $scope.translateStatus = (status) => $rootScope.getContentsI18nText(`enum.productVariant.status.${status}`);
+
+  $scope.isEditorInitialized = false;
+  const descriptions = ['desc1', 'desc2', 'desc3'];
+  $scope.initEditor = () => {
+    if (!$scope.isEditorInitialized) {
+      $scope.isEditorInitialized = true;
+      console.log(111);
+      const initDesc = (name) => {
+        const node = $(`#${name}`);
+        node.summernote({ height: 300 });
+        const data = _.get($scope.product, `data.${name}`);
+        if (data) {
+          node.code(`${data}`);
+        }
+      };
+      descriptions.forEach(initDesc);
+    }
+  };
+  $scope.saveEditorContents = () => {
+    const saveDesc = (name) => {
+      const node = $(`#${name}`);
+      const data = node.code();
+      if (data) {
+        _.set($scope.product, `data.${name}`, data);
+      }
+    };
+    descriptions.forEach(saveDesc);
+  };
 });

@@ -5039,6 +5039,8 @@ module.exports = {
       "tabInfo": "상품 정보",
       "tabImage": "이미지",
       "tabCategory": "카테고리",
+      "tabRecommendProduct": "추천상품",
+      "tabEditor": "상품 정보 입력",
       "labelName": {
         "KO": "상품명(한국어)",
         "EN": "상품명(영어)",
@@ -5118,17 +5120,6 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
         return _.get(product, 'name.ko') || '';
       },
       orderable: false
-    }, {
-      data: function data(product) {
-        return product;
-      },
-      orderable: false,
-      render: function render(product) {
-        var brandId = _.get(product, 'brand.id');
-        var brandName = _.get(product, 'brand.name.ko') || '';
-        if (!brandId) return brandName;
-        return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandName + '</a>';
-      }
     }, {
       data: function data(product) {
         return product.sku || '';
@@ -5600,7 +5591,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        var newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, data: {} };
+        var newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, data: { quantity: 1 } };
         var split = newVariantSKU.split('-');
         var kindPos = split.length - 1;
         for (var _i = $scope.variantKinds.length - 1; _i >= 0; _i--) {
@@ -5655,8 +5646,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.tmpObjToProduct();
     // $scope.imageToProduct();
     $scope.imageRowsToVariant();
-    // 2016. 05. 18. [heekyu] set default main image for product
-    if (!_.get($scope.product, 'appImages.default[0]')) {}
+
+    $scope.saveEditorContents();
     $scope.updateCategoryPath();
     if (!$scope.product.id) {
       return productUtil.createProduct($scope.product, $scope.productVariants).then(function (res) {
@@ -5807,7 +5798,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     var colors = Object.keys($scope.variantsByColor);
     for (var i = 0; i < colors.length; i++) {
       var color = colors[i];
-      $scope.variantsByColor[color].share = isImageShared($scope.variantsByColor[color].variants);
+      // $scope.variantsByColor[color].share = isImageShared($scope.variantsByColor[color].variants);
+      $scope.variantsByColor[color].share = true;
     }
   };
   $scope.initImages = function () {
@@ -5942,7 +5934,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     addMultipleUploadListener();
   }, 1000);
 
-  $scope.newProductVariant = { data: {} };
+  $scope.newProductVariant = { data: { quantity: 1 } };
   $scope.addProductVariant = function (newProductVariant) {
     if (!newProductVariant.data || !newProductVariant.data.color || !newProductVariant.data.size) {
       window.alert('insert color and/or size');
@@ -5961,7 +5953,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       return;
     }
     */
-    $scope.newProductVariant = {};
+    $scope.newProductVariant = { data: { quantity: 1 } };
     $scope.productVariants.push(newProductVariant);
     $scope.productVariantsMap[newProductVariant.sku] = newProductVariant;
     $scope.initImages();
@@ -6042,6 +6034,34 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
   $scope.translateStatus = function (status) {
     return $rootScope.getContentsI18nText('enum.productVariant.status.' + status);
+  };
+
+  $scope.isEditorInitialized = false;
+  var descriptions = ['desc1', 'desc2', 'desc3'];
+  $scope.initEditor = function () {
+    if (!$scope.isEditorInitialized) {
+      $scope.isEditorInitialized = true;
+      console.log(111);
+      var initDesc = function initDesc(name) {
+        var node = $('#' + name);
+        node.summernote({ height: 300 });
+        var data = _.get($scope.product, 'data.' + name);
+        if (data) {
+          node.code('' + data);
+        }
+      };
+      descriptions.forEach(initDesc);
+    }
+  };
+  $scope.saveEditorContents = function () {
+    var saveDesc = function saveDesc(name) {
+      var node = $('#' + name);
+      var data = node.code();
+      if (data) {
+        _.set($scope.product, 'data.' + name, data);
+      }
+    };
+    descriptions.forEach(saveDesc);
   };
 });
 }, {"../module.js":10}],

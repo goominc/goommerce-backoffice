@@ -44,16 +44,6 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
         orderable: false,
       },
       {
-        data: (product) => product,
-        orderable: false,
-        render: (product) => {
-          const brandId = _.get(product, 'brand.id');
-          const brandName = _.get(product, 'brand.name.ko') || '';
-          if (!brandId) return brandName;
-          return `<a ui-sref="brand.edit({brandId: ${brandId}})">${brandName}</a>`;
-        },
-      },
-      {
         data: (product) => product.sku || '',
         orderable: false,
       },

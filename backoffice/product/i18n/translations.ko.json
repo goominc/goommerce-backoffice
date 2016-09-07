@@ -15,6 +15,8 @@
       "tabInfo": "상품 정보",
       "tabImage": "이미지",
       "tabCategory": "카테고리",
+      "tabRecommendProduct": "추천상품",
+      "tabEditor": "상품 정보 입력",
       "labelName": {
         "KO": "상품명(한국어)",
         "EN": "상품명(영어)",

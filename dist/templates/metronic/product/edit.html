@@ -120,7 +120,7 @@
                             <th width="20%">색상</th>
                             <th width="20%">사이즈</th>
                             <th width="20%">가격</th>
-                            <th width="20%">상태</th>
+                            <th width="20%">수량</th>
                             <th width="20%"></th>
                           </tr>
                           </thead>
@@ -130,12 +130,7 @@
                             <td><input type="text" data-ng-model="newProductVariant.data.size" /></td>
                             <td><input type="number" data-ng-model="newProductVariant.KRW" /></td>
                             <td>
-                              <select data-ng-model="productVariant.status" convert-to-number>
-                                <option value="0">{{translateStatus(0)}}</option>
-                                <option value="10">{{translateStatus(10)}}</option>
-                                <option value="20">{{translateStatus(20)}}</option>
-                                <option value="30">{{translateStatus(30)}}</option>
-                              </select>
+                              <input type="number" data-ng-model="newProductVariant.data.quantity" />
                             </td>
                             <td><button class="btn blue" data-ng-click="addProductVariant(newProductVariant)"><i class="fa fa-plus"></i> {{'main.createButton' | translate}}</button></td>
                           </tr>
@@ -144,12 +139,7 @@
                             <td><input type="text" data-ng-model="productVariant.data.size" /></td>
                             <td><input type="number" data-ng-model="productVariant.KRW" /></td>
                             <td>
-                              <select data-ng-model="productVariant.status" convert-to-number>
-                                <option value="0">{{translateStatus(0)}}</option>
-                                <option value="10">{{translateStatus(10)}}</option>
-                                <option value="20">{{translateStatus(20)}}</option>
-                                <option value="30">{{translateStatus(30)}}</option>
-                              </select>
+                              <input type="number" data-ng-model="productVariant.data.quantity" />
                             </td>
                             <td><button class="btn red" data-ng-click="removeProductVariant($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></td>
                           </tr>
@@ -179,9 +169,8 @@
                   <uib-tab heading="{{'product.edit.tabImage' | translate}}" data-ng-click="initImages()">
                     <div class="row">
                       <div class="col-md-12">
-                        <button class="btn blue" cl-upload-widget="" callback="imageUploaded(result)"><i class="fa fa-plus"></i> 한 장씩 추가</button>
                         <span class="btn green fileinput-button" style="margin: 15px 0;">
-                          <i class="fa fa-plus"></i> 여러 장 추가
+                          <i class="fa fa-plus"></i> 사진 추가
                           <input type="file" id="image-upload-button" webkitdirectory directory multiple/>
                         </span>
                         <!--button class="btn red product-image-trash"><i class="icon-trash"></i></button-->
@@ -191,8 +180,7 @@
                           <thead>
                           <tr>
                             <th width="20%">SKU</th>
-                            <th width="15%">Color</th>
-                            <th width="5%">Collapse</th>
+                            <th width="20%">Color</th>
                             <th width="10%">SlotCount</th>
                             <th width="50%">Image</th>
                           </tr>
@@ -203,14 +191,14 @@
                             <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
                               {{row.color}}
                             </td>
-                            <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
+                            <!--td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
                               <input id="product-image-{{row.sku}}" type="checkbox"
                                      data-ng-if="row.rowspan > 1"
                                      data-ng-model="variantsByColor[row.color].share"
                                      data-ng-change="toggleShare(row.color)"
                               />
                               <label for="product-image-{{row.sku}}"></label>
-                            </td>
+                            </td-->
                             <td data-ng-if="row.imagespan > 0" rowspan="{{row.imagespan}}" style="border-right: 1px solid #e7ecf1;">
                               <input class="product-small-number-input" type="number" min="0" data-ng-model="row.slotCount" />
                             </td>
@@ -286,6 +274,21 @@
                             </div>
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  </uib-tab>
+                  <uib-tab heading="{{'product.edit.tabRecommendProduct' | translate}}">
+
+                  </uib-tab>
+                  <uib-tab heading="{{'product.edit.tabEditor' | translate}}" data-ng-click="initEditor()">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <h3>상세 정보</h3>
+                        <div id="desc1"></div>
+                        <h3>배송/반품/교환 안내</h3>
+                        <div id="desc2"></div>
+                        <h3>취급 주의 사항</h3>
+                        <div id="desc3"></div>
                       </div>
                     </div>
                   </uib-tab>
