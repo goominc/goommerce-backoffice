@@ -14,13 +14,6 @@
               <div class="row">
                 <div class="col-md-12" style="margin-bottom: 20px;">
                   <div class="actions btn-set">
-                    <button class="btn" style="margin-right: 20px;"
-                            data-ng-repeat="locale in state.locales"
-                            data-ng-class="{'red': state.editLocale === locale, 'blue': state.editLocale !== locale}"
-                            data-ng-click="changeCategoryEditLocale(locale)"
-                    >
-                      {{locale}}
-                    </button>
                     <button class="btn blue pull-right" ng-click="reindex()"><i class="fa fa-check"></i> {{'product.category.reindexButton' | translate}}</button>
                   </div>
                 </div>
@@ -34,10 +27,10 @@
                     </div>
                   </div>
                   <form class="form-horizontal form-row-seperated">
-                    <div class="form-group" ng-repeat="field in names">
-                      <label class="col-md-2 control-label">{{field.title}} <span class="required"> * </span> </label>
+                    <div class="form-group">
+                      <label class="col-md-2 control-label">이름 <span class="required"> * </span> </label>
                       <div class="col-md-10">
-                        <input type="text" class="form-control ng-pristine ng-untouched ng-invalid ng-invalid-required" placeholder="{{field.placeholder}}" ng-model="category.name[field.key]">
+                        <input type="text" class="form-control" placeholder="카테고리 이름" ng-model="category.name.ko">
                       </div>
                     </div>
                     <div class="form-group">
@@ -50,6 +43,9 @@
                       </div>
                     </div>
                   </form>
+                  <div class="col-md-12">
+
+                  </div>
                 </div>
               </div>
             </div>

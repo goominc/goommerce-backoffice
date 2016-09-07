@@ -86,6 +86,7 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: $translate.instant('product.edit.createTitle'),
           sref: 'product.add',
         },
+        /*
         {
           key: 'product.batchUpload',
           name: $translate.instant('product.batchUpload.title'),
@@ -96,7 +97,6 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: $translate.instant('product.imageUpload.title'),
           sref: 'product.imageUpload',
         },
-        /*
         {
           key: 'product.smarket',
           name: 'S마켓',
@@ -212,60 +212,6 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
             {
               name: $translate.instant('cms.dTopBanner'),
               sref: 'cms.simple({name: "desktop_top_banner"})'
-            },
-          ],
-        },
-        {
-          name: $translate.instant('cms.dSiteKeywords'),
-          sref: '',
-          children: [
-            {
-              name: 'KO',
-              sref: 'cms.pureHtml({name: "desktop_site_keywords_ko"})',
-            },
-            {
-              name: 'ZH-CN',
-              sref: 'cms.pureHtml({name: "desktop_site_keywords_zh-cn"})',
-            },
-            {
-              name: 'ZH-TW',
-              sref: 'cms.pureHtml({name: "desktop_site_keywords_zh-tw"})',
-            },
-          ],
-        },
-        {
-          name: $translate.instant('cms.dShippingPolicy'),
-          sref: '',
-          children: [
-            {
-              name: 'KO',
-              sref: 'cms.pureHtml({name: "desktop_shipping_policy_ko"})',
-            },
-            {
-              name: 'ZH-CN',
-              sref: 'cms.pureHtml({name: "desktop_shipping_policy_zh-cn"})',
-            },
-            {
-              name: 'ZH-TW',
-              sref: 'cms.pureHtml({name: "desktop_shipping_policy_zh-tw"})',
-            },
-          ],
-        },
-        {
-          name: $translate.instant('cms.mShippingPolicy'),
-          sref: '',
-          children: [
-            {
-              name: 'KO',
-              sref: 'cms.pureHtml({name: "mobile_shipping_policy_ko"})',
-            },
-            {
-              name: 'ZH-CN',
-              sref: 'cms.pureHtml({name: "mobile_shipping_policy_zh-cn"})',
-            },
-            {
-              name: 'ZH-TW',
-              sref: 'cms.pureHtml({name: "mobile_shipping_policy_zh-tw"})',
             },
           ],
         },
