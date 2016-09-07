@@ -149,6 +149,16 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
 
   const initObj = initFromProduct();
   $scope.allCategories = categories;
+  $scope.categoryIdMap = {};
+  const dfs = (category) => {
+    if ($scope.categoryIdMap[category.id]) {
+      window.alert('category tree detect a circle');
+      return;
+    }
+    $scope.categoryIdMap[category.id] = category;
+    (category.children || []).forEach(dfs);
+  };
+  dfs(categories);
 
   $scope.contentTitle = $translate.instant(initObj.titleKey);
   $scope.contentSubTitle = '';
@@ -678,9 +688,31 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           break;
         }
       }
+      const category = $scope.categoryIdMap[categoryId];
+      category.isChecked = false;
+      (category.children || []).forEach((child) => {
+        if ($scope.productCategorySet.has(child.id)) {
+          $scope.toggleCategory(child.id);
+        }
+      });
     } else {
       $scope.productCategorySet.add(categoryId);
       $scope.product.categories.push(categoryId);
+      while (true) {
+        if (categoryId === $scope.allCategories.id) {
+          break;
+        }
+        const category = $scope.categoryIdMap[categoryId];
+        category.isChecked = true;
+        if (!category || !category.parentId || category.parentId < 1) {
+          break;
+        }
+        if (!$scope.productCategorySet.has(category.parentId)) {
+          $scope.toggleCategory(category.parentId);
+          break;
+        }
+        categoryId = category.parentId;
+      }
     }
   };
   // 2016. 02. 03. [heekyu] TODO this logic must be in server side
@@ -743,7 +775,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   $scope.initEditor = () => {
     if (!$scope.isEditorInitialized) {
       $scope.isEditorInitialized = true;
-      console.log(111);
       const initDesc = (name) => {
         const node = $(`#${name}`);
         node.summernote({ height: 300 });

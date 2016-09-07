@@ -165,17 +165,19 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       key: 'product.add',
       name: $translate.instant('product.edit.createTitle'),
       sref: 'product.add'
-    }, {
-      key: 'product.batchUpload',
-      name: $translate.instant('product.batchUpload.title'),
-      sref: 'product.batchUpload'
-    }, {
-      key: 'product.imageUpload',
-      name: $translate.instant('product.imageUpload.title'),
-      sref: 'product.imageUpload'
     }]
   },
   /*
+  {
+    key: 'product.batchUpload',
+    name: $translate.instant('product.batchUpload.title'),
+    sref: 'product.batchUpload',
+  },
+  {
+    key: 'product.imageUpload',
+    name: $translate.instant('product.imageUpload.title'),
+    sref: 'product.imageUpload',
+  },
   {
     key: 'product.smarket',
     name: 'S마켓',
@@ -272,45 +274,6 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       }, {
         name: $translate.instant('cms.dTopBanner'),
         sref: 'cms.simple({name: "desktop_top_banner"})'
-      }]
-    }, {
-      name: $translate.instant('cms.dSiteKeywords'),
-      sref: '',
-      children: [{
-        name: 'KO',
-        sref: 'cms.pureHtml({name: "desktop_site_keywords_ko"})'
-      }, {
-        name: 'ZH-CN',
-        sref: 'cms.pureHtml({name: "desktop_site_keywords_zh-cn"})'
-      }, {
-        name: 'ZH-TW',
-        sref: 'cms.pureHtml({name: "desktop_site_keywords_zh-tw"})'
-      }]
-    }, {
-      name: $translate.instant('cms.dShippingPolicy'),
-      sref: '',
-      children: [{
-        name: 'KO',
-        sref: 'cms.pureHtml({name: "desktop_shipping_policy_ko"})'
-      }, {
-        name: 'ZH-CN',
-        sref: 'cms.pureHtml({name: "desktop_shipping_policy_zh-cn"})'
-      }, {
-        name: 'ZH-TW',
-        sref: 'cms.pureHtml({name: "desktop_shipping_policy_zh-tw"})'
-      }]
-    }, {
-      name: $translate.instant('cms.mShippingPolicy'),
-      sref: '',
-      children: [{
-        name: 'KO',
-        sref: 'cms.pureHtml({name: "mobile_shipping_policy_ko"})'
-      }, {
-        name: 'ZH-CN',
-        sref: 'cms.pureHtml({name: "mobile_shipping_policy_zh-cn"})'
-      }, {
-        name: 'ZH-TW',
-        sref: 'cms.pureHtml({name: "mobile_shipping_policy_zh-tw"})'
       }]
     }]
   }];
@@ -5395,6 +5358,16 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
   var initObj = initFromProduct();
   $scope.allCategories = categories;
+  $scope.categoryIdMap = {};
+  var dfs = function dfs(category) {
+    if ($scope.categoryIdMap[category.id]) {
+      window.alert('category tree detect a circle');
+      return;
+    }
+    $scope.categoryIdMap[category.id] = category;
+    (category.children || []).forEach(dfs);
+  };
+  dfs(categories);
 
   $scope.contentTitle = $translate.instant(initObj.titleKey);
   $scope.contentSubTitle = '';
@@ -5968,15 +5941,37 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     if ($scope.productCategorySet.has(categoryId)) {
       $scope.productCategorySet['delete'](categoryId);
       for (var i = 0; i < $scope.product.categories.length; i++) {
-        var category = $scope.product.categories[i];
-        if (category === categoryId) {
+        var _category = $scope.product.categories[i];
+        if (_category === categoryId) {
           $scope.product.categories.splice(i, 1);
           break;
         }
       }
+      var category = $scope.categoryIdMap[categoryId];
+      category.isChecked = false;
+      (category.children || []).forEach(function (child) {
+        if ($scope.productCategorySet.has(child.id)) {
+          $scope.toggleCategory(child.id);
+        }
+      });
     } else {
       $scope.productCategorySet.add(categoryId);
       $scope.product.categories.push(categoryId);
+      while (true) {
+        if (categoryId === $scope.allCategories.id) {
+          break;
+        }
+        var category = $scope.categoryIdMap[categoryId];
+        category.isChecked = true;
+        if (!category || !category.parentId || category.parentId < 1) {
+          break;
+        }
+        if (!$scope.productCategorySet.has(category.parentId)) {
+          $scope.toggleCategory(category.parentId);
+          break;
+        }
+        categoryId = category.parentId;
+      }
     }
   };
   // 2016. 02. 03. [heekyu] TODO this logic must be in server side
@@ -6041,7 +6036,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   $scope.initEditor = function () {
     if (!$scope.isEditorInitialized) {
       $scope.isEditorInitialized = true;
-      console.log(111);
       var initDesc = function initDesc(name) {
         var node = $('#' + name);
         node.summernote({ height: 300 });
