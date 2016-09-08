@@ -5785,8 +5785,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     row.images.splice(index, 1);
   };
   $scope.imageSortable = {
-    connectWith: '.image-container',
-    placeholder: 'ui-state-highlight'
+    connectWith: '.image-container'
   };
   $scope.setProductMainImage = function () {
     if (!_.get($scope.product, 'appImages.default[0]') && _.get($scope, 'imageRows[0].images[0]')) {
@@ -6263,7 +6262,6 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
   $scope.addBestVariant = function (id) {
     var variant = $scope.variantIdMap[id];
     $scope.category.data.bestVariants.push(variant);
-    console.log(variant);
     loadProducts();
   };
 

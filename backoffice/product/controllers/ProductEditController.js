@@ -534,7 +534,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
   $scope.imageSortable = {
     connectWith: '.image-container',
-    placeholder: 'ui-state-highlight',
   };
   $scope.setProductMainImage = () => {
     if (!_.get($scope.product, 'appImages.default[0]') && _.get($scope, 'imageRows[0].images[0]')) {

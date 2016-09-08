@@ -44,13 +44,13 @@
                     </div>
                   </form>
                   <div class="row">
+                    <h4>Best Sellers</h4>
                     <div
                       class="col-md-12"
                       style="min-height: 100px;"
                       ui-sortable
-                      data-ng-model="category.bestVariants"
+                      data-ng-model="category.data.bestVariants"
                     >
-                      <h4>Best Sellers</h4>
                       <div class="product-image-wrap image-inline" style="text-align: center;" data-ng-repeat="bestVariant in category.data.bestVariants">
                         <img data-ng-src="{{getImageUrl(bestVariant)}}" />
                         <div class="delete-button" data-ng-click="deleteBestVariant($index)"><i class="fa fa-remove"></i></div>

@@ -198,7 +198,6 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
   $scope.addBestVariant = (id) => {
     const variant = $scope.variantIdMap[id];
     $scope.category.data.bestVariants.push(variant);
-    console.log(variant);
     loadProducts();
   };
 
