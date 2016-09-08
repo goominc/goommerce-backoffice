@@ -635,6 +635,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
               if (!$scope.$$phase) {
                 $scope.$apply();
               }
+              $('#image-upload-button').attr('value', '');
               boUtils.stopProgressBar();
             }
           });
@@ -679,6 +680,9 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   };
 
   $scope.toggleCategory = (categoryId) => {
+    if (categoryId === $scope.allCategories.id) {
+      return;
+    }
     if ($scope.productCategorySet.has(categoryId)) {
       $scope.productCategorySet.delete(categoryId);
       for (let i = 0; i < $scope.product.categories.length; i++) {
@@ -699,9 +703,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       $scope.productCategorySet.add(categoryId);
       $scope.product.categories.push(categoryId);
       while (true) {
-        if (categoryId === $scope.allCategories.id) {
-          break;
-        }
         const category = $scope.categoryIdMap[categoryId];
         category.isChecked = true;
         if (!category || !category.parentId || category.parentId < 1) {
