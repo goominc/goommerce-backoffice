@@ -44,10 +44,6 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
         orderable: false,
       },
       {
-        data: (product) => product.sku || '',
-        orderable: false,
-      },
-      {
         data: (product) => boUtils.formatDate(product.createdAt),
         orderable: false,
       },
