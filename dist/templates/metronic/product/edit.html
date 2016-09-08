@@ -119,9 +119,10 @@
                           <tr role="row" class="heading">
                             <th width="20%">색상</th>
                             <th width="20%">사이즈</th>
-                            <th width="20%">가격</th>
-                            <th width="20%">수량</th>
-                            <th width="20%"></th>
+                            <th width="15%">가격</th>
+                            <th width="15%">수량</th>
+                            <th width="15%">숨김</th>
+                            <th width="15%"></th>
                           </tr>
                           </thead>
                           <tbody class="cell-center">
@@ -132,6 +133,7 @@
                             <td>
                               <input type="number" data-ng-model="newProductVariant.data.quantity" />
                             </td>
+                            <td></td>
                             <td><button class="btn blue" data-ng-click="addProductVariant(newProductVariant)"><i class="fa fa-plus"></i> {{'main.createButton' | translate}}</button></td>
                           </tr>
                           <tr data-ng-repeat="productVariant in productVariants">
@@ -140,6 +142,10 @@
                             <td><input type="number" data-ng-model="productVariant.KRW" /></td>
                             <td>
                               <input type="number" data-ng-model="productVariant.data.quantity" />
+                            </td>
+                            <td>
+                              <input type="checkbox" id="product_variant_{{productVariant.id}}" data-ng-model="productVariant.data.isHide">
+                              <label for="product_variant_{{productVariant.id}}"></label>
                             </td>
                             <td><button class="btn red" data-ng-click="removeProductVariant($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></td>
                           </tr>

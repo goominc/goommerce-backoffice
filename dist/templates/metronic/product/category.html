@@ -17,10 +17,10 @@
                     <button class="btn blue pull-right" ng-click="reindex()"><i class="fa fa-check"></i> {{'product.category.reindexButton' | translate}}</button>
                   </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <div id="categoryTree"></div>
                 </div>
-                <div class="col-md-8" data-ng-if="category && category.id != root.id">
+                <div class="col-md-9" data-ng-if="category && category.id != root.id">
                   <div class="col-md-12 category-action-box">
                     <div class="actions btn-set">
                       <button class="btn blue" ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
@@ -43,8 +43,38 @@
                       </div>
                     </div>
                   </form>
-                  <div class="col-md-12">
-
+                  <div class="row">
+                    <div
+                      class="col-md-12"
+                      style="min-height: 100px;"
+                      ui-sortable
+                      data-ng-model="category.bestVariants"
+                    >
+                      <h4>Best Sellers</h4>
+                      <div class="product-image-wrap image-inline" style="text-align: center;" data-ng-repeat="bestVariant in category.data.bestVariants">
+                        <img data-ng-src="{{getImageUrl(bestVariant)}}" />
+                        <div class="delete-button" data-ng-click="deleteBestVariant($index)"><i class="fa fa-remove"></i></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row" style="margin-top: 20px;">
+                    <div class="col-md-12">
+                      <h4>상품 목록</h4>
+                      <div bo-datatables="variantDatatables">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>상품명</th>
+                              <th>색상</th>
+                              <th>사이즈</th>
+                              <th>이미지</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody></tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

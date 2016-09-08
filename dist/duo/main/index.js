@@ -2428,10 +2428,13 @@ directiveModule.directive('boDatatables', function ($http, $compile, $parse, dat
         }
       };
       scope.$watch(attr.boDatatables, function (dataTables) {
+        if (!dataTables) {
+          return;
+        }
         var table = new $.fn.dataTable.Api(elem.find('table'));
         table.destroy();
         if (dataTables.data) {
-          init(dataTables.data);
+          init(dataTables, dataTables.data);
         } else {
           $http.get(dataTables.url).then(function (res) {
             if (dataTables.field && dataTables.field !== '') {
@@ -5085,11 +5088,6 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       orderable: false
     }, {
       data: function data(product) {
-        return product.sku || '';
-      },
-      orderable: false
-    }, {
-      data: function data(product) {
         return boUtils.formatDate(product.createdAt);
       },
       orderable: false
@@ -5890,6 +5888,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
               if (!$scope.$$phase) {
                 $scope.$apply();
               }
+              $('#image-upload-button').attr('value', '');
               boUtils.stopProgressBar();
             }
           });
@@ -5938,6 +5937,9 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
 
   $scope.toggleCategory = function (categoryId) {
+    if (categoryId === $scope.allCategories.id) {
+      return;
+    }
     if ($scope.productCategorySet.has(categoryId)) {
       $scope.productCategorySet['delete'](categoryId);
       for (var i = 0; i < $scope.product.categories.length; i++) {
@@ -5958,9 +5960,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       $scope.productCategorySet.add(categoryId);
       $scope.product.categories.push(categoryId);
       while (true) {
-        if (categoryId === $scope.allCategories.id) {
-          break;
-        }
         var category = $scope.categoryIdMap[categoryId];
         category.isChecked = true;
         if (!category || !category.parentId || category.parentId < 1) {
@@ -6189,6 +6188,90 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     }
   });
 
+  $scope.getImageUrl = function (variant) {
+    return _.get(variant, 'appImages.default[0].thumbnails.320') || _.get(variant, 'appImages.default[0].image.url', '');
+  };
+
+  var initVariantDatatables = function initVariantDatatables(productVariants) {
+    $scope.variantDatatables = {
+      data: productVariants,
+      columns: [{
+        data: function data(_data) {
+          return _.get(_data, 'product.name.ko', '');
+        }
+      }, {
+        data: function data(_data2) {
+          return _.get(_data2, 'data.color', '');
+        }
+      }, {
+        data: function data(_data3) {
+          return _.get(_data3, 'data.size', '');
+        }
+      }, {
+        data: function data(_data4) {
+          return _data4;
+        },
+        render: function render(variant) {
+          return '<img width="80px" src="' + $scope.getImageUrl(variant) + '" />';
+        }
+      }, {
+        data: 'id',
+        render: function render(id) {
+          return '<button class="btn blue" data-ng-click="addBestVariant(' + id + ')"><i class="fa fa-plus"></i> 베스트</button>';
+        }
+      }]
+    };
+  };
+
+  var loadProducts = function loadProducts() {
+    var categoryId = _.get($scope, 'category.id');
+    if (!categoryId) {
+      return;
+    }
+    _.defaults($scope.category, { data: { bestVariants: [] } });
+    var bestVariantIds = new Set();
+    $scope.category.data.bestVariants.forEach(function (v) {
+      return bestVariantIds.add(v.id);
+    });
+    $scope.variantIdMap = {};
+    $http.get('/api/v1/products?categoryId=' + categoryId + '&limit=500').then(function (res) {
+      var products = res.data.products || [];
+      var productVariants = [];
+      products.forEach(function (product) {
+        (product.productVariants || []).forEach(function (variant) {
+          var isHide = _.get(variant, 'data.isHide');
+          if (!isHide && !bestVariantIds.has(variant.id)) {
+            variant.product = product;
+            productVariants.push(variant);
+            $scope.variantIdMap[variant.id] = variant;
+          } else {
+            for (var i = 0; i < $scope.category.data.bestVariants.length; i++) {
+              // 2016. 09. 08. [heekyu] update variant data
+              var variantId = $scope.category.data.bestVariants[i].id;
+              if (variant.id === variantId) {
+                $scope.category.data.bestVariants[i] = variant;
+                break;
+              }
+            }
+          }
+        });
+      });
+      initVariantDatatables(productVariants);
+    });
+  };
+
+  $scope.addBestVariant = function (id) {
+    var variant = $scope.variantIdMap[id];
+    $scope.category.data.bestVariants.push(variant);
+    console.log(variant);
+    loadProducts();
+  };
+
+  $scope.deleteBestVariant = function (index) {
+    $scope.category.data.bestVariants.splice(index, 1);
+    loadProducts();
+  };
+
   // 2016. 01. 20. [heekyu] refer to https://www.jstree.com/api
   jstreeNode.on('move_node.jstree', function (e, data) {
     var old_parent = data.old_parent;
@@ -6209,13 +6292,17 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     }
   });
   jstreeNode.on('select_node.jstree', function (e, data) {
+    if (+data.node.id === +_.get($scope, 'category.id')) {
+      return;
+    }
     $scope.category = categoryIdMap[data.node.id];
+    loadProducts();
     if (!$scope.$$phase) {
       $scope.$apply();
     }
     $state.go('product.category.child', { categoryId: data.node.id });
   });
-  // TODO update all tree
+  loadProducts();
 
   var selectNode = function selectNode(categoryId) {
     jstreeNode.jstree('select_node', categoryId);
@@ -6234,6 +6321,9 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
       window.alert('[ERROR] Category is NULL');
       return false;
     }
+    $scope.category.data.bestVariants.forEach(function (v) {
+      delete v.product;
+    });
     $http.put('/api/v1/categories/' + $scope.category.id, _.omit($scope.category, ['id', 'children'])).then(function (res) {
       var category = res.data;
       categoryIdMap[category.id] = category;

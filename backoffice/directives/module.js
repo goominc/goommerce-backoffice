@@ -88,10 +88,13 @@ directiveModule.directive('boDatatables', ($http, $compile, $parse, datatableCom
         }
       };
       scope.$watch(attr.boDatatables, (dataTables) => {
+        if (!dataTables) {
+          return;
+        }
         const table = new $.fn.dataTable.Api(elem.find('table'));
         table.destroy();
         if (dataTables.data) {
-          init(dataTables.data);
+          init(dataTables, dataTables.data);
         } else {
           $http.get(dataTables.url).then((res) => {
             if (dataTables.field && dataTables.field !== '') {

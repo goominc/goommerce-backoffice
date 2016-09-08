@@ -129,6 +129,84 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     },
   });
 
+  $scope.getImageUrl = (variant) =>
+  _.get(variant, 'appImages.default[0].thumbnails.320') ||
+  _.get(variant, 'appImages.default[0].image.url', '');
+
+  const initVariantDatatables = (productVariants) => {
+    $scope.variantDatatables = {
+      data: productVariants,
+      columns: [
+        {
+          data: (data) => _.get(data, 'product.name.ko', ''),
+        },
+        {
+          data: (data) => _.get(data, 'data.color', ''),
+        },
+        {
+          data: (data) => _.get(data, 'data.size', ''),
+        },
+        {
+          data: (data) => data,
+          render: (variant) =>
+            `<img width="80px" src="${$scope.getImageUrl(variant)}" />`,
+        },
+        {
+          data: 'id',
+          render: (id) =>
+            `<button class="btn blue" data-ng-click="addBestVariant(${id})"><i class="fa fa-plus"></i> 베스트</button>`,
+        }
+      ],
+    };
+  };
+
+  const loadProducts = () => {
+    const categoryId = _.get($scope, 'category.id');
+    if (!categoryId) {
+      return;
+    }
+    _.defaults($scope.category, { data: { bestVariants: [] }});
+    const bestVariantIds = new Set();
+    $scope.category.data.bestVariants.forEach((v) => bestVariantIds.add(v.id));
+    $scope.variantIdMap = {};
+    $http.get(`/api/v1/products?categoryId=${categoryId}&limit=500`).then((res) => {
+      const products = res.data.products || [];
+      const productVariants = [];
+      products.forEach((product) => {
+        (product.productVariants || []).forEach((variant) => {
+          const isHide = _.get(variant, 'data.isHide');
+          if (!isHide && !bestVariantIds.has(variant.id)) {
+            variant.product = product;
+            productVariants.push(variant);
+            $scope.variantIdMap[variant.id] = variant;
+          } else {
+            for (let i = 0; i < $scope.category.data.bestVariants.length; i++) {
+              // 2016. 09. 08. [heekyu] update variant data
+              const variantId = $scope.category.data.bestVariants[i].id;
+              if (variant.id === variantId) {
+                $scope.category.data.bestVariants[i] = variant;
+                break;
+              }
+            }
+          }
+        });
+      });
+      initVariantDatatables(productVariants);
+    });
+  };
+
+  $scope.addBestVariant = (id) => {
+    const variant = $scope.variantIdMap[id];
+    $scope.category.data.bestVariants.push(variant);
+    console.log(variant);
+    loadProducts();
+  };
+
+  $scope.deleteBestVariant = (index) => {
+    $scope.category.data.bestVariants.splice(index, 1);
+    loadProducts();
+  };
+
   // 2016. 01. 20. [heekyu] refer to https://www.jstree.com/api
   jstreeNode.on('move_node.jstree', (e, data) => {
     const { old_parent, parent } = data;
@@ -147,13 +225,17 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     }
   });
   jstreeNode.on('select_node.jstree', (e, data) => {
+    if (+data.node.id === +_.get($scope, 'category.id')) {
+      return;
+    }
     $scope.category = categoryIdMap[data.node.id];
+    loadProducts();
     if (!$scope.$$phase) {
       $scope.$apply();
     }
     $state.go('product.category.child', { categoryId: data.node.id });
   });
-  // TODO update all tree
+  loadProducts();
 
   const selectNode = (categoryId) => {
     jstreeNode.jstree('select_node', categoryId);
@@ -177,6 +259,9 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
       window.alert('[ERROR] Category is NULL');
       return false;
     }
+    $scope.category.data.bestVariants.forEach((v) => {
+      delete v.product;
+    });
     $http.put('/api/v1/categories/' + $scope.category.id, _.omit($scope.category, ['id', 'children'])).then((res) => {
       const category = res.data;
       categoryIdMap[category.id] = category;
