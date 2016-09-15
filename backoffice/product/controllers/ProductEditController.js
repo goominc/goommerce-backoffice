@@ -180,6 +180,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   $scope.inputFields = [
     // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
     {title: 'name', key: 'name.ko', tmpKey: 'name', isRequired: true},
+    {title: '상품설명', key: 'data.description', tmpKey: 'description', isRequired: true},
   ];
   $scope.moreFields = [
     /*
@@ -614,7 +615,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         const r = new FileReader();
         const file = imageFiles[i];
         const metaData = _.pick(file, ['name', 'type']);
-        console.log(metaData);
         r.onload = function(e) {
           imageContents[i] = e.target.result;
           // boUtils.uploadImage(e.target.result, `tmp/product/P(${$scope.product.id || 'add'})-${i}-${Date.now()}`).then((res) => {
