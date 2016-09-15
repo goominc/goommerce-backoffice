@@ -266,17 +266,21 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
         name: $translate.instant('cms.dMainBanner'),
         sref: 'cms.simple({name: "desktop_main_banner"})'
       }, {
-        name: $translate.instant('cms.dRightBanner'),
-        sref: 'cms.simple({name: "desktop_right_banner"})'
+        name: $translate.instant('cms.dMdPick'),
+        sref: 'cms.simple({name: "desktop_md_pick"})'
       }, {
         name: $translate.instant('cms.mMainBanner'),
         sref: 'cms.simple({name: "mobile_main_banner"})'
-      }, {
-        name: $translate.instant('cms.dTopBanner'),
-        sref: 'cms.simple({name: "desktop_top_banner"})'
       }]
     }]
   }];
+
+  /*
+  {
+    name: $translate.instant('cms.dTopBanner'),
+    sref: 'cms.simple({name: "desktop_top_banner"})'
+  },
+  */
 
   /*
   {
@@ -1921,6 +1925,7 @@ module.exports = {
   "cms": {
     "mainCategory": "메인페이지 카테고리",
     "dMainBanner": "데스크탑 메인 배너",
+    "dMdPick": "데스크탑 MD PICK",
     "dRightBanner": "데스크탑 우측 배너",
     "mMainBanner": "모바일 메인 배너",
     "dShippingPolicy": "데스크탑 사입비 배송비 정책",

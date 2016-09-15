@@ -2,6 +2,7 @@
   "cms": {
     "mainCategory": "메인페이지 카테고리",
     "dMainBanner": "데스크탑 메인 배너",
+    "dMdPick": "데스크탑 MD PICK",
     "dRightBanner": "데스크탑 우측 배너",
     "mMainBanner": "모바일 메인 배너",
     "dShippingPolicy": "데스크탑 사입비 배송비 정책",
