@@ -2,7 +2,7 @@
 
 const cmsModule = require('./module');
 
-cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, $translate) => {
+cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
   $scope.cms = {
     ko: { rows: [] },
     en: { rows: [] },
@@ -38,12 +38,6 @@ cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, 
   };
 
   $scope.addRow = () => {
-    /*
-    if (!$scope.newObject.link || $scope.newObject.link === '') {
-      window.alert('type link');
-      return;
-    }
-    */
     if (!$scope.newObject.link) {
       $scope.newObject.link = '';
     }
@@ -52,13 +46,6 @@ cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, 
       return;
     }
     $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
-    if ($rootScope.state.editLocale === 'ko') {
-      $rootScope.state.locales.forEach((locale) => {
-        if ((_.get($scope.cms, `${locale}.rows`) || []).length === $scope.cms[$rootScope.state.editLocale].rows.length - 1) {
-          $scope.cms[locale].rows.push($scope.newObject);
-        }
-      });
-    }
     $scope.newObject = {};
   };
 
@@ -77,6 +64,29 @@ cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, 
     handle: '.cms-simple-sortable-pointer',
     placeholder: 'ui-state-highlight',
   };
+
+  $('#image-upload-button').on('change', function (changeEvent) {
+    const file = _.get(changeEvent, 'target.files[0]');
+    if (!file) {
+      return;
+    }
+    boUtils.startProgressBar();
+    $('#image-upload-button').attr('value', '');
+    const r = new FileReader();
+    r.onload = function(e) {
+      boUtils.uploadImage201607(e.target.result, file).then((res) => {
+        boUtils.stopProgressBar();
+        $scope.newObject.image = res.data.images[0];
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      }, () => {
+        window.alert('image upload fail');
+        boUtils.stopProgressBar();
+      });
+    };
+    r.readAsBinaryString(file);
+  });
 });
 
 cmsModule.controller('CmsMainCategoryController', ($scope, $rootScope, $http, $state, boUtils) => {

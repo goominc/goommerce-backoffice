@@ -92,10 +92,10 @@ utilModule.factory('boUtils', ($http, $rootScope, $cookies, boConfig) => {
         (err) => window.alert(err)
       );
     },
-    uploadImage201607: (imageContent, file) => {
+    uploadImage201607: (imageContent, { name, type }) => {
       const params = {
         content: imageContent,
-        metaData: file,
+        metaData: { name, type },
       };
       const query = 'thumbs=160,320,640';
       return $http.post(`${boConfig.apiUrl}/api/v1/upload/stream?${query}`, params).then(

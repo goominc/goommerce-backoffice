@@ -616,10 +616,13 @@ utilModule.factory('boUtils', function ($http, $rootScope, $cookies, boConfig) {
         return window.alert(err);
       });
     },
-    uploadImage201607: function uploadImage201607(imageContent, file) {
+    uploadImage201607: function uploadImage201607(imageContent, _ref) {
+      var name = _ref.name;
+      var type = _ref.type;
+
       var params = {
         content: imageContent,
-        metaData: file
+        metaData: { name: name, type: type }
       };
       var query = 'thumbs=160,320,640';
       return $http.post(boConfig.apiUrl + '/api/v1/upload/stream?' + query, params).then(function (res) {
@@ -1935,7 +1938,7 @@ module.exports = {
 
 var cmsModule = require('./module');
 
-cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $rootScope, $translate) {
+cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
   $scope.cms = {
     ko: { rows: [] },
     en: { rows: [] },
@@ -1968,12 +1971,6 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
   };
 
   $scope.addRow = function () {
-    /*
-    if (!$scope.newObject.link || $scope.newObject.link === '') {
-      window.alert('type link');
-      return;
-    }
-    */
     if (!$scope.newObject.link) {
       $scope.newObject.link = '';
     }
@@ -1982,13 +1979,6 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
       return;
     }
     $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
-    if ($rootScope.state.editLocale === 'ko') {
-      $rootScope.state.locales.forEach(function (locale) {
-        if ((_.get($scope.cms, locale + '.rows') || []).length === $scope.cms[$rootScope.state.editLocale].rows.length - 1) {
-          $scope.cms[locale].rows.push($scope.newObject);
-        }
-      });
-    }
     $scope.newObject = {};
   };
 
@@ -2007,6 +1997,29 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
     handle: '.cms-simple-sortable-pointer',
     placeholder: 'ui-state-highlight'
   };
+
+  $('#image-upload-button').on('change', function (changeEvent) {
+    var file = _.get(changeEvent, 'target.files[0]');
+    if (!file) {
+      return;
+    }
+    boUtils.startProgressBar();
+    $('#image-upload-button').attr('value', '');
+    var r = new FileReader();
+    r.onload = function (e) {
+      boUtils.uploadImage201607(e.target.result, file).then(function (res) {
+        boUtils.stopProgressBar();
+        $scope.newObject.image = res.data.images[0];
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      }, function () {
+        window.alert('image upload fail');
+        boUtils.stopProgressBar();
+      });
+    };
+    r.readAsBinaryString(file);
+  });
 });
 
 cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, $http, $state, boUtils) {
@@ -5382,7 +5395,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   $rootScope.initAll($scope, $state.current.name);
   $scope.inputFields = [
   // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
-  { title: 'name', key: 'name.ko', tmpKey: 'name', isRequired: true }];
+  { title: 'name', key: 'name.ko', tmpKey: 'name', isRequired: true }, { title: '상품설명', key: 'data.description', tmpKey: 'description', isRequired: true }];
   $scope.moreFields = [
     /*
     { title: '구분', enums: ['상의', '원피스', '바지', '치마', '기타'], key: 'data.detail.kind', tmpKey: 'detailKind' },
@@ -5867,7 +5880,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         var r = new FileReader();
         var file = imageFiles[i];
         var metaData = _.pick(file, ['name', 'type']);
-        console.log(metaData);
         r.onload = function (e) {
           imageContents[i] = e.target.result;
           // boUtils.uploadImage(e.target.result, `tmp/product/P(${$scope.product.id || 'add'})-${i}-${Date.now()}`).then((res) => {
