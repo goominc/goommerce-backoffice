@@ -417,10 +417,10 @@ Login page
   margin-bottom: 15px;
 }
 .product-variant-color-button {
-  width: 100px;
+  width: 90px;
 }
 .product-variant-size-button {
-  width: 50px;
+  width: 100px;
 }
 .product-variant-attr-candidate-button {
   display: inline-block;
