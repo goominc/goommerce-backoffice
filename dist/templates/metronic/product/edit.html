@@ -144,8 +144,8 @@
                               <input type="number" data-ng-model="productVariant.data.quantity" />
                             </td>
                             <td>
-                              <input type="checkbox" id="product_variant_{{productVariant.id}}" data-ng-model="productVariant.data.isHide">
-                              <label for="product_variant_{{productVariant.id}}"></label>
+                              <input type="checkbox" id="product_variant_hide_{{$index}}" data-ng-model="productVariant.data.isHide">
+                              <label for="product_variant_hide_{{$index}}"></label>
                             </td>
                             <td><button class="btn red" data-ng-click="removeProductVariant($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></td>
                           </tr>
