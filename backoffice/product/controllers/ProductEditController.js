@@ -427,6 +427,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     $scope.imageRows = [];
     // 2016. 05. 27. [heekyu] product image
     const mainImages = _.get($scope.product, 'appImages.default') || [];
+    /*
     $scope.imageRows.push({
       sku: '메인 상품 이미지',
       color: '-',
@@ -435,6 +436,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       slotCount: mainImages.length,
       images: mainImages,
     });
+    */
     const colors = Object.keys($scope.variantsByColor);
     let firstVariant = true;
     colors.forEach((color) => {

@@ -5689,14 +5689,16 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     $scope.imageRows = [];
     // 2016. 05. 27. [heekyu] product image
     var mainImages = _.get($scope.product, 'appImages.default') || [];
+    /*
     $scope.imageRows.push({
       sku: '메인 상품 이미지',
       color: '-',
       rowspan: 1,
       imagespan: 1,
       slotCount: mainImages.length,
-      images: mainImages
+      images: mainImages,
     });
+    */
     var colors = Object.keys($scope.variantsByColor);
     var firstVariant = true;
     colors.forEach(function (color) {

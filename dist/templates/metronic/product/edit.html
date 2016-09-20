@@ -185,15 +185,13 @@
                         <table class="table table-bordered dataTable">
                           <thead>
                           <tr>
-                            <th width="20%">SKU</th>
-                            <th width="20%">Color</th>
+                            <th width="30%">Color</th>
                             <th width="10%">SlotCount</th>
-                            <th width="50%">Image</th>
+                            <th width="60%">Image</th>
                           </tr>
                           </thead>
                           <tbody class="cell-center">
                           <tr data-ng-repeat="row in imageRows">
-                            <td style="border-right: 1px solid #e7ecf1;">{{row.sku}}</td>
                             <td data-ng-if="row.rowspan > 0" rowspan="{{row.rowspan}}">
                               {{row.color}}
                             </td>
