@@ -5815,7 +5815,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       _.set($scope.product, 'appImages.default', $scope.imageRows[0].images);
     }
     $scope.setProductMainImage(); // TODO
-    var i = 1;
+    var i = 0;
     while (i < $scope.imageRows.length) {
       var row = $scope.imageRows[i];
       for (var j = 0; j < row.imagespan; j++) {
