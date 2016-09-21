@@ -175,9 +175,10 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   ];
   $rootScope.initAll($scope, $state.current.name);
   $scope.inputFields = [
-    // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
-    {title: 'name', key: 'name.ko', tmpKey: 'name', isRequired: true},
+    {title: '품번', key: 'sku', tmpKey: 'sku', placeholder: 'ABCDEFGHIJK', isRequired: true},
+    {title: '상품명', key: 'name.ko', tmpKey: 'name', isRequired: true},
     {title: '상품설명', key: 'data.description', tmpKey: 'description', isRequired: true},
+    {title: '짧은설명', key: 'data.shortDescription', tmpKey: 'shortDescription', isRequired: true},
   ];
   $scope.moreFields = [
     /*
@@ -776,7 +777,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       $scope.isEditorInitialized = true;
       const initDesc = (name) => {
         const node = $(`#${name}`);
-        node.summernote({ height: 300 });
+        node.summernote({ height: 600 });
         const data = _.get($scope.product, `data.${name}`);
         if (data) {
           node.code(`${data}`);

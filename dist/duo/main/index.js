@@ -5395,9 +5395,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     name: $translate.instant(initObj.titleKey)
   }];
   $rootScope.initAll($scope, $state.current.name);
-  $scope.inputFields = [
-  // {title: 'SKU', key: 'sku', tmpKey: 'sku', placeholder: '00000-0000', isRequired: true},
-  { title: 'name', key: 'name.ko', tmpKey: 'name', isRequired: true }, { title: '상품설명', key: 'data.description', tmpKey: 'description', isRequired: true }];
+  $scope.inputFields = [{ title: '품번', key: 'sku', tmpKey: 'sku', placeholder: 'ABCDEFGHIJK', isRequired: true }, { title: '상품명', key: 'name.ko', tmpKey: 'name', isRequired: true }, { title: '상품설명', key: 'data.description', tmpKey: 'description', isRequired: true }, { title: '짧은설명', key: 'data.shortDescription', tmpKey: 'shortDescription', isRequired: true }];
   $scope.moreFields = [
     /*
     { title: '구분', enums: ['상의', '원피스', '바지', '치마', '기타'], key: 'data.detail.kind', tmpKey: 'detailKind' },
@@ -6052,7 +6050,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       $scope.isEditorInitialized = true;
       var initDesc = function initDesc(name) {
         var node = $('#' + name);
-        node.summernote({ height: 300 });
+        node.summernote({ height: 600 });
         var data = _.get($scope.product, 'data.' + name);
         if (data) {
           node.code('' + data);
