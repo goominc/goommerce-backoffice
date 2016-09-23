@@ -201,7 +201,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         render: (data) => data ? boUtils.formatDate(data) : '',
       },
       {
-        data: (data) => _.get(data, 'method', ''),
+        data: (data) => data.method || 0,
         render: (method) => $rootScope.getContentsI18nText(`enum.payment.method.${method}`),
       },
       {
@@ -212,7 +212,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         render: (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`),
       },
       {
-        data: 'settlementStatus',
+        data: (data) => data.settlementStatus || 0,
         render: (status) => $rootScope.getContentsI18nText(`enum.order.settlementStatus.${status}`),
       },
       {
@@ -228,7 +228,7 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         data: (data) => _.get(data, 'data.tel') || '',
       },
       {
-        data: 'email',
+        data: (data) => data.email || data.userId || '',
       },
       {
         data: (data) => _.get(data, 'data.affiliate.source') || '',
@@ -310,7 +310,7 @@ orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, 
         data: (data) => _.get(data, 'data.tel') || '',
       },
       {
-        data: 'email',
+        data: (data) => data.email || data.userId || '',
       },
       {
         data: 'id',
@@ -1448,7 +1448,7 @@ orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $r
         data: (data) => _.get(data, 'data.tel') || '',
       },
       {
-        data: 'email',
+        data: (data) => data.email || data.userId || '',
       },
     ],
     fnCreatedRow(nRow, aData, iDataIndex) {
