@@ -457,8 +457,6 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     const data = _.pick(order, 'finalShippingCostKRW');
     data.orderProducts = order.orderProducts.map(
       (o) => _.pick(o, 'id', 'finalQuantity', 'settledKRW'));
-    data.adjustments = order.adjustments.map(
-      (a) => _.pick(a, 'id', 'settledKRW'));
     $http.put(`/api/v1/orders/${order.id}/finalize`, data).then((res) => {
       $state.reload();
     }, (err) => alert(err.data.message));
@@ -1210,8 +1208,8 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $scope.addressFields = [
       {title: $translate.instant('order.address.nameLabel'), obj: _.get($scope.order.address, 'detail.name'), key: 'name'},
       {title: $translate.instant('order.address.postalCodeLabel'), obj: _.get($scope.order.address, 'detail.postalCode'), key: 'postalCode'},
-      {title: $translate.instant('order.address.addressLabel'), obj: _.get($scope.order.address, 'detail.address.base'), key: 'addressBase'},
-      {title: $translate.instant('order.address.addressDetailLabel'), obj: _.get($scope.order.address, 'detail.address.detail'), key: 'addressDetail'},
+      {title: $translate.instant('order.address.addressLabel'), obj: _.get($scope.order.address, 'detail.address1'), key: 'address1'},
+      {title: $translate.instant('order.address.addressDetailLabel'), obj: _.get($scope.order.address, 'detail.address2'), key: 'address2'},
       {title: $translate.instant('order.address.countryCodeLabel'), obj: _.get($scope.order.address, 'countryCode'), key: 'countryCode'},
       {title: $translate.instant('order.address.telLabel'), obj: _.get($scope.order.address, 'detail.tel'), key: 'tel'},
     ];
@@ -2088,13 +2086,11 @@ orderModule.controller('OrderBrandVatController', ($scope, $http, $state, $rootS
   function orderSubTotal(order) {
     let total = new Decimal(0);
     _.forEach(order.orderProducts, (o) => (total = total.add(new Decimal(o.finalTotalKRW))));
-    _.forEach(order.adjustments, (o) => (total = total.add(new Decimal(o.finalKRW))));
     return total;
   }
   function orderSettledTotal(order) {
     let total = new Decimal(0);
     _.forEach(order.orderProducts, (o) => (total = total.add(new Decimal(o.settledKRW || 0))));
-    _.forEach(order.adjustments, (o) => (total = total.add(new Decimal(o.settledKRW || 0))));
     return total;
   }
 
