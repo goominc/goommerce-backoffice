@@ -5183,7 +5183,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG'],
     GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG'],
     WHITE: ['WHT', 'OWH', 'IVY', 'BEG'],
-    OTHERS: ['DBR', 'BLK', 'SLV', 'CMF', 'PBK', 'PWH']
+    OTHERS: ['DBR', 'BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'YEL', 'LRD', 'DBL', 'DNY']
   };
   $scope.colorKeys = Object.keys($scope.allColors);
   var getFeetSizes = function getFeetSizes(start, step, end) {
