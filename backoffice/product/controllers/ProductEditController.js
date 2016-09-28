@@ -591,6 +591,10 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   const addMultipleUploadListener = () => {
     const imgExt = new Set(['jpg', 'jpeg', 'png']);
     $('#image-upload-button').on('change', function (changeEvent) {
+      if (!$scope.imageRows || !$scope.imageRows.length) {
+        window.alert('이미지 업로드 전 상품 색상/사이즈 설정해 주세요');
+        return;
+      }
       const imageFiles = [];
       for (let i = 0; i < changeEvent.target.files.length; i++) {
         const file = changeEvent.target.files[i];
@@ -777,7 +781,73 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       $scope.isEditorInitialized = true;
       const initDesc = (name) => {
         const node = $(`#${name}`);
-        node.summernote({ height: 600 });
+        node.summernote({
+          height: 600,
+          onImageUpload : (files) => {
+            const file = files[0];
+            const metaData = _.pick(file, ['name', 'type']);
+            const r = new FileReader();
+            boUtils.startProgressBar();
+            r.onload = function(e) {
+              boUtils.uploadImage201607(e.target.result, metaData, '').then((res) => {
+                boUtils.stopProgressBar();
+                const resultImage = res.data.images[0];
+                const elem = $('<img>').attr('src', resultImage.url);
+                node.summernote('insertNode', elem[0]);
+                // editor.insertImage(welEditable, resultImage.url);
+              }).catch((err) => {
+                boUtils.stopProgressBar();
+                throw err;
+              });
+            };
+            r.readAsBinaryString(file);
+          },
+        });
+        /*
+        node.on('summernote.paste', (e) => {
+          setTimeout(() => {
+            const images = $(`#${name} + .note-editor`).find('img') || [];
+            for (let i = 0; i < images.length; i++) {
+              const image = images[0];
+              const imgSrc = $(image).attr('src');
+              const dataType = imgSrc.substring(0, 10);
+              const trapdoor = 1000; // TODO set trapdoor value
+              if (dataType === 'data:image' && imgSrc.length > trapdoor) {
+                let contentType = '';
+                let i = 11;
+                for (; i < trapdoor; i++) {
+                  if (imgSrc[i] === ';') {
+                    break;
+                  }
+                  contentType += imgSrc[i];
+                }
+                let encoding = '';
+                i += 1;
+                for (; i < trapdoor; i++) {
+                  if (imgSrc[i] === ',') {
+                    break;
+                  }
+                  encoding += imgSrc[i];
+                }
+                if (encoding === 'base64') {
+                  boUtils.startProgressBar();
+                  const imageContent = Base64.decode(imgSrc.substring(i + 1));
+                  const name = `summernote-${new Date().getTime()}`;
+                  boUtils.uploadImage201607(imageContent, { name, type: contentType })
+                    .then((res) => {
+                      boUtils.stopProgressBar();
+                      const resultImage = res.data.images[0];
+                      $(image).attr('src', resultImage.url);
+                    }).catch((err) => {
+                      boUtils.stopProgressBar();
+                      throw err;
+                    })
+                }
+              }
+            }
+          }, 1000);
+        });
+        */
         const data = _.get($scope.product, `data.${name}`);
         if (data) {
           node.code(`${data}`);

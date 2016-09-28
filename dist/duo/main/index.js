@@ -623,12 +623,13 @@ utilModule.factory('boUtils', function ($http, $rootScope, $cookies, boConfig) {
     uploadImage201607: function uploadImage201607(imageContent, _ref) {
       var name = _ref.name;
       var type = _ref.type;
+      var thumbs = arguments.length <= 2 || arguments[2] === undefined ? '160,320,640' : arguments[2];
 
       var params = {
         content: imageContent,
         metaData: { name: name, type: type }
       };
-      var query = 'thumbs=160,320,640';
+      var query = 'thumbs=' + thumbs;
       return $http.post(boConfig.apiUrl + '/api/v1/upload/stream?' + query, params).then(function (res) {
         return res;
       }, function (err) {
@@ -741,6 +742,27 @@ utilModule.factory('boUtils', function ($http, $rootScope, $cookies, boConfig) {
 
       document.body.appendChild(form);
       form.submit();
+    },
+    // http://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript#answer-20151856
+    base64toBlob: function base64toBlob(base64Data, contentType) {
+      contentType = contentType || '';
+      var sliceSize = 1024;
+      var byteCharacters = atob(base64Data);
+      var bytesLength = byteCharacters.length;
+      var slicesCount = Math.ceil(bytesLength / sliceSize);
+      var byteArrays = new Array(slicesCount);
+
+      for (var sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+        var begin = sliceIndex * sliceSize;
+        var end = Math.min(begin + sliceSize, bytesLength);
+
+        var bytes = new Array(end - begin);
+        for (var offset = begin, i = 0; offset < end; ++i, ++offset) {
+          bytes[i] = byteCharacters[offset].charCodeAt(0);
+        }
+        byteArrays[sliceIndex] = new Uint8Array(bytes);
+      }
+      return new Blob(byteArrays, { type: contentType });
     }
   };
 });
@@ -5856,6 +5878,10 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   var addMultipleUploadListener = function addMultipleUploadListener() {
     var imgExt = new Set(['jpg', 'jpeg', 'png']);
     $('#image-upload-button').on('change', function (changeEvent) {
+      if (!$scope.imageRows || !$scope.imageRows.length) {
+        window.alert('이미지 업로드 전 상품 색상/사이즈 설정해 주세요');
+        return;
+      }
       var imageFiles = [];
       for (var i = 0; i < changeEvent.target.files.length; i++) {
         var file = changeEvent.target.files[i];
@@ -6049,7 +6075,73 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       $scope.isEditorInitialized = true;
       var initDesc = function initDesc(name) {
         var node = $('#' + name);
-        node.summernote({ height: 600 });
+        node.summernote({
+          height: 600,
+          onImageUpload: function onImageUpload(files) {
+            var file = files[0];
+            var metaData = _.pick(file, ['name', 'type']);
+            var r = new FileReader();
+            boUtils.startProgressBar();
+            r.onload = function (e) {
+              boUtils.uploadImage201607(e.target.result, metaData, '').then(function (res) {
+                boUtils.stopProgressBar();
+                var resultImage = res.data.images[0];
+                var elem = $('<img>').attr('src', resultImage.url);
+                node.summernote('insertNode', elem[0]);
+                // editor.insertImage(welEditable, resultImage.url);
+              })['catch'](function (err) {
+                boUtils.stopProgressBar();
+                throw err;
+              });
+            };
+            r.readAsBinaryString(file);
+          }
+        });
+        /*
+        node.on('summernote.paste', (e) => {
+          setTimeout(() => {
+            const images = $(`#${name} + .note-editor`).find('img') || [];
+            for (let i = 0; i < images.length; i++) {
+              const image = images[0];
+              const imgSrc = $(image).attr('src');
+              const dataType = imgSrc.substring(0, 10);
+              const trapdoor = 1000; // TODO set trapdoor value
+              if (dataType === 'data:image' && imgSrc.length > trapdoor) {
+                let contentType = '';
+                let i = 11;
+                for (; i < trapdoor; i++) {
+                  if (imgSrc[i] === ';') {
+                    break;
+                  }
+                  contentType += imgSrc[i];
+                }
+                let encoding = '';
+                i += 1;
+                for (; i < trapdoor; i++) {
+                  if (imgSrc[i] === ',') {
+                    break;
+                  }
+                  encoding += imgSrc[i];
+                }
+                if (encoding === 'base64') {
+                  boUtils.startProgressBar();
+                  const imageContent = Base64.decode(imgSrc.substring(i + 1));
+                  const name = `summernote-${new Date().getTime()}`;
+                  boUtils.uploadImage201607(imageContent, { name, type: contentType })
+                    .then((res) => {
+                      boUtils.stopProgressBar();
+                      const resultImage = res.data.images[0];
+                      $(image).attr('src', resultImage.url);
+                    }).catch((err) => {
+                      boUtils.stopProgressBar();
+                      throw err;
+                    })
+                }
+              }
+            }
+          }, 1000);
+        });
+        */
         var data = _.get($scope.product, 'data.' + name);
         if (data) {
           node.code('' + data);
