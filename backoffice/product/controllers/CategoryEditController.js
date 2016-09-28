@@ -175,8 +175,8 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
       products.forEach((product) => {
         (product.productVariants || []).forEach((variant) => {
           const isHide = _.get(variant, 'data.isHide');
+          variant.product = product;
           if (!isHide && !bestVariantIds.has(variant.id)) {
-            variant.product = product;
             productVariants.push(variant);
             $scope.variantIdMap[variant.id] = variant;
           } else {
@@ -259,7 +259,10 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
       return false;
     }
     $scope.category.data.bestVariants.forEach((v) => {
-      delete v.product;
+      v.product = _.pick(v.product, 'name', 'KRW', 'data');
+      if (v.product.data) {
+        v.product.data = _.pick(v.product.data, 'description', 'shortDescription');
+      }
     });
     $http.put('/api/v1/categories/' + $scope.category.id, _.omit($scope.category, ['id', 'children'])).then((res) => {
       const category = res.data;

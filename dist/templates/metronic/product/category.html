@@ -20,13 +20,13 @@
                 <div class="col-md-3">
                   <div id="categoryTree"></div>
                 </div>
-                <div class="col-md-9" data-ng-if="category && category.id != root.id">
+                <div class="col-md-9" data-ng-if="category">
                   <div class="col-md-12 category-action-box">
                     <div class="actions btn-set">
                       <button class="btn blue" ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
                     </div>
                   </div>
-                  <form class="form-horizontal form-row-seperated">
+                  <form class="form-horizontal form-row-seperated" data-ng-if="category.id != root.id">
                     <div class="form-group">
                       <label class="col-md-2 control-label">이름 <span class="required"> * </span> </label>
                       <div class="col-md-10">

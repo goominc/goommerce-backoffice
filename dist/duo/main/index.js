@@ -742,27 +742,6 @@ utilModule.factory('boUtils', function ($http, $rootScope, $cookies, boConfig) {
 
       document.body.appendChild(form);
       form.submit();
-    },
-    // http://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript#answer-20151856
-    base64toBlob: function base64toBlob(base64Data, contentType) {
-      contentType = contentType || '';
-      var sliceSize = 1024;
-      var byteCharacters = atob(base64Data);
-      var bytesLength = byteCharacters.length;
-      var slicesCount = Math.ceil(bytesLength / sliceSize);
-      var byteArrays = new Array(slicesCount);
-
-      for (var sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
-        var begin = sliceIndex * sliceSize;
-        var end = Math.min(begin + sliceSize, bytesLength);
-
-        var bytes = new Array(end - begin);
-        for (var offset = begin, i = 0; offset < end; ++i, ++offset) {
-          bytes[i] = byteCharacters[offset].charCodeAt(0);
-        }
-        byteArrays[sliceIndex] = new Uint8Array(bytes);
-      }
-      return new Blob(byteArrays, { type: contentType });
     }
   };
 });
@@ -6344,8 +6323,8 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
       products.forEach(function (product) {
         (product.productVariants || []).forEach(function (variant) {
           var isHide = _.get(variant, 'data.isHide');
+          variant.product = product;
           if (!isHide && !bestVariantIds.has(variant.id)) {
-            variant.product = product;
             productVariants.push(variant);
             $scope.variantIdMap[variant.id] = variant;
           } else {
@@ -6425,7 +6404,10 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
       return false;
     }
     $scope.category.data.bestVariants.forEach(function (v) {
-      delete v.product;
+      v.product = _.pick(v.product, 'name', 'KRW', 'data');
+      if (v.product.data) {
+        v.product.data = _.pick(v.product.data, 'description', 'shortDescription');
+      }
     });
     $http.put('/api/v1/categories/' + $scope.category.id, _.omit($scope.category, ['id', 'children'])).then(function (res) {
       var category = res.data;
