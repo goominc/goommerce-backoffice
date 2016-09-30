@@ -5501,6 +5501,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
   // END Manipluate Variant attributes
 
+  var defaultQuantity = 20;
+
   // BEGIN Manipulate Variants
   $scope.generateProductVariants = function () {
     $scope.tmpObjToProduct();
@@ -5576,7 +5578,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        var newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, data: { quantity: 1 } };
+        var newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, data: { quantity: defaultQuantity } };
         var split = newVariantSKU.split('-');
         var kindPos = split.length - 1;
         for (var _i = $scope.variantKinds.length - 1; _i >= 0; _i--) {
@@ -5924,7 +5926,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     addMultipleUploadListener();
   }, 1000);
 
-  $scope.newProductVariant = { data: { quantity: 1 } };
+  $scope.newProductVariant = { data: { quantity: defaultQuantity } };
   $scope.addProductVariant = function (newProductVariant) {
     if (!newProductVariant.data || !newProductVariant.data.color || !newProductVariant.data.size) {
       window.alert('insert color and/or size');
@@ -5943,7 +5945,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       return;
     }
     */
-    $scope.newProductVariant = { data: { quantity: 1 } };
+    $scope.newProductVariant = { data: { quantity: defaultQuantity } };
     $scope.productVariants.push(newProductVariant);
     $scope.productVariantsMap[newProductVariant.sku] = newProductVariant;
     $scope.initImages();
@@ -6056,7 +6058,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       var initDesc = function initDesc(name) {
         var node = $('#' + name);
         node.summernote({
-          height: 600,
+          height: 700,
+          fontNames: ['Nanum Gothic', 'Open Sans', 'Arial'],
           onImageUpload: function onImageUpload(files) {
             var file = files[0];
             var metaData = _.pick(file, ['name', 'type']);

@@ -785,7 +785,8 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       const initDesc = (name) => {
         const node = $(`#${name}`);
         node.summernote({
-          height: 600,
+          height: 700,
+          fontNames: ['Nanum Gothic', 'Open Sans' ,'Arial'],
           onImageUpload : (files) => {
             const file = files[0];
             const metaData = _.pick(file, ['name', 'type']);
