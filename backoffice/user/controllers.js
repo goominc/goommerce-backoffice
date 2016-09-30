@@ -72,7 +72,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
         },
       },
       {
-        data: 'email',
+        data: (data) => data.email || '',
       },
       {
         data: (data) => data,
