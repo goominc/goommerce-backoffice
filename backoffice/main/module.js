@@ -209,12 +209,10 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
               name: $translate.instant('cms.mMainBanner'),
               sref: 'cms.simple({name: "mobile_main_banner"})',
             },
-            /*
             {
-              name: $translate.instant('cms.dTopBanner'),
-              sref: 'cms.simple({name: "desktop_top_banner"})'
+              name: $translate.instant('cms.mMdPick'),
+              sref: 'cms.simple({name: "mobile_md_pick"})'
             },
-            */
           ],
         },
       ],
