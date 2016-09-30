@@ -5179,12 +5179,12 @@ var productModule = require('../module.js');
 
 productModule.controller('ProductEditController', function ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil, boUtils) {
   $scope.allColors = {
-    BLUE: ['RBL', 'BLU', 'VBL', 'NVY', 'MNT'],
-    GREEN: ['GRN', 'AGN', 'KHA'],
-    RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG'],
-    GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG'],
-    WHITE: ['WHT', 'OWH', 'IVY', 'BEG'],
-    OTHERS: ['DBR', 'BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'YEL', 'LRD', 'DBL', 'DNY']
+    BLUE: ['RBL', 'BLU', 'VBL', 'NVY', 'MNT', 'CBL', 'DNV', 'CBT', 'LBL', 'DBR'],
+    GREEN: ['GRN', 'AGN', 'KHA', 'BGN', 'DGN'],
+    RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG', 'POR', 'BGD', 'DRD', 'LRD'],
+    GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG', 'DGR'],
+    WHITE: ['WHT', 'OWH', 'IVY', 'BEG', 'LBI'],
+    OTHERS: ['BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'PTN', 'SLM', 'NYE', 'YEL', 'AWT', 'ABL', 'BWR', 'WNB', 'BRW']
   };
   $scope.colorKeys = Object.keys($scope.allColors);
   var getFeetSizes = function getFeetSizes(start, step, end) {
@@ -5200,9 +5200,10 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     'M-Top': ['095 (M)', '100 (L)', '105 (XL)', '110 (XXL)'],
     'M-PANTS': ['085', '090', '095', '100'],
     'M-PTHP': ['029', '031', '033', '035'],
-    'W-Top': ['085 (S)', '090 (M)', '095 (L)'],
-    'W-PANTS': ['065', '070', '075'],
-    'W-PTHP': ['026', '027', '028']
+    'W-Top': ['080 (XS)', '085 (S)', '090 (M)', '095 (L)'],
+    'W-PANTS': ['060', '065', '070', '075'],
+    'W-PTHP': ['024', '026', '027', '028'],
+    '신발': getFeetSizes(230, 5, 290)
   };
   $scope.variantKinds = [{ name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors }, { name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes }];
   $scope.favoriteCategories = [
@@ -7451,10 +7452,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: 'email'
-    }, {
       data: function data(_data) {
-        return _data;
+        return _data.email || '';
+      }
+    }, {
+      data: function data(_data2) {
+        return _data2;
       },
       render: function render(user) {
         return userUtil.getRoleName(user);
@@ -7482,8 +7485,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return boUtils.formatDate(data);
       }
     }, {
-      data: function data(_data2) {
-        return _data2;
+      data: function data(_data3) {
+        return _data3;
       },
       render: function render(user) {
         $scope.userIdMap[user.id] = user;
@@ -7504,20 +7507,20 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data3) {
-        return _data3.name || '';
-      }
-    }, {
       data: function data(_data4) {
-        return _.get(_data4, 'data.tel') || '';
+        return _data4.name || '';
       }
     }, {
       data: function data(_data5) {
-        return _.get(_data5, 'data.bizName') || '';
+        return _.get(_data5, 'data.tel') || '';
       }
     }, {
       data: function data(_data6) {
-        return _.get(_data6, 'data.bizNumber') || '';
+        return _.get(_data6, 'data.bizName') || '';
+      }
+    }, {
+      data: function data(_data7) {
+        return _.get(_data7, 'data.bizNumber') || '';
       }
     }, {
       data: 'createdAt',
@@ -7537,8 +7540,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: function data(_data7) {
-        return _.get(_data7, 'roles[0].brand.id') || '';
+      data: function data(_data8) {
+        return _.get(_data8, 'roles[0].brand.id') || '';
       },
       render: function render(brandId) {
         return '<a ui-sref="brand.edit({ brandId: ' + brandId + ' })">' + brandId + '</a>';
@@ -7546,12 +7549,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data8) {
-        return _data8.name || '';
+      data: function data(_data9) {
+        return _data9.name || '';
       }
     }, {
-      data: function data(_data9) {
-        return _.get(_data9, 'data.tel') || '';
+      data: function data(_data10) {
+        return _.get(_data10, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -7573,31 +7576,31 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data10) {
-        return _data10.name || '';
-      }
-    }, {
       data: function data(_data11) {
-        return _.get(_data11, 'data.tel') || '';
+        return _data11.name || '';
       }
     }, {
       data: function data(_data12) {
-        return _.get(_data12, 'data.bizName') || '';
+        return _.get(_data12, 'data.tel') || '';
       }
     }, {
       data: function data(_data13) {
-        return _.get(_data13, 'data.bizNumber') || '';
+        return _.get(_data13, 'data.bizName') || '';
       }
     }, {
       data: function data(_data14) {
-        return _data14;
+        return _.get(_data14, 'data.bizNumber') || '';
+      }
+    }, {
+      data: function data(_data15) {
+        return _data15;
       },
       render: function render(user) {
         return _.get(user, 'data.bizImage') ? '<button class="btn blue" data-ng-click="openBizImage(' + user.id + ')">사업자 등록증 보기</button>' : '';
       }
     }, {
-      data: function data(_data15) {
-        return _data15;
+      data: function data(_data16) {
+        return _data16;
       },
       // render: (user) => `<button class="btn blue" data-ng-click="changeToBuyer(${user.id})">바이어 인증</button>`,
       render: function render(user) {
@@ -7622,12 +7625,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data16) {
-        return _data16.name || '';
+      data: function data(_data17) {
+        return _data17.name || '';
       }
     }, {
-      data: function data(_data17) {
-        return _.get(_data17, 'data.tel') || '';
+      data: function data(_data18) {
+        return _.get(_data18, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -7635,8 +7638,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return boUtils.formatDate(data);
       }
     }, {
-      data: function data(_data18) {
-        return _data18;
+      data: function data(_data19) {
+        return _data19;
       },
       render: function render(user) {
         $scope.userIdMap[user.id] = user;
