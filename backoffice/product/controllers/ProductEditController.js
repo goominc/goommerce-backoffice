@@ -4,12 +4,12 @@ const productModule = require('../module.js');
 
 productModule.controller('ProductEditController', ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil, boUtils) => {
   $scope.allColors = {
-    BLUE: ['RBL', 'BLU', 'VBL', 'NVY', 'MNT'],
-    GREEN: ['GRN', 'AGN', 'KHA'],
-    RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG'],
-    GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG'],
-    WHITE: ['WHT', 'OWH', 'IVY', 'BEG'],
-    OTHERS: ['DBR', 'BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'YEL', 'LRD', 'DBL', 'DNY'],
+    BLUE: ['RBL', 'BLU', 'VBL', 'NVY', 'MNT', 'CBL', 'DNV', 'CBT', 'LBL', 'DBR'],
+    GREEN: ['GRN', 'AGN', 'KHA', 'BGN', 'DGN'],
+    RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG', 'POR', 'BGD', 'DRD', 'LRD'],
+    GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG', 'DGR'],
+    WHITE: ['WHT', 'OWH', 'IVY', 'BEG', 'LBI'],
+    OTHERS: ['BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'PTN', 'SLM', 'NYE', 'YEL', 'AWT', 'ABL', 'BWR', 'WNB', 'BRW'],
   };
   $scope.colorKeys = Object.keys($scope.allColors);
   const getFeetSizes = (start, step, end) => {
@@ -25,9 +25,10 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     'M-Top': ['095 (M)', '100 (L)', '105 (XL)', '110 (XXL)'],
     'M-PANTS': ['085', '090', '095', '100'],
     'M-PTHP': ['029', '031', '033', '035'],
-    'W-Top': ['085 (S)', '090 (M)', '095 (L)'],
-    'W-PANTS': ['065', '070', '075'],
-    'W-PTHP': ['026', '027', '028'],
+    'W-Top': ['080 (XS)', '085 (S)', '090 (M)', '095 (L)'],
+    'W-PANTS': ['060', '065', '070', '075'],
+    'W-PTHP': ['024', '026', '027', '028'],
+    '신발': getFeetSizes(235, 290, 5),
   };
   $scope.variantKinds = [
     {name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors},
