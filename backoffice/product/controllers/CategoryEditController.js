@@ -259,7 +259,7 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
       return false;
     }
     $scope.category.data.bestVariants.forEach((v) => {
-      v.product = _.pick(v.product, 'name', 'KRW', 'data');
+      v.product = _.pick(v.product, 'name', 'KRW', 'data', 'id');
       if (v.product.data) {
         v.product.data = _.pick(v.product.data, 'description', 'shortDescription');
       }

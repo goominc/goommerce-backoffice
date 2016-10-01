@@ -5190,7 +5190,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG', 'POR', 'BGD', 'DRD', 'LRD'],
     GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG', 'DGR'],
     WHITE: ['WHT', 'OWH', 'IVY', 'BEG', 'LBI'],
-    OTHERS: ['BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'PTN', 'SLM', 'NYE', 'YEL', 'AWT', 'ABL', 'BWR', 'WNB', 'BRW']
+    OTHERS: ['BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'PTN', 'SLM', 'NYE', 'YEL', 'AWT', 'ABL', 'BWR', 'WNB', 'BRW', 'BNW', 'BNG']
   };
   $scope.colorKeys = Object.keys($scope.allColors);
   var getFeetSizes = function getFeetSizes(start, step, end) {
@@ -6414,7 +6414,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
       return false;
     }
     $scope.category.data.bestVariants.forEach(function (v) {
-      v.product = _.pick(v.product, 'name', 'KRW', 'data');
+      v.product = _.pick(v.product, 'name', 'KRW', 'data', 'id');
       if (v.product.data) {
         v.product.data = _.pick(v.product.data, 'description', 'shortDescription');
       }
