@@ -3224,6 +3224,15 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     }
     return 0;
   };
+  $scope.refundedAmount = function (payment) {
+    var total = 0;
+    (order.payments || []).forEach(function (p) {
+      if (p.type === 2 && p.status === 0 && p.parentId === payment.id) {
+        total += +p.data.PRTC_Price;
+      }
+    });
+    return total;
+  };
   $scope.paymentMethod = function (payment) {
     if (payment && payment.data) {
       var _payment$data2 = payment.data;

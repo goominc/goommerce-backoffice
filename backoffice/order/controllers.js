@@ -402,6 +402,15 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     }
     return 0;
   }
+  $scope.refundedAmount = (payment) => {
+    let total = 0;
+    (order.payments || []).forEach((p) => {
+      if (p.type === 2 && p.status === 0 && p.parentId === payment.id) {
+        total += +p.data.PRTC_Price;
+      }
+    });
+    return total;
+  }
   $scope.paymentMethod = (payment) => {
     if (payment && payment.data) {
       const { payMethod, paymethod, P_TYPE } = payment.data;
