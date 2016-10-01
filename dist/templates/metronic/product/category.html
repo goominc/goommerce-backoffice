@@ -42,8 +42,15 @@
                         </div>
                       </div>
                     </div>
+                    <span class="btn blue fileinput-button">
+                      <i class="fa fa-plus"></i> 배너 이미지 추가
+                      <input type="file" id="banner-upload-button" />
+                    </span>
+                    <div class="col-md-12" ng-if="category.data.banner" style="margin: 15px 0;">
+                      <img width="100%" ng-src="{{category.data.banner.url}}" />
+                    </div>
                   </form>
-                  <div class="row">
+                  <div class="row" style="margin-top: 15px;">
                     <h4>Best Sellers</h4>
                     <div
                       class="col-md-12"

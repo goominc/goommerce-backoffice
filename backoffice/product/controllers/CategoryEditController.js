@@ -2,7 +2,7 @@
 
 const productModule = require('../module.js');
 
-productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $state, categories, $translate) => {
+productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $state, categories, $translate, boUtils) => {
   $scope.contentTitle = $translate.instant('product.category.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [
@@ -286,4 +286,29 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     $rootScope.changeEditLocale(locale);
     $state.reload();
   };
+
+  setTimeout(() => {
+    $('#banner-upload-button').on('change', function (changeEvent) {
+      const file = _.get(changeEvent, 'target.files[0]');
+      if (!file) {
+        return;
+      }
+      boUtils.startProgressBar();
+      $('#banner-upload-button').attr('value', '');
+      const r = new FileReader();
+      r.onload = function(e) {
+        boUtils.uploadImage201607(e.target.result, file).then((res) => {
+          boUtils.stopProgressBar();
+          _.set($scope.category, 'data.banner', res.data.images[0]);
+          if (!$scope.$$phase) {
+            $scope.$apply();
+          }
+        }, () => {
+          window.alert('image upload fail');
+          boUtils.stopProgressBar();
+        });
+      };
+      r.readAsBinaryString(file);
+    });
+  }, 500);
 });

@@ -271,16 +271,12 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       }, {
         name: $translate.instant('cms.mMainBanner'),
         sref: 'cms.simple({name: "mobile_main_banner"})'
+      }, {
+        name: $translate.instant('cms.mMdPick'),
+        sref: 'cms.simple({name: "mobile_md_pick"})'
       }]
     }]
   }];
-
-  /*
-  {
-    name: $translate.instant('cms.dTopBanner'),
-    sref: 'cms.simple({name: "desktop_top_banner"})'
-  },
-  */
 
   /*
   {
@@ -1929,6 +1925,7 @@ module.exports = {
     "dMdPick": "데스크탑 MD PICK",
     "dRightBanner": "데스크탑 우측 배너",
     "mMainBanner": "모바일 메인 배너",
+    "mMdPick": "모바일 MD PICK",
     "dShippingPolicy": "데스크탑 사입비 배송비 정책",
     "mShippingPolicy": "모바일 사입비 배송비 정책",
     "dSiteKeywords": "데스크탑 사이트 키워드",
@@ -6152,7 +6149,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
 
 var productModule = require('../module.js');
 
-productModule.controller('CategoryEditController', function ($scope, $rootScope, $http, $state, categories, $translate) {
+productModule.controller('CategoryEditController', function ($scope, $rootScope, $http, $state, categories, $translate, boUtils) {
   $scope.contentTitle = $translate.instant('product.category.title');
   $scope.contentSubTitle = '';
   $scope.breadcrumb = [{
@@ -6435,6 +6432,31 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     $rootScope.changeEditLocale(locale);
     $state.reload();
   };
+
+  setTimeout(function () {
+    $('#banner-upload-button').on('change', function (changeEvent) {
+      var file = _.get(changeEvent, 'target.files[0]');
+      if (!file) {
+        return;
+      }
+      boUtils.startProgressBar();
+      $('#banner-upload-button').attr('value', '');
+      var r = new FileReader();
+      r.onload = function (e) {
+        boUtils.uploadImage201607(e.target.result, file).then(function (res) {
+          boUtils.stopProgressBar();
+          _.set($scope.category, 'data.banner', res.data.images[0]);
+          if (!$scope.$$phase) {
+            $scope.$apply();
+          }
+        }, function () {
+          window.alert('image upload fail');
+          boUtils.stopProgressBar();
+        });
+      };
+      r.readAsBinaryString(file);
+    });
+  }, 500);
 });
 }, {"../module.js":10}],
 41: [function(require, module, exports) {
