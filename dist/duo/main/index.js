@@ -6061,7 +6061,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   var descriptions = ['desktop-desc1', 'desktop-desc2', 'desktop-desc3', 'mobile-desc1', 'mobile-desc2', 'mobile-desc3'];
   var getSummernoteConfig = function getSummernoteConfig(node, name) {
     var options = {
-      fontNames: ['Nanum Gothic', 'Open Sans', 'Arial'],
+      fontNames: ['Noto Sans', 'Nanum Gothic', 'Open Sans', 'Arial'],
       onImageUpload: function onImageUpload(files) {
         var file = files[0];
         var metaData = _.pick(file, ['name', 'type']);

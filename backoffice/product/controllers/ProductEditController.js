@@ -784,7 +784,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   ];
   const getSummernoteConfig = (node, name) => {
     const options = {
-      fontNames: ['Nanum Gothic', 'Open Sans' ,'Arial'],
+      fontNames: ['Noto Sans','Nanum Gothic', 'Open Sans' ,'Arial'],
       onImageUpload : (files) => {
         const file = files[0];
         const metaData = _.pick(file, ['name', 'type']);
