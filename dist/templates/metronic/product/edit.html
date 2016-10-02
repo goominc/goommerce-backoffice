@@ -281,15 +281,31 @@
                       </div>
                     </div>
                   </uib-tab>
-                  <uib-tab heading="{{'product.edit.tabEditor' | translate}}" data-ng-click="initEditor()">
+                  <uib-tab heading="{{'product.edit.tabDesktopEditor' | translate}}" data-ng-click="initEditor()">
                     <div class="row">
                       <div class="col-md-12">
                         <h3>상세 정보</h3>
-                        <div id="desc1"></div>
+                        <div id="desktop-desc1"></div>
                         <h3>배송/반품/교환 안내</h3>
-                        <div id="desc2"></div>
+                        <div id="desktop-desc2"></div>
                         <h3>취급 주의 사항</h3>
-                        <div id="desc3"></div>
+                        <div id="desktop-desc3"></div>
+                      </div>
+                    </div>
+                  </uib-tab>
+                  <uib-tab heading="{{'product.edit.tabMobileEditor' | translate}}" data-ng-click="initEditor()">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <h3>상세 정보</h3>
+                        <div id="mobile-desc1"></div>
+                      </div>
+                      <div class="col-md-4">
+                        <h3>배송/반품/교환 안내</h3>
+                        <div id="mobile-desc2"></div>
+                      </div>
+                      <div class="col-md-4">
+                        <h3>취급 주의 사항</h3>
+                        <div id="mobile-desc3"></div>
                       </div>
                     </div>
                   </uib-tab>

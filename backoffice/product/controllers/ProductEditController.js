@@ -778,35 +778,48 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   $scope.translateStatus = (status) => $rootScope.getContentsI18nText(`enum.productVariant.status.${status}`);
 
   $scope.isEditorInitialized = false;
-  const descriptions = ['desc1', 'desc2', 'desc3'];
+  const descriptions = [
+    'desktop-desc1', 'desktop-desc2', 'desktop-desc3',
+    'mobile-desc1', 'mobile-desc2', 'mobile-desc3',
+  ];
+  const getSummernoteConfig = (node, name) => {
+    const options = {
+      fontNames: ['Nanum Gothic', 'Open Sans' ,'Arial'],
+      onImageUpload : (files) => {
+        const file = files[0];
+        const metaData = _.pick(file, ['name', 'type']);
+        const r = new FileReader();
+        boUtils.startProgressBar();
+        r.onload = function(e) {
+          boUtils.uploadImage201607(e.target.result, metaData, '').then((res) => {
+            boUtils.stopProgressBar();
+            const resultImage = res.data.images[0];
+            const elem = $('<img>').attr('src', resultImage.url);
+            node.summernote('insertNode', elem[0]);
+            // editor.insertImage(welEditable, resultImage.url);
+          }).catch((err) => {
+            boUtils.stopProgressBar();
+            throw err;
+          });
+        };
+        r.readAsBinaryString(file);
+      },
+    };
+    if (name.startsWith('mobile')) {
+      options.width = 320;
+      options.height = 500;
+    } else {
+      options.width = 980;
+      options.height = 700;
+    }
+    return options;
+  };
   $scope.initEditor = () => {
     if (!$scope.isEditorInitialized) {
       $scope.isEditorInitialized = true;
       const initDesc = (name) => {
         const node = $(`#${name}`);
-        node.summernote({
-          height: 700,
-          fontNames: ['Nanum Gothic', 'Open Sans' ,'Arial'],
-          onImageUpload : (files) => {
-            const file = files[0];
-            const metaData = _.pick(file, ['name', 'type']);
-            const r = new FileReader();
-            boUtils.startProgressBar();
-            r.onload = function(e) {
-              boUtils.uploadImage201607(e.target.result, metaData, '').then((res) => {
-                boUtils.stopProgressBar();
-                const resultImage = res.data.images[0];
-                const elem = $('<img>').attr('src', resultImage.url);
-                node.summernote('insertNode', elem[0]);
-                // editor.insertImage(welEditable, resultImage.url);
-              }).catch((err) => {
-                boUtils.stopProgressBar();
-                throw err;
-              });
-            };
-            r.readAsBinaryString(file);
-          },
-        });
+        node.summernote(getSummernoteConfig(node, name));
         /*
         node.on('summernote.paste', (e) => {
           setTimeout(() => {
@@ -852,7 +865,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           }, 1000);
         });
         */
-        const data = _.get($scope.product, `data.${name}`);
+        const data = _.get($scope.product, `contents.${name}`);
         if (data) {
           node.code(`${data}`);
         }
@@ -865,7 +878,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
       const node = $(`#${name}`);
       const data = node.code();
       if (data) {
-        _.set($scope.product, `data.${name}`, data);
+        _.set($scope.product, `contents.${name}`, data);
       }
     };
     descriptions.forEach(saveDesc);

@@ -4982,7 +4982,7 @@ productModule.factory('productUtil', function ($http, $q) {
       });
     },
     narrowProduct: function narrowProduct(product) {
-      return _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages', 'name']);
+      return _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'contents', 'appImages', 'name']);
     },
     narrowProductVariant: function narrowProductVariant(variant) {
       return _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages', 'status']);
@@ -5030,7 +5030,8 @@ module.exports = {
       "tabImage": "이미지",
       "tabCategory": "카테고리",
       "tabRecommendProduct": "추천상품",
-      "tabEditor": "상품 정보 입력",
+      "tabDesktopEditor": "데스크탑 정보 입력",
+      "tabMobileEditor": "모바일 정보 입력",
       "labelName": {
         "KO": "상품명(한국어)",
         "EN": "상품명(영어)",
@@ -6057,35 +6058,45 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   };
 
   $scope.isEditorInitialized = false;
-  var descriptions = ['desc1', 'desc2', 'desc3'];
+  var descriptions = ['desktop-desc1', 'desktop-desc2', 'desktop-desc3', 'mobile-desc1', 'mobile-desc2', 'mobile-desc3'];
+  var getSummernoteConfig = function getSummernoteConfig(node, name) {
+    var options = {
+      fontNames: ['Nanum Gothic', 'Open Sans', 'Arial'],
+      onImageUpload: function onImageUpload(files) {
+        var file = files[0];
+        var metaData = _.pick(file, ['name', 'type']);
+        var r = new FileReader();
+        boUtils.startProgressBar();
+        r.onload = function (e) {
+          boUtils.uploadImage201607(e.target.result, metaData, '').then(function (res) {
+            boUtils.stopProgressBar();
+            var resultImage = res.data.images[0];
+            var elem = $('<img>').attr('src', resultImage.url);
+            node.summernote('insertNode', elem[0]);
+            // editor.insertImage(welEditable, resultImage.url);
+          })['catch'](function (err) {
+            boUtils.stopProgressBar();
+            throw err;
+          });
+        };
+        r.readAsBinaryString(file);
+      }
+    };
+    if (name.startsWith('mobile')) {
+      options.width = 320;
+      options.height = 500;
+    } else {
+      options.width = 980;
+      options.height = 700;
+    }
+    return options;
+  };
   $scope.initEditor = function () {
     if (!$scope.isEditorInitialized) {
       $scope.isEditorInitialized = true;
       var initDesc = function initDesc(name) {
         var node = $('#' + name);
-        node.summernote({
-          height: 700,
-          fontNames: ['Nanum Gothic', 'Open Sans', 'Arial'],
-          onImageUpload: function onImageUpload(files) {
-            var file = files[0];
-            var metaData = _.pick(file, ['name', 'type']);
-            var r = new FileReader();
-            boUtils.startProgressBar();
-            r.onload = function (e) {
-              boUtils.uploadImage201607(e.target.result, metaData, '').then(function (res) {
-                boUtils.stopProgressBar();
-                var resultImage = res.data.images[0];
-                var elem = $('<img>').attr('src', resultImage.url);
-                node.summernote('insertNode', elem[0]);
-                // editor.insertImage(welEditable, resultImage.url);
-              })['catch'](function (err) {
-                boUtils.stopProgressBar();
-                throw err;
-              });
-            };
-            r.readAsBinaryString(file);
-          }
-        });
+        node.summernote(getSummernoteConfig(node, name));
         /*
         node.on('summernote.paste', (e) => {
           setTimeout(() => {
@@ -6131,7 +6142,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
           }, 1000);
         });
         */
-        var data = _.get($scope.product, 'data.' + name);
+        var data = _.get($scope.product, 'contents.' + name);
         if (data) {
           node.code('' + data);
         }
@@ -6144,7 +6155,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       var node = $('#' + name);
       var data = node.code();
       if (data) {
-        _.set($scope.product, 'data.' + name, data);
+        _.set($scope.product, 'contents.' + name, data);
       }
     };
     descriptions.forEach(saveDesc);

@@ -184,8 +184,10 @@ productModule.factory('productUtil', ($http, $q) => {
         }
       })
     },
-    narrowProduct: (product) => _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'appImages', 'name']),
-    narrowProductVariant: (variant) => _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages', 'status']),
+    narrowProduct: (product) => _.pick(product,
+      ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'contents', 'appImages', 'name']),
+    narrowProductVariant: (variant) => _.pick(variant,
+      ['id', 'productId', 'sku', 'KRW', 'data', 'appImages', 'status']),
   };
 });
 
