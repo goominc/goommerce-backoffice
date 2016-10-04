@@ -116,14 +116,15 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           sref: 'order.main',
         },
         {
-          key: 'order.listPrice',
-          name: $translate.instant('order.listPrice.title'),
-          sref: 'order.listPrice',
-        },
-        {
           key: 'order.beforePayment',
           name: $translate.instant('order.beforePayment.title'),
           sref: 'order.beforePayment',
+        },
+        /*
+        {
+          key: 'order.listPrice',
+          name: $translate.instant('order.listPrice.title'),
+          sref: 'order.listPrice',
         },
         {
           key: 'order.uncle',
@@ -150,6 +151,7 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: $translate.instant('order.godo.title'),
           sref: 'order.godo',
         },
+        */
       ],
     },
     {

@@ -31,6 +31,24 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
   }
   $scope.root.name[editLocale] = $translate.instant('product.category.rootName'); // TODO root name i18n
 
+  const devices = ['desktop', 'mobile'];
+  $('#category-ui-desktop').summernote({
+    width: 1200,
+    height: 700,
+  });
+  $('#category-ui-mobile').summernote({
+    width: 320,
+    height: 500,
+  });
+  const getNode = (device) => $(`#category-ui-${device}`);
+  $scope.setCategory = (category) => {
+    $scope.category = category;
+    devices.forEach((device) => {
+      const editorData = _.get(category, `contents.customUI-${device}`, '');
+      getNode(device).code(editorData);
+    });
+  };
+
   const getTreeData = (root, currentCategoryId, opened) => {
     let json = {
       id: root.id,
@@ -40,7 +58,7 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     };
     categoryIdMap[root.id] = root;
     if (currentCategoryId && +root.id === +currentCategoryId) {
-      $scope.category = root;
+      $scope.setCategory(root);
       json.state.selected = true;
     }
 
@@ -53,7 +71,6 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
   };
 
   const jstreeData = getTreeData($scope.root, currentCategoryId, true);
-  // $scope.category = categoryIdMap[currentCategoryId];
   const jstreeNode = $('#categoryTree');
   jstreeNode.jstree({
     core: {
@@ -227,7 +244,7 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
     if (+data.node.id === +_.get($scope, 'category.id')) {
       return;
     }
-    $scope.category = categoryIdMap[data.node.id];
+    $scope.setCategory(categoryIdMap[data.node.id]);
     loadProducts();
     if (!$scope.$$phase) {
       $scope.$apply();
@@ -258,6 +275,12 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
       window.alert('[ERROR] Category is NULL');
       return false;
     }
+    devices.forEach((device) => {
+      const editorData = getNode(device).code();
+      if (editorData) {
+        _.set($scope.category, `contents.customUI-${device}`, editorData);
+      }
+    });
     $scope.category.data.bestVariants.forEach((v) => {
       v.product = _.pick(v.product, 'name', 'KRW', 'data', 'id');
       if (v.product.data) {
@@ -268,7 +291,8 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
       const category = res.data;
       categoryIdMap[category.id] = category;
       jstreeNode.jstree('set_text', category.id, category.name[editLocale]);
-      $scope.category = category;
+      $scope.setCategory(category);
+      window.alert(`${_.get(category, 'name.ko', category.id)}가 성공적으로 저장되었습니다`);
     }, (err) => {
       window.alert(err.data);
     });

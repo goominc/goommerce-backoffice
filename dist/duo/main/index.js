@@ -193,35 +193,44 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       name: $translate.instant('main.mainMenu'),
       sref: 'order.main'
     }, {
-      key: 'order.listPrice',
-      name: $translate.instant('order.listPrice.title'),
-      sref: 'order.listPrice'
-    }, {
       key: 'order.beforePayment',
       name: $translate.instant('order.beforePayment.title'),
       sref: 'order.beforePayment'
-    }, {
-      key: 'order.uncle',
-      name: $translate.instant('order.uncle.title'),
-      sref: 'order.uncle'
-    }, {
-      key: 'order.settlement',
-      name: $translate.instant('order.settlement.title'),
-      sref: 'order.settlement'
-    }, {
-      key: 'order.vat',
-      name: $translate.instant('order.vat.title'),
-      sref: 'order.vat({month: "' + moment().format('YYYY-MM') + '"})'
-    }, {
-      key: 'order.listBigBuyer',
-      name: $translate.instant('order.listBigBuyer.title'),
-      sref: 'order.listBigBuyer'
-    }, {
-      key: 'order.godo',
-      name: $translate.instant('order.godo.title'),
-      sref: 'order.godo'
     }]
-  }, {
+  },
+  /*
+  {
+    key: 'order.listPrice',
+    name: $translate.instant('order.listPrice.title'),
+    sref: 'order.listPrice',
+  },
+  {
+    key: 'order.uncle',
+    name: $translate.instant('order.uncle.title'),
+    sref: 'order.uncle',
+  },
+  {
+    key: 'order.settlement',
+    name: $translate.instant('order.settlement.title'),
+    sref: 'order.settlement',
+  },
+  {
+    key: 'order.vat',
+    name: $translate.instant('order.vat.title'),
+    sref: `order.vat({month: "${moment().format('YYYY-MM')}"})`,
+  },
+  {
+    key: 'order.listBigBuyer',
+    name: $translate.instant('order.listBigBuyer.title'),
+    sref: 'order.listBigBuyer',
+  },
+  {
+    key: 'order.godo',
+    name: $translate.instant('order.godo.title'),
+    sref: 'order.godo',
+  },
+  */
+  {
     key: 'user', // TODO get key from router
     name: $translate.instant('user.manage.title'),
     sref: 'user.manage',
@@ -6194,6 +6203,26 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
   }
   $scope.root.name[editLocale] = $translate.instant('product.category.rootName'); // TODO root name i18n
 
+  var devices = ['desktop', 'mobile'];
+  $('#category-ui-desktop').summernote({
+    width: 1200,
+    height: 700
+  });
+  $('#category-ui-mobile').summernote({
+    width: 320,
+    height: 500
+  });
+  var getNode = function getNode(device) {
+    return $('#category-ui-' + device);
+  };
+  $scope.setCategory = function (category) {
+    $scope.category = category;
+    devices.forEach(function (device) {
+      var editorData = _.get(category, 'contents.customUI-' + device, '');
+      getNode(device).code(editorData);
+    });
+  };
+
   var getTreeData = function getTreeData(root, currentCategoryId, opened) {
     var json = {
       id: root.id,
@@ -6203,7 +6232,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     /* TODO disabled: !root.isActive, */
     categoryIdMap[root.id] = root;
     if (currentCategoryId && +root.id === +currentCategoryId) {
-      $scope.category = root;
+      $scope.setCategory(root);
       json.state.selected = true;
     }
 
@@ -6216,7 +6245,6 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
   };
 
   var jstreeData = getTreeData($scope.root, currentCategoryId, true);
-  // $scope.category = categoryIdMap[currentCategoryId];
   var jstreeNode = $('#categoryTree');
   jstreeNode.jstree({
     core: {
@@ -6398,7 +6426,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     if (+data.node.id === +_.get($scope, 'category.id')) {
       return;
     }
-    $scope.category = categoryIdMap[data.node.id];
+    $scope.setCategory(categoryIdMap[data.node.id]);
     loadProducts();
     if (!$scope.$$phase) {
       $scope.$apply();
@@ -6424,6 +6452,12 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
       window.alert('[ERROR] Category is NULL');
       return false;
     }
+    devices.forEach(function (device) {
+      var editorData = getNode(device).code();
+      if (editorData) {
+        _.set($scope.category, 'contents.customUI-' + device, editorData);
+      }
+    });
     $scope.category.data.bestVariants.forEach(function (v) {
       v.product = _.pick(v.product, 'name', 'KRW', 'data', 'id');
       if (v.product.data) {
@@ -6434,7 +6468,8 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
       var category = res.data;
       categoryIdMap[category.id] = category;
       jstreeNode.jstree('set_text', category.id, category.name[editLocale]);
-      $scope.category = category;
+      $scope.setCategory(category);
+      window.alert(_.get(category, 'name.ko', category.id) + '가 성공적으로 저장되었습니다');
     }, function (err) {
       window.alert(err.data);
     });

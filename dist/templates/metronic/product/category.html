@@ -26,67 +26,86 @@
                       <button class="btn blue" ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
                     </div>
                   </div>
-                  <form class="form-horizontal form-row-seperated" data-ng-if="category.id != root.id">
-                    <div class="form-group">
-                      <label class="col-md-2 control-label">이름 <span class="required"> * </span> </label>
-                      <div class="col-md-10">
-                        <input type="text" class="form-control" placeholder="카테고리 이름" ng-model="category.name.ko">
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-md-2 control-label">{{'product.edit.labelActive' | translate}}</label>
-                      <div class="col-md-10">
-                        <div class="form-control">
-                          <input id="category-{{category.id}}" type="checkbox" data-ng-model="category.isActive">
-                          <label for="category-{{category.id}}"><span></span></label>
+                  <div class="col-md-12">
+                    에디터에서 작성한 UI 사용
+                    <input type="checkbox" id="category_use_custom" data-ng-model="category.data.isUseCustomUI" />
+                    <label
+                      for="category_use_custom"
+                    />
+                  </div>
+                  <uib-tabset>
+                    <uib-tab heading="카테고리 기본설정">
+                      <form class="form-horizontal form-row-seperated" data-ng-if="category.id != root.id">
+                        <div class="form-group">
+                          <label class="col-md-2 control-label">이름 <span class="required"> * </span> </label>
+                          <div class="col-md-10">
+                            <input type="text" class="form-control" placeholder="카테고리 이름" ng-model="category.name.ko">
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label class="col-md-2 control-label">{{'product.edit.labelActive' | translate}}</label>
+                          <div class="col-md-10">
+                            <div class="form-control">
+                              <input id="category-{{category.id}}" type="checkbox" data-ng-model="category.isActive">
+                              <label for="category-{{category.id}}"><span></span></label>
+                            </div>
+                          </div>
+                        </div>
+                        <span class="btn blue fileinput-button">
+                          <i class="fa fa-plus"></i> 배너 이미지 추가
+                          <input type="file" id="banner-upload-button" />
+                        </span>
+                        <div class="col-md-12" ng-if="category.data.banner" style="margin: 15px 0;">
+                          <img width="100%" ng-src="{{category.data.banner.url}}" />
+                        </div>
+                      </form>
+                      <div class="row" style="margin-top: 15px;">
+                        <h4>Best Sellers</h4>
+                        <div
+                          class="col-md-12"
+                          style="min-height: 100px;"
+                          ui-sortable
+                          data-ng-model="category.data.bestVariants"
+                        >
+                          <div class="product-image-wrap image-inline" style="text-align: center;" data-ng-repeat="bestVariant in category.data.bestVariants">
+                            <img data-ng-src="{{getImageUrl(bestVariant)}}" />
+                            <div class="delete-button" data-ng-click="deleteBestVariant($index)"><i class="fa fa-remove"></i></div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <span class="btn blue fileinput-button">
-                      <i class="fa fa-plus"></i> 배너 이미지 추가
-                      <input type="file" id="banner-upload-button" />
-                    </span>
-                    <div class="col-md-12" ng-if="category.data.banner" style="margin: 15px 0;">
-                      <img width="100%" ng-src="{{category.data.banner.url}}" />
-                    </div>
-                  </form>
-                  <div class="row" style="margin-top: 15px;">
-                    <h4>Best Sellers</h4>
-                    <div
-                      class="col-md-12"
-                      style="min-height: 100px;"
-                      ui-sortable
-                      data-ng-model="category.data.bestVariants"
-                    >
-                      <div class="product-image-wrap image-inline" style="text-align: center;" data-ng-repeat="bestVariant in category.data.bestVariants">
-                        <img data-ng-src="{{getImageUrl(bestVariant)}}" />
-                        <div class="delete-button" data-ng-click="deleteBestVariant($index)"><i class="fa fa-remove"></i></div>
+                      <div class="row" style="margin-top: 50px;">
+                        <div class="col-md-12">
+                          <h4>상품 목록</h4>
+                          <div bo-datatables="variantDatatables">
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>상품명</th>
+                                  <th>색상</th>
+                                  <th>사이즈</th>
+                                  <th>이미지</th>
+                                  <th></th>
+                                </tr>
+                              </thead>
+                              <tbody></tbody>
+                            </table>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  <div class="row" style="margin-top: 50px;">
-                    <div class="col-md-12">
-                      <h4>상품 목록</h4>
-                      <div bo-datatables="variantDatatables">
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>상품명</th>
-                              <th>색상</th>
-                              <th>사이즈</th>
-                              <th>이미지</th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody></tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
+                    </uib-tab>
+                    <uib-tab heading="커스텀 템플릿">
+                    </uib-tab>
+                  </uib-tabset>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+        <div class="col-md-12">
+          <div id="category-ui-desktop"></div>
+        </div>
+        <div class="col-md-12">
+          <div id="category-ui-mobile"></div>
         </div>
       </div>
     </div>
