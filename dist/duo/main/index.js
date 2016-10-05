@@ -3332,8 +3332,8 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   $scope.closeOrder = function () {
     if (window.confirm('구매 확정됩니다. 사용자에게 마일리지가 적립됩니다.')) {
       $http.put('/api/v1/orders/' + order.id + '/close').then(function () {
-        winow.alert('완료되었습니다');
-        $state.reload();
+        window.alert('완료되었습니다');
+        $state.go('order.main');
       });
     }
   };
@@ -4192,6 +4192,10 @@ orderModule.controller('OrderListPriceController', function ($scope, $http, $sta
         $(nRow).css('background-color', 'rgb(179,102,255)');
       } else if (aData.status === 300) {
         $(nRow).css('background-color', 'rgb(255,185,187)');
+      } else if (aData.status === 301) {
+        $(nRow).css('background-color', 'rgba(255, 255, 0, 0.4)');
+      } else if (aData.status === 400) {
+        $(nRow).css('background-color', 'rgba(59, 59, 78, 0.27)');
       }
     }
   };

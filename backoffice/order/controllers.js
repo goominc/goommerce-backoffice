@@ -486,8 +486,8 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   $scope.closeOrder = () => {
     if (window.confirm('구매 확정됩니다. 사용자에게 마일리지가 적립됩니다.')) {
       $http.put(`/api/v1/orders/${order.id}/close`).then(() => {
-        winow.alert('완료되었습니다');
-        $state.reload();
+        window.alert('완료되었습니다');
+        $state.go('order.main');
       });
     }
   };
@@ -1600,19 +1600,23 @@ orderModule.controller('OrderListPriceController', ($scope, $http, $state, $root
     fnCreatedRow(nRow, aData, iDataIndex) {
       if (aData.status === 100) {
       } else if (aData.status === 101) {
-        $(nRow).css('background-color', 'rgb(219,219,219)')
+        $(nRow).css('background-color', 'rgb(219,219,219)');
       } else if (aData.status === 102) {
-        $(nRow).css('background-color', 'rgb(255,185,185)')
+        $(nRow).css('background-color', 'rgb(255,185,185)');
       } else if (aData.status === 200) {
-        $(nRow).css('background-color', 'rgb(198,190,250)')
+        $(nRow).css('background-color', 'rgb(198,190,250)');
       } else if (aData.status === 201) {
-        $(nRow).css('background-color', 'rgb(208,216,232)')
+        $(nRow).css('background-color', 'rgb(208,216,232)');
       } else if (aData.status === 202) {
-        $(nRow).css('background-color', 'rgb(211,147,227)')
+        $(nRow).css('background-color', 'rgb(211,147,227)');
       } else if (aData.status === 203) {
-        $(nRow).css('background-color', 'rgb(179,102,255)')
+        $(nRow).css('background-color', 'rgb(179,102,255)');
       } else if (aData.status === 300) {
-        $(nRow).css('background-color', 'rgb(255,185,187)')
+        $(nRow).css('background-color', 'rgb(255,185,187)');
+      } else if (aData.status === 301) {
+        $(nRow).css('background-color', 'rgba(255, 255, 0, 0.4)');
+      } else if (aData.status === 400) {
+        $(nRow).css('background-color', 'rgba(59, 59, 78, 0.27)');
       }
     }
   };
