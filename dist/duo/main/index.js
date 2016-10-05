@@ -285,20 +285,20 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
         sref: 'cms.simple({name: "mobile_md_pick"})'
       }]
     }]
-  }];
-
+  },
   /*
   {
     key: 'currency', // TODO get key from router
     name: $translate.instant('currency.title'),
     sref: 'currency.main',
   },
+  */
   {
     key: 'text',
     name: $translate.instant('text.title'),
-    sref: 'text.main',
-  },
-  */
+    sref: 'text.main'
+  }];
+
   var pageTitleTemplate = '<div class="page-title"><h1>{{contentTitle}} <small data-ng-if="contentSubTitle">{{contentSubTitle}}</small></h1></div>';
   var initContentTitle = function initContentTitle(scope) {
     var elem = $('#contentTitle');
@@ -2745,6 +2745,7 @@ module.exports = {
       "title": "주문현황"
     },
     "detail": {
+      "closeOrderButton": "구매 확정",
       "deleteButton": "주문 삭제",
       "deleteMessage": "정말로 삭제하시겠습니까?",
       "title": "주문상세",
@@ -2834,7 +2835,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 var orderModule = require('./module');
 
 orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
-  var allStatus = [0, 100, 101, 102, 200, 201, 202, 203, 300, 400];
+  var allStatus = [0, 100, 102, 200, 201, 203, 300, 301, 400];
   var allPaymentStatus = [0, 1, 100, 200];
   var allPaymentMethods = [0, 1, 2, 3, 4, 5];
   var allSettlementStatus = [0, 100];
@@ -3326,6 +3327,15 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     }, function (err) {
       return alert(err.data.message);
     });
+  };
+
+  $scope.closeOrder = function () {
+    if (window.confirm('구매 확정됩니다. 사용자에게 마일리지가 적립됩니다.')) {
+      $http.put('/api/v1/orders/' + order.id + '/close').then(function () {
+        winow.alert('완료되었습니다');
+        $state.reload();
+      });
+    }
   };
 
   $scope.deleteOrder = function () {

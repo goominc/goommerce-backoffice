@@ -6,13 +6,12 @@ orderModule.factory('orderCommons', ($rootScope, $compile, boUtils) => {
   const allStatus = [
     0,
     100,
-    101,
     102,
     200,
     201,
-    202,
     203,
     300,
+    301,
     400,
   ];
   const allPaymentStatus = [
@@ -482,6 +481,15 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     $http.put(`/api/v1/orders/${order.id}/status`, data).then((res) => {
       $state.reload();
     }, (err) => alert(err.data.message));
+  };
+
+  $scope.closeOrder = () => {
+    if (window.confirm('구매 확정됩니다. 사용자에게 마일리지가 적립됩니다.')) {
+      $http.put(`/api/v1/orders/${order.id}/close`).then(() => {
+        winow.alert('완료되었습니다');
+        $state.reload();
+      });
+    }
   };
 
   $scope.deleteOrder = () => {

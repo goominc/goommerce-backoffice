@@ -225,12 +225,12 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
       name: $translate.instant('currency.title'),
       sref: 'currency.main',
     },
+    */
     {
       key: 'text',
       name: $translate.instant('text.title'),
       sref: 'text.main',
     },
-    */
   ];
 
   const pageTitleTemplate = '<div class="page-title"><h1>{{contentTitle}} <small data-ng-if="contentSubTitle">{{contentSubTitle}}</small></h1></div>';
