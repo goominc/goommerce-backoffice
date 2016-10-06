@@ -148,6 +148,25 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       },
     ],
   };
+  $scope.adminDatatables = {
+    field: 'users',
+    storeKey: 'userAdmin',
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return `<a ui-sref="user.info({ userId: ${id} })">${id}</a>`;
+        },
+      },
+      {
+        data: (data) => _.get(data, 'userId', ''),
+      },
+      {
+        data: 'createdAt',
+        render: (data) => boUtils.formatDate(data),
+      },
+    ],
+  };
 
   $scope.sellerDatatables = {
     field: 'users',
