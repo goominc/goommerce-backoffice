@@ -112,6 +112,10 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
     ],
   };
 
+  $scope.onChangeUserGrade = (e) => {
+    console.log(e);
+  };
+
   $scope.buyerDatatables = {
     field: 'users',
     storeKey: 'userBuyer',
@@ -124,7 +128,10 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
         },
       },
       {
-        data: 'email',
+        data: (data) => _.get(data, 'userId', ''),
+      },
+      {
+        data: (data) => _.get(data, 'email', ''),
       },
       {
         data: (data) => data.name || '',
@@ -133,10 +140,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
         data: (data) => _.get(data, 'data.tel') || '',
       },
       {
-        data: (data) => _.get(data, 'data.bizName') || '',
-      },
-      {
-        data: (data) => _.get(data, 'data.bizNumber') || '',
+        data: (data) => userUtil.spyderBuyerLevel[userUtil.getBuyerLevel(data)] || '',
       },
       {
         data: 'createdAt',
@@ -286,9 +290,9 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
 
   $scope.editRole = { admin: false, buyer: false, bigBuyer: false, seller: false };
   // former item has more priority
-  const roles = ['admin', 'bigBuyer', 'buyer'];
+  const roles = ['admin', 'buyer', 'team-spyder'];
   $scope.makeUserRolePopupData = (user) => {
-    const res = { admin: false, buyer: false, bigBuyer: false, seller: false };
+    const res = { admin: false, buyer: false, 'team-spyder': false };
     if (user.roles) {
       for (let i = 0; i < user.roles.length; i++) {
         const role = user.roles[i];
@@ -297,9 +301,6 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
             res[item] = true;
           }
         });
-        if (role.type === 'owner') {
-          res.seller = true;
-        }
       };
     }
     $scope.editRole = res;
@@ -318,8 +319,6 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       $scope.newUserRole = null;
     }
   };
-
-  const userIdToData = {};
 
   $scope.openRolePopup = (userId) => {
     const user = $scope.userIdToData[userId];
@@ -368,94 +367,77 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
     $compile(angular.element($('table')))($scope);
   };
 
+  const hasRole = (userId, roleType) => {
+    const user = $scope.userIdToData[userId];
+    const userRole = user.roles || [];
+    for (let i = 0; i < userRole.length; i++) {
+      const role = userRole[i];
+      if (role.type === roleType) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   // 2016. 02. 23. [heekyu] this is very limited since server cannot handle race condition properly
   $scope.saveRole = () => {
     const editRoleToData = () => {
+      const arr = [];
       for (let i = 0; i < roles.length; i++) {
         const role = roles[i];
         if ($scope.editRole[role]) {
-          return [ { type: role } ];
+          const obj = { type: role };
+          if (role === 'buyer') {
+            obj.grede = '베이직';
+          }
+          arr.push(obj);
         }
       }
-      return null;
+      return arr;
     };
     const newRoleData = editRoleToData();
     if (!newRoleData && !$scope.editRoleUser.roles) {
       return;
     }
-    const addOrDelete = {};
-
-    const isChangable = (roleType) => {
-      for (let i = 0; i < roles.length; i++) {
-        const role = roles[i];
-        if (role === roleType) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    ($scope.editRoleUser.roles || []).forEach((role) => {
-      if (!isChangable(role.type)) {
-        return;
-      }
-      if (addOrDelete[role.type]) {
-        addOrDelete[role.type]--;
-      } else {
-        addOrDelete[role.type] = -1;
-      }
-    });
-    (newRoleData || []).forEach((role) => {
-      if (!isChangable(role.type)) {
-        return;
-      }
-      if (addOrDelete[role.type]) {
-        addOrDelete[role.type]++;
-      } else {
-        addOrDelete[role.type] = 1;
-      }
-    });
     const url = `/api/v1/users/${$scope.editRoleUser.id}/roles`;
-    const keys = Object.keys(addOrDelete);
-    const addRoles = [];
-    const deleteRoles = [];
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const count = addOrDelete[key];
-      if (count === 1) {
-        addRoles.push(key);
-        // promises.push($http.post(url, { roleType: key }));
-      } else if (count === -1) {
-        deleteRoles.push(key);
-        // promises.push($http.delete(url, { data: { type: key }, headers: {"Content-Type": "application/json;charset=utf-8"} }));
-      }
-    }
-    if (deleteRoles.length > 0) {
-      $http.delete(url, { data: { type: deleteRoles[0] }, headers: {"Content-Type": "application/json;charset=utf-8"} }).then(() => {
-        if (addRoles.length > 0) {
-          $http.post(url, { roleType: addRoles[0] }).then(() => {
-            $scope.closeRolePopup();
-            $state.reload();
-          }).catch((err) => {
-            window.alert(err.message);
-          });
-        } else {
-          $scope.closeRolePopup();
-          $state.reload();
+    let promise = Promise.resolve('');
+    ($scope.editRoleUser.roles || []).forEach((userRole) => {
+      let found = false;
+      for (let i = 0; i < (newRoleData || []).length; i += 1) {
+        const newRole = newRoleData[i];
+        if (newRole.type === userRole.type) {
+          found = true;
+          break;
         }
-      }).catch((err) => {
-        window.alert(err.message);
-      });
-    } else if (addRoles.length > 0) {
-      $http.post(url, { roleType: addRoles[0] }).then(() => {
-        $scope.closeRolePopup();
-        $state.reload();
-      }).catch((err) => {
-        window.alert(err.message);
-      });
-    } else {
+      }
+      if (!found) {
+        // delete case
+        promise = promise.then(() => {
+          $http.delete(url, { data: { roleType: userRole.type }, headers: {"Content-Type": "application/json;charset=utf-8"} })
+        });
+      }
+    });
+    (newRoleData || []).forEach((newRole) => {
+      let found = false;
+      for (let i = 0; i < ($scope.editRoleUser.roles || []).length; i += 1) {
+        const userRole = $scope.editRoleUser.roles[i];
+        if (userRole.type === newRole.type) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        // add case
+        promise = promise.then(() => $http.post(url, { roleType: newRole.type }));
+      }
+    });
+    promise.then(() => {
       $scope.closeRolePopup();
-    }
+      $state.reload();
+    }).catch((err) => {
+      window.alert(err.message);
+      throw err;
+    });
   };
 
   $scope.inactivateUser = (e, userId) => {
@@ -582,22 +564,16 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     $scope.userFields = [
       {title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true},
       {title: $translate.instant('user.info.emailLabel'), obj: $scope.user.userId, key: 'email', isReadOnly: true, isRequired: true},
-      {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
-      {title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'data.firstName'), isReadOnly: true, isRequired: true},
+      // {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
+      {title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'name'), isReadOnly: true, isRequired: true},
+      // {title: 'SMS 마케팅 동의', obj: _.get($scope.user, 'data.isAgreeSMS'), isReadOnly: true, isRequired: false },
       {title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false},
       {title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false},
-      {title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false},
-      {title: $translate.instant('user.info.bizNameLabel'), obj: _.get($scope.user, 'data.bizName'), key: 'data.bizName', isRequired: false},
-      {title: $translate.instant('user.info.bizNumberLabel'), obj: _.get($scope.user, 'data.bizNumber'), key: 'data.bizNumber', isRequired: false},
-      {title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false},
-      {title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false},
-      {title: $translate.instant('user.info.settlementAliasLabel'), obj: _.get($scope.user, 'data.settlement.alias'), key: 'data.settlement.alias', isRequired: false},
-      {title: $translate.instant('user.info.orderNameLabel'), obj: _.get($scope.user, 'data.order.name'), key: 'data.order.name', isRequired: false},
+      // {title: '생년', },
     ];
-    const roleType = _.get($scope.user, 'roles[0].type');
-    const brand = _.get($scope.user, 'roles[0].brand');
-    if ((roleType === 'owner' || roleType === 'staff') && brand) {
-      $scope.myBrand = brand;
+    const level = userUtil.getBuyerLevel($scope.user);
+    if (level) {
+      $scope.levelObj = level;
     }
   };
   init(user);
@@ -611,6 +587,15 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     res.data.logs.forEach((l) => (l.createdAt = boUtils.formatDate(l.createdAt)));
     $scope.notes = res.data.logs.sort((a, b) => (a.id < b.id));
   });
+  $scope.changeGrade = (newLevel) => {
+    const data = { level: newLevel };
+    $http.post(`/api/v1/users/${$scope.user.id}/level`, data).then(() => {
+      window.alert('회원 등급이 변경되었습니다');
+      $state.reload();
+    }).catch(() => {
+      window.alert('[FAIL] 회원 등급 변경 요청이 실패하였습니다');
+    });
+  };
 
   $scope.save = () => {
     convertUtil.copyFieldObj($scope.userFields, $scope.user);
@@ -632,6 +617,10 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
       $state.reload();
     });
   };
+
+  $scope.grades = Object.keys(userUtil.spyderBuyerLevel).map((level) => (
+    { label: userUtil.spyderBuyerLevel[level], value: level }
+  ));
 
   $('#image-upload-button').on('change', function (changeEvent) {
     boUtils.startProgressBar();

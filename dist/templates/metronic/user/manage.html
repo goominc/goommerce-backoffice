@@ -56,33 +56,6 @@
                         </table>
                       </div>
                     </uib-tab>
-                    <uib-tab heading="{{'user.manage.noRoleTab' | translate}}" active="tabName === 'noRole'" data-ng-click="changeTab('noRole')">
-                      <div
-                        data-ng-if="tabName === 'noRole'"
-                        bo-server-datatables="noRoleDatatables"
-                        url="/api/v1/users"
-                        url-params="{ roles: 'none' }"
-                        table-render="datatablesLoaded()"
-                        fn-url-params="fnUrlParams(urlParams)"
-                      >
-                        <table class="table table-bordered table-hover" style="width: 100%;">
-                          <thead>
-                          <tr role="row" class="heading">
-                            <td>ID</td>
-                            <td>{{'main.word.email' | translate}}</td>
-                            <td>{{'main.word.name' | translate}}</td>
-                            <td>{{'main.word.tel' | translate}}</td>
-                            <td>{{'user.info.bizNameLabel' | translate}}</td>
-                            <td>{{'user.info.bizNumberLabel' | translate}}</td>
-                            <td></td>
-                            <td></td>
-                            <td>{{'main.word.createdAt' | translate}}</td>
-                          </tr>
-                          </thead>
-                          <tbody class="cell-center"></tbody>
-                        </table>
-                      </div>
-                    </uib-tab>
                     <uib-tab heading="{{'user.manage.buyerTab' | translate}}" active="tabName === 'buyer'" data-ng-click="changeTab('buyer')">
                       <div
                         data-ng-if="tabName === 'buyer'"
@@ -95,58 +68,11 @@
                           <thead>
                           <tr role="row" class="heading">
                             <td>ID</td>
+                            <td>유저 아이디</td>
                             <td>{{'main.word.email' | translate}}</td>
                             <td>{{'main.word.name' | translate}}</td>
                             <td>{{'main.word.tel' | translate}}</td>
-                            <td>{{'user.info.bizNameLabel' | translate}}</td>
-                            <td>{{'user.info.bizNumberLabel' | translate}}</td>
-                            <td>{{'main.word.createdAt' | translate}}</td>
-                          </tr>
-                          </thead>
-                          <tbody class="cell-center"></tbody>
-                        </table>
-                      </div>
-                    </uib-tab>
-                    <uib-tab heading="{{'user.manage.sellerTab' | translate}}" active="tabName === 'seller'" data-ng-click="changeTab('seller')">
-                      <div
-                        data-ng-if="tabName === 'seller'"
-                        bo-server-datatables="sellerDatatables"
-                        url="/api/v1/users"
-                        url-params="{ roles: 'owner' }"
-                        fn-url-params="fnUrlParams(urlParams)"
-                      >
-                        <table class="table table-bordered table-hover" style="width: 100%;">
-                          <thead>
-                          <tr role="row" class="heading">
-                            <td>ID</td>
-                            <td>{{'brand.title' | translate}}</td>
-                            <td>{{'main.word.email' | translate}}</td>
-                            <td>{{'main.word.name' | translate}}</td>
-                            <td>{{'main.word.tel' | translate}}</td>
-                            <td>{{'main.word.createdAt' | translate}}</td>
-                          </tr>
-                          </thead>
-                          <tbody class="cell-center"></tbody>
-                        </table>
-                      </div>
-                    </uib-tab>
-                    <uib-tab heading="{{'user.manage.bigBuyerTab' | translate}}" active="tabName === 'bigBuyer'" data-ng-click="changeTab('bigBuyer')">
-                      <div
-                        data-ng-if="tabName === 'bigBuyer'"
-                        bo-server-datatables="buyerDatatables"
-                        url="/api/v1/users"
-                        url-params="{ roles: 'bigBuyer' }"
-                        fn-url-params="fnUrlParams(urlParams)"
-                      >
-                        <table class="table table-bordered table-hover" style="width: 100%;">
-                          <thead>
-                          <tr role="row" class="heading">
-                            <td>ID</td>
-                            <td>{{'main.word.email' | translate}}</td>
-                            <td>{{'main.word.name' | translate}}</td>
-                            <td>{{'main.word.tel' | translate}}</td>
-                            <td>{{'user.info.bizNameLabel' | translate}}</td>
-                            <td>{{'user.info.bizNumberLabel' | translate}}</td>
+                            <td>{{'user.info.gradeLabel' | translate}}</td>
                             <td>{{'main.word.createdAt' | translate}}</td>
                           </tr>
                           </thead>
@@ -166,35 +92,10 @@
                           <thead>
                           <tr role="row" class="heading">
                             <td>ID</td>
+                            <td>UserID</td>
                             <td>{{'main.word.email' | translate}}</td>
                             <td>{{'main.word.name' | translate}}</td>
                             <td>{{'main.word.tel' | translate}}</td>
-                            <td>{{'user.info.bizNameLabel' | translate}}</td>
-                            <td>{{'user.info.bizNumberLabel' | translate}}</td>
-                            <td>{{'main.word.createdAt' | translate}}</td>
-                          </tr>
-                          </thead>
-                          <tbody class="cell-center"></tbody>
-                        </table>
-                      </div>
-                    </uib-tab>
-                    <uib-tab heading="{{'user.manage.godoTab' | translate}}" active="tabName === 'godo'" data-ng-click="changeTab('godo')">
-                      <div
-                        data-ng-if="tabName === 'godo'"
-                        bo-server-datatables="buyerDatatables"
-                        url="/api/v1/users"
-                        url-params="{ sources: 'godo' }"
-                        fn-url-params="fnUrlParams(urlParams)"
-                      >
-                        <table class="table table-bordered table-hover" style="width: 100%;">
-                          <thead>
-                          <tr role="row" class="heading">
-                            <td>ID</td>
-                            <td>{{'main.word.email' | translate}}</td>
-                            <td>{{'main.word.name' | translate}}</td>
-                            <td>{{'main.word.tel' | translate}}</td>
-                            <td>{{'user.info.bizNameLabel' | translate}}</td>
-                            <td>{{'user.info.bizNumberLabel' | translate}}</td>
                             <td>{{'main.word.createdAt' | translate}}</td>
                           </tr>
                           </thead>
@@ -281,10 +182,9 @@
         <table class="table table-borded dataTable">
           <thead>
           <tr>
-            <th>Admin</th>
-            <th>BigBuyer</th>
-            <th>Buyer</th>
-            <th>Seller</th>
+            <th>어드민</th>
+            <th>바이어</th>
+            <th>팀스파이더</th>
           </tr>
           </thead>
           <tbody>
@@ -294,16 +194,12 @@
               <label for="edit_role_admin"></label>
             </td>
             <td style="text-align: center;">
-              <input data-ng-if="!editRole.admin && !editRole.seller" id="edit_role_bigBuyer" type="checkbox" data-ng-model="editRole.bigBuyer" />
-              <label for="edit_role_bigBuyer"></label>
-            </td>
-            <td style="text-align: center;">
-              <input data-ng-if="!editRole.admin && !editRole.seller" id="edit_role_buyer" type="checkbox" data-ng-model="editRole.buyer" />
+              <input data-ng-if="!editRole.admin" id="edit_role_buyer" type="checkbox" data-ng-model="editRole.buyer" />
               <label for="edit_role_buyer"></label>
             </td>
             <td style="text-align: center;">
-              <input id="edit_role_seller" type="checkbox" data-ng-model="editRole.seller" disabled />
-              <label for="edit_role_seller"></label>
+              <input data-ng-if="!editRole.admin" id="edit_role_teamspyder" type="checkbox" data-ng-model="editRole['team-spyder']" />
+              <label for="edit_role_teamspyder"></label>
             </td>
           </tr>
           </tbody>

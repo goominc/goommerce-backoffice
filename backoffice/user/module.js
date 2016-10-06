@@ -50,12 +50,26 @@ userModule.config(($stateProvider) => {
     });
 });
 
+const spyderBuyerLevel = {
+  1: '베이직',
+  2: '실버',
+  3: '골드',
+  4: 'VIP',
+};
 userModule.factory('userUtil', () => {
   return {
-    getRoleName: (user) => {
-      const role = _.get(user, 'roles[0]');
-      return role ? role.type : '';
+    getRoleName: (user) => (user.roles || []).map((role) => role.type).join(','),
+    getBuyerLevel: (user) => {
+      for (let i = 0; i < (user.roles || []).length; i += 1) {
+        const role = user.roles[0];
+        if (role.type === 'buyer') {
+          const level = role.level || 1;
+          return level;
+        }
+      }
+      return '';
     },
+    spyderBuyerLevel,
   };
 });
 

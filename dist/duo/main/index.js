@@ -7409,12 +7409,30 @@ userModule.config(function ($stateProvider) {
   });
 });
 
+var spyderBuyerLevel = {
+  1: '베이직',
+  2: '실버',
+  3: '골드',
+  4: 'VIP'
+};
 userModule.factory('userUtil', function () {
   return {
     getRoleName: function getRoleName(user) {
-      var role = _.get(user, 'roles[0]');
-      return role ? role.type : '';
-    }
+      return (user.roles || []).map(function (role) {
+        return role.type;
+      }).join(',');
+    },
+    getBuyerLevel: function getBuyerLevel(user) {
+      for (var i = 0; i < (user.roles || []).length; i += 1) {
+        var role = user.roles[0];
+        if (role.type === 'buyer') {
+          var level = role.level || 1;
+          return level;
+        }
+      }
+      return '';
+    },
+    spyderBuyerLevel: spyderBuyerLevel
   };
 });
 
@@ -7589,6 +7607,10 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }]
   };
 
+  $scope.onChangeUserGrade = function (e) {
+    console.log(e);
+  };
+
   $scope.buyerDatatables = {
     field: 'users',
     storeKey: 'userBuyer',
@@ -7599,22 +7621,24 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: 'email'
-    }, {
       data: function data(_data4) {
-        return _data4.name || '';
+        return _.get(_data4, 'userId', '');
       }
     }, {
       data: function data(_data5) {
-        return _.get(_data5, 'data.tel') || '';
+        return _.get(_data5, 'email', '');
       }
     }, {
       data: function data(_data6) {
-        return _.get(_data6, 'data.bizName') || '';
+        return _data6.name || '';
       }
     }, {
       data: function data(_data7) {
-        return _.get(_data7, 'data.bizNumber') || '';
+        return _.get(_data7, 'data.tel') || '';
+      }
+    }, {
+      data: function data(_data8) {
+        return userUtil.spyderBuyerLevel[userUtil.getBuyerLevel(_data8)] || '';
       }
     }, {
       data: 'createdAt',
@@ -7634,8 +7658,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: function data(_data8) {
-        return _.get(_data8, 'roles[0].brand.id') || '';
+      data: function data(_data9) {
+        return _.get(_data9, 'roles[0].brand.id') || '';
       },
       render: function render(brandId) {
         return '<a ui-sref="brand.edit({ brandId: ' + brandId + ' })">' + brandId + '</a>';
@@ -7643,12 +7667,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data9) {
-        return _data9.name || '';
+      data: function data(_data10) {
+        return _data10.name || '';
       }
     }, {
-      data: function data(_data10) {
-        return _.get(_data10, 'data.tel') || '';
+      data: function data(_data11) {
+        return _.get(_data11, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -7670,31 +7694,31 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data11) {
-        return _data11.name || '';
-      }
-    }, {
       data: function data(_data12) {
-        return _.get(_data12, 'data.tel') || '';
+        return _data12.name || '';
       }
     }, {
       data: function data(_data13) {
-        return _.get(_data13, 'data.bizName') || '';
+        return _.get(_data13, 'data.tel') || '';
       }
     }, {
       data: function data(_data14) {
-        return _.get(_data14, 'data.bizNumber') || '';
+        return _.get(_data14, 'data.bizName') || '';
       }
     }, {
       data: function data(_data15) {
-        return _data15;
+        return _.get(_data15, 'data.bizNumber') || '';
+      }
+    }, {
+      data: function data(_data16) {
+        return _data16;
       },
       render: function render(user) {
         return _.get(user, 'data.bizImage') ? '<button class="btn blue" data-ng-click="openBizImage(' + user.id + ')">사업자 등록증 보기</button>' : '';
       }
     }, {
-      data: function data(_data16) {
-        return _data16;
+      data: function data(_data17) {
+        return _data17;
       },
       // render: (user) => `<button class="btn blue" data-ng-click="changeToBuyer(${user.id})">바이어 인증</button>`,
       render: function render(user) {
@@ -7719,12 +7743,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data17) {
-        return _data17.name || '';
+      data: function data(_data18) {
+        return _data18.name || '';
       }
     }, {
-      data: function data(_data18) {
-        return _.get(_data18, 'data.tel') || '';
+      data: function data(_data19) {
+        return _.get(_data19, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -7732,8 +7756,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return boUtils.formatDate(data);
       }
     }, {
-      data: function data(_data19) {
-        return _data19;
+      data: function data(_data20) {
+        return _data20;
       },
       render: function render(user) {
         $scope.userIdMap[user.id] = user;
@@ -7776,9 +7800,9 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
 
   $scope.editRole = { admin: false, buyer: false, bigBuyer: false, seller: false };
   // former item has more priority
-  var roles = ['admin', 'bigBuyer', 'buyer'];
+  var roles = ['admin', 'buyer', 'team-spyder'];
   $scope.makeUserRolePopupData = function (user) {
-    var res = { admin: false, buyer: false, bigBuyer: false, seller: false };
+    var res = { admin: false, buyer: false, 'team-spyder': false };
     if (user.roles) {
       var _loop = function (i) {
         var role = user.roles[i];
@@ -7787,9 +7811,6 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
             res[item] = true;
           }
         });
-        if (role.type === 'owner') {
-          res.seller = true;
-        }
       };
 
       for (var i = 0; i < user.roles.length; i++) {
@@ -7812,8 +7833,6 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       $scope.newUserRole = null;
     }
   };
-
-  var userIdToData = {};
 
   $scope.openRolePopup = function (userId) {
     var user = $scope.userIdToData[userId];
@@ -7862,94 +7881,79 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     $compile(angular.element($('table')))($scope);
   };
 
+  var hasRole = function hasRole(userId, roleType) {
+    var user = $scope.userIdToData[userId];
+    var userRole = user.roles || [];
+    for (var i = 0; i < userRole.length; i++) {
+      var role = userRole[i];
+      if (role.type === roleType) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   // 2016. 02. 23. [heekyu] this is very limited since server cannot handle race condition properly
   $scope.saveRole = function () {
     var editRoleToData = function editRoleToData() {
+      var arr = [];
       for (var i = 0; i < roles.length; i++) {
         var role = roles[i];
         if ($scope.editRole[role]) {
-          return [{ type: role }];
+          var obj = { type: role };
+          if (role === 'buyer') {
+            obj.grede = '베이직';
+          }
+          arr.push(obj);
         }
       }
-      return null;
+      return arr;
     };
     var newRoleData = editRoleToData();
     if (!newRoleData && !$scope.editRoleUser.roles) {
       return;
     }
-    var addOrDelete = {};
-
-    var isChangable = function isChangable(roleType) {
-      for (var i = 0; i < roles.length; i++) {
-        var role = roles[i];
-        if (role === roleType) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    ($scope.editRoleUser.roles || []).forEach(function (role) {
-      if (!isChangable(role.type)) {
-        return;
-      }
-      if (addOrDelete[role.type]) {
-        addOrDelete[role.type]--;
-      } else {
-        addOrDelete[role.type] = -1;
-      }
-    });
-    (newRoleData || []).forEach(function (role) {
-      if (!isChangable(role.type)) {
-        return;
-      }
-      if (addOrDelete[role.type]) {
-        addOrDelete[role.type]++;
-      } else {
-        addOrDelete[role.type] = 1;
-      }
-    });
     var url = '/api/v1/users/' + $scope.editRoleUser.id + '/roles';
-    var keys = Object.keys(addOrDelete);
-    var addRoles = [];
-    var deleteRoles = [];
-    for (var i = 0; i < keys.length; i++) {
-      var key = keys[i];
-      var count = addOrDelete[key];
-      if (count === 1) {
-        addRoles.push(key);
-        // promises.push($http.post(url, { roleType: key }));
-      } else if (count === -1) {
-          deleteRoles.push(key);
-          // promises.push($http.delete(url, { data: { type: key }, headers: {"Content-Type": "application/json;charset=utf-8"} }));
+    var promise = Promise.resolve('');
+    ($scope.editRoleUser.roles || []).forEach(function (userRole) {
+      var found = false;
+      for (var i = 0; i < (newRoleData || []).length; i += 1) {
+        var newRole = newRoleData[i];
+        if (newRole.type === userRole.type) {
+          found = true;
+          break;
         }
-    }
-    if (deleteRoles.length > 0) {
-      $http['delete'](url, { data: { type: deleteRoles[0] }, headers: { "Content-Type": "application/json;charset=utf-8" } }).then(function () {
-        if (addRoles.length > 0) {
-          $http.post(url, { roleType: addRoles[0] }).then(function () {
-            $scope.closeRolePopup();
-            $state.reload();
-          })['catch'](function (err) {
-            window.alert(err.message);
-          });
-        } else {
-          $scope.closeRolePopup();
-          $state.reload();
+      }
+      if (!found) {
+        // delete case
+        promise = promise.then(function () {
+          $http['delete'](url, { data: { roleType: userRole.type }, headers: { "Content-Type": "application/json;charset=utf-8" } });
+        });
+      }
+    });
+    (newRoleData || []).forEach(function (newRole) {
+      var found = false;
+      for (var i = 0; i < ($scope.editRoleUser.roles || []).length; i += 1) {
+        var userRole = $scope.editRoleUser.roles[i];
+        if (userRole.type === newRole.type) {
+          found = true;
+          break;
         }
-      })['catch'](function (err) {
-        window.alert(err.message);
-      });
-    } else if (addRoles.length > 0) {
-      $http.post(url, { roleType: addRoles[0] }).then(function () {
-        $scope.closeRolePopup();
-        $state.reload();
-      })['catch'](function (err) {
-        window.alert(err.message);
-      });
-    } else {
+      }
+      if (!found) {
+        // add case
+        promise = promise.then(function () {
+          return $http.post(url, { roleType: newRole.type });
+        });
+      }
+    });
+    promise.then(function () {
       $scope.closeRolePopup();
-    }
+      $state.reload();
+    })['catch'](function (err) {
+      window.alert(err.message);
+      throw err;
+    });
   };
 
   $scope.inactivateUser = function (e, userId) {
@@ -8065,11 +8069,16 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     user.lastLoginAt = boUtils.formatDate(user.lastLoginAt);
     $scope.user = user;
 
-    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.userId, key: 'email', isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'data.firstName'), isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: $translate.instant('user.info.gradeLabel'), obj: _.get($scope.user, 'data.grade'), key: 'data.grade', isRequired: false }, { title: $translate.instant('user.info.bizNameLabel'), obj: _.get($scope.user, 'data.bizName'), key: 'data.bizName', isRequired: false }, { title: $translate.instant('user.info.bizNumberLabel'), obj: _.get($scope.user, 'data.bizNumber'), key: 'data.bizNumber', isRequired: false }, { title: $translate.instant('user.info.vbankCodeLabel'), obj: _.get($scope.user, 'inipay.vbank.bank'), key: 'inipay.vbank.bank', isRequired: false }, { title: $translate.instant('user.info.vbankAccountLabel'), obj: _.get($scope.user, 'inipay.vbank.vacct'), key: 'inipay.vbank.vacct', isRequired: false }, { title: $translate.instant('user.info.settlementAliasLabel'), obj: _.get($scope.user, 'data.settlement.alias'), key: 'data.settlement.alias', isRequired: false }, { title: $translate.instant('user.info.orderNameLabel'), obj: _.get($scope.user, 'data.order.name'), key: 'data.order.name', isRequired: false }];
-    var roleType = _.get($scope.user, 'roles[0].type');
-    var brand = _.get($scope.user, 'roles[0].brand');
-    if ((roleType === 'owner' || roleType === 'staff') && brand) {
-      $scope.myBrand = brand;
+    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.userId, key: 'email', isReadOnly: true, isRequired: true },
+    // {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
+    { title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'name'), isReadOnly: true, isRequired: true },
+    // {title: 'SMS 마케팅 동의', obj: _.get($scope.user, 'data.isAgreeSMS'), isReadOnly: true, isRequired: false },
+    { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }];
+
+    // {title: '생년', },
+    var level = userUtil.getBuyerLevel($scope.user);
+    if (level) {
+      $scope.levelObj = level;
     }
   };
   init(user);
@@ -8087,6 +8096,15 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
       return a.id < b.id;
     });
   });
+  $scope.changeGrade = function (newLevel) {
+    var data = { level: newLevel };
+    $http.post('/api/v1/users/' + $scope.user.id + '/level', data).then(function () {
+      window.alert('회원 등급이 변경되었습니다');
+      $state.reload();
+    })['catch'](function () {
+      window.alert('[FAIL] 회원 등급 변경 요청이 실패하였습니다');
+    });
+  };
 
   $scope.save = function () {
     convertUtil.copyFieldObj($scope.userFields, $scope.user);
@@ -8108,6 +8126,10 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
       $state.reload();
     });
   };
+
+  $scope.grades = Object.keys(userUtil.spyderBuyerLevel).map(function (level) {
+    return { label: userUtil.spyderBuyerLevel[level], value: level };
+  });
 
   $('#image-upload-button').on('change', function (changeEvent) {
     boUtils.startProgressBar();
