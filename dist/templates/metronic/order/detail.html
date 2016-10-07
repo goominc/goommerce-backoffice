@@ -19,6 +19,11 @@
             </div>
             <div class="portlet-body">
               <div class="row">
+                <div class="col-md-12">
+                  {{orderSummary}}
+                </div>
+              </div>
+              <div class="row">
                 <div class="col-md-4">
                   <div class="portlet yellow-crusta box">
                     <div class="portlet-title">
@@ -74,19 +79,6 @@
                           <div class="form-group">
                             <select class="form-control" data-ng-model="order.paymentStatus" convert-to-number>
                               <option data-ng-repeat="p in allPaymentStatus" value="{{p}}">{{translateOrderPaymentStatus(p)}}</option>
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row static-info">
-                        <div class="col-md-5 name">
-                          정산 상태:
-                        </div>
-                        <div class="col-md-7 value">
-                          <div class="form-group">
-                            <select class="form-control" data-ng-model="order.settlementStatus" convert-to-number>
-                              <option value="0">{{translateOrderSettlementStatus(0)}}</option>
-                              <option value="100">{{translateOrderSettlementStatus(100)}}</option>
                             </select>
                           </div>
                         </div>
@@ -197,20 +189,6 @@
                       </div>
                       <div class="row static-info">
                         <div class="col-md-3 name">
-                          세금:
-                        </div>
-                        <div class="col-md-3 value">
-                          {{(+order.taxKRW).format()}} 원
-                        </div>
-                        <div class="col-md-3 value">
-                          {{(+order.finalTaxKRW).format()}} 원
-                        </div>
-                        <div class="col-md-3 value">
-                          {{(order.taxKRW - order.finalTaxKRW).format()}} 원
-                        </div>
-                      </div>
-                      <div class="row static-info">
-                        <div class="col-md-3 name">
                           배송비:
                         </div>
                         <div class="col-md-3 value">
@@ -225,16 +203,44 @@
                       </div>
                       <div class="row static-info">
                         <div class="col-md-3 name">
+                          쿠폰할인 금액:
+                        </div>
+                        <div class="col-md-3 value">
+                          {{(-order.couponKRW || 0).format()}} 원
+                        </div>
+                        <div class="col-md-3 value">
+                          {{(-order.couponKRW || 0).format()}} 원
+                        </div>
+                        <div class="col-md-3 value">
+                          -
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-3 name">
                           총 금액:
                         </div>
                         <div class="col-md-3 value">
-                          {{(+order.totalKRW).format()}} 원
+                          {{(+order.totalKRW + (+order.credit || 0)).format()}} 원
                         </div>
                         <div class="col-md-3 value">
-                          {{(+order.finalTotalKRW).format()}} 원
+                          {{(+order.finalTotalKRW + (+order.credit || 0)).format()}} 원
                         </div>
                         <div class="col-md-3 value">
                           {{(order.totalKRW - order.finalTotalKRW).format()}} 원
+                        </div>
+                      </div>
+                      <div class="row static-info">
+                        <div class="col-md-3 name">
+                          마일리지 사용 금액:
+                        </div>
+                        <div class="col-md-3 value">
+                          {{(-order.credit || 0).format()}} 원
+                        </div>
+                        <div class="col-md-3 value">
+                          {{(-order.credit || 0).format()}} 원
+                        </div>
+                        <div class="col-md-3 value">
+                          -
                         </div>
                       </div>
                       <div class="row static-info">
@@ -249,15 +255,6 @@
                         </div>
                         <div class="col-md-3 value">
                           {{(order.totalPaid.amount - order.finalTotalKRW - order.totalRefuned).format()}} ({{(+order.totalRefuned).format()}})
-                        </div>
-                      </div>
-                      <div class="row static-info">
-                        <div class="col-md-9">
-                        </div>
-                        <div class="col-md-3 value">
-                          <button class="btn blue" data-ng-click="refundOrder()">
-                            <i class="fa fa-eject"></i> Refund
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -293,6 +290,7 @@
                               <th>
                                 <select class="form-control" data-ng-model="newShipment.provider" convert-to-number>
                                   <option value="0" ng-if="order.address.countryCode === 'KR'">CJ</option>
+                                  <option value="1" ng-if="order.address.countryCode === 'KR'">로젝택배</option>
                                   <option value="104" ng-if="order.address.countryCode !== 'KR'">영통</option>
                                   <option value="105" ng-if="order.address.countryCode !== 'KR'">판다</option>
                                 </select>

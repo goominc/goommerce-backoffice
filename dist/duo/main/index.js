@@ -3130,12 +3130,24 @@ orderModule.controller('OrderListBeforePaymentController', function ($scope, $ro
       render: function render(id) {
         return '<button class="btn blue" data-ng-click="startProcessing(' + id + ')"><i class="fa fa-play"></i> ' + $translate.instant('order.main.startProcessing') + '</button>';
       }
+    }, {
+      data: 'id',
+      render: function render(id) {
+        return '\n            <button class="btn red" data-ng-click="cancelOrder(' + id + ')">\n              <i class="fa fa-remove"></i> 주문취소\n            </button>\n          ';
+      }
     }]
   };
   $scope.startProcessing = function (orderId) {
     if (window.confirm('입금 확인하셨습니까?')) {
       $http.post('/api/v1/orders/' + orderId + '/start_processing').then(function (res) {
         // TODO: Update datatables row data.
+        $state.reload();
+      });
+    }
+  };
+  $scope.cancelOrder = function (orderId) {
+    if (window.confirm('입금대기 상태를 취소하시겠습니까?')) {
+      $http.put('/api/v1/orders/' + orderId + '/cancel').then(function (res) {
         $state.reload();
       });
     }
@@ -3196,6 +3208,17 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
       boxKRW: 3300
     };
   }
+
+  var orderProcess = [100, 102, 200, 201, 202, 400];
+  var makeOrderSummary = function makeOrderSummary() {
+    if (order.status < 100) {
+      return '주문 처리 중 입니다.';
+    } else if (order.status === 300) {
+      return '주문 취소되었습니다.';
+    } else if (order.status === 301) {
+      return '반품 중입니다.';
+    }
+  };
 
   $scope.allStatus = orderCommons.allStatus;
   $scope.allPaymentStatus = orderCommons.allPaymentStatus;
@@ -3369,6 +3392,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   };
   $scope.shipmentProviderText = function (provider) {
     if (provider === 0) return 'CJ';
+    if (provider === 1) return '로젝택배';
     if (provider === 104) return '영통';
     if (provider === 105) return '판다';
     return provider;
@@ -7647,6 +7671,25 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       }
     }]
   };
+  $scope.adminDatatables = {
+    field: 'users',
+    storeKey: 'userAdmin',
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+      }
+    }, {
+      data: function data(_data9) {
+        return _.get(_data9, 'userId', '');
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }]
+  };
 
   $scope.sellerDatatables = {
     field: 'users',
@@ -7658,8 +7701,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: function data(_data9) {
-        return _.get(_data9, 'roles[0].brand.id') || '';
+      data: function data(_data10) {
+        return _.get(_data10, 'roles[0].brand.id') || '';
       },
       render: function render(brandId) {
         return '<a ui-sref="brand.edit({ brandId: ' + brandId + ' })">' + brandId + '</a>';
@@ -7667,12 +7710,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data10) {
-        return _data10.name || '';
+      data: function data(_data11) {
+        return _data11.name || '';
       }
     }, {
-      data: function data(_data11) {
-        return _.get(_data11, 'data.tel') || '';
+      data: function data(_data12) {
+        return _.get(_data12, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -7694,31 +7737,31 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data12) {
-        return _data12.name || '';
-      }
-    }, {
       data: function data(_data13) {
-        return _.get(_data13, 'data.tel') || '';
+        return _data13.name || '';
       }
     }, {
       data: function data(_data14) {
-        return _.get(_data14, 'data.bizName') || '';
+        return _.get(_data14, 'data.tel') || '';
       }
     }, {
       data: function data(_data15) {
-        return _.get(_data15, 'data.bizNumber') || '';
+        return _.get(_data15, 'data.bizName') || '';
       }
     }, {
       data: function data(_data16) {
-        return _data16;
+        return _.get(_data16, 'data.bizNumber') || '';
+      }
+    }, {
+      data: function data(_data17) {
+        return _data17;
       },
       render: function render(user) {
         return _.get(user, 'data.bizImage') ? '<button class="btn blue" data-ng-click="openBizImage(' + user.id + ')">사업자 등록증 보기</button>' : '';
       }
     }, {
-      data: function data(_data17) {
-        return _data17;
+      data: function data(_data18) {
+        return _data18;
       },
       // render: (user) => `<button class="btn blue" data-ng-click="changeToBuyer(${user.id})">바이어 인증</button>`,
       render: function render(user) {
@@ -7743,12 +7786,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data18) {
-        return _data18.name || '';
+      data: function data(_data19) {
+        return _data19.name || '';
       }
     }, {
-      data: function data(_data19) {
-        return _.get(_data19, 'data.tel') || '';
+      data: function data(_data20) {
+        return _.get(_data20, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -7756,8 +7799,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return boUtils.formatDate(data);
       }
     }, {
-      data: function data(_data20) {
-        return _data20;
+      data: function data(_data21) {
+        return _data21;
       },
       render: function render(user) {
         $scope.userIdMap[user.id] = user;

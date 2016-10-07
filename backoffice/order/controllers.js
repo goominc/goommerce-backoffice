@@ -317,6 +317,16 @@ orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, 
           return `<button class="btn blue" data-ng-click="startProcessing(${id})"><i class="fa fa-play"></i> ${$translate.instant('order.main.startProcessing')}</button>`;
         },
       },
+      {
+        data: 'id',
+        render: (id) => {
+          return `
+            <button class="btn red" data-ng-click="cancelOrder(${id})">
+              <i class="fa fa-remove"></i> 주문취소
+            </button>
+          `;
+        },
+      }
     ],
   };
   $scope.startProcessing = (orderId) => {
@@ -327,6 +337,13 @@ orderModule.controller('OrderListBeforePaymentController', ($scope, $rootScope, 
       });
     }
   };
+  $scope.cancelOrder = (orderId) => {
+    if (window.confirm('입금대기 상태를 취소하시겠습니까?')) {
+      $http.put(`/api/v1/orders/${orderId}/cancel`).then((res) => {
+        $state.reload();
+      });
+    }
+  }
 });
 
 orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $state, $translate, boUtils, convertUtil, orderCommons, order) => {
@@ -383,6 +400,24 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
       boxKRW: 3300,
     };
   }
+
+  const orderProcess = [
+    100,
+    102,
+    200,
+    201,
+    202,
+    400,
+  ];
+  const makeOrderSummary = () => {
+    if (order.status < 100) {
+      return '주문 처리 중 입니다.';
+    } else if (order.status === 300) {
+      return '주문 취소되었습니다.';
+    } else if (order.status === 301) {
+      return '반품 중입니다.';
+    }
+  };
 
   $scope.allStatus = orderCommons.allStatus;
   $scope.allPaymentStatus = orderCommons.allPaymentStatus;
@@ -521,6 +556,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   };
   $scope.shipmentProviderText = (provider) => {
     if (provider === 0) return 'CJ';
+    if (provider === 1) return '로젝택배';
     if (provider === 104) return '영통';
     if (provider === 105) return '판다';
     return provider;
