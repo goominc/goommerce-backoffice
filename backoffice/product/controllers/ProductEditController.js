@@ -29,6 +29,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     'W-PANTS': ['060', '065', '070', '075'],
     'W-PTHP': ['024', '026', '027', '028'],
     '신발': getFeetSizes(230, 5, 290),
+    '액세서리': ['S', 'M', 'Free'],
   };
   $scope.variantKinds = [
     {name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors},

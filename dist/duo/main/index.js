@@ -5064,6 +5064,7 @@ module.exports = {
     "saveAndNewButton": "저장하고 새 상품 만들기",
     "main": {
       "title": "상품",
+      "skuColumn": "품번",
       "nameColumn": "이름",
       "brandColumn": "브랜드"
     },
@@ -5152,6 +5153,10 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       data: 'id',
       render: function render(id) {
         return '<a ui-sref="product.edit({productId: ' + id + '})">' + id + '</a>';
+      }
+    }, {
+      data: function data(product) {
+        return product.sku || '';
       }
     }, {
       data: function data(product) {
@@ -5257,7 +5262,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     'W-Top': ['080 (XS)', '085 (S)', '090 (M)', '095 (L)'],
     'W-PANTS': ['060', '065', '070', '075'],
     'W-PTHP': ['024', '026', '027', '028'],
-    '신발': getFeetSizes(230, 5, 290)
+    '신발': getFeetSizes(230, 5, 290),
+    '액세서리': ['S', 'M', 'Free']
   };
   $scope.variantKinds = [{ name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors }, { name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes }];
   $scope.favoriteCategories = [

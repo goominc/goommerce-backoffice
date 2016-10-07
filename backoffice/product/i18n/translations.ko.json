@@ -3,6 +3,7 @@
     "saveAndNewButton": "저장하고 새 상품 만들기",
     "main": {
       "title": "상품",
+      "skuColumn": "품번",
       "nameColumn": "이름",
       "brandColumn": "브랜드"
     },

@@ -40,6 +40,9 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
         },
       },
       {
+        data: (product) => product.sku || '',
+      },
+      {
         data: (product) => _.get(product, 'name.ko') || '',
         orderable: false,
       },
