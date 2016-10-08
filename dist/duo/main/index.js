@@ -8118,7 +8118,7 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     user.lastLoginAt = boUtils.formatDate(user.lastLoginAt);
     $scope.user = user;
 
-    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.userId, key: 'email', isReadOnly: true, isRequired: true },
+    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: '유저 아이디', key: 'userId', obj: $scope.user.userId, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true },
     // {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
     { title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'name'), isReadOnly: true, isRequired: true },
     // {title: 'SMS 마케팅 동의', obj: _.get($scope.user, 'data.isAgreeSMS'), isReadOnly: true, isRequired: false },
