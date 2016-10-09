@@ -3052,7 +3052,7 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
       if (aData.status === 100) {} else if (aData.status === 101) {
         $(nRow).css('background-color', 'rgb(219,219,219)');
       } else if (aData.status === 102) {
-        $(nRow).css('background-color', 'rgb(255,185,185)');
+        $(nRow).css('background-color', 'rgb(126, 172, 163)');
       } else if (aData.status === 200) {
         $(nRow).css('background-color', 'rgb(198,190,250)');
       } else if (aData.status === 201) {
