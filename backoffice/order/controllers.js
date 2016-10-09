@@ -369,6 +369,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   order.orderedAt = boUtils.formatDate(order.orderedAt);
   order.finalShippingCostKRW = order.finalShippingCostKRW && Number(order.finalShippingCostKRW);
   (order.orderProducts || []).forEach((p) => {
+    p.imageUrl = _.get(p, 'productVariant.appImages.default[0].thumbnails.640', '');
     if (boUtils.isString(p.product.id)) {
       p.product.shortId = boUtils.shorten(p.product.id, 8);
     } else {

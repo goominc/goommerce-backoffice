@@ -45,15 +45,7 @@
                       </div>
                       <div class="row static-info">
                         <div class="col-md-5 name">
-                          주문 처리/정산 날짜:
-                        </div>
-                        <div class="col-md-7 value">
-                          {{(order.processedDate || "").substring(5, 10)}}
-                        </div>
-                      </div>
-                      <div class="row static-info">
-                        <div class="col-md-5 name">
-                          시작(결제완료) 시각:
+                          결제완료 시각:
                         </div>
                         <div class="col-md-7 value">
                           {{order.orderedAt}}
@@ -104,18 +96,10 @@
                       </div>
                       <div class="row static-info">
                         <div class="col-md-5 name">
-                          이메일:
+                          주문자 아이디:
                         </div>
                         <div class="col-md-7 value">
-                          <a ui-sref="user.info({userId: user.id})">{{user.email}}</a>
-                        </div>
-                      </div>
-                      <div class="row static-info">
-                        <div class="col-md-5 name">
-                          사업자 번호:
-                        </div>
-                        <div class="col-md-7 value">
-                          {{user.data.bizNumber}}
+                          <a ui-sref="user.info({userId: user.id})">{{user.userId}}</a>
                         </div>
                       </div>
                       <div class="row static-info">
@@ -348,24 +332,30 @@
                           <thead>
                           <tr>
                             <th>상품ID</th>
+                            <th>이미지</th>
+                            <th>품번</th>
                             <th>상품명</th>
                             <th>색상</th>
                             <th>크기</th>
                             <th>주문(최초) 가격</th>
-                            <th>가격</th>
-                            <th>주문(최초 수량)</th>
+                            <th>주문(최초) 수량</th>
                             <th>주문금액</th>
-                            <th>재고 수량</th>
                             <th>최종수량</th>
                             <th>최종금액</th>
-                            <th>정산금액</th>
-                            <th>Status</th>
                           </tr>
                           </thead>
                           <tbody class="cell-center">
                           <tr data-ng-repeat="row in order.orderProducts">
                             <td>
                               <a href="/products/{{row.product.id}}" target="_blank">{{row.product.shortId}}</a>
+                            </td>
+                            <td>
+                              <a href="/products/{{row.product.id}}" target="_blank">
+                                <img width="80" ng-src="{{row.imageUrl}}" />
+                              </a>
+                            </td>
+                            <td>
+                              {{row.product.sku}}
                             </td>
                             <td>
                               {{row.product.name.ko}}
@@ -380,28 +370,16 @@
                               <span>{{(+row.productVariant.KRW).format()}}</span>
                             </td>
                             <td>
-                              <span>{{(+row.productVariant.KRW).format()}}</span>
-                            </td>
-                            <td>
                               {{row.quantity}}
                             </td>
                             <td>
                               {{(+row.totalKRW).format()}}
                             </td>
                             <td>
-                              {{row.data.stock.quantity}}
-                            </td>
-                            <td>
                               <input type="number" data-ng-model="row.finalQuantity">
                             </td>
                             <td>
                               {{(+row.finalTotalKRW).format()}}
-                            </td>
-                            <td>
-                              <input type="number" string-to-number data-ng-model="row.settledKRW">
-                            </td>
-                            <td>
-                              {{translateOrderProductStatus(row.status)}}
                             </td>
                           </tr>
                           </tbody>
