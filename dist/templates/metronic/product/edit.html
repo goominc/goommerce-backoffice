@@ -131,7 +131,7 @@
                             <td><input type="text" data-ng-model="newProductVariant.data.size" /></td>
                             <td><input type="number" data-ng-model="newProductVariant.KRW" /></td>
                             <td>
-                              <input type="number" data-ng-model="newProductVariant.data.quantity" />
+                              <input type="number" data-ng-model="newProductVariant.stock" />
                             </td>
                             <td></td>
                             <td><button class="btn blue" data-ng-click="addProductVariant(newProductVariant)"><i class="fa fa-plus"></i> {{'main.createButton' | translate}}</button></td>
@@ -141,7 +141,7 @@
                             <td><input type="text" data-ng-model="productVariant.data.size" /></td>
                             <td><input type="number" data-ng-model="productVariant.KRW" /></td>
                             <td>
-                              <input type="number" data-ng-model="productVariant.data.quantity" />
+                              <input type="number" data-ng-model="productVariant.stock" />
                             </td>
                             <td>
                               <input type="checkbox" id="product_variant_hide_{{$index}}" data-ng-model="productVariant.data.isHide">

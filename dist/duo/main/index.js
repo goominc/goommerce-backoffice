@@ -5032,7 +5032,7 @@ productModule.factory('productUtil', function ($http, $q) {
       return _.pick(product, ['id', 'sku', 'KRW', 'categories', 'isActive', 'brand', 'data', 'contents', 'appImages', 'name']);
     },
     narrowProductVariant: function narrowProductVariant(variant) {
-      return _.pick(variant, ['id', 'productId', 'sku', 'KRW', 'data', 'appImages', 'status']);
+      return _.pick(variant, ['id', 'productId', 'sku', 'stock', 'KRW', 'data', 'appImages', 'status']);
     }
   };
 });
@@ -5638,7 +5638,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        var newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, data: { quantity: defaultQuantity } };
+        var newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, stock: defaultQuantity };
         var split = newVariantSKU.split('-');
         var kindPos = split.length - 1;
         for (var _i = $scope.variantKinds.length - 1; _i >= 0; _i--) {
@@ -5986,7 +5986,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     addMultipleUploadListener();
   }, 1000);
 
-  $scope.newProductVariant = { data: { quantity: defaultQuantity } };
+  $scope.newProductVariant = { stock: defaultQuantity };
   $scope.addProductVariant = function (newProductVariant) {
     if (!newProductVariant.data || !newProductVariant.data.color || !newProductVariant.data.size) {
       window.alert('insert color and/or size');
@@ -6005,7 +6005,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
       return;
     }
     */
-    $scope.newProductVariant = { data: { quantity: defaultQuantity } };
     $scope.productVariants.push(newProductVariant);
     $scope.productVariantsMap[newProductVariant.sku] = newProductVariant;
     $scope.initImages();
