@@ -320,7 +320,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        const newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, stock: defaultQuantity };
+        const newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, stock: defaultQuantity, data: {} };
         const split = newVariantSKU.split('-');
         let kindPos = split.length - 1;
         for (let i = $scope.variantKinds.length - 1; i >= 0; i--) {
@@ -656,7 +656,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     addMultipleUploadListener();
   }, 1000);
 
-  $scope.newProductVariant = { stock: defaultQuantity };
+  $scope.newProductVariant = { data: {}, stock: defaultQuantity };
   $scope.addProductVariant = (newProductVariant) => {
     if (!newProductVariant.data || !newProductVariant.data.color || !newProductVariant.data.size) {
       window.alert('insert color and/or size');

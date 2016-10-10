@@ -5639,7 +5639,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         newVariants.push(alreadyIn);
         newVariantsMap[newVariantSKU] = alreadyIn;
       } else {
-        var newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, stock: defaultQuantity };
+        var newVariant = { sku: newVariantSKU, KRW: $scope.product.KRW, stock: defaultQuantity, data: {} };
         var split = newVariantSKU.split('-');
         var kindPos = split.length - 1;
         for (var _i = $scope.variantKinds.length - 1; _i >= 0; _i--) {
@@ -5987,7 +5987,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     addMultipleUploadListener();
   }, 1000);
 
-  $scope.newProductVariant = { stock: defaultQuantity };
+  $scope.newProductVariant = { data: {}, stock: defaultQuantity };
   $scope.addProductVariant = function (newProductVariant) {
     if (!newProductVariant.data || !newProductVariant.data.color || !newProductVariant.data.size) {
       window.alert('insert color and/or size');
