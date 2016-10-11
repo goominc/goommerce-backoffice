@@ -13,15 +13,79 @@
             <div class="portlet-title">
               {{order.id}}
               <div class="actions btn-set">
-                <button class="btn green" ng-click="closeOrder()"><i class="fa fa-check"></i> {{'order.detail.closeOrderButton' | translate}}</button>
                 <button class="btn red" ng-click="deleteOrder()"><i class="fa fa-exclamation-triangle"></i> {{'order.detail.deleteButton' | translate}}</button>
               </div>
             </div>
             <div class="portlet-body">
-              <div class="row">
-                <div class="col-md-12">
-                  {{orderSummary}}
+              <div class="row" data-ng-if="order.status === 100">
+                <div class="col-md-12" style="margin-bottom: 20px;">
+                  <button class="btn green" disabled>상품준비중</button> >
+                  <button class="btn blue" data-ng-click="readyShipment()">
+                    <i class="fa fa-check" /> 배송준비완료
+                  </button> >
+                  <button class="btn grey" disabled>배송중</button> >
+                  <button class="btn grey" disabled>구매확정</button>
                 </div>
+                <div class="col-md-12" style="margin-bottom: 20px;">
+                  <div class="alert alert-danger">
+                    주문한 상품을 확인하고 준비한 뒤 <b>배송준비완료</b> 버튼을 클릭하세요
+                  </div>
+                </div>
+              </div>
+              <div class="row" data-ng-if="order.status === 102">
+                <div class="col-md-12">
+                  <button class="btn green" disabled>상품준비중</button> >
+                  <button class="btn green" disabled>배송준비완료</button> >
+                  <button class="btn blue" ng-click="startShipment()">
+                    <i class="fa fa-check" /> 배송중
+                  </button> >
+                  <button class="btn grey" disabled>구매확정</button>
+                </div>
+                <div class="col-md-12" style="margin: 15px 5px;">
+                  <div class="col-md-4">
+                    <input
+                      class="form-control"
+                      type="text"
+                      placeholder="송장번호 입력해 주세요"
+                      data-ng-model="newShipment.trackingNumber"
+                    />
+                  </div>
+                  <div class="col-md-2">
+                    <select class="form-control" data-ng-model="newShipment.provider" convert-to-number>
+                      <option value="1" ng-if="order.address.countryCode === 'KR'">로젝택배</option>
+                      <option value="0" ng-if="order.address.countryCode === 'KR'">CJ</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-12" style="margin-bottom: 20px;">
+                  <div class="alert alert-danger">
+                    송장 번호를 입력한 후 <b>배송 중</b> 버튼을 클릭하세요
+                  </div>
+                </div>
+              </div>
+              <div class="row" data-ng-if="order.status === 200">
+                <div class="col-md-12" style="margin: 15px 0;">
+                  <button class="btn green" disabled>상품준비중</button> >
+                  <button class="btn green" disabled>배송준비완료</button> >
+                  <button class="btn green" disabled>배송중</button> >
+                  <button class="btn blue" ng-click="closeOrder()">
+                    <i class="fa fa-check" /> 구매확정
+                  </button>
+                </div>
+                <div class="col-md-12" style="margin-bottom: 20px;">
+                  <div class="alert alert-danger">
+                    구매 확정 버튼을 눌러 주세요. 고객에게 마일리지가 부여됩니다.
+                  </div>
+                </div>
+              </div>
+              <div class="row" data-ng-if="order.status === 400">
+                <div class="col-md-12" style="margin: 15px 0;">
+                  <button class="btn green" disabled>상품준비중</button> >
+                  <button class="btn green" disabled>배송준비완료</button> >
+                  <button class="btn green" disabled>배송중</button> >
+                  <button class="btn green" disabled>구매확정</button>
+                </div>
+                <div class="alert">구매 완료된 주문입니다.</div>
               </div>
               <div class="row">
                 <div class="col-md-4">
@@ -273,8 +337,8 @@
                               </th>
                               <th>
                                 <select class="form-control" data-ng-model="newShipment.provider" convert-to-number>
-                                  <option value="0" ng-if="order.address.countryCode === 'KR'">CJ</option>
                                   <option value="1" ng-if="order.address.countryCode === 'KR'">로젝택배</option>
+                                  <option value="0" ng-if="order.address.countryCode === 'KR'">CJ</option>
                                   <option value="104" ng-if="order.address.countryCode !== 'KR'">영통</option>
                                   <option value="105" ng-if="order.address.countryCode !== 'KR'">판다</option>
                                 </select>

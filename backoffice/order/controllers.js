@@ -8,11 +8,10 @@ orderModule.factory('orderCommons', ($rootScope, $compile, boUtils) => {
     100,
     102,
     200,
-    201,
     203,
-    300,
     301,
     400,
+    300,
   ];
   const allPaymentStatus = [
     0,
@@ -229,9 +228,6 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
       {
         data: (data) => data.email || data.userId || '',
       },
-      {
-        data: (data) => _.get(data, 'data.affiliate.source') || '',
-      },
     ],
     fnCreatedRow(nRow, aData, iDataIndex) {
       if (aData.status === 100) {
@@ -395,10 +391,10 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
 
   if (_.get(order, 'address.countryCode', 'KR') === 'KR') {
     $scope.newShipment = {
-      provider: 0,
+      provider: 1,
       unitKRW: 0,
       weight: 0,
-      boxKRW: 3300,
+      boxKRW: 2500,
     };
   }
 
@@ -501,7 +497,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     const data = _.pick(order, 'finalShippingCostKRW');
     data.orderProducts = order.orderProducts.map(
       (o) => _.pick(o, 'id', 'finalQuantity', 'settledKRW'));
-    $http.put(`/api/v1/orders/${order.id}/finalize`, data).then((res) => {
+    return $http.put(`/api/v1/orders/${order.id}/finalize`, data).then((res) => {
       $state.reload();
     }, (err) => alert(err.data.message));
   };
@@ -519,11 +515,44 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     }, (err) => alert(err.data.message));
   };
 
+  $scope.readyShipment = () => {
+    if (!window.confirm('상품 확인 및 배송 준비 완료되었습니까?')) {
+      return;
+    }
+    Promise.all([
+      $http.put(`/api/v1/orders/${order.id}/status`, { status: 102 }),
+      $scope.finalize()
+    ]).then(() => {
+      window.alert('저장되었습니다');
+      $state.relod();
+    });
+  };
+
+  $scope.startShipment = () => {
+    const trackingNumber = $scope.newShipment.trackingNumber;
+    if (!trackingNumber) {
+      window.alert('송장번호를 입력해 주세요');
+      return;
+    }
+    if (!window.confirm(`${trackingNumber} 번에 대한 배송 정보가 추가됩니다.`)) {
+      return;
+    }
+    Promise.all([
+      $http.put(`/api/v1/orders/${order.id}/status`, { status: 200 }),
+      $scope.addShipment($scope.newShipment)
+    ]).then(() => {
+      window.alert('저장되었습니다');
+      $state.relod();
+    });
+  };
+
   $scope.closeOrder = () => {
     if (window.confirm('구매 확정됩니다. 사용자에게 마일리지가 적립됩니다.')) {
       $http.put(`/api/v1/orders/${order.id}/close`).then(() => {
         window.alert('완료되었습니다');
         $state.go('order.main');
+      }).catch(() => {
+        window.alert('구매 확정 처리가 이전에 수행된 적이 있을 수 있습니다. 주문 처리 이력을 확인해 주세요');
       });
     }
   };
