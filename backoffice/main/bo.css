@@ -1,6 +1,6 @@
 @import "./css/fonts.css";
 * {
-  font-family: 'Noto Sans', 'Nanum Gothic', 'Open Sans', 'Arial', sans-serif;
+  font-family: 'Noto Sans KR', 'Nanum Gothic', 'Open Sans', 'Arial', sans-serif;
 }
 @import "./css/base.css";
 @import "./css/brand.css";
