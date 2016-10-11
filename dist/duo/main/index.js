@@ -6137,7 +6137,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   var descriptions = ['desktop-desc1', 'desktop-desc2', 'desktop-desc3', 'mobile-desc1', 'mobile-desc2', 'mobile-desc3'];
   var getSummernoteConfig = function getSummernoteConfig(node, name) {
     var options = {
-      fontNames: ['Noto Sans', 'Nanum Gothic', 'Open Sans', 'Arial'],
+      fontNames: ['Noto Sans KR', 'Open Sans', 'Arial'],
       onImageUpload: function onImageUpload(files) {
         var file = files[0];
         var metaData = _.pick(file, ['name', 'type']);
@@ -8143,7 +8143,7 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
 
     $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: '유저 아이디', key: 'userId', obj: $scope.user.userId, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true },
     // {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
-    { title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'name'), isReadOnly: true, isRequired: true },
+    { title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'name'), isReadOnly: true, isRequired: true }, { title: '마일리지', obj: _.get($scope.user, 'credit', 0), isReadOnly: true },
     // {title: 'SMS 마케팅 동의', obj: _.get($scope.user, 'data.isAgreeSMS'), isReadOnly: true, isRequired: false },
     { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }];
 
