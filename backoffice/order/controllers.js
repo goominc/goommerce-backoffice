@@ -210,10 +210,6 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         render: (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`),
       },
       {
-        data: (data) => data.settlementStatus || 0,
-        render: (status) => $rootScope.getContentsI18nText(`enum.order.settlementStatus.${status}`),
-      },
-      {
         data: 'buyerId',
         render: (buyerId) => {
           return '<a ui-sref="user.info({userId: ' + buyerId+ '})">' + buyerId + '</a>'
