@@ -321,7 +321,7 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
       $('#banner-upload-button').attr('value', '');
       const r = new FileReader();
       r.onload = function(e) {
-        boUtils.uploadImage201607(e.target.result, file).then((res) => {
+        boUtils.uploadImage201607(e.target.result, file, '').then((res) => {
           boUtils.stopProgressBar();
           _.set($scope.category, 'data.banner', res.data.images[0]);
           if (!$scope.$$phase) {

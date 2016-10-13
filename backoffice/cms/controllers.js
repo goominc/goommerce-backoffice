@@ -74,7 +74,7 @@ cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, 
     $('#image-upload-button').attr('value', '');
     const r = new FileReader();
     r.onload = function(e) {
-      boUtils.uploadImage201607(e.target.result, file).then((res) => {
+      boUtils.uploadImage201607(e.target.result, file, '').then((res) => {
         boUtils.stopProgressBar();
         $scope.newObject.image = res.data.images[0];
         if (!$scope.$$phase) {
