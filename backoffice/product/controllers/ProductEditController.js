@@ -4,7 +4,7 @@ const productModule = require('../module.js');
 
 productModule.controller('ProductEditController', ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil, boUtils) => {
   $scope.allColors = {
-    BLUE: ['RBL', 'BLU', 'VBL', 'NVY', 'MNT', 'CBL', 'DNV', 'CBT', 'LBL', 'DBR'],
+    BLUE: ['RBL', 'BLU', 'VBL', 'NVY', 'MNT', 'CBL', 'DNV', 'CBT', 'LBL', 'DBR', 'DBL'],
     GREEN: ['GRN', 'AGN', 'KHA', 'BGN', 'DGN'],
     RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG', 'POR', 'BGD', 'DRD', 'LRD'],
     GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG', 'DGR'],
@@ -547,6 +547,9 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     }
   };
   $scope.imageRowsToVariant = () => {
+    if (!$scope.imageRows || !$scope.imageRows.length) {
+      return;
+    }
     if ($scope.imageRows[0].images.length) {
       _.set($scope.product, 'appImages.default', $scope.imageRows[0].images);
     }
