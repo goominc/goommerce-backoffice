@@ -4,6 +4,7 @@ const mainModule = angular.module('backoffice.main', [
     'ui.router',
     'ngCookies',
     require('../brand/module').name,
+    require('../board/module').name,
     require('../building/module').name,
     require('../cms/module').name,
     require('../currency/module').name,
@@ -190,6 +191,25 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
       sref: 'building.main',
     },
     */
+    {
+      key: 'board',
+      name: '게시판',
+      sref: 'board.list({boardId:1})', // notice
+      children: [
+        {
+          name: '공지사항',
+          sref: 'board.list({boardId:1})', // notice
+        },
+        {
+          name: '매장',
+          sref: 'board.list({boardId:3})', // shop
+        },
+        {
+          name: '이벤트',
+          sref: 'board.list({boardId:4})', // event
+        },
+      ],
+    },
     {
       key: 'cms', // TODO get key from router
       name: 'CMS',
