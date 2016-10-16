@@ -556,6 +556,42 @@ utilModule.factory('boUtils', function ($http, $rootScope, $cookies, boConfig) {
   var getBuildingName = function getBuildingName(brand) {
     return _.get(brand, 'data.location.building.name.ko', '') + ' ' + _.get(brand, 'data.location.floor', '') + ' ' + _.get(brand, 'data.location.flatNumber', '') + '호';
   };
+  var uploadImageFile201607 = function uploadImageFile201607(files) {
+    var formData = new FormData();
+    formData.append('images', files);
+    // return $http.post('/api/v1/upload', formData, {
+    return $http.post('/api/v1/upload', formData, {
+      transformRequest: angular.identity,
+      headers: { 'Content-Type': undefined }
+    }).then(function (res) {
+      return res;
+    }, function (err) {
+      return window.alert(err);
+    });
+  };
+  var startProgressBar = function startProgressBar() {
+    Metronic.blockUI({ target: '#bo-content-container', boxed: true });
+  };
+  var stopProgressBar = function stopProgressBar() {
+    Metronic.unblockUI('#bo-content-container');
+  };
+  var uploadImage201607 = function uploadImage201607(imageContent, _ref) {
+    var name = _ref.name;
+    var type = _ref.type;
+    var thumbs = arguments.length <= 2 || arguments[2] === undefined ? '160,320,640' : arguments[2];
+
+    var params = {
+      content: imageContent,
+      metaData: { name: name, type: type }
+    };
+    var query = 'thumbs=' + thumbs;
+    return $http.post(boConfig.apiUrl + '/api/v1/upload/stream?' + query, params).then(function (res) {
+      return res;
+    }, function (err) {
+      window.alert(err);
+      throw err;
+    });
+  };
   return {
     // http://stackoverflow.com/questions/111529/create-query-parameters-in-javascript
     encodeQueryData: function encodeQueryData(url, data) {
@@ -639,35 +675,8 @@ utilModule.factory('boUtils', function ($http, $rootScope, $cookies, boConfig) {
         return window.alert(err);
       });
     },
-    uploadImage201607: function uploadImage201607(imageContent, _ref) {
-      var name = _ref.name;
-      var type = _ref.type;
-      var thumbs = arguments.length <= 2 || arguments[2] === undefined ? '160,320,640' : arguments[2];
-
-      var params = {
-        content: imageContent,
-        metaData: { name: name, type: type }
-      };
-      var query = 'thumbs=' + thumbs;
-      return $http.post(boConfig.apiUrl + '/api/v1/upload/stream?' + query, params).then(function (res) {
-        return res;
-      }, function (err) {
-        return window.alert(err);
-      });
-    },
-    uploadImageFile201607: function uploadImageFile201607(files) {
-      var formData = new FormData();
-      formData.append('images', files);
-      // return $http.post('/api/v1/upload', formData, {
-      return $http.post('/api/v1/upload', formData, {
-        transformRequest: angular.identity,
-        headers: { 'Content-Type': undefined }
-      }).then(function (res) {
-        return res;
-      }, function (err) {
-        return window.alert(err);
-      });
-    },
+    uploadImage201607: uploadImage201607,
+    uploadImageFile201607: uploadImageFile201607,
     getBuildingName: getBuildingName,
     getNameWithAllBuildingInfo: function getNameWithAllBuildingInfo(brand) {
       // format: 'Name (Building Floor FlatNumber)'
@@ -679,12 +688,8 @@ utilModule.factory('boUtils', function ($http, $rootScope, $cookies, boConfig) {
 
       return name.ko + ' ( ' + getBuildingName(brand) + ' )'; // eslint-disable-line
     },
-    startProgressBar: function startProgressBar() {
-      Metronic.blockUI({ target: '#bo-content-container', boxed: true });
-    },
-    stopProgressBar: function stopProgressBar() {
-      Metronic.unblockUI('#bo-content-container');
-    },
+    startProgressBar: startProgressBar,
+    stopProgressBar: stopProgressBar,
     isString: isString,
     shorten: function shorten(str) {
       var maxLen = arguments.length <= 1 || arguments[1] === undefined ? 15 : arguments[1];
@@ -761,6 +766,25 @@ utilModule.factory('boUtils', function ($http, $rootScope, $cookies, boConfig) {
 
       document.body.appendChild(form);
       form.submit();
+    },
+    getSummerNoteImageUpload: function getSummerNoteImageUpload(files, node) {
+      var file = files[0];
+      var metaData = _.pick(file, ['name', 'type']);
+      var r = new FileReader();
+      startProgressBar();
+      r.onload = function (e) {
+        uploadImage201607(e.target.result, metaData, '').then(function (res) {
+          stopProgressBar();
+          var resultImage = res.data.images[0];
+          var elem = $('<img>').attr('src', resultImage.url);
+          node.summernote('insertNode', elem[0]);
+          // editor.insertImage(welEditable, resultImage.url);
+        })['catch'](function (err) {
+          stopProgressBar();
+          throw err;
+        });
+      };
+      r.readAsBinaryString(file);
     }
   };
 });
@@ -1819,12 +1843,20 @@ boardModule.controller('BoardListController', function ($scope, $http, $state, $
     field: 'boardItems',
     columns: [{
       data: 'id',
+      orderable: false,
       render: function render(id) {
         return '<a ui-sref="board.edit({ boardId: ' + $scope.boardId + ', boardItemId: ' + id + ' })">' + id + '</a>';
       }
     }, {
       data: function data(_data) {
         return _.get(_data, 'data.title', '제목없음');
+      },
+      orderable: false
+    }, {
+      data: 'id',
+      orderable: false,
+      render: function render(id) {
+        return '<button class="btn red" data-ng-click="deleteItem(' + id + ')">삭제</button>';
       }
     }]
   };
@@ -1832,9 +1864,19 @@ boardModule.controller('BoardListController', function ($scope, $http, $state, $
   $scope.goNewBoard = function () {
     $state.go('board.add', { boardId: $scope.boardId });
   };
+
+  $scope.deleteItem = function (id) {
+    if (window.confirm('정말 삭제하시겠습니까?')) {
+      $http['delete']('/api/v1/boards/items/' + id).then(function () {
+        $state.reload();
+      }, function () {
+        window.alert('요청이 실패하였습니다');
+      });
+    }
+  };
 });
 
-boardModule.controller('BoardDetailController', function ($scope, $http, $state, $rootScope, $translate) {
+boardModule.controller('BoardDetailController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
   $scope.name = $state.params.boardType;
   $scope.contentTitle = $scope.boardType;
   $scope.contentSubTitle = '';
@@ -1854,7 +1896,10 @@ boardModule.controller('BoardDetailController', function ($scope, $http, $state,
   var contentNode = $('#board-content');
   contentNode.summernote({
     width: 710,
-    height: 500
+    height: 500,
+    onImageUpload: function onImageUpload(files) {
+      return boUtils.getSummerNoteImageUpload(files, contentNode);
+    }
   });
 
   var boardItemId = $state.params.boardItemId;
@@ -1875,7 +1920,7 @@ boardModule.controller('BoardDetailController', function ($scope, $http, $state,
       // add
       $http.post('/api/v1/boards/' + $scope.boardId, $scope.data).then(function () {
         window.alert('저장되었습니다');
-        $state.go('board.list({ boardId: ' + $scope.boardId + ' )');
+        $state.go('board.list', { boardId: $scope.boardId });
       }, function () {
         window.alert('실패하였습니다');
       });

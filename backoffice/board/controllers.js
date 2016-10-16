@@ -34,11 +34,19 @@ boardModule.controller('BoardListController', ($scope, $http, $state, $rootScope
     columns: [
       {
         data: 'id',
+        orderable: false,
         render: (id) =>
           `<a ui-sref="board.edit({ boardId: ${$scope.boardId}, boardItemId: ${id} })">${id}</a>`,
       },
       {
         data: (data) => _.get(data, 'data.title', '제목없음'),
+        orderable: false,
+      },
+      {
+        data: 'id',
+        orderable: false,
+        render: (id) =>
+          `<button class="btn red" data-ng-click="deleteItem(${id})">삭제</button>`,
       },
     ],
   };
@@ -46,9 +54,19 @@ boardModule.controller('BoardListController', ($scope, $http, $state, $rootScope
   $scope.goNewBoard = () => {
     $state.go(`board.add`, { boardId: $scope.boardId });
   };
+
+  $scope.deleteItem = (id) => {
+    if (window.confirm('정말 삭제하시겠습니까?')) {
+      $http.delete(`/api/v1/boards/items/${id}`).then(() => {
+        $state.reload();
+      }, () => {
+        window.alert('요청이 실패하였습니다');
+      });
+    }
+  };
 });
 
-boardModule.controller('BoardDetailController', ($scope, $http, $state, $rootScope, $translate) => {
+boardModule.controller('BoardDetailController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
   $scope.name = $state.params.boardType;
   $scope.contentTitle = $scope.boardType;
   $scope.contentSubTitle = '';
@@ -73,6 +91,7 @@ boardModule.controller('BoardDetailController', ($scope, $http, $state, $rootSco
   contentNode.summernote({
     width: 710,
     height: 500,
+    onImageUpload: (files) => boUtils.getSummerNoteImageUpload(files, contentNode),
   });
 
   const boardItemId = $state.params.boardItemId;
@@ -93,7 +112,7 @@ boardModule.controller('BoardDetailController', ($scope, $http, $state, $rootSco
       // add
       $http.post(`/api/v1/boards/${$scope.boardId}`, $scope.data).then(() => {
         window.alert('저장되었습니다');
-        $state.go(`board.list({ boardId: ${$scope.boardId} )`);
+        $state.go('board.list', { boardId: $scope.boardId });
       }, () => {
         window.alert('실패하였습니다');
       });

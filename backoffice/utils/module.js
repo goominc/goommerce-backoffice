@@ -9,6 +9,38 @@ utilModule.factory('boUtils', ($http, $rootScope, $cookies, boConfig) => {
   };
   const getBuildingName = (brand) =>
     `${_.get(brand, 'data.location.building.name.ko', '')} ${_.get(brand, 'data.location.floor', '')} ${_.get(brand, 'data.location.flatNumber', '')}호`;
+  const uploadImageFile201607 = (files) => {
+    const formData = new FormData();
+    formData.append('images', files);
+    // return $http.post('/api/v1/upload', formData, {
+    return $http.post('/api/v1/upload', formData, {
+      transformRequest: angular.identity,
+      headers: {'Content-Type': undefined}
+    }).then(
+      (res) => res,
+      (err) => window.alert(err)
+    );
+  };
+  const startProgressBar = () => {
+    Metronic.blockUI({target: '#bo-content-container', boxed: true});
+  };
+  const stopProgressBar = () => {
+    Metronic.unblockUI('#bo-content-container');
+  };
+  const uploadImage201607 = (imageContent, { name, type }, thumbs = '160,320,640') => {
+    const params = {
+      content: imageContent,
+      metaData: { name, type },
+    };
+    const query = `thumbs=${thumbs}`;
+    return $http.post(`${boConfig.apiUrl}/api/v1/upload/stream?${query}`, params).then(
+      (res) => res,
+      (err) => {
+        window.alert(err);
+        throw err;
+      },
+    );
+  };
   return {
     // http://stackoverflow.com/questions/111529/create-query-parameters-in-javascript
     encodeQueryData : (url, data) => {
@@ -92,29 +124,8 @@ utilModule.factory('boUtils', ($http, $rootScope, $cookies, boConfig) => {
         (err) => window.alert(err)
       );
     },
-    uploadImage201607: (imageContent, { name, type }, thumbs = '160,320,640') => {
-      const params = {
-        content: imageContent,
-        metaData: { name, type },
-      };
-      const query = `thumbs=${thumbs}`;
-      return $http.post(`${boConfig.apiUrl}/api/v1/upload/stream?${query}`, params).then(
-        (res) => res,
-        (err) => window.alert(err)
-      );
-    },
-    uploadImageFile201607: (files) => {
-      const formData = new FormData();
-      formData.append('images', files);
-      // return $http.post('/api/v1/upload', formData, {
-      return $http.post('/api/v1/upload', formData, {
-        transformRequest: angular.identity,
-        headers: {'Content-Type': undefined}
-      }).then(
-        (res) => res,
-        (err) => window.alert(err)
-      );
-    },
+    uploadImage201607,
+    uploadImageFile201607,
     getBuildingName,
     getNameWithAllBuildingInfo: (brand) => {
       // format: 'Name (Building Floor FlatNumber)'
@@ -126,12 +137,8 @@ utilModule.factory('boUtils', ($http, $rootScope, $cookies, boConfig) => {
 
       return `${name.ko} ( ${getBuildingName(brand)} )`; // eslint-disable-line
     },
-    startProgressBar: () => {
-      Metronic.blockUI({target: '#bo-content-container', boxed: true});
-    },
-    stopProgressBar: () => {
-      Metronic.unblockUI('#bo-content-container');
-    },
+    startProgressBar,
+    stopProgressBar,
     isString,
     shorten: (str, maxLen = 15) => {
       if (!isString(str)) {
@@ -206,6 +213,25 @@ utilModule.factory('boUtils', ($http, $rootScope, $cookies, boConfig) => {
 
       document.body.appendChild(form);
       form.submit();
+    },
+    getSummerNoteImageUpload: (files, node) => {
+      const file = files[0];
+      const metaData = _.pick(file, ['name', 'type']);
+      const r = new FileReader();
+      startProgressBar();
+      r.onload = function(e) {
+        uploadImage201607(e.target.result, metaData, '').then((res) => {
+          stopProgressBar();
+          const resultImage = res.data.images[0];
+          const elem = $('<img>').attr('src', resultImage.url);
+          node.summernote('insertNode', elem[0]);
+          // editor.insertImage(welEditable, resultImage.url);
+        }).catch((err) => {
+          stopProgressBar();
+          throw err;
+        });
+      };
+      r.readAsBinaryString(file);
     },
   };
 });
