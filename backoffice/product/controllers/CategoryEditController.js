@@ -35,10 +35,12 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
   $('#category-ui-desktop').summernote({
     width: 1200,
     height: 700,
+    onImageUpload: (files) => boUtils.getSummerNoteImageUpload(files, $('#category-ui-desktop')),
   });
   $('#category-ui-mobile').summernote({
     width: 320,
     height: 500,
+    onImageUpload: (files) => boUtils.getSummerNoteImageUpload(files, $('#category-ui-mobile')),
   });
   const getNode = (device) => $(`#category-ui-${device}`);
   $scope.setCategory = (category) => {

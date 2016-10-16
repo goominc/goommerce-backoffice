@@ -788,25 +788,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
   const getSummernoteConfig = (node, name) => {
     const options = {
       fontNames: ['Noto Sans KR', 'Open Sans' ,'Arial'],
-      onImageUpload : (files) => {
-        const file = files[0];
-        const metaData = _.pick(file, ['name', 'type']);
-        const r = new FileReader();
-        boUtils.startProgressBar();
-        r.onload = function(e) {
-          boUtils.uploadImage201607(e.target.result, metaData, '').then((res) => {
-            boUtils.stopProgressBar();
-            const resultImage = res.data.images[0];
-            const elem = $('<img>').attr('src', resultImage.url);
-            node.summernote('insertNode', elem[0]);
-            // editor.insertImage(welEditable, resultImage.url);
-          }).catch((err) => {
-            boUtils.stopProgressBar();
-            throw err;
-          });
-        };
-        r.readAsBinaryString(file);
-      },
+      onImageUpload: (files) => boUtils.getSummerNoteImageUpload(files, node),
     };
     if (name.startsWith('mobile')) {
       options.width = 320;

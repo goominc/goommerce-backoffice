@@ -6337,23 +6337,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     var options = {
       fontNames: ['Noto Sans KR', 'Open Sans', 'Arial'],
       onImageUpload: function onImageUpload(files) {
-        var file = files[0];
-        var metaData = _.pick(file, ['name', 'type']);
-        var r = new FileReader();
-        boUtils.startProgressBar();
-        r.onload = function (e) {
-          boUtils.uploadImage201607(e.target.result, metaData, '').then(function (res) {
-            boUtils.stopProgressBar();
-            var resultImage = res.data.images[0];
-            var elem = $('<img>').attr('src', resultImage.url);
-            node.summernote('insertNode', elem[0]);
-            // editor.insertImage(welEditable, resultImage.url);
-          })['catch'](function (err) {
-            boUtils.stopProgressBar();
-            throw err;
-          });
-        };
-        r.readAsBinaryString(file);
+        return boUtils.getSummerNoteImageUpload(files, node);
       }
     };
     if (name.startsWith('mobile')) {
@@ -6471,11 +6455,17 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
   var devices = ['desktop', 'mobile'];
   $('#category-ui-desktop').summernote({
     width: 1200,
-    height: 700
+    height: 700,
+    onImageUpload: function onImageUpload(files) {
+      return boUtils.getSummerNoteImageUpload(files, $('#category-ui-desktop'));
+    }
   });
   $('#category-ui-mobile').summernote({
     width: 320,
-    height: 500
+    height: 500,
+    onImageUpload: function onImageUpload(files) {
+      return boUtils.getSummerNoteImageUpload(files, $('#category-ui-mobile'));
+    }
   });
   var getNode = function getNode(device) {
     return $('#category-ui-' + device);
