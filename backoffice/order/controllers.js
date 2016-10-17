@@ -10,6 +10,7 @@ orderModule.factory('orderCommons', ($rootScope, $compile, boUtils) => {
     200,
     203,
     301,
+    302,
     400,
     300,
   ];
@@ -241,6 +242,12 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         $(nRow).css('background-color', 'rgb(179,102,255)')
       } else if (aData.status === 300) {
         $(nRow).css('background-color', 'rgb(255,185,187)')
+      } else if (aData.status === 301) {
+        $(nRow).css('background-color', 'rgba(255, 128, 0, 0.4)');
+      } else if (aData.status === 302) {
+        $(nRow).css('background-color', 'rgba(255, 255, 0, 0.4)');
+      } else if (aData.status === 400) {
+        $(nRow).css('background-color', 'rgba(59, 59, 78, 0.27)');
       }
     }
   };
@@ -1462,7 +1469,7 @@ orderModule.controller('OrderCsController', ($scope, $rootScope, $http, $state, 
 
   $rootScope.initAll($scope, $state.current.name);
 });
-
+/*
 orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $rootScope, $translate, boUtils, orderCommons) => {
   $scope.contentTitle = $translate.instant('order.listBigBuyer.title');
   $scope.breadcrumb = [
@@ -1660,6 +1667,7 @@ orderModule.controller('OrderListPriceController', ($scope, $http, $state, $root
       },
     ],
     fnCreatedRow(nRow, aData, iDataIndex) {
+        console.log(aData.status);
       if (aData.status === 100) {
       } else if (aData.status === 101) {
         $(nRow).css('background-color', 'rgb(219,219,219)');
@@ -1676,7 +1684,9 @@ orderModule.controller('OrderListPriceController', ($scope, $http, $state, $root
       } else if (aData.status === 300) {
         $(nRow).css('background-color', 'rgb(255,185,187)');
       } else if (aData.status === 301) {
-        $(nRow).css('background-color', 'rgba(255, 255, 0, 0.4)');
+        $(nRow).css('background-color', 'rgba(255, 255, 0, 0.3)');
+      } else if (aData.status === 302) {
+        $(nRow).css('background-color', 'rgb(255,185,187)');
       } else if (aData.status === 400) {
         $(nRow).css('background-color', 'rgba(59, 59, 78, 0.27)');
       }
@@ -1686,7 +1696,7 @@ orderModule.controller('OrderListPriceController', ($scope, $http, $state, $root
   const getRoleType = () => $scope.roles[$rootScope.state.order.listPrice.roleType].name;
   orderCommons.applyFilterSearch($scope, $state, 'state.order.listPrice', getRoleType);
 });
-
+*/
 orderModule.controller('OrderSettlementController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
   $scope.contentTitle = $translate.instant('order.settlement.title');
   $scope.breadcrumb = [

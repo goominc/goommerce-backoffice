@@ -3057,7 +3057,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 var orderModule = require('./module');
 
 orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
-  var allStatus = [0, 100, 102, 200, 203, 301, 400, 300];
+  var allStatus = [0, 100, 102, 200, 203, 301, 302, 400, 300];
   var allPaymentStatus = [0, 1, 100, 200];
   var allPaymentMethods = [0, 1, 2, 3, 4, 5];
   var allSettlementStatus = [0, 100];
@@ -3274,6 +3274,12 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
         $(nRow).css('background-color', 'rgb(179,102,255)');
       } else if (aData.status === 300) {
         $(nRow).css('background-color', 'rgb(255,185,187)');
+      } else if (aData.status === 301) {
+        $(nRow).css('background-color', 'rgba(255, 128, 0, 0.4)');
+      } else if (aData.status === 302) {
+        $(nRow).css('background-color', 'rgba(255, 255, 0, 0.4)');
+      } else if (aData.status === 400) {
+        $(nRow).css('background-color', 'rgba(59, 59, 78, 0.27)');
       }
     }
   };
@@ -4241,19 +4247,23 @@ orderModule.controller('OrderCsController', function ($scope, $rootScope, $http,
 
   $rootScope.initAll($scope, $state.current.name);
 });
-
-orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $state, $rootScope, $translate, boUtils, orderCommons) {
+/*
+orderModule.controller('OrderListBigBuyerController', ($scope, $http, $state, $rootScope, $translate, boUtils, orderCommons) => {
   $scope.contentTitle = $translate.instant('order.listBigBuyer.title');
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'order.main',
-    name: $translate.instant('order.main.title')
-  }, {
-    sref: 'order.listBigBuyer',
-    name: $translate.instant('order.listBigBuyer.title')
-  }];
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'order.main',
+      name: $translate.instant('order.main.title'),
+    },
+    {
+      sref: 'order.listBigBuyer',
+      name: $translate.instant('order.listBigBuyer.title'),
+    },
+  ];
   $rootScope.initAll($scope, $state.current.name);
 
   $scope.orderDatatables = {
@@ -4261,101 +4271,99 @@ orderModule.controller('OrderListBigBuyerController', function ($scope, $http, $
     storeKey: 'orderBigBuyer',
     // disableFilter: true,
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
-    columns: [{
-      data: 'id',
-      render: function render(id) {
-        return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
-      }
-    }, {
-      data: 'status',
-      render: function render(status) {
-        return $rootScope.getContentsI18nText('enum.order.status.' + status);
-      }
-    }, {
-      data: 'createdAt',
-      render: function render(data) {
-        return boUtils.formatDate(data);
-      }
-    }, {
-      data: function data(_data32) {
-        return (+_data32.totalKRW).format();
-      }
-    }, {
-      data: 'paymentStatus',
-      render: function render(status) {
-        return $rootScope.getContentsI18nText('enum.order.paymentStatus.' + status);
-      }
-    }, {
-      data: 'settlementStatus',
-      render: function render(status) {
-        return $rootScope.getContentsI18nText('enum.order.settlementStatus.' + status);
-      }
-    }, {
-      data: 'buyerId',
-      render: function render(buyerId) {
-        return '<a ui-sref="user.info({userId: ' + buyerId + '})">' + buyerId + '</a>';
-      }
-    }, {
-      data: function data(_data33) {
-        return _.get(_data33, 'name') || '';
-      }
-    }, {
-      data: function data(_data34) {
-        return _.get(_data34, 'data.tel') || '';
-      }
-    }, {
-      data: function data(_data35) {
-        return _data35.email || _data35.userId || '';
-      }
-    }],
-    fnCreatedRow: function fnCreatedRow(nRow, aData, iDataIndex) {
-      if (aData.status === 100) {} else if (aData.status === 101) {
-        $(nRow).css('background-color', 'rgb(219,219,219)');
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>'
+        },
+      },
+      {
+        data: 'status',
+        render: (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`),
+      },
+      {
+        data: 'createdAt',
+        render: (data) => boUtils.formatDate(data),
+      },
+      {
+        data: (data) => (+data.totalKRW).format(),
+      },
+      {
+        data: 'paymentStatus',
+        render: (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`),
+      },
+      {
+        data: 'settlementStatus',
+        render: (status) => $rootScope.getContentsI18nText(`enum.order.settlementStatus.${status}`),
+      },
+      {
+        data: 'buyerId',
+        render: (buyerId) => {
+          return '<a ui-sref="user.info({userId: ' + buyerId+ '})">' + buyerId + '</a>'
+        },
+      },
+      {
+        data: (data) => _.get(data, 'name') || '',
+      },
+      {
+        data: (data) => _.get(data, 'data.tel') || '',
+      },
+      {
+        data: (data) => data.email || data.userId || '',
+      },
+    ],
+    fnCreatedRow(nRow, aData, iDataIndex) {
+      if (aData.status === 100) {
+      } else if (aData.status === 101) {
+        $(nRow).css('background-color', 'rgb(219,219,219)')
       } else if (aData.status === 102) {
-        $(nRow).css('background-color', 'rgb(255,185,185)');
+        $(nRow).css('background-color', 'rgb(255,185,185)')
       } else if (aData.status === 200) {
-        $(nRow).css('background-color', 'rgb(198,190,250)');
+        $(nRow).css('background-color', 'rgb(198,190,250)')
       } else if (aData.status === 201) {
-        $(nRow).css('background-color', 'rgb(208,216,232)');
+        $(nRow).css('background-color', 'rgb(208,216,232)')
       } else if (aData.status === 202) {
-        $(nRow).css('background-color', 'rgb(211,147,227)');
+        $(nRow).css('background-color', 'rgb(211,147,227)')
       } else if (aData.status === 203) {
-        $(nRow).css('background-color', 'rgb(179,102,255)');
+        $(nRow).css('background-color', 'rgb(179,102,255)')
       } else if (aData.status === 300) {
-        $(nRow).css('background-color', 'rgb(255,185,187)');
+        $(nRow).css('background-color', 'rgb(255,185,187)')
       }
     }
   };
 
-  orderCommons.applyFilterSearch($scope, $state, 'state.order.bigBuyer', function () {
-    return 'bigBuyer';
-  });
+  orderCommons.applyFilterSearch($scope, $state, 'state.order.bigBuyer', () => 'bigBuyer');
 });
 
-orderModule.controller('OrderListPriceController', function ($scope, $http, $state, $rootScope, $translate, boUtils, orderCommons) {
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'order.main',
-    name: $translate.instant('order.main.title')
-  }, {
-    sref: 'order.listPrice',
-    name: $translate.instant('order.listPrice.title')
-  }];
+orderModule.controller('OrderListPriceController', ($scope, $http, $state, $rootScope, $translate, boUtils, orderCommons) => {
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'order.main',
+      name: $translate.instant('order.main.title'),
+    },
+    {
+      sref: 'order.listPrice',
+      name: $translate.instant('order.listPrice.title'),
+    },
+  ];
   $rootScope.initAll($scope, $state.current.name);
 
   $scope.roles = {
     all: { name: null, displayName: '모든 바이어' },
     buyer: { name: 'buyer', displayName: '바이어' },
-    bigBuyer: { name: 'bigBuyer', displayName: '빅바이어' }
+    bigBuyer: { name: 'bigBuyer', displayName: '빅바이어' },
   };
   $scope.roleTypes = Object.keys($scope.roles);
   if (!_.get($rootScope.state, 'order.listPrice.roleType')) {
     // 2016. 07. 13. [heekyu] default is buyer
     _.set($rootScope.state, 'order.listPrice.roleType', 'buyer');
   }
-  $scope.changeRoleType = function (role) {
+  $scope.changeRoleType = (role) => {
     _.set($rootScope.state, 'order.listPrice.roleType', role);
     $('table').DataTable().ajax.reload();
   };
@@ -4363,85 +4371,83 @@ orderModule.controller('OrderListPriceController', function ($scope, $http, $sta
   $scope.orderDatatables = {
     field: 'orders',
     storeKey: 'orderListPrice',
-    columns: [{
-      data: 'id',
-      render: function render(id) {
-        return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
-      }
-    }, {
-      data: 'status',
-      render: function render(status) {
-        return $rootScope.getContentsI18nText('enum.order.status.' + status);
-      }
-    }, {
-      data: function data(_data36) {
-        return _data36.orderedAt || _data36.createdAt;
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>'
+        },
       },
-      render: function render(data) {
-        return boUtils.formatDate(data);
-      }
-    }, {
-      data: function data(_data37) {
-        return _.get(_data37, 'method', '');
+      {
+        data: 'status',
+        render: (status) => $rootScope.getContentsI18nText(`enum.order.status.${status}`),
       },
-      render: function render(method) {
-        return method !== '' ? $rootScope.getContentsI18nText('enum.payment.method.' + method) : '-';
-      }
-    }, {
-      data: 'buyerId',
-      render: function render(buyerId) {
-        return '<a ui-sref="user.info({userId: ' + buyerId + '})">' + buyerId + '</a>';
-      }
-    }, {
-      data: function data(_data38) {
-        return _.get(_data38, 'name') || '';
-      }
-    }, {
-      data: function data(_data39) {
-        return (+(_data39.finalSubtotalKRW || _data39.subtotalKRW || 0)).format();
-      }
-    }, {
-      data: function data(_data40) {
-        var handlingFee = +(_data40.finalHandlingFeeKRW || _data40.handlingFeeKRW || 0);
-        if (!handlingFee) {
-          return 0;
-        }
-        var tax = +(_data40.finalTaxKRW || _data40.taxKRW || 0);
-        if (!tax) {
-          return handlingFee.format();
-        }
-        return boUtils.calcTax(handlingFee).supply.format();
-      }
-    }, {
-      data: function data(_data41) {
-        var shippingCost = +(_data41.finalShippingCostKRW || _data41.shippingCostKRW || 0);
-        if (!shippingCost) {
-          return 0;
-        }
-        var tax = +(_data41.finalTaxKRW || _data41.taxKRW || 0);
-        if (!tax) {
-          return shippingCost.format();
-        }
-        return boUtils.calcTax(shippingCost).supply.format();
-      }
-    }, {
-      data: function data(_data42) {
-        var handlingFee = +(_data42.finalHandlingFeeKRW || _data42.handlingFeeKRW || 0);
-        var shippingCost = +(_data42.finalShippingCostKRW || _data42.shippingCostKRW || 0);
-        var tax = +(_data42.finalTaxKRW || _data42.taxKRW || 0);
-        if (!tax) {
-          return 0;
-        }
-        tax = new Decimal(tax).add(new Decimal(boUtils.calcTax(handlingFee).tax)).add(new Decimal(boUtils.calcTax(shippingCost).tax));
-        return tax.toNumber().format();
-      }
-    }, {
-      data: function data(_data43) {
-        return (+(_data43.finalTotalKRW || _data43.totalKRW || 0)).format();
-      }
-    }],
-    fnCreatedRow: function fnCreatedRow(nRow, aData, iDataIndex) {
-      if (aData.status === 100) {} else if (aData.status === 101) {
+      {
+        data: (data) => data.orderedAt || data.createdAt,
+        render: (data) => boUtils.formatDate(data),
+      },
+      {
+        data: (data) => _.get(data, 'method', ''),
+        render: (method) => method !== '' ? $rootScope.getContentsI18nText(`enum.payment.method.${method}`) : '-',
+      },
+      {
+        data: 'buyerId',
+        render: (buyerId) => {
+          return '<a ui-sref="user.info({userId: ' + buyerId+ '})">' + buyerId + '</a>'
+        },
+      },
+      {
+        data: (data) => _.get(data, 'name') || '',
+      },
+      {
+        data: (data) => (+(data.finalSubtotalKRW || data.subtotalKRW || 0)).format(),
+      },
+      {
+        data: (data) => {
+          const handlingFee = +(data.finalHandlingFeeKRW || data.handlingFeeKRW || 0);
+          if (!handlingFee) {
+            return 0;
+          }
+          let tax = +(data.finalTaxKRW || data.taxKRW || 0);
+          if (!tax) {
+            return handlingFee.format();
+          }
+          return boUtils.calcTax(handlingFee).supply.format();
+        },
+      },
+      {
+        data: (data) => {
+          let shippingCost = +(data.finalShippingCostKRW || data.shippingCostKRW || 0);
+          if (!shippingCost) {
+            return 0;
+          }
+          let tax = +(data.finalTaxKRW || data.taxKRW || 0);
+          if (!tax) {
+            return shippingCost.format();
+          }
+          return boUtils.calcTax(shippingCost).supply.format();
+        },
+      },
+      {
+        data: (data) => {
+          let handlingFee = +(data.finalHandlingFeeKRW || data.handlingFeeKRW || 0);
+          let shippingCost = +(data.finalShippingCostKRW || data.shippingCostKRW || 0);
+          let tax = +(data.finalTaxKRW || data.taxKRW || 0);
+          if (!tax) {
+            return 0;
+          }
+          tax = new Decimal(tax).add(new Decimal(boUtils.calcTax(handlingFee).tax)).add(new Decimal(boUtils.calcTax(shippingCost).tax));
+          return tax.toNumber().format();
+        },
+      },
+      {
+        data: (data) => (+(data.finalTotalKRW || data.totalKRW || 0)).format(),
+      },
+    ],
+    fnCreatedRow(nRow, aData, iDataIndex) {
+        console.log(aData.status);
+      if (aData.status === 100) {
+      } else if (aData.status === 101) {
         $(nRow).css('background-color', 'rgb(219,219,219)');
       } else if (aData.status === 102) {
         $(nRow).css('background-color', 'rgb(255,185,185)');
@@ -4456,19 +4462,19 @@ orderModule.controller('OrderListPriceController', function ($scope, $http, $sta
       } else if (aData.status === 300) {
         $(nRow).css('background-color', 'rgb(255,185,187)');
       } else if (aData.status === 301) {
-        $(nRow).css('background-color', 'rgba(255, 255, 0, 0.4)');
+        $(nRow).css('background-color', 'rgba(255, 255, 0, 0.3)');
+      } else if (aData.status === 302) {
+        $(nRow).css('background-color', 'rgb(255,185,187)');
       } else if (aData.status === 400) {
         $(nRow).css('background-color', 'rgba(59, 59, 78, 0.27)');
       }
     }
   };
 
-  var getRoleType = function getRoleType() {
-    return $scope.roles[$rootScope.state.order.listPrice.roleType].name;
-  };
+  const getRoleType = () => $scope.roles[$rootScope.state.order.listPrice.roleType].name;
   orderCommons.applyFilterSearch($scope, $state, 'state.order.listPrice', getRoleType);
 });
-
+*/
 orderModule.controller('OrderSettlementController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
   $scope.contentTitle = $translate.instant('order.settlement.title');
   $scope.breadcrumb = [{
@@ -4594,8 +4600,8 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
       // disableFilter: true,
       url: '/api/v1/orders/settlement/' + activeDate,
       columns: [{
-        data: function data(_data44) {
-          return _data44;
+        data: function data(_data32) {
+          return _data32;
         },
         className: 'dt-center',
         orderable: false,
@@ -4609,43 +4615,43 @@ orderModule.controller('OrderSettlementController', function ($scope, $http, $st
           return '<a ui-sref="order.detail({orderId: ' + orderId + '})">' + orderId + '</a>';
         }
       }, {
-        data: function data(_data45) {
-          return _.get(_data45, 'brand.id', '');
+        data: function data(_data33) {
+          return _.get(_data33, 'brand.id', '');
         },
         render: function render(brandId) {
           return '<a ui-sref="brand.edit({brandId: ' + brandId + '})">' + brandId + '</a>';
         }
       }, {
-        data: function data(_data46) {
-          return _.get(_data46, 'brand.name.ko', '');
+        data: function data(_data34) {
+          return _.get(_data34, 'brand.name.ko', '');
         }
       }, {
-        data: function data(_data47) {
-          return _.get(_data47, 'brand.data.tel', '');
+        data: function data(_data35) {
+          return _.get(_data35, 'brand.data.tel', '');
         }
       }, {
-        data: function data(_data48) {
-          return _.get(_data48, 'brand.data.bank.name', '');
+        data: function data(_data36) {
+          return _.get(_data36, 'brand.data.bank.name', '');
         }
       }, {
-        data: function data(_data49) {
-          return _.get(_data49, 'brand.data.bank.accountNumber', '');
+        data: function data(_data37) {
+          return _.get(_data37, 'brand.data.bank.accountNumber', '');
         }
       }, {
-        data: function data(_data50) {
-          return (+_.get(_data50, 'originalPriceKRW', 0)).format();
+        data: function data(_data38) {
+          return (+_.get(_data38, 'originalPriceKRW', 0)).format();
         }
       }, {
-        data: function data(_data51) {
-          return (+_.get(_data51, 'settledPriceKRW', 0)).format();
+        data: function data(_data39) {
+          return (+_.get(_data39, 'settledPriceKRW', 0)).format();
         }
       }, {
-        data: function data(_data52) {
-          return (+_.get(_data52, 'finalTotalKRW', '0')).format();
+        data: function data(_data40) {
+          return (+_.get(_data40, 'finalTotalKRW', '0')).format();
         }
       }, {
-        data: function data(_data53) {
-          return _.get(_data53, 'brand.data.bank.accountHolder', '');
+        data: function data(_data41) {
+          return _.get(_data41, 'brand.data.bank.accountHolder', '');
         }
       }, {
         data: 'buyerId',
@@ -4712,20 +4718,20 @@ orderModule.controller('OrderGodoController', function ($scope, $http, $state, $
           return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
         }
       }, {
-        data: function data(_data54) {
-          return _.get(_data54, 'processedDate', '').substring(0, 10);
+        data: function data(_data42) {
+          return _.get(_data42, 'processedDate', '').substring(0, 10);
         }
       }, {
-        data: function data(_data55) {
-          return _.get(_data55, 'finalTotalKRW', '');
+        data: function data(_data43) {
+          return _.get(_data43, 'finalTotalKRW', '');
         }
       }, {
-        data: function data(_data56) {
-          return _.get(_data56, 'finalHandlingFeeKRW', '');
+        data: function data(_data44) {
+          return _.get(_data44, 'finalHandlingFeeKRW', '');
         }
       }, {
-        data: function data(_data57) {
-          return _.get(_data57, 'commissionKRW', '');
+        data: function data(_data45) {
+          return _.get(_data45, 'commissionKRW', '');
         }
       }]
     };
@@ -4755,15 +4761,15 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders/vat/' + $scope.month,
     columns: [{
-      data: function data(_data58) {
-        return _.get(_data58, 'brand.id', '');
+      data: function data(_data46) {
+        return _.get(_data46, 'brand.id', '');
       },
       render: function render(id) {
         return '<a ui-sref="order.brandVat({brandId:' + id + ',month:\'' + $scope.month + '\'})">' + id + '</a>';
       }
     }, {
-      data: function data(_data59) {
-        return _data59;
+      data: function data(_data47) {
+        return _data47;
       },
       orderable: false,
       render: function render(data) {
@@ -4772,43 +4778,43 @@ orderModule.controller('OrderVatController', function ($scope, $http, $state, $r
         return '<a ui-sref="brand.edit({ brandId: ' + _.get(data, 'brand.id', '') + '})">' + _.get(data, 'brand.name.ko', '') + '</a>';
       }
     }, {
-      data: function data(_data60) {
-        return _.sum([_data60.subTotalKRW, _data60.adjustmentKRW]);
+      data: function data(_data48) {
+        return _.sum([_data48.subTotalKRW, _data48.adjustmentKRW]);
       },
       orderable: false
     }, {
-      data: function data(_data61) {
-        return +_.get(_data61, 'vatKRW', 0);
+      data: function data(_data49) {
+        return +_.get(_data49, 'vatKRW', 0);
       },
       orderable: false
     }, {
-      data: function data(_data62) {
-        return _.sum([_data62.subTotalKRW, _data62.adjustmentKRW, _data62.vatKRW]);
+      data: function data(_data50) {
+        return _.sum([_data50.subTotalKRW, _data50.adjustmentKRW, _data50.vatKRW]);
       },
       orderable: false
     }, {
-      data: function data(_data63) {
-        return _.get(_data63, 'brand.data.bank.name') || '';
+      data: function data(_data51) {
+        return _.get(_data51, 'brand.data.bank.name') || '';
       },
       orderable: false
     }, {
-      data: function data(_data64) {
-        return _.get(_data64, 'brand.data.bank.accountNumber') || '';
+      data: function data(_data52) {
+        return _.get(_data52, 'brand.data.bank.accountNumber') || '';
       },
       orderable: false
     }, {
-      data: function data(_data65) {
-        return _.get(_data65, 'brand.data.bank.accountHolder') || '';
+      data: function data(_data53) {
+        return _.get(_data53, 'brand.data.bank.accountHolder') || '';
       },
       orderable: false
     }, {
-      data: function data(_data66) {
-        return boUtils.getBuildingName(_data66.brand);
+      data: function data(_data54) {
+        return boUtils.getBuildingName(_data54.brand);
       },
       orderable: false
     }, {
-      data: function data(_data67) {
-        return _.get(_data67, 'brand.data.tel', '');
+      data: function data(_data55) {
+        return _.get(_data55, 'brand.data.tel', '');
       },
       orderable: false
     }]
@@ -4951,8 +4957,8 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
     // data: [{id:1, name:'aa'}, {id:2, name:'bb'}], // temp
     url: '/api/v1/orders/vat/brands/' + brandId + '/' + month,
     columns: [{
-      data: function data(_data68) {
-        return moment(_data68.orderedAt).format('YYYY-MM-DD');
+      data: function data(_data56) {
+        return moment(_data56.orderedAt).format('YYYY-MM-DD');
       }
     }, {
       render: function render() {
@@ -4963,48 +4969,48 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
         return _.get(brand, 'name.ko', '');
       }
     }, {
-      data: function data(_data69) {
-        return _.get(_data69, 'buyerName', '');
+      data: function data(_data57) {
+        return _.get(_data57, 'buyerName', '');
       }
     }, {
-      data: function data(_data70) {
-        return orderSubTotal(_data70);
+      data: function data(_data58) {
+        return orderSubTotal(_data58);
       }
     }, {
-      data: function data(_data71) {
+      data: function data(_data59) {
         return '0';
       }
     }, {
-      data: function data(_data72) {
-        return orderSubTotal(_data72);
+      data: function data(_data60) {
+        return orderSubTotal(_data60);
       }
     }, {
-      data: function data(_data73) {
-        return orderSubTotal(_data73).mul(0.1);
+      data: function data(_data61) {
+        return orderSubTotal(_data61).mul(0.1);
       }
     }, {
-      data: function data(_data74) {
-        return orderSubTotal(_data74).mul(1.1);
+      data: function data(_data62) {
+        return orderSubTotal(_data62).mul(1.1);
       }
     }, {
-      data: function data(_data75) {
+      data: function data(_data63) {
         return '';
       }
     }, {
-      data: function data(_data76) {
-        return orderSettledTotal(_data76);
+      data: function data(_data64) {
+        return orderSettledTotal(_data64);
       }
     }, {
-      data: function data(_data77) {
-        return orderSubTotal(_data77).mul(1.1).sub(orderSettledTotal(_data77));
+      data: function data(_data65) {
+        return orderSubTotal(_data65).mul(1.1).sub(orderSettledTotal(_data65));
       }
     }, {
-      data: function data(_data78) {
+      data: function data(_data66) {
         return '';
       }
     }, {
-      data: function data(_data79) {
-        return _.get(_data79, 'id', '');
+      data: function data(_data67) {
+        return _.get(_data67, 'id', '');
       },
       render: function render(id) {
         return '<a ui-sref="order.detail({orderId: ' + id + '})">' + id + '</a>';
