@@ -143,6 +143,13 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
         data: (data) => userUtil.spyderBuyerLevel[userUtil.getBuyerLevel(data)] || '',
       },
       {
+        data: (data) => data,
+        render: (user) => {
+          const credit = user.credit || 0;
+          return `${credit} <button class="btn blue" data-ng-click="openCreditPopup(${user.id})">변경</button>`;
+        },
+      },
+      {
         data: 'createdAt',
         render: (data) => boUtils.formatDate(data),
       },
@@ -372,6 +379,47 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
     }, () => {
       window.alert('비밀번호 저장이 실패하였습니다.')
     });
+  };
+  $scope.openCreditPopup = (userId) => {
+    const user = $scope.userIdToData[userId];
+    $scope.creditUser = user;
+    $('#user_credit').modal();
+  };
+  $scope.closeCreditPopup = () => {
+    const node = $('#user_credit');
+    node.modal('hide');
+    node.removeClass('in');
+    $('.modal-backdrop').remove();
+  };
+  $scope.changeCredit = (amount, type = 20) => {
+    const user = $scope.creditUser;
+    const url = `/api/v1/users/${user.id}/credits`;
+    if (amount > 0) {
+      if (!window.confirm(`마일리지 ${amount}점이 추가됩니다.`)) {
+        return;
+      }
+      $http.post(url, { value: amount, type }).then(() => {
+        $scope.closeCreditPopup();
+        $state.reload();
+      }, (err) => {
+        window.alert('마일리지 추가 요청이 실패하였습니다.');
+        throw err;
+      });
+    } else if (amount < 0) {
+      if (!window.confirm(`마일리지 ${-amount}점을 사용합니다`)) {
+        return;
+      }
+      $http.delete(url, {
+        data: { value: -amount },
+        headers: {"Content-Type": "application/json;charset=utf-8"}
+      }).then(() => {
+        $scope.closeCreditPopup();
+        $state.reload();
+      }, (err) => {
+        window.alert('마일리지 사용 요청이 실패하였습니다.');
+        throw err;
+      });
+    }
   };
 
   $scope.datatablesLoaded = () => {

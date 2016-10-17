@@ -7731,6 +7731,7 @@ module.exports = {
       "firstNameLabel": "이름",
       "lastNameLabel": "성",
       "gradeLabel": "회원 등급",
+      "creditLabel": "마일리지",
       "vbankCodeLabel": "은행코드",
       "vbankAccountLabel": "가상계좌번호",
       "changePasswordButton": "비밀번호 변경",
@@ -7902,6 +7903,14 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return userUtil.spyderBuyerLevel[userUtil.getBuyerLevel(_data8)] || '';
       }
     }, {
+      data: function data(_data9) {
+        return _data9;
+      },
+      render: function render(user) {
+        var credit = user.credit || 0;
+        return credit + ' <button class="btn blue" data-ng-click="openCreditPopup(' + user.id + ')">변경</button>';
+      }
+    }, {
       data: 'createdAt',
       render: function render(data) {
         return boUtils.formatDate(data);
@@ -7917,8 +7926,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: function data(_data9) {
-        return _.get(_data9, 'userId', '');
+      data: function data(_data10) {
+        return _.get(_data10, 'userId', '');
       }
     }, {
       data: 'createdAt',
@@ -7938,8 +7947,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: function data(_data10) {
-        return _.get(_data10, 'roles[0].brand.id') || '';
+      data: function data(_data11) {
+        return _.get(_data11, 'roles[0].brand.id') || '';
       },
       render: function render(brandId) {
         return '<a ui-sref="brand.edit({ brandId: ' + brandId + ' })">' + brandId + '</a>';
@@ -7947,12 +7956,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data11) {
-        return _data11.name || '';
+      data: function data(_data12) {
+        return _data12.name || '';
       }
     }, {
-      data: function data(_data12) {
-        return _.get(_data12, 'data.tel') || '';
+      data: function data(_data13) {
+        return _.get(_data13, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -7974,31 +7983,31 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data13) {
-        return _data13.name || '';
-      }
-    }, {
       data: function data(_data14) {
-        return _.get(_data14, 'data.tel') || '';
+        return _data14.name || '';
       }
     }, {
       data: function data(_data15) {
-        return _.get(_data15, 'data.bizName') || '';
+        return _.get(_data15, 'data.tel') || '';
       }
     }, {
       data: function data(_data16) {
-        return _.get(_data16, 'data.bizNumber') || '';
+        return _.get(_data16, 'data.bizName') || '';
       }
     }, {
       data: function data(_data17) {
-        return _data17;
+        return _.get(_data17, 'data.bizNumber') || '';
+      }
+    }, {
+      data: function data(_data18) {
+        return _data18;
       },
       render: function render(user) {
         return _.get(user, 'data.bizImage') ? '<button class="btn blue" data-ng-click="openBizImage(' + user.id + ')">사업자 등록증 보기</button>' : '';
       }
     }, {
-      data: function data(_data18) {
-        return _data18;
+      data: function data(_data19) {
+        return _data19;
       },
       // render: (user) => `<button class="btn blue" data-ng-click="changeToBuyer(${user.id})">바이어 인증</button>`,
       render: function render(user) {
@@ -8023,12 +8032,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data19) {
-        return _data19.name || '';
+      data: function data(_data20) {
+        return _data20.name || '';
       }
     }, {
-      data: function data(_data20) {
-        return _.get(_data20, 'data.tel') || '';
+      data: function data(_data21) {
+        return _.get(_data21, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -8036,8 +8045,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return boUtils.formatDate(data);
       }
     }, {
-      data: function data(_data21) {
-        return _data21;
+      data: function data(_data22) {
+        return _data22;
       },
       render: function render(user) {
         $scope.userIdMap[user.id] = user;
@@ -8147,6 +8156,49 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, function () {
       window.alert('비밀번호 저장이 실패하였습니다.');
     });
+  };
+  $scope.openCreditPopup = function (userId) {
+    var user = $scope.userIdToData[userId];
+    $scope.creditUser = user;
+    $('#user_credit').modal();
+  };
+  $scope.closeCreditPopup = function () {
+    var node = $('#user_credit');
+    node.modal('hide');
+    node.removeClass('in');
+    $('.modal-backdrop').remove();
+  };
+  $scope.changeCredit = function (amount) {
+    var type = arguments.length <= 1 || arguments[1] === undefined ? 20 : arguments[1];
+
+    var user = $scope.creditUser;
+    var url = '/api/v1/users/' + user.id + '/credits';
+    if (amount > 0) {
+      if (!window.confirm('마일리지 ' + amount + '점이 추가됩니다.')) {
+        return;
+      }
+      $http.post(url, { value: amount, type: type }).then(function () {
+        $scope.closeCreditPopup();
+        $state.reload();
+      }, function (err) {
+        window.alert('마일리지 추가 요청이 실패하였습니다.');
+        throw err;
+      });
+    } else if (amount < 0) {
+      if (!window.confirm('마일리지 ' + -amount + '점을 사용합니다')) {
+        return;
+      }
+      $http['delete'](url, {
+        data: { value: -amount },
+        headers: { "Content-Type": "application/json;charset=utf-8" }
+      }).then(function () {
+        $scope.closeCreditPopup();
+        $state.reload();
+      }, function (err) {
+        window.alert('마일리지 사용 요청이 실패하였습니다.');
+        throw err;
+      });
+    }
   };
 
   $scope.datatablesLoaded = function () {

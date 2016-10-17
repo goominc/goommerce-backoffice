@@ -22,6 +22,7 @@
       "firstNameLabel": "이름",
       "lastNameLabel": "성",
       "gradeLabel": "회원 등급",
+      "creditLabel": "마일리지",
       "vbankCodeLabel": "은행코드",
       "vbankAccountLabel": "가상계좌번호",
       "changePasswordButton": "비밀번호 변경",
