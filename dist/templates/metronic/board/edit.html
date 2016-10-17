@@ -16,33 +16,49 @@
               </div>
             </div>
             <div class="portlet-body">
-              <div class="row">
-                <div class="form-group">
-                  <label class="col-md-2 control-label">타이틀</label>
-                  <div class="col-md-10">
-                    <input
-                      class="form-control"
-                      style="width: 200px;"
-                      data-ng-model="data.title"
-                    />
+              <form class="row form-horizontal">
+                <div class="row" ng-if="boardId === 3">
+                  <div class="col-md-12">
+                    <div class="form-group" data-ng-repeat="field in boardFields">
+                      <label class="col-md-2 control-label">{{field.title}} </label>
+                      <div class="col-md-10">
+                        <input
+                          type="text"
+                          class="form-control"
+                          ng-model="data[field.key]"
+                        >
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="form-group">
-                  <label class="col-md-2 control-label">짧은 설명(리스트)</label>
-                  <div class="col-md-10">
-                    <textarea
-                      style="width: 500px;"
-                      rows="3"
-                      data-ng-model="data.shortContent"
-                    />
+                <div class="row" ng-if="boardId !== 3">
+                  <div class="form-group">
+                    <label class="col-md-2 control-label">타이틀</label>
+                    <div class="col-md-10">
+                      <input
+                        class="form-control"
+                        style="width: 200px;"
+                        data-ng-model="data.title"
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-md-2 control-label">짧은 설명(리스트)</label>
+                    <div class="col-md-10">
+                      <textarea
+                        style="width: 500px;"
+                        rows="3"
+                        data-ng-model="data.shortContent"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="row" style="margin-top: 20px;">
-                <div class="col-md-12">
-                  <div id="board-content"></div>
+                <div class="row" style="margin-top: 20px;">
+                  <div class="col-md-12">
+                    <div id="board-content"></div>
+                  </div>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>

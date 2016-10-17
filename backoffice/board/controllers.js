@@ -39,7 +39,16 @@ boardModule.controller('BoardListController', ($scope, $http, $state, $rootScope
           `<a ui-sref="board.edit({ boardId: ${$scope.boardId}, boardItemId: ${id} })">${id}</a>`,
       },
       {
-        data: (data) => _.get(data, 'data.title', '제목없음'),
+        data: (data) => {
+          let title = _.get(data, 'data.title');
+          if (!title) {
+            title = _.get(data, 'data.name');
+          }
+          if (!title) {
+            title = '제목없음';
+          }
+          return title;
+        },
         orderable: false,
       },
       {
@@ -66,11 +75,31 @@ boardModule.controller('BoardListController', ($scope, $http, $state, $rootScope
   };
 });
 
+const saveBoardItem = (boardId, boardItemId, data, $http, $state) => {
+  if (!boardItemId) {
+    // add
+    $http.post(`/api/v1/boards/${boardId}`, data).then(() => {
+      window.alert('저장되었습니다');
+      $state.go('board.list', { boardId });
+    }, () => {
+      window.alert('실패하였습니다');
+    });
+  } else {
+    // edit
+    $http.put(`/api/v1/boards/items/${boardItemId}`, data).then(() => {
+      window.alert('저장되었습니다');
+      $state.go('board.list', { boardId });
+    }, () => {
+      window.alert('실패하였습니다');
+    });
+  }
+};
+
 boardModule.controller('BoardDetailController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
   $scope.name = $state.params.boardType;
   $scope.contentTitle = $scope.boardType;
   $scope.contentSubTitle = '';
-  $scope.boardId = $state.params.boardId;
+  $scope.boardId = +$state.params.boardId;
   $scope.breadcrumb = [
     {
       sref: 'dashboard',
@@ -87,18 +116,31 @@ boardModule.controller('BoardDetailController', ($scope, $http, $state, $rootSco
   ];
   $rootScope.initAll($scope, $state.current.name);
 
-  const contentNode = $('#board-content');
-  contentNode.summernote({
-    width: 710,
-    height: 500,
-    onImageUpload: (files) => boUtils.getSummerNoteImageUpload(files, contentNode),
-  });
+  let contentNode = null;
+  if ($scope.boardId === 3) {
+    // store
+    $scope.boardFields = [
+      { title: '이름', key: 'name', obj: _.get($scope, 'data.detail') },
+      { title: '위치', key: 'location', obj: _.get($scope, 'data.detail') },
+      { title: '전화번호', key: 'tel', obj: _.get($scope, 'data.detail') },
+      { title: '매장타입', key: 'type', obj: _.get($scope, 'data.detail') },
+      { title: '매장정보', key: 'detail', obj: _.get($scope, 'data.detail') },
+    ];
+  } else {
+    // default(notice, etc)
+    contentNode = $('#board-content');
+    contentNode.summernote({
+      width: 710,
+      height: 500,
+      onImageUpload: (files) => boUtils.getSummerNoteImageUpload(files, contentNode),
+    });
+  }
 
   const boardItemId = $state.params.boardItemId;
   if (boardItemId) {
     $http.get(`/api/v1/boards/items/${boardItemId}`).then((res) => {
       $scope.data = res.data.data || {};
-      if ($scope.data.content) {
+      if ($scope.data.content && contentNode) {
         contentNode.code($scope.data.content);
       }
     });
@@ -107,23 +149,9 @@ boardModule.controller('BoardDetailController', ($scope, $http, $state, $rootSco
   }
 
   $scope.save = () => {
-    $scope.data.content = contentNode.code();
-    if (!boardItemId) {
-      // add
-      $http.post(`/api/v1/boards/${$scope.boardId}`, $scope.data).then(() => {
-        window.alert('저장되었습니다');
-        $state.go('board.list', { boardId: $scope.boardId });
-      }, () => {
-        window.alert('실패하였습니다');
-      });
-    } else {
-      // edit
-      $http.put(`/api/v1/boards/items/${boardItemId}`, $scope.data).then(() => {
-        window.alert('저장되었습니다');
-        $state.go('board.list', { boardId: $scope.boardId });
-      }, () => {
-        window.alert('실패하였습니다');
-      });
+    if (contentNode) {
+      $scope.data.content = contentNode.code();
     }
+    saveBoardItem($scope.boardId, boardItemId, $scope.data, $http, $state);
   };
 });
