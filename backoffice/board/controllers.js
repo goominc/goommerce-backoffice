@@ -125,6 +125,7 @@ boardModule.controller('BoardDetailController', ($scope, $http, $state, $rootSco
       { title: '전화번호', key: 'tel', obj: _.get($scope, 'data.detail') },
       { title: '매장타입', key: 'type', obj: _.get($scope, 'data.detail') },
       { title: '매장정보', key: 'detail', obj: _.get($scope, 'data.detail') },
+      { title: '지도URL', key: 'mapUrl', obj: _.get($scope, 'data.mapUrl') },
     ];
   } else {
     // default(notice, etc)
