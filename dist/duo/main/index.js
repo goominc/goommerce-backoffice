@@ -3057,7 +3057,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 var orderModule = require('./module');
 
 orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
-  var allStatus = [0, 100, 102, 200, 203, 301, 302, 400, 300];
+  var allStatus = [0, 100, 102, 200, 203, 302, 400, 300];
   var allPaymentStatus = [0, 1, 100, 200];
   var allPaymentMethods = [0, 1, 2, 3, 4, 5];
   var allSettlementStatus = [0, 100];

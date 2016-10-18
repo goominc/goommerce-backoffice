@@ -9,7 +9,6 @@ orderModule.factory('orderCommons', ($rootScope, $compile, boUtils) => {
     102,
     200,
     203,
-    301,
     302,
     400,
     300,
