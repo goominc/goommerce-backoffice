@@ -204,10 +204,6 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: '매장',
           sref: 'board.list({boardId:3})', // shop
         },
-        {
-          name: '이벤트',
-          sref: 'board.list({boardId:4})', // event
-        },
       ],
     },
     {

@@ -273,11 +273,8 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       sref: 'board.list({boardId:1})' }, // notice
     {
       name: '매장',
-      sref: 'board.list({boardId:3})' }, // shop
-    {
-      name: '이벤트',
-      sref: 'board.list({boardId:4})' }]
-  }, // event
+      sref: 'board.list({boardId:3})' }]
+  }, // shop
   {
     key: 'cms', // TODO get key from router
     name: 'CMS',
