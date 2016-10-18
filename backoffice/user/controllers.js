@@ -316,7 +316,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
 
   $scope.editRole = { admin: false, buyer: false, bigBuyer: false, seller: false };
   // former item has more priority
-  const roles = ['admin', 'buyer', 'team-spyder'];
+  const roles = ['admin', 'buyer', 'team-spyder', 'manager'];
   $scope.makeUserRolePopupData = (user) => {
     const res = { admin: false, buyer: false, 'team-spyder': false };
     if (user.roles) {
@@ -479,9 +479,9 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
       }
       if (!found) {
         // delete case
-        promise = promise.then(() => {
-          $http.delete(url, { data: { roleType: userRole.type }, headers: {"Content-Type": "application/json;charset=utf-8"} })
-        });
+        promise = promise.then(() => (
+          $http.delete(url, { data: { type: userRole.type }, headers: {"Content-Type": "application/json;charset=utf-8"} })
+        ));
       }
     });
     (newRoleData || []).forEach((newRole) => {

@@ -7679,11 +7679,17 @@ var spyderBuyerLevel = {
   3: '골드',
   4: 'VIP'
 };
+var buyerNameMap = {
+  admin: '어드민',
+  buyer: '유저',
+  manager: '매니저',
+  'team-spyder': '팀스파이더'
+};
 userModule.factory('userUtil', function () {
   return {
     getRoleName: function getRoleName(user) {
       return (user.roles || []).map(function (role) {
-        return role.type;
+        return buyerNameMap[role.type] || role.type;
       }).join(',');
     },
     getBuyerLevel: function getBuyerLevel(user) {
@@ -8092,7 +8098,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
 
   $scope.editRole = { admin: false, buyer: false, bigBuyer: false, seller: false };
   // former item has more priority
-  var roles = ['admin', 'buyer', 'team-spyder'];
+  var roles = ['admin', 'buyer', 'team-spyder', 'manager'];
   $scope.makeUserRolePopupData = function (user) {
     var res = { admin: false, buyer: false, 'team-spyder': false };
     if (user.roles) {
@@ -8262,7 +8268,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       if (!found) {
         // delete case
         promise = promise.then(function () {
-          $http['delete'](url, { data: { roleType: userRole.type }, headers: { "Content-Type": "application/json;charset=utf-8" } });
+          return $http['delete'](url, { data: { type: userRole.type }, headers: { "Content-Type": "application/json;charset=utf-8" } });
         });
       }
     });

@@ -56,9 +56,16 @@ const spyderBuyerLevel = {
   3: '골드',
   4: 'VIP',
 };
+const buyerNameMap = {
+  admin: '어드민',
+  buyer: '유저',
+  manager: '매니저',
+  'team-spyder': '팀스파이더',
+};
 userModule.factory('userUtil', () => {
   return {
-    getRoleName: (user) => (user.roles || []).map((role) => role.type).join(','),
+    getRoleName: (user) => (user.roles || [])
+      .map((role) => buyerNameMap[role.type] || role.type).join(','),
     getBuyerLevel: (user) => {
       for (let i = 0; i < (user.roles || []).length; i += 1) {
         const role = user.roles[0];
