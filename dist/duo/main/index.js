@@ -3573,11 +3573,11 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     }
     Promise.all([$http.put('/api/v1/orders/' + order.id + '/status', { status: 102 }), $scope.finalize()]).then(function () {
       window.alert('저장되었습니다');
-      $state.relod();
+      $state.reload();
     });
   };
 
-  $scope.startShipment = function () {
+  $scope.beginShipment = function () {
     var trackingNumber = $scope.newShipment.trackingNumber;
     if (!trackingNumber) {
       window.alert('송장번호를 입력해 주세요');
@@ -3588,7 +3588,14 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     }
     Promise.all([$http.put('/api/v1/orders/' + order.id + '/status', { status: 200 }), $scope.addShipment($scope.newShipment)]).then(function () {
       window.alert('저장되었습니다');
-      $state.relod();
+      $state.reload();
+    });
+  };
+
+  $scope.endShipment = function () {
+    $http.put('/api/v1/orders/' + order.id + '/status', { status: 203 }).then(function () {
+      window.alert('저장되었습니다');
+      $state.reload();
     });
   };
 
