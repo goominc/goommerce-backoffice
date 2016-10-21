@@ -5487,7 +5487,7 @@ var productModule = require('../module.js');
 
 productModule.controller('ProductEditController', function ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil, boUtils) {
   $scope.allColors = {
-    BLUE: ['RBL', 'BLU', 'VBL', 'NVY', 'MNT', 'CBL', 'DNV', 'CBT', 'LBL', 'DBR', 'DBL'],
+    BLUE: ['RBL', 'BLU', 'VBL', 'NVY', 'MNT', 'CBL', 'DNV', 'CBT', 'LBL', 'DBR', 'DBL', 'TBL'],
     GREEN: ['GRN', 'AGN', 'KHA', 'BGN', 'DGN'],
     RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG', 'POR', 'BGD', 'DRD', 'LRD'],
     GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG', 'DGR'],
