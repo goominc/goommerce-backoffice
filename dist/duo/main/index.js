@@ -2734,6 +2734,7 @@ directiveModule.directive('boServerDatatables', function ($http, $compile, datat
         var url = boUtils.encodeQueryData(urlBase, urlParams);
         $http.get(url).then(function (value) {
           var serverData = value.data;
+          var data = serverData;
           if (dataTables['field']) {
             serverData = serverData[dataTables['field']];
           }
@@ -2746,7 +2747,7 @@ directiveModule.directive('boServerDatatables', function ($http, $compile, datat
           pageInfo.recordsFiltered = pageInfo.recordsTotal;
           callback(pageInfo);
           if (scope.tableRender) {
-            scope.tableRender();
+            scope.tableRender({ data: data });
           }
           // 2016. 03. 30. [heekyu] THIS DOES NOT WORK
           // $compile(angular.element(elem.find('table')))(scope);
@@ -3183,8 +3184,9 @@ orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
         }
         _.merge(urlParams, queryParams);
       };
-      scope.datatablesLoaded = function () {
+      scope.datatablesLoaded = function (data) {
         $('table').css('width', '100%');
+        scope.ajaxData = data;
         $compile(angular.element($('table')))(scope);
       };
     }

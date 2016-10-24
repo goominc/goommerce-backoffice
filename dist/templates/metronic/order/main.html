@@ -71,11 +71,14 @@
         <div class="col-md-12">
           <div class="portlet light">
             <div class="portlet-body">
+              <div class="col-md-12" ng-if="ajaxData">
+                <h3>매출총합 : {{(+ajaxData.summary.totalPrice || 0).format()}}원</h3>
+              </div>
               <div
                 bo-server-datatables="orderDatatables"
                 url="/api/v1/orders"
                 url-params="{}"
-                table-render="datatablesLoaded()"
+                table-render="datatablesLoaded(data)"
                 fn-url-params="fnUrlParams(urlParams)"
               >
                 <table class="table table-bordered table-hover">

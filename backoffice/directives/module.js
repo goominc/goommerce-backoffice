@@ -150,6 +150,7 @@ directiveModule.directive('boServerDatatables', ($http, $compile, datatableCommo
         const url = boUtils.encodeQueryData(urlBase, urlParams);
         $http.get(url).then((value) => {
           let serverData = value.data;
+          const data = serverData;
           if (dataTables['field']) {
             serverData = serverData[dataTables['field']];
           }
@@ -162,7 +163,7 @@ directiveModule.directive('boServerDatatables', ($http, $compile, datatableCommo
           pageInfo.recordsFiltered = pageInfo.recordsTotal;
           callback(pageInfo);
           if (scope.tableRender) {
-            scope.tableRender();
+            scope.tableRender({ data });
           }
           // 2016. 03. 30. [heekyu] THIS DOES NOT WORK
           // $compile(angular.element(elem.find('table')))(scope);

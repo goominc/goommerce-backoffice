@@ -156,8 +156,9 @@ orderModule.factory('orderCommons', ($rootScope, $compile, boUtils) => {
         }
         _.merge(urlParams, queryParams);
       };
-      scope.datatablesLoaded = () => {
+      scope.datatablesLoaded = (data) => {
         $('table').css('width', '100%');
+        scope.ajaxData = data;
         $compile(angular.element($('table')))(scope);
       };
     },
