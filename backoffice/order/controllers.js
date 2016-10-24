@@ -206,6 +206,12 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
         data: (data) => (+data.totalKRW).format(),
       },
       {
+        data: (data) => (-data.couponKRW || 0).format(),
+      },
+      {
+        data: (data) => (-data.credit || 0).format(),
+      },
+      {
         data: 'paymentStatus',
         render: (status) => $rootScope.getContentsI18nText(`enum.order.paymentStatus.${status}`),
       },

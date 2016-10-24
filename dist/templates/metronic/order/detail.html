@@ -221,6 +221,108 @@
                   </div>
                 </div>
                 <div class="col-md-12">
+                  <div class="portlet grey-cascade box">
+                    <div class="portlet-title">
+                      <div class="caption">
+                        <i class="fa fa-cogs"></i>Payments > <a target="_blank" href="https://iniweb.inicis.com">이니시스</a>
+                      </div>
+                    </div>
+                    <div class="portlet-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover table-bordered table-striped">
+                          <thead>
+                            <tr>
+                              <th width="5%">ID</th>
+                              <th width="5%">PID</th>
+                              <th width="30%">TID / 메세지</th>
+                              <th width="5%">Type</th>
+                              <th width="10%">가격</th>
+                              <th width="5%">통화</th>
+                              <th width="5%">Method</th>
+                              <th width="5%">상태</th>
+                              <th width="5%">요청자</th>
+                              <th width="10%">시간</th>
+                              <th width="5%"></th>
+                              <th width="5%"></th>
+                            </tr>
+                          </thead>
+                          <tbody class="cell-center">
+                            <tr data-ng-repeat="row in order.payments">
+                              <td>
+                                {{row.id}}
+                              </td>
+                              <td>
+                                {{row.parentId}}
+                              </td>
+                              <td>
+                                {{row.tid}}<br/>{{row.data.ResultMsg}}
+                              </td>
+                              <td>
+                                {{translatePaymentType(row.type)}}
+                              </td>
+                              <td>
+                                {{paymentAmount(row).format()}}
+                              </td>
+                              <td>
+                                {{row.data.currency}}
+                              </td>
+                              <td>
+                                {{row.data.payMethod || row.data.P_TYPE || row.data.paymethod}}
+                              </td>
+                              <td>
+                                {{translatePaymentStatus(row.status)}}
+                              </td>
+                              <td>
+                                {{paymentLogs[row.id][0].requester.name.ko || paymentLogs[row.id][0].requester.email}}
+                              </td>
+                              <td>
+                                {{paymentLogs[row.id][0].createdAt}}
+                              </td>
+                              <td>
+                                <div ng-if="row.type === 0">
+                                  <button class="btn blue" data-ng-click="popupRefund(row)">
+                                    <i class="fa fa-eject"></i> 환불
+                                  </button>
+                                </div>
+                              </td>
+                              <td>
+                                <div ng-if="row.type === 0 && paymentMethod(row) === 'CARD'">
+                                  <form action="https://iniweb.inicis.com/app/publication/apReceipt.jsp" accept-charset="euc-kr" target="_blank">
+                                    <input type="hidden" name="noTid" value="{{row.tid}}" />
+                                    <input type="hidden" name="noMethod" value="1" />
+                                    <input type="hidden" name="clpaymethod" value="0" />
+                                    <input type="hidden" name="rt" value="1" />
+                                    <input type="hidden" name="valFlg" value="1" />
+                                    <input type="hidden" name="nmBuyer" value="{{row.data.P_UNAME || row.data.buyerName}}" />
+                                    <input type="hidden" name="prGoods" value="{{row.data.P_AMT || row.data.TotPrice}}" />
+                                    <button class="btn blue">
+                                      <i class="fa fa-eject"></i> 영수증
+                                    </button>
+                                  </form>
+                                </div>
+                                <div ng-if="row.type === 0 && paymentMethod(row) === 'VBANK'">
+                                  <form action="https://iniweb.inicis.com/app/publication/apCashReceipt.jsp" accept-charset="euc-kr" target="_blank">
+                                    <input type="hidden" name="noTid" value="{{getParent(row).tid || row.tid}}" />
+                                    <input type="hidden" name="noMethod" value="1" />
+                                    <input type="hidden" name="clpaymethod" value="22" />
+                                    <input type="hidden" name="rt" value="1" />
+                                    <input type="hidden" name="valFlg" value="1" />
+                                    <input type="hidden" name="nmBuyer" value="{{row.data.P_UNAME || getParent(row).data.buyerName}}" />
+                                    <input type="hidden" name="prGoods" value="{{row.data.P_AMT || getParent(row).data.TotPrice}}" />
+                                    <button class="btn blue">
+                                      <i class="fa fa-eject"></i> 영수증
+                                    </button>
+                                  </form>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12">
                   <div class="portlet yellow-crusta box">
                     <div class="portlet-title">
                       <div class="caption">
@@ -418,9 +520,9 @@
                             <th>상품ID</th>
                             <th>이미지</th>
                             <th>품번</th>
-                            <th>상품명</th>
                             <th>색상</th>
                             <th>크기</th>
+                            <th>상품명</th>
                             <th>주문(최초) 가격</th>
                             <th>주문(최초) 수량</th>
                             <th>주문금액</th>
@@ -431,10 +533,10 @@
                           <tbody class="cell-center">
                           <tr data-ng-repeat="row in order.orderProducts">
                             <td>
-                              <a href="/products/{{row.product.id}}" target="_blank">{{row.product.shortId}}</a>
+                              <a ui-sref="product.edit({ productId: row.product.id })">{{row.product.shortId}}</a>
                             </td>
                             <td>
-                              <a href="/products/{{row.product.id}}" target="_blank">
+                              <a ui-sref="product.edit({ productId: row.product.id })">
                                 <img width="80" ng-src="{{row.imageUrl}}" />
                               </a>
                             </td>
@@ -442,13 +544,13 @@
                               {{row.product.sku}}
                             </td>
                             <td>
-                              {{row.product.name.ko}}
-                            </td>
-                            <td>
                               {{row.productVariant.data.color}}
                             </td>
                             <td>
                               {{row.productVariant.data.size}}
+                            </td>
+                            <td>
+                              {{row.product.name.ko}}
                             </td>
                             <td>
                               <span>{{(+row.productVariant.KRW).format()}}</span>
@@ -464,108 +566,6 @@
                             </td>
                             <td>
                               {{(+row.finalTotalKRW).format()}}
-                            </td>
-                          </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-12">
-                  <div class="portlet grey-cascade box">
-                    <div class="portlet-title">
-                      <div class="caption">
-                        <i class="fa fa-cogs"></i>Payments
-                      </div>
-                    </div>
-                    <div class="portlet-body">
-                      <div class="table-responsive">
-                        <table class="table table-hover table-bordered table-striped">
-                          <thead>
-                          <tr>
-                            <th width="5%">ID</th>
-                            <th width="5%">PID</th>
-                            <th width="30%">TID / 메세지</th>
-                            <th width="5%">Type</th>
-                            <th width="10%">가격</th>
-                            <th width="5%">통화</th>
-                            <th width="5%">Method</th>
-                            <th width="5%">상태</th>
-                            <th width="5%">요청자</th>
-                            <th width="10%">시간</th>
-                            <th width="5%"></th>
-                            <th width="5%"></th>
-                          </tr>
-                          </thead>
-                          <tbody class="cell-center">
-                          <tr data-ng-repeat="row in order.payments">
-                            <td>
-                              {{row.id}}
-                            </td>
-                            <td>
-                              {{row.parentId}}
-                            </td>
-                            <td>
-                              {{row.tid}}<br/>{{row.data.ResultMsg}}
-                            </td>
-                            <td>
-                              {{translatePaymentType(row.type)}}
-                            </td>
-                            <td>
-                              {{paymentAmount(row).format()}}
-                            </td>
-                            <td>
-                              {{row.data.currency}}
-                            </td>
-                            <td>
-                              {{row.data.payMethod || row.data.P_TYPE || row.data.paymethod}}
-                            </td>
-                            <td>
-                              {{translatePaymentStatus(row.status)}}
-                            </td>
-                            <td>
-                              {{paymentLogs[row.id][0].requester.name.ko || paymentLogs[row.id][0].requester.email}}
-                            </td>
-                            <td>
-                              {{paymentLogs[row.id][0].createdAt}}
-                            </td>
-                            <td>
-                              <div ng-if="row.type === 0">
-                                <button class="btn blue" data-ng-click="popupRefund(row)">
-                                  <i class="fa fa-eject"></i> 환불
-                                </button>
-                              </div>
-                            </td>
-                            <td>
-                              <div ng-if="row.type === 0 && paymentMethod(row) === 'CARD'">
-                                <form action="https://iniweb.inicis.com/app/publication/apReceipt.jsp" accept-charset="euc-kr" target="_blank">
-                                  <input type="hidden" name="noTid" value="{{row.tid}}" />
-                                  <input type="hidden" name="noMethod" value="1" />
-                                  <input type="hidden" name="clpaymethod" value="0" />
-                                  <input type="hidden" name="rt" value="1" />
-                                  <input type="hidden" name="valFlg" value="1" />
-                                  <input type="hidden" name="nmBuyer" value="{{row.data.P_UNAME || row.data.buyerName}}" />
-                                  <input type="hidden" name="prGoods" value="{{row.data.P_AMT || row.data.TotPrice}}" />
-                                  <button class="btn blue">
-                                    <i class="fa fa-eject"></i> 영수증
-                                  </button>
-                                </form>
-                              </div>
-                              <div ng-if="row.type === 0 && paymentMethod(row) === 'VBANK'">
-                                <form action="https://iniweb.inicis.com/app/publication/apCashReceipt.jsp" accept-charset="euc-kr" target="_blank">
-                                  <input type="hidden" name="noTid" value="{{getParent(row).tid || row.tid}}" />
-                                  <input type="hidden" name="noMethod" value="1" />
-                                  <input type="hidden" name="clpaymethod" value="22" />
-                                  <input type="hidden" name="rt" value="1" />
-                                  <input type="hidden" name="valFlg" value="1" />
-                                  <input type="hidden" name="nmBuyer" value="{{row.data.P_UNAME || getParent(row).data.buyerName}}" />
-                                  <input type="hidden" name="prGoods" value="{{row.data.P_AMT || getParent(row).data.TotPrice}}" />
-                                  <button class="btn blue">
-                                    <i class="fa fa-eject"></i> 영수증
-                                  </button>
-                                </form>
-                              </div>
                             </td>
                           </tr>
                           </tbody>
