@@ -8444,11 +8444,15 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
   $scope.noteType = {
     0: '-',
     100: '승인',
-    101: '거절'
+    101: '거절',
+    200: '회원탈퇴(비활성)'
   };
   $http.get('/api/v1/users/' + user.id + '/logs').then(function (res) {
     res.data.logs.forEach(function (l) {
-      return l.createdAt = boUtils.formatDate(l.createdAt);
+      l.createdAt = boUtils.formatDate(l.createdAt);
+      if (l.type === 200 && l.data) {
+        l.data.message = '' + (l.data.reason || '') + (l.data.reason && l.data.text ? ',' : '') + (l.data.text || '');
+      }
     });
     $scope.notes = res.data.logs.sort(function (a, b) {
       return a.id < b.id;

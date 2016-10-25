@@ -651,9 +651,15 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     0: '-',
     100: '승인',
     101: '거절',
+    200: '회원탈퇴(비활성)'
   };
   $http.get(`/api/v1/users/${user.id}/logs`).then((res) => {
-    res.data.logs.forEach((l) => (l.createdAt = boUtils.formatDate(l.createdAt)));
+    res.data.logs.forEach((l) => {
+      l.createdAt = boUtils.formatDate(l.createdAt);
+      if (l.type === 200 && l.data) {
+        l.data.message = `${l.data.reason || ''}${l.data.reason && l.data.text ? ',' : ''}${l.data.text || ''}`;
+      }
+    });
     $scope.notes = res.data.logs.sort((a, b) => (a.id < b.id));
   });
   $scope.changeGrade = (newLevel) => {
