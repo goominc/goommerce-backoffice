@@ -61,6 +61,7 @@ const buyerNameMap = {
   buyer: '유저',
   manager: '매니저',
   'team-spyder': '팀스파이더',
+  staff: '직원',
 };
 userModule.factory('userUtil', () => {
   return {

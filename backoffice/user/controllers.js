@@ -316,7 +316,7 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
 
   $scope.editRole = { admin: false, buyer: false, bigBuyer: false, seller: false };
   // former item has more priority
-  const roles = ['admin', 'buyer', 'team-spyder', 'manager'];
+  const roles = ['admin', 'buyer', 'team-spyder', 'manager', 'staff'];
   $scope.makeUserRolePopupData = (user) => {
     const res = { admin: false, buyer: false, 'team-spyder': false };
     if (user.roles) {

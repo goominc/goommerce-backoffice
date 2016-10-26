@@ -183,6 +183,7 @@
           <tr>
             <th>어드민</th>
             <th>매니저</th>
+            <th>직원</th>
             <th>팀스파이더</th>
             <th>유저</th>
           </tr>
@@ -196,6 +197,10 @@
             <td style="text-align: center;">
               <input data-ng-if="!editRole.admin" id="edit_role_manager" type="checkbox" data-ng-model="editRole.manager" />
               <label for="edit_role_manager" />
+            </td>
+            <td style="text-align: center;">
+              <input data-ng-if="!editRole.admin" id="edit_role_staff" type="checkbox" data-ng-model="editRole.staff" />
+              <label for="edit_role_staff" />
             </td>
             <td style="text-align: center;">
               <input data-ng-if="!editRole.admin" id="edit_role_teamspyder" type="checkbox" data-ng-model="editRole['team-spyder']" />

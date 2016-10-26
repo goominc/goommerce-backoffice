@@ -3650,8 +3650,56 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     });
   };
   $scope.shipmentProviderText = function (provider) {
+    /*
+    switch (provider) {
+      case 1:
+        return '우체국택배';
+      case 4:
+        return 'CJ대한통운';
+      case 5:
+        return '한진택배';
+      case 6:
+        return '로젠택배';
+      case 8:
+        return '현대택배';
+      case 10:
+        return '현대택배';
+        01    우체국택배    O
+       04    CJ대한통운    O
+       05    한진택배    O
+       06    로젠택배    O
+       08    현대택배    O
+       10    KGB택배    O
+       11    일양로지스    O
+       12    EMS    O
+       13    DHL    O
+       14    UPS    O
+       15    GTX로지스    O
+       16    한의사랑택배    O
+       17    천일택배    O
+       18    건영택배    O
+       21    Fedex    O
+       22    대신택배    O
+       23    경동택배    O
+       24    CVSnet 편의점택배    O
+       25    TNT Express    O
+       26    USPS    O
+       28    GSMNtoN(인로스)    O
+       29    에어보이익스프레스    O
+       32    합동택배    O
+       33    DHL Global Mail    O
+       34    i-Parcel    O
+       36    쿠팡 로켓배송    X
+       37    범한판토스    O
+       38    APEX(ECMS Express)    O
+       39    KG로지스택배(통합)    O
+       40    굿투럭(신규)    O
+       default:
+        return provider;
+    }
+     */
     if (provider === 0) return 'CJ';
-    if (provider === 1) return '로젝택배';
+    if (provider === 1) return '로젠택배';
     if (provider === 104) return '영통';
     if (provider === 105) return '판다';
     return provider;
@@ -7700,7 +7748,8 @@ var buyerNameMap = {
   admin: '어드민',
   buyer: '유저',
   manager: '매니저',
-  'team-spyder': '팀스파이더'
+  'team-spyder': '팀스파이더',
+  staff: '직원'
 };
 userModule.factory('userUtil', function () {
   return {
@@ -8115,7 +8164,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
 
   $scope.editRole = { admin: false, buyer: false, bigBuyer: false, seller: false };
   // former item has more priority
-  var roles = ['admin', 'buyer', 'team-spyder', 'manager'];
+  var roles = ['admin', 'buyer', 'team-spyder', 'manager', 'staff'];
   $scope.makeUserRolePopupData = function (user) {
     var res = { admin: false, buyer: false, 'team-spyder': false };
     if (user.roles) {
