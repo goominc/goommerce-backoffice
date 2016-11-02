@@ -299,12 +299,13 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
         sref: 'cms.simple({name: "mobile_md_pick"})'
       }]
     }]
-  }, {
-    key: 'coupon',
-    name: '쿠폰',
-    sref: 'coupon.main'
   },
   /*
+  {
+    key: 'coupon',
+    name: '쿠폰',
+    sref: 'coupon.main',
+  },
   {
     key: 'currency', // TODO get key from router
     name: $translate.instant('currency.title'),
@@ -2551,6 +2552,10 @@ couponModule.controller('CouponMainController', function ($scope, $http, $state,
     }]
   };
 
+  $scope.issueCoupon = function (coupon) {
+    $http.post('/api/v1/coupons/');
+  };
+
   var loadCoupons = function loadCoupons() {
     $http.get('/api/v1/coupons').then(function (res) {
       console.log(res.data);
@@ -2560,7 +2565,16 @@ couponModule.controller('CouponMainController', function ($scope, $http, $state,
   loadCoupons();
 });
 
-couponModule.controller('CouponUserCouponController', function ($scope) {});
+couponModule.controller('CouponEditController', function ($scope) {});
+
+couponModule.controller('CouponUserCouponController', function ($scope) {
+  $scope.userCouponDatatables = {
+    field: 'userCoupons',
+    columns: [{
+      data: ''
+    }]
+  };
+});
 }, {"./module":7}],
 8: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
@@ -5706,7 +5720,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     'W-PANTS': ['060', '065', '070', '075'],
     'W-PTHP': ['024', '026', '027', '028'],
     '신발': getFeetSizes(230, 5, 290),
-    '액세서리': ['S', 'M', 'Free']
+    '액세서리': ['S', 'M', 'L', 'Free']
   };
   $scope.variantKinds = [{ name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors }, { name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes }];
   $scope.favoriteCategories = [
