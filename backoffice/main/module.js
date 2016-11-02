@@ -240,12 +240,24 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
         },
       ],
     },
-    /*
     {
       key: 'coupon',
       name: '쿠폰',
       sref: 'coupon.main',
+      children: [
+        {
+          name: '쿠폰종류',
+          sref: 'coupon.main',
+        },
+        /*
+        {
+          name: '발급쿠폰',
+          sref: 'coupon.userCoupons',
+        },
+        */
+      ],
     },
+    /*
     {
       key: 'currency', // TODO get key from router
       name: $translate.instant('currency.title'),

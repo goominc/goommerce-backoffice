@@ -1,0 +1,103 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="col-md-12" style="margin-bottom: 20px;" ng-if="!coupon.id">
+              <div class="actions btn-set">
+                <button class="btn blue" data-ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
+              </div>
+            </div>
+            <div class="portlet-body">
+              <div class="row" style="margin-top: 15px; border-top: 1px solid #666; padding-top: 15px;" ng-if="coupon.id">
+                <form class="row form-horizontal">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label class="col-md-2 control-label">쿠폰 발행</label>
+                      <div class="col-md-10">
+                        <div class="col-md-3">
+                          <input
+                            class="form-control"
+                            type="number"
+                            max="10"
+                            placeholder="발행 수(최대 10개)"
+                            ng-model="issueCount"
+                          />
+                        </div>
+                        <div class="col-md-8">
+                          <button class="btn blue" ng-click="generateCoupon(issueCount)"><i class="fa fa-plus" /> 발행</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="row" ng-if="userCoupons && userCoupons.length">
+                <div class="col-md-10 col-md-offset-2">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>쿠폰ID</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="coupon in userCoupons">
+                        <td>{{coupon.uid}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="row">
+                <form class="row form-horizontal">
+                  <div class="col-md-12">
+                    <div class="form-group" data-ng-repeat="field in fields">
+                      <label class="col-md-2 control-label">{{field.name}} </label>
+                      <div class="col-md-10">
+                        <select ng-if="field.enums" ng-disabled="coupon.id" class="form-control col-md-4" data-ng-model="coupon.type" convert-to-number>
+                          <option value="{{enum.value}}" ng-repeat="enum in field.enums">{{enum.title}}</option>
+                        </select>
+                        <input
+                          ng-if="!field.enums"
+                          type="text"
+                          class="form-control"
+                          ng-model="coupon[field.key]"
+                          ng-readonly="coupon.id"
+                          placeholder="{{field.placeholder}}"
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->

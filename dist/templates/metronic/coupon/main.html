@@ -11,10 +11,32 @@
         <div class="col-md-12">
           <div class="portlet light">
             <div class="portlet-title">
-              Content
+              <div class="actions btn-set">
+                <button class="btn blue" ng-click="goNewCoupon()">
+                  <i class="fa fa-plus"></i> 새 쿠폰
+                </button>
+              </div>
             </div>
             <div class="portlet-body">
-              Body
+              <div
+                bo-server-datatables="couponDatatables"
+                url="/api/v1/coupons"
+                table-render="datatablesLoaded()"
+              >
+                <table style="width: 100%;">
+                  <thead>
+                    <tr>
+                      <th>쿠폰명</th>
+                      <th>생성시각</th>
+                      <th>타입</th>
+                      <th>Value</th>
+                      <th>최소금액</th>
+                      <th />
+                    </tr>
+                  </thead>
+                  <tbody />
+                </table>
+              </div>
             </div>
           </div>
         </div>

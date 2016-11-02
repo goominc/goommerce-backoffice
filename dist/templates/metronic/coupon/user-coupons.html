@@ -10,11 +10,25 @@
       <div class="row">
         <div class="col-md-12">
           <div class="portlet light">
-            <div class="portlet-title">
-              Content
-            </div>
             <div class="portlet-body">
-              Body
+              <div
+                bo-server-datatables="userCouponDatatables"
+                url="/api/v1/userCoupons"
+              >
+                <table style="width: 100%;">
+                  <thead>
+                    <tr>
+                      <th>쿠폰명</th>
+                      <th>발급시각</th>
+                      <th>타입</th>
+                      <th>Value</th>
+                      <th>만료일</th>
+                      <th>User</th>
+                    </tr>
+                  </thead>
+                  <tbody />
+                </table>
+              </div>
             </div>
           </div>
         </div>

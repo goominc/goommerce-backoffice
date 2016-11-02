@@ -62,7 +62,13 @@ utilModule.factory('boUtils', ($http, $rootScope, $cookies, boConfig) => {
         table.fnDraw();
       });
     },
-    formatDate: (date) => {
+    formatDate: (date, isDateOnly) => {
+      const mo = moment(date);
+      if (isDateOnly) {
+        return mo.format('YYYY-MM-DD');
+      }
+      return mo.format('YYYY-MM-DD hh:mm:ss');
+      /*
       if (!(date instanceof Date)) {
         date = new Date(date);
       }
@@ -78,6 +84,7 @@ utilModule.factory('boUtils', ($http, $rootScope, $cookies, boConfig) => {
       const MM = appendLeadingZeroIfNeeded(date.getMinutes().toString());
       const SS = appendLeadingZeroIfNeeded(date.getSeconds().toString());
       return yyyy + '-' + mm + '-' + dd + ' ' + HH + ':' + MM + ':' + SS;
+      */
     },
     autoComplete: (elem, name, data, fnGetDisplay) => {
       const Bloodhound = window.Bloodhound;

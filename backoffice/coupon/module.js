@@ -23,6 +23,16 @@ couponModule.config(($stateProvider) => {
       url: '/userCoupons',
       templateUrl: templateRoot + '/coupon/user-coupons.html',
       controller: 'CouponUserCouponController',
+    })
+    .state('coupon.add', {
+      url: '/add',
+      templateUrl: templateRoot + '/coupon/edit.html',
+      controller: 'CouponEditController',
+    })
+    .state('coupon.edit', {
+      url: '/:couponId',
+      templateUrl: templateRoot + '/coupon/edit.html',
+      controller: 'CouponEditController',
     });
 });
 

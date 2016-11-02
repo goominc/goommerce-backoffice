@@ -299,13 +299,23 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
         sref: 'cms.simple({name: "mobile_md_pick"})'
       }]
     }]
-  },
-  /*
-  {
+  }, {
     key: 'coupon',
     name: '쿠폰',
     sref: 'coupon.main',
+    children: [{
+      name: '쿠폰종류',
+      sref: 'coupon.main'
+    }]
   },
+  /*
+  {
+    name: '발급쿠폰',
+    sref: 'coupon.userCoupons',
+  },
+  */
+
+  /*
   {
     key: 'currency', // TODO get key from router
     name: $translate.instant('currency.title'),
@@ -840,22 +850,28 @@ utilModule.factory('boUtils', function ($http, $rootScope, $cookies, boConfig) {
         table.fnDraw();
       });
     },
-    formatDate: function formatDate(date) {
+    formatDate: function formatDate(date, isDateOnly) {
+      var mo = moment(date);
+      if (isDateOnly) {
+        return mo.format('YYYY-MM-DD');
+      }
+      return mo.format('YYYY-MM-DD hh:mm:ss');
+      /*
       if (!(date instanceof Date)) {
         date = new Date(date);
       }
-      var yyyy = date.getFullYear().toString();
+      const yyyy = date.getFullYear().toString();
       function appendLeadingZeroIfNeeded(str) {
         if (str[1]) return str;
         return '0' + str;
       }
-      var mm = appendLeadingZeroIfNeeded((date.getMonth() + 1).toString()); // getMonth() is zero-based
-      var dd = appendLeadingZeroIfNeeded(date.getDate().toString());
-
-      var HH = appendLeadingZeroIfNeeded(date.getHours().toString());
-      var MM = appendLeadingZeroIfNeeded(date.getMinutes().toString());
-      var SS = appendLeadingZeroIfNeeded(date.getSeconds().toString());
+      const mm = appendLeadingZeroIfNeeded((date.getMonth() + 1).toString()); // getMonth() is zero-based
+      const dd  = appendLeadingZeroIfNeeded(date.getDate().toString());
+       const HH = appendLeadingZeroIfNeeded(date.getHours().toString());
+      const MM = appendLeadingZeroIfNeeded(date.getMinutes().toString());
+      const SS = appendLeadingZeroIfNeeded(date.getSeconds().toString());
       return yyyy + '-' + mm + '-' + dd + ' ' + HH + ':' + MM + ':' + SS;
+      */
     },
     autoComplete: function autoComplete(elem, name, data, fnGetDisplay) {
       var Bloodhound = window.Bloodhound;
@@ -2518,6 +2534,14 @@ couponModule.config(function ($stateProvider) {
     url: '/userCoupons',
     templateUrl: templateRoot + '/coupon/user-coupons.html',
     controller: 'CouponUserCouponController'
+  }).state('coupon.add', {
+    url: '/add',
+    templateUrl: templateRoot + '/coupon/edit.html',
+    controller: 'CouponEditController'
+  }).state('coupon.edit', {
+    url: '/:couponId',
+    templateUrl: templateRoot + '/coupon/edit.html',
+    controller: 'CouponEditController'
   });
 });
 
@@ -2532,7 +2556,7 @@ require('./controllers');
 
 var couponModule = require('./module');
 
-couponModule.controller('CouponMainController', function ($scope, $http, $state, $rootScope, $translate) {
+couponModule.controller('CouponMainController', function ($scope, $http, $state, $rootScope, $translate, $compile, boUtils) {
   $scope.name = $state.params.name;
   $scope.contentTitle = $scope.name;
   $scope.contentSubTitle = '';
@@ -2545,27 +2569,152 @@ couponModule.controller('CouponMainController', function ($scope, $http, $state,
   }];
   $rootScope.initAll($scope, $state.current.name);
 
+  var couponType = {
+    1: '가격할인',
+    2: '비율할인'
+  };
+
   $scope.couponDatatables = {
     field: 'coupons',
     columns: [{
-      data: 'id'
+      data: function data(_data) {
+        return _data;
+      },
+      render: function render(coupon) {
+        return '<a ui-sref="coupon.edit({ couponId: ' + coupon.id + ' })">' + coupon.name + '</a>';
+      },
+      orderable: false
+    }, {
+      data: function data(_data2) {
+        return boUtils.formatDate(_data2.createdAt);
+      },
+      orderable: false
+    }, {
+      data: function data(_data3) {
+        return couponType[_data3.type] || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data4) {
+        return _data4.value || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data5) {
+        return _data5.minValue || '';
+      },
+      orderable: false
+    }, {
+      data: 'id',
+      render: function render(id) {
+        return '<button class="btn red" ng-click="deleteCoupon(' + id + ')"><i class="fa fa-remove" /> 쿠폰삭제</button>';
+      }
     }]
   };
 
-  $scope.issueCoupon = function (coupon) {
-    $http.post('/api/v1/coupons/');
+  $scope.goNewCoupon = function () {
+    $state.go('coupon.add');
   };
 
-  var loadCoupons = function loadCoupons() {
-    $http.get('/api/v1/coupons').then(function (res) {
-      console.log(res.data);
-    });
+  $scope.deleteCoupon = function (couponId) {
+    console.log(couponId);
+    if (window.confirm('삭제하시겠습니까?')) {
+      $http['delete']('/api/v1/coupons/' + couponId).then(function (res) {
+        $state.reload();
+      })['catch'](function () {
+        window.alert('삭제 실패하였습니다');
+      });
+    }
   };
-  var loadUserCoupons = function loadUserCoupons() {};
-  loadCoupons();
+
+  $scope.datatablesLoaded = function () {
+    $compile(angular.element($('table')))($scope);
+  };
 });
 
-couponModule.controller('CouponEditController', function ($scope) {});
+couponModule.controller('CouponEditController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+  $scope.name = $state.params.name;
+  $scope.contentTitle = $scope.name;
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'coupon.main',
+    name: '쿠폰'
+  }, {
+    sref: 'coupon.edit',
+    name: $scope.name
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  var couponId = $state.params.couponId;
+  if (couponId) {
+    $http.get('/api/v1/coupons/' + couponId).then(function (res) {
+      if (res.data.begin) {
+        res.data.begin = boUtils.formatDate(res.data.begin, true);
+      }
+      if (res.data.end) {
+        res.data.end = boUtils.formatDate(res.data.end, true);
+      }
+      $scope.coupon = res.data;
+    });
+  } else {
+    $scope.coupon = {};
+  }
+
+  // Coupon.setRequired(['name', 'type', 'target', 'value', 'expirationType']);
+  $scope.fields = [{ name: '쿠폰명', key: 'name' }, { name: '시작날짜', key: 'begin', placeholder: 'YYYY-MM-DD' }, { name: '종료날짜', key: 'end', placeholder: 'YYYY-MM-DD' }, { name: '할인 타입', key: 'type', enums: [{ title: '가격', value: 1 }, { title: '비율(%)', value: 2 }] }, { name: '할인 값', key: 'value' }, { name: '최소금액', key: 'minValue' }];
+
+  // { name: '최대값', key: '' },
+  $scope.save = function () {
+    if (!couponId) {
+      $scope.coupon.target = 2; // Cart
+      $scope.coupon.expirationType = 1;
+      $http.post('/api/v1/coupons', $scope.coupon).then(function () {
+        window.alert('생성 완료');
+        $state.go('coupon.main');
+      });
+    }
+  };
+
+  var formatUid = function formatUid(uid) {
+    if (uid.length === 16) {
+      var res = '';
+      for (var i = 0; i < 16; i += 1) {
+        res += uid[i].toUpperCase();
+        if (i % 4 === 3 && i < 15) {
+          res += '-';
+        }
+      }
+      return res;
+    }
+    return uid;
+  };
+
+  $scope.generateCoupon = function (count) {
+    if (count > 10) {
+      count = 10;
+    }
+    var coupon = $scope.coupon;
+    if (count >= 1 && window.confirm(count + ' 개 쿠폰을 발급하시겠습니까?')) {
+      var promises = [];
+      for (var i = 0; i < count; i += 1) {
+        promises.push($http.post('/api/v1/coupons/' + coupon.id + '/generate', { count: count }));
+      }
+      Promise.all(promises).then(function (res) {
+        window.alert('쿠폰 발행되었습니다.');
+        $scope.userCoupons = res.map(function (r) {
+          r.data.uid = formatUid(r.data.uid);
+          return r.data;
+        });
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      });
+    }
+  };
+});
 
 couponModule.controller('CouponUserCouponController', function ($scope) {
   $scope.userCouponDatatables = {
