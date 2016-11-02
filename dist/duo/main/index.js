@@ -665,7 +665,7 @@ boardModule.controller('BoardDetailController', function ($scope, $http, $state,
       r.onload = function (e) {
         boUtils.uploadImage201607(e.target.result, file, '').then(function (res) {
           boUtils.stopProgressBar();
-          $scope[key] = res.data.images[0];
+          $scope.data[key] = res.data.images[0];
           if (!$scope.$$phase) {
             $scope.$apply();
           }

@@ -58,21 +58,21 @@
                     <div class="form-group">
                       <label class="col-md-2 control-label">썸네일</label>
                       <div class="col-md-10">
-                        <span class="btn blue fileinput-button" ng-if="!data.thumbnail.url">
-                          <i class="fa fa-plus"></i> 썸네일 추가
+                        <span class="btn blue fileinput-button">
+                          <i class="fa fa-plus"></i> 추가/변경
                           <input type="file" id="thumbnail-upload-button" />
                         </span>
-                        <img ng-if="data.thumbnail.url" ng-src="data.thumbnail.url" width="200" />
+                        <img ng-if="data.thumbnail.url" ng-src="{{data.thumbnail.url}}" height="120" />
                       </div>
                     </div>
                     <div class="form-group">
                       <label class="col-md-2 control-label">상세 메인 이미지</label>
                       <div class="col-md-10">
-                        <span class="btn blue fileinput-button" ng-if="!data.mainImage.url">
-                          <i class="fa fa-plus"></i> 이미지 추가
+                        <span class="btn blue fileinput-button">
+                          <i class="fa fa-plus"></i> 추가/변경
                           <input type="file" id="main-upload-button" />
                         </span>
-                        <img ng-if="data.mainImage.url" ng-src="data.mainImage.url" width="300" />
+                        <img ng-if="data.mainImage.url" ng-src="{{data.mainImage.url}}" height="200" />
                       </div>
                     </div>
                     <div class="form-group" data-ng-repeat="field in boardFields">
