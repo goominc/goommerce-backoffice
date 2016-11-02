@@ -17,21 +17,7 @@
             </div>
             <div class="portlet-body">
               <form class="row form-horizontal">
-                <div class="row" ng-if="boardId === 3">
-                  <div class="col-md-12">
-                    <div class="form-group" data-ng-repeat="field in boardFields">
-                      <label class="col-md-2 control-label">{{field.title}} </label>
-                      <div class="col-md-10">
-                        <input
-                          type="text"
-                          class="form-control"
-                          ng-model="data[field.key]"
-                        >
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row" ng-if="boardId !== 3">
+                <div class="row" ng-if="boardId === 1">
                   <div class="form-group">
                     <label class="col-md-2 control-label">타이틀</label>
                     <div class="col-md-10">
@@ -50,6 +36,64 @@
                         rows="3"
                         data-ng-model="data.shortContent"
                       />
+                    </div>
+                  </div>
+                </div>
+                <div class="row" ng-if="boardId === 3">
+                  <div class="col-md-12">
+                    <div class="form-group" data-ng-repeat="field in boardFields">
+                      <label class="col-md-2 control-label">{{field.title}} </label>
+                      <div class="col-md-10">
+                        <input
+                          type="text"
+                          class="form-control"
+                          ng-model="data[field.key]"
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" ng-if="boardId === 4">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label class="col-md-2 control-label">썸네일</label>
+                      <div class="col-md-10">
+                        <span class="btn blue fileinput-button" ng-if="!data.thumbnail.url">
+                          <i class="fa fa-plus"></i> 썸네일 추가
+                          <input type="file" id="thumbnail-upload-button" />
+                        </span>
+                        <img ng-if="data.thumbnail.url" ng-src="data.thumbnail.url" width="200" />
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-md-2 control-label">상세 메인 이미지</label>
+                      <div class="col-md-10">
+                        <span class="btn blue fileinput-button" ng-if="!data.mainImage.url">
+                          <i class="fa fa-plus"></i> 이미지 추가
+                          <input type="file" id="main-upload-button" />
+                        </span>
+                        <img ng-if="data.mainImage.url" ng-src="data.mainImage.url" width="300" />
+                      </div>
+                    </div>
+                    <div class="form-group" data-ng-repeat="field in boardFields">
+                      <label class="col-md-2 control-label">{{field.title}} </label>
+                      <div class="col-md-10">
+                        <input
+                          type="text"
+                          class="form-control"
+                          ng-model="data[field.key]"
+                        >
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-md-2 control-label">짧은 설명(리스트)</label>
+                      <div class="col-md-10">
+                      <textarea
+                        style="width: 500px;"
+                        rows="3"
+                        data-ng-model="data.shortDescription"
+                      />
+                      </div>
                     </div>
                   </div>
                 </div>

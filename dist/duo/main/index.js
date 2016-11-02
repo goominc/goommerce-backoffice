@@ -103,7 +103,7 @@ mainModule.constant('boConfig', {
 
 'use strict';
 
-var mainModule = angular.module('backoffice.main', ['ui.router', 'ngCookies', require('../brand/module').name, require('../board/module').name, require('../building/module').name, require('../cms/module').name, require('../currency/module').name, require('../dashboard/module').name, require('../directives/module.js').name, require('../order/module').name, require('../product/module').name, require('../text/module').name, require('../third_party/angular-translate'), require('../user/module').name]).config(function ($translateProvider) {
+var mainModule = angular.module('backoffice.main', ['ui.router', 'ngCookies', require('../board/module').name, require('../brand/module').name, require('../building/module').name, require('../cms/module').name, require('../coupon/module').name, require('../currency/module').name, require('../dashboard/module').name, require('../directives/module.js').name, require('../order/module').name, require('../product/module').name, require('../text/module').name, require('../third_party/angular-translate'), require('../user/module').name]).config(function ($translateProvider) {
   $translateProvider.registerAvailableLanguageKeys(['en', 'ko'], {
     'en_US': 'en',
     'en_UK': 'en',
@@ -273,8 +273,11 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       sref: 'board.list({boardId:1})' }, // notice
     {
       name: '매장',
-      sref: 'board.list({boardId:3})' }]
-  }, // shop
+      sref: 'board.list({boardId:3})' }, // shop
+    {
+      name: '이벤트',
+      sref: 'board.list({boardId:4})' }]
+  }, // events
   {
     key: 'cms', // TODO get key from router
     name: 'CMS',
@@ -296,6 +299,10 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
         sref: 'cms.simple({name: "mobile_md_pick"})'
       }]
     }]
+  }, {
+    key: 'coupon',
+    name: '쿠폰',
+    sref: 'coupon.main'
   },
   /*
   {
@@ -483,8 +490,230 @@ mainModule.controller('LoginModalController', function ($scope, $rootScope, $htt
     });
   };
 });
-}, {"../brand/module":3,"../board/module":4,"../building/module":5,"../cms/module":6,"../currency/module":7,"../dashboard/module":8,"../directives/module.js":9,"../order/module":10,"../product/module":11,"../text/module":12,"../third_party/angular-translate":13,"../user/module":14,"./i18n/translations.en.json":15,"./i18n/translations.ko.json":16}],
+}, {"../board/module":3,"../brand/module":4,"../building/module":5,"../cms/module":6,"../coupon/module":7,"../currency/module":8,"../dashboard/module":9,"../directives/module.js":10,"../order/module":11,"../product/module":12,"../text/module":13,"../third_party/angular-translate":14,"../user/module":15,"./i18n/translations.en.json":16,"./i18n/translations.ko.json":17}],
 3: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var boardModule = angular.module('backoffice.board', []);
+
+module.exports = boardModule;
+
+boardModule.config(function ($stateProvider) {
+  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
+  var templateRoot = 'templates/metronic';
+
+  $stateProvider.state('board', {
+    abstract: true,
+    url: '/board',
+    template: '<ui-view/>'
+  }).state('board.add', {
+    url: '/:boardId/add',
+    templateUrl: templateRoot + '/board/edit.html',
+    controller: 'BoardDetailController'
+  }).state('board.edit', {
+    url: '/:boardId/:boardItemId',
+    templateUrl: templateRoot + '/board/edit.html',
+    controller: 'BoardDetailController'
+  }).state('board.list', {
+    url: '/:boardId',
+    templateUrl: templateRoot + '/board/list.html',
+    controller: 'BoardListController'
+  });
+});
+
+// BEGIN module require js
+require('./controllers');
+// END module require js
+}, {"./controllers":18}],
+18: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var boardModule = require('./module');
+
+var boardIdToTitle = {
+  1: '공지사항',
+  3: '매장',
+  4: '이벤트'
+};
+
+boardModule.controller('BoardListController', function ($scope, $http, $state, $rootScope, $translate, $compile) {
+  $scope.name = $state.params.boardType;
+  $scope.contentTitle = $scope.boardType;
+  $scope.contentSubTitle = '';
+  $scope.boardId = $state.params.boardId;
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'board.list({ boardId: ' + $scope.boardId + ' })',
+    name: boardIdToTitle[$scope.boardId] || 'Unknown'
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.datatablesLoaded = function () {
+    $compile(angular.element($('table')))($scope);
+  };
+
+  $scope.boardDatatables = {
+    field: 'boardItems',
+    columns: [{
+      data: 'id',
+      orderable: false,
+      render: function render(id) {
+        return '<a ui-sref="board.edit({ boardId: ' + $scope.boardId + ', boardItemId: ' + id + ' })">' + id + '</a>';
+      }
+    }, {
+      data: function data(_data) {
+        var title = _.get(_data, 'data.title');
+        if (!title) {
+          title = _.get(_data, 'data.name');
+        }
+        if (!title) {
+          title = '제목없음';
+        }
+        return title;
+      },
+      orderable: false
+    }, {
+      data: 'id',
+      orderable: false,
+      render: function render(id) {
+        return '<button class="btn red" data-ng-click="deleteItem(' + id + ')">삭제</button>';
+      }
+    }]
+  };
+
+  $scope.goNewBoard = function () {
+    $state.go('board.add', { boardId: $scope.boardId });
+  };
+
+  $scope.deleteItem = function (id) {
+    if (window.confirm('정말 삭제하시겠습니까?')) {
+      $http['delete']('/api/v1/boards/items/' + id).then(function () {
+        $state.reload();
+      }, function () {
+        window.alert('요청이 실패하였습니다');
+      });
+    }
+  };
+});
+
+var saveBoardItem = function saveBoardItem(boardId, boardItemId, data, $http, $state) {
+  if (!boardItemId) {
+    // add
+    $http.post('/api/v1/boards/' + boardId, data).then(function () {
+      window.alert('저장되었습니다');
+      $state.go('board.list', { boardId: boardId });
+    }, function () {
+      window.alert('실패하였습니다');
+    });
+  } else {
+    // edit
+    $http.put('/api/v1/boards/items/' + boardItemId, data).then(function () {
+      window.alert('저장되었습니다');
+      $state.go('board.list', { boardId: boardId });
+    }, function () {
+      window.alert('실패하였습니다');
+    });
+  }
+};
+
+boardModule.controller('BoardDetailController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+  $scope.name = $state.params.boardType;
+  $scope.contentTitle = $scope.boardType;
+  $scope.contentSubTitle = '';
+  $scope.boardId = +$state.params.boardId;
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'board.list({ boardId: ' + $scope.boardId + ' })',
+    name: boardIdToTitle[$scope.boardId] || 'Unknown'
+  }, {
+    sref: 'board.edit',
+    name: $scope.name
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  var contentNode = null;
+  var initEditor = function initEditor() {
+    contentNode = $('#board-content');
+    contentNode.summernote({
+      width: 710,
+      height: 500,
+      onImageUpload: function onImageUpload(files) {
+        return boUtils.getSummerNoteImageUpload(files, contentNode);
+      }
+    });
+  };
+  var addUploadEventHandler = function addUploadEventHandler(node) {
+    var key = arguments.length <= 1 || arguments[1] === undefined ? 'default' : arguments[1];
+
+    node.on('change', function (changeEvent) {
+      var file = _.get(changeEvent, 'target.files[0]');
+      console.log(file);
+      if (!file) {
+        return;
+      }
+      boUtils.startProgressBar();
+      node.attr('value', '');
+      var r = new FileReader();
+      r.onload = function (e) {
+        boUtils.uploadImage201607(e.target.result, file, '').then(function (res) {
+          boUtils.stopProgressBar();
+          $scope[key] = res.data.images[0];
+          if (!$scope.$$phase) {
+            $scope.$apply();
+          }
+        }, function () {
+          window.alert('image upload fail');
+          boUtils.stopProgressBar();
+        });
+      };
+      r.readAsBinaryString(file);
+    });
+  };
+  if ($scope.boardId === 3) {
+    // store
+    $scope.boardFields = [{ title: '이름', key: 'name' }, { title: '위치', key: 'location' }, { title: '전화번호', key: 'tel' }, { title: '매장타입', key: 'type' }, { title: '매장정보', key: 'detail' }, { title: '지도URL', key: 'mapUrl' }];
+  } else if ($scope.boardId === 4) {
+    // events
+    $scope.boardFields = [{ title: '타이틀', key: 'title' }, { title: '버튼텍스트', key: 'buttonText' }];
+    initEditor();
+    setTimeout(function () {
+      addUploadEventHandler($('#thumbnail-upload-button'), 'thumbnail');
+      addUploadEventHandler($('#main-upload-button'), 'mainImage');
+    }, 500);
+  } else {
+    // default(notice, etc)
+    initEditor();
+  }
+
+  var boardItemId = $state.params.boardItemId;
+  if (boardItemId) {
+    $http.get('/api/v1/boards/items/' + boardItemId).then(function (res) {
+      $scope.data = res.data.data || {};
+      if ($scope.data.content && contentNode) {
+        contentNode.code($scope.data.content);
+      }
+    });
+  } else {
+    $scope.data = {};
+  }
+
+  $scope.save = function () {
+    if (contentNode) {
+      $scope.data.content = contentNode.code();
+    }
+    saveBoardItem($scope.boardId, boardItemId, $scope.data, $http, $state);
+  };
+});
+}, {"./module":3}],
+4: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -540,8 +769,8 @@ module.exports = brandModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../utils/module":17,"../third_party/angular-translate":13,"./i18n/translations.en.json":18,"./i18n/translations.ko.json":19,"./controllers.js":20}],
-17: [function(require, module, exports) {
+}, {"../utils/module":19,"../third_party/angular-translate":14,"./i18n/translations.en.json":20,"./i18n/translations.ko.json":21,"./controllers.js":22}],
+19: [function(require, module, exports) {
 'use strict';
 
 var utilModule = angular.module('backoffice.utils', ['ngCookies']);
@@ -799,12 +1028,12 @@ utilModule.factory('convertUtil', function () {
 
 module.exports = utilModule;
 }, {}],
-13: [function(require, module, exports) {
+14: [function(require, module, exports) {
 'use strict';
 
 module.exports = require('angular-translate/bower-angular-translate@2.7.2:angular-translate.min.js');
-}, {"angular-translate/bower-angular-translate@2.7.2:angular-translate.min.js":21}],
-21: [function(require, module, exports) {
+}, {"angular-translate/bower-angular-translate@2.7.2:angular-translate.min.js":23}],
+23: [function(require, module, exports) {
 /*!
  * angular-translate - v2.7.2 - 2015-06-01
  * http://github.com/angular-translate/angular-translate
@@ -1312,12 +1541,12 @@ module.exports = require('angular-translate/bower-angular-translate@2.7.2:angula
   }return angular.module("pascalprecht.translate", ["ng"]).run(a), a.$inject = ["$translate"], a.displayName = "runTranslate", angular.module("pascalprecht.translate").provider("$translateSanitization", b), angular.module("pascalprecht.translate").constant("pascalprechtTranslateOverrider", {}).provider("$translate", c), c.$inject = ["$STORAGE_KEY", "$windowProvider", "$translateSanitizationProvider", "pascalprechtTranslateOverrider"], c.displayName = "displayName", angular.module("pascalprecht.translate").factory("$translateDefaultInterpolation", d), d.$inject = ["$interpolate", "$translateSanitization"], d.displayName = "$translateDefaultInterpolation", angular.module("pascalprecht.translate").constant("$STORAGE_KEY", "NG_TRANSLATE_LANG_KEY"), angular.module("pascalprecht.translate").directive("translate", e), e.$inject = ["$translate", "$q", "$interpolate", "$compile", "$parse", "$rootScope"], e.displayName = "translateDirective", angular.module("pascalprecht.translate").directive("translateCloak", f), f.$inject = ["$rootScope", "$translate"], f.displayName = "translateCloakDirective", angular.module("pascalprecht.translate").filter("translate", g), g.$inject = ["$parse", "$translate"], g.displayName = "translateFilterFactory", angular.module("pascalprecht.translate").factory("$translationCache", h), h.$inject = ["$cacheFactory"], h.displayName = "$translationCache", "pascalprecht.translate";
 });
 }, {}],
-18: [function(require, module, exports) {
+20: [function(require, module, exports) {
 module.exports = {
 
 };
 }, {}],
-19: [function(require, module, exports) {
+21: [function(require, module, exports) {
 module.exports = {
   "brand": {
     "title": "브랜드",
@@ -1359,7 +1588,7 @@ module.exports = {
 }
 ;
 }, {}],
-20: [function(require, module, exports) {
+22: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -1768,190 +1997,6 @@ brandModule.controller('BrandInquiryInfoController', function ($scope, $rootScop
     init(res.data);
   });
 });
-}, {"./module":3}],
-4: [function(require, module, exports) {
-// Copyright (C) 2016 Goom Inc. All rights reserved.
-
-'use strict';
-
-var boardModule = angular.module('backoffice.coupon', []);
-
-module.exports = boardModule;
-
-boardModule.config(function ($stateProvider) {
-  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
-  var templateRoot = 'templates/metronic';
-
-  $stateProvider.state('board', {
-    abstract: true,
-    url: '/board',
-    template: '<ui-view/>'
-  }).state('board.add', {
-    url: '/:boardId/add',
-    templateUrl: templateRoot + '/board/edit.html',
-    controller: 'BoardDetailController'
-  }).state('board.edit', {
-    url: '/:boardId/:boardItemId',
-    templateUrl: templateRoot + '/board/edit.html',
-    controller: 'BoardDetailController'
-  }).state('board.list', {
-    url: '/:boardId',
-    templateUrl: templateRoot + '/board/list.html',
-    controller: 'BoardListController'
-  });
-});
-
-// BEGIN module require js
-require('./controllers');
-// END module require js
-}, {"./controllers":22}],
-22: [function(require, module, exports) {
-// Copyright (C) 2016 Goom Inc. All rights reserved.
-
-'use strict';
-
-var boardModule = require('./module');
-
-var boardIdToTitle = {
-  1: '공지사항',
-  3: '매장',
-  4: '이벤트'
-};
-
-boardModule.controller('BoardListController', function ($scope, $http, $state, $rootScope, $translate, $compile) {
-  $scope.name = $state.params.boardType;
-  $scope.contentTitle = $scope.boardType;
-  $scope.contentSubTitle = '';
-  $scope.boardId = $state.params.boardId;
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'board.list({ boardId: ' + $scope.boardId + ' })',
-    name: boardIdToTitle[$scope.boardId] || 'Unknown'
-  }];
-  $rootScope.initAll($scope, $state.current.name);
-
-  $scope.datatablesLoaded = function () {
-    $compile(angular.element($('table')))($scope);
-  };
-
-  $scope.boardDatatables = {
-    field: 'boardItems',
-    columns: [{
-      data: 'id',
-      orderable: false,
-      render: function render(id) {
-        return '<a ui-sref="board.edit({ boardId: ' + $scope.boardId + ', boardItemId: ' + id + ' })">' + id + '</a>';
-      }
-    }, {
-      data: function data(_data) {
-        var title = _.get(_data, 'data.title');
-        if (!title) {
-          title = _.get(_data, 'data.name');
-        }
-        if (!title) {
-          title = '제목없음';
-        }
-        return title;
-      },
-      orderable: false
-    }, {
-      data: 'id',
-      orderable: false,
-      render: function render(id) {
-        return '<button class="btn red" data-ng-click="deleteItem(' + id + ')">삭제</button>';
-      }
-    }]
-  };
-
-  $scope.goNewBoard = function () {
-    $state.go('board.add', { boardId: $scope.boardId });
-  };
-
-  $scope.deleteItem = function (id) {
-    if (window.confirm('정말 삭제하시겠습니까?')) {
-      $http['delete']('/api/v1/boards/items/' + id).then(function () {
-        $state.reload();
-      }, function () {
-        window.alert('요청이 실패하였습니다');
-      });
-    }
-  };
-});
-
-var saveBoardItem = function saveBoardItem(boardId, boardItemId, data, $http, $state) {
-  if (!boardItemId) {
-    // add
-    $http.post('/api/v1/boards/' + boardId, data).then(function () {
-      window.alert('저장되었습니다');
-      $state.go('board.list', { boardId: boardId });
-    }, function () {
-      window.alert('실패하였습니다');
-    });
-  } else {
-    // edit
-    $http.put('/api/v1/boards/items/' + boardItemId, data).then(function () {
-      window.alert('저장되었습니다');
-      $state.go('board.list', { boardId: boardId });
-    }, function () {
-      window.alert('실패하였습니다');
-    });
-  }
-};
-
-boardModule.controller('BoardDetailController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
-  $scope.name = $state.params.boardType;
-  $scope.contentTitle = $scope.boardType;
-  $scope.contentSubTitle = '';
-  $scope.boardId = +$state.params.boardId;
-  $scope.breadcrumb = [{
-    sref: 'dashboard',
-    name: $translate.instant('dashboard.home')
-  }, {
-    sref: 'board.list({ boardId: ' + $scope.boardId + ' })',
-    name: boardIdToTitle[$scope.boardId] || 'Unknown'
-  }, {
-    sref: 'board.edit',
-    name: $scope.name
-  }];
-  $rootScope.initAll($scope, $state.current.name);
-
-  var contentNode = null;
-  if ($scope.boardId === 3) {
-    // store
-    $scope.boardFields = [{ title: '이름', key: 'name', obj: _.get($scope, 'data.detail') }, { title: '위치', key: 'location', obj: _.get($scope, 'data.detail') }, { title: '전화번호', key: 'tel', obj: _.get($scope, 'data.detail') }, { title: '매장타입', key: 'type', obj: _.get($scope, 'data.detail') }, { title: '매장정보', key: 'detail', obj: _.get($scope, 'data.detail') }, { title: '지도URL', key: 'mapUrl', obj: _.get($scope, 'data.mapUrl') }];
-  } else {
-    // default(notice, etc)
-    contentNode = $('#board-content');
-    contentNode.summernote({
-      width: 710,
-      height: 500,
-      onImageUpload: function onImageUpload(files) {
-        return boUtils.getSummerNoteImageUpload(files, contentNode);
-      }
-    });
-  }
-
-  var boardItemId = $state.params.boardItemId;
-  if (boardItemId) {
-    $http.get('/api/v1/boards/items/' + boardItemId).then(function (res) {
-      $scope.data = res.data.data || {};
-      if ($scope.data.content && contentNode) {
-        contentNode.code($scope.data.content);
-      }
-    });
-  } else {
-    $scope.data = {};
-  }
-
-  $scope.save = function () {
-    if (contentNode) {
-      $scope.data.content = contentNode.code();
-    }
-    saveBoardItem($scope.boardId, boardItemId, $scope.data, $http, $state);
-  };
-});
 }, {"./module":4}],
 5: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
@@ -1993,13 +2038,13 @@ module.exports = buildingModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../utils/module":17,"../third_party/angular-translate":13,"./i18n/translations.en.json":23,"./i18n/translations.ko.json":24,"./controllers.js":25}],
-23: [function(require, module, exports) {
+}, {"../utils/module":19,"../third_party/angular-translate":14,"./i18n/translations.en.json":24,"./i18n/translations.ko.json":25,"./controllers.js":26}],
+24: [function(require, module, exports) {
 module.exports = {
 
 };
 }, {}],
-24: [function(require, module, exports) {
+25: [function(require, module, exports) {
 module.exports = {
   "building": {
     "main": {
@@ -2019,7 +2064,7 @@ module.exports = {
 }
 ;
 }, {}],
-25: [function(require, module, exports) {
+26: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -2139,13 +2184,13 @@ cmsModule.config(function ($stateProvider) {
 // BEGIN module require js
 require('./controllers');
 // END module require js
-}, {"../third_party/angular-translate":13,"./i18n/translations.en.json":26,"./i18n/translations.ko.json":27,"./controllers":28}],
-26: [function(require, module, exports) {
+}, {"../third_party/angular-translate":14,"./i18n/translations.en.json":27,"./i18n/translations.ko.json":28,"./controllers":29}],
+27: [function(require, module, exports) {
 module.exports = {
 
 };
 }, {}],
-27: [function(require, module, exports) {
+28: [function(require, module, exports) {
 module.exports = {
   "cms": {
     "mainCategory": "메인페이지 카테고리",
@@ -2162,7 +2207,7 @@ module.exports = {
 }
 ;
 }, {}],
-28: [function(require, module, exports) {
+29: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -2452,6 +2497,76 @@ cmsModule.controller('CmsPureHtmlController', function ($scope, $http, $rootScop
 
 'use strict';
 
+var couponModule = angular.module('backoffice.coupon', []);
+
+module.exports = couponModule;
+
+couponModule.config(function ($stateProvider) {
+  // 2016. 01. 04. [heekyu] how can I configure this outside of config?
+  var templateRoot = 'templates/metronic';
+
+  $stateProvider.state('coupon', {
+    abstract: true,
+    url: '/coupon',
+    template: '<ui-view/>'
+  }).state('coupon.main', {
+    url: '/main',
+    templateUrl: templateRoot + '/coupon/main.html',
+    controller: 'CouponMainController'
+  }).state('coupon.userCoupons', {
+    url: '/userCoupons',
+    templateUrl: templateRoot + '/coupon/user-coupons.html',
+    controller: 'CouponUserCouponController'
+  });
+});
+
+// BEGIN module require js
+require('./controllers');
+// END module require js
+}, {"./controllers":30}],
+30: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
+var couponModule = require('./module');
+
+couponModule.controller('CouponMainController', function ($scope, $http, $state, $rootScope, $translate) {
+  $scope.name = $state.params.name;
+  $scope.contentTitle = $scope.name;
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'coupon.main',
+    name: $scope.name
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.couponDatatables = {
+    field: 'coupons',
+    columns: [{
+      data: 'id'
+    }]
+  };
+
+  var loadCoupons = function loadCoupons() {
+    $http.get('/api/v1/coupons').then(function (res) {
+      console.log(res.data);
+    });
+  };
+  var loadUserCoupons = function loadUserCoupons() {};
+  loadCoupons();
+});
+
+couponModule.controller('CouponUserCouponController', function ($scope) {});
+}, {"./module":7}],
+8: [function(require, module, exports) {
+// Copyright (C) 2016 Goom Inc. All rights reserved.
+
+'use strict';
+
 var currencyModule = angular.module('backoffice.currency', ['ui.router', require('../third_party/angular-translate')]);
 
 currencyModule.config(function ($translateProvider) {
@@ -2479,14 +2594,14 @@ module.exports = currencyModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":13,"./i18n/translations.en.json":29,"./i18n/translations.ko.json":30,"./controllers.js":31}],
-29: [function(require, module, exports) {
+}, {"../third_party/angular-translate":14,"./i18n/translations.en.json":31,"./i18n/translations.ko.json":32,"./controllers.js":33}],
+31: [function(require, module, exports) {
 module.exports = {
 
 }
 ;
 }, {}],
-30: [function(require, module, exports) {
+32: [function(require, module, exports) {
 module.exports = {
   "currency": {
     "title": "환율"
@@ -2494,7 +2609,7 @@ module.exports = {
 }
 ;
 }, {}],
-31: [function(require, module, exports) {
+33: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -2521,8 +2636,8 @@ currencyModule.controller('CurrencyMainController', function ($scope, $http) {
     });
   };
 });
-}, {"./module":7}],
-8: [function(require, module, exports) {
+}, {"./module":8}],
+9: [function(require, module, exports) {
 'use strict';
 
 var dashboardModule = angular.module('backoffice.dashboard', ['ui.router', require('../third_party/angular-translate')]);
@@ -2548,15 +2663,15 @@ module.exports = dashboardModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":13,"./i18n/translations.en.json":32,"./i18n/translations.ko.json":33,"./controllers.js":34}],
-32: [function(require, module, exports) {
+}, {"../third_party/angular-translate":14,"./i18n/translations.en.json":34,"./i18n/translations.ko.json":35,"./controllers.js":36}],
+34: [function(require, module, exports) {
 module.exports = {
   "dashboard": {
     "home": "홈"
   }
 };
 }, {}],
-33: [function(require, module, exports) {
+35: [function(require, module, exports) {
 module.exports = {
   "dashboard": {
     "home": "홈",
@@ -2567,7 +2682,7 @@ module.exports = {
   }
 };
 }, {}],
-34: [function(require, module, exports) {
+36: [function(require, module, exports) {
 'use strict';
 
 var dashboardModule = require('./module');
@@ -2583,8 +2698,8 @@ dashboardModule.controller('DashboardController', function ($scope, $rootScope, 
   }];
   $rootScope.initAll($scope);
 });
-}, {"./module":8}],
-9: [function(require, module, exports) {
+}, {"./module":9}],
+10: [function(require, module, exports) {
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -2838,8 +2953,8 @@ directiveModule.directive('stringToNumber', function () {
 });
 // change per page values here
 // data: realData, need implement
-}, {"../utils/module":17}],
-10: [function(require, module, exports) {
+}, {"../utils/module":19}],
+11: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -2925,15 +3040,15 @@ module.exports = orderModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":13,"./i18n/translations.en.json":35,"./i18n/translations.ko.json":36,"./controllers.js":37}],
-35: [function(require, module, exports) {
+}, {"../third_party/angular-translate":14,"./i18n/translations.en.json":37,"./i18n/translations.ko.json":38,"./controllers.js":39}],
+37: [function(require, module, exports) {
 module.exports = {
   "order": {
 
   }
 };
 }, {}],
-36: [function(require, module, exports) {
+38: [function(require, module, exports) {
 module.exports = {
   "order": {
     "title": "주문",
@@ -3045,7 +3160,7 @@ module.exports = {
 }
 ;
 }, {}],
-37: [function(require, module, exports) {
+39: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -3649,8 +3764,10 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
       $state.reload();
     });
   };
+  var shipmentProviders = {
+    1: '우체국택배'
+  };
   $scope.shipmentProviderText = function (provider) {
-    /*
     switch (provider) {
       case 1:
         return '우체국택배';
@@ -3663,46 +3780,65 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
       case 8:
         return '현대택배';
       case 10:
-        return '현대택배';
-        01    우체국택배    O
-       04    CJ대한통운    O
-       05    한진택배    O
-       06    로젠택배    O
-       08    현대택배    O
-       10    KGB택배    O
-       11    일양로지스    O
-       12    EMS    O
-       13    DHL    O
-       14    UPS    O
-       15    GTX로지스    O
-       16    한의사랑택배    O
-       17    천일택배    O
-       18    건영택배    O
-       21    Fedex    O
-       22    대신택배    O
-       23    경동택배    O
-       24    CVSnet 편의점택배    O
-       25    TNT Express    O
-       26    USPS    O
-       28    GSMNtoN(인로스)    O
-       29    에어보이익스프레스    O
-       32    합동택배    O
-       33    DHL Global Mail    O
-       34    i-Parcel    O
-       36    쿠팡 로켓배송    X
-       37    범한판토스    O
-       38    APEX(ECMS Express)    O
-       39    KG로지스택배(통합)    O
-       40    굿투럭(신규)    O
-       default:
+        return 'KGB택배';
+      case 11:
+        return '일양로지스';
+      case 12:
+        return 'EMS';
+      case 13:
+        return 'DHL';
+      case 14:
+        return 'UPS';
+      case 15:
+        return 'GTX로지스';
+      case 16:
+        return '한의사랑택배';
+      case 17:
+        return '천일택배';
+      case 18:
+        return '건영택배';
+      case 21:
+        return 'Fedex';
+      case 22:
+        return '대신택배';
+      case 23:
+        return '경동택배';
+      case 24:
+        return 'CVSnet 편의점택배';
+      case 25:
+        return 'TNT Express';
+      case 26:
+        return 'USPS';
+      case 28:
+        return 'GSMNtoN(인로스)';
+      case 29:
+        return '에어보이익스프레스';
+      case 32:
+        return '합동택배';
+      case 33:
+        return 'DHL Global Mail';
+      case 34:
+        return 'i-Parcel';
+      case 36:
+        return '쿠팡 로켓배송';
+      case 37:
+        return '범한판토스';
+      case 38:
+        return 'APEX(ECMS Express)';
+      case 39:
+        return 'KG로지스택배(통합)';
+      case 40:
+        return '굿투럭(신규)';
+      default:
         return provider;
     }
-     */
+    /*
     if (provider === 0) return 'CJ';
     if (provider === 1) return '로젠택배';
     if (provider === 104) return '영통';
     if (provider === 105) return '판다';
     return provider;
+    */
   };
 
   $scope.exportPackingList = function () {
@@ -5080,8 +5216,8 @@ orderModule.controller('OrderBrandVatController', function ($scope, $http, $stat
     }]
   };
 });
-}, {"./module":10}],
-11: [function(require, module, exports) {
+}, {"./module":11}],
+12: [function(require, module, exports) {
 'use strict';
 
 var productModule = angular.module('backoffice.product', ['ui.router', 'ui.bootstrap', require('../third_party/angular-translate')]);
@@ -5352,8 +5488,8 @@ require('./controllers/ProductBatchUploadController');
 require('./controllers/ProductImageUploadController');
 require('./controllers/SMarketController');
 // END module require js
-}, {"../third_party/angular-translate":13,"./i18n/translations.en.json":38,"./i18n/translations.ko.json":39,"./controllers/ProductMainController":40,"./controllers/ProductEditController":41,"./controllers/CategoryEditController":42,"./controllers/ProductBatchUploadController":43,"./controllers/ProductImageUploadController":44,"./controllers/SMarketController":45}],
-38: [function(require, module, exports) {
+}, {"../third_party/angular-translate":14,"./i18n/translations.en.json":40,"./i18n/translations.ko.json":41,"./controllers/ProductMainController":42,"./controllers/ProductEditController":43,"./controllers/CategoryEditController":44,"./controllers/ProductBatchUploadController":45,"./controllers/ProductImageUploadController":46,"./controllers/SMarketController":47}],
+40: [function(require, module, exports) {
 module.exports = {
   "product": {
     "main": {
@@ -5365,7 +5501,7 @@ module.exports = {
   }
 };
 }, {}],
-39: [function(require, module, exports) {
+41: [function(require, module, exports) {
 module.exports = {
   "product": {
     "saveAndNewButton": "저장하고 새 상품 만들기",
@@ -5422,7 +5558,7 @@ module.exports = {
 }
 ;
 }, {}],
-40: [function(require, module, exports) {
+42: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -5535,8 +5671,8 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
     }
   };
 });
-}, {"../module.js":11}],
-41: [function(require, module, exports) {
+}, {"../module.js":12}],
+43: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -6507,8 +6643,8 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     descriptions.forEach(saveDesc);
   };
 });
-}, {"../module.js":11}],
-42: [function(require, module, exports) {
+}, {"../module.js":12}],
+44: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -6856,8 +6992,8 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     });
   }, 500);
 });
-}, {"../module.js":11}],
-43: [function(require, module, exports) {
+}, {"../module.js":12}],
+45: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -6994,8 +7130,8 @@ productModule.controller('ProductBatchUploadController', function ($scope, $http
     console.log(contents);
   };
 });
-}, {"../module.js":11}],
-44: [function(require, module, exports) {
+}, {"../module.js":12}],
+46: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -7410,8 +7546,8 @@ productModule.controller('ProductImageUploadController', function ($scope, $http
     $scope.clearImages();
   };
 });
-}, {"../module":11}],
-45: [function(require, module, exports) {
+}, {"../module":12}],
+47: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -7453,8 +7589,8 @@ productModule.controller('SMarketController', function ($scope, $http) {
     }]
   };
 });
-}, {"../module.js":11}],
-12: [function(require, module, exports) {
+}, {"../module.js":12}],
+13: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -7486,14 +7622,14 @@ module.exports = textModule;
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":13,"./i18n/translations.en.json":46,"./i18n/translations.ko.json":47,"./controllers.js":48}],
-46: [function(require, module, exports) {
+}, {"../third_party/angular-translate":14,"./i18n/translations.en.json":48,"./i18n/translations.ko.json":49,"./controllers.js":50}],
+48: [function(require, module, exports) {
 module.exports = {
 
 }
 ;
 }, {}],
-47: [function(require, module, exports) {
+49: [function(require, module, exports) {
 module.exports = {
   "text": {
     "title": "국제화"
@@ -7501,7 +7637,7 @@ module.exports = {
 }
 ;
 }, {}],
-48: [function(require, module, exports) {
+50: [function(require, module, exports) {
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
 'use strict';
@@ -7691,8 +7827,8 @@ textModule.controller('TextMainController', function ($scope, $http, $q, $state,
     }
   };
 });
-}, {"./module":12}],
-14: [function(require, module, exports) {
+}, {"./module":13}],
+15: [function(require, module, exports) {
 'use strict';
 
 var userModule = angular.module('backoffice.user', ['ui.router', require('../third_party/angular-translate')]);
@@ -7775,13 +7911,13 @@ userModule.factory('userUtil', function () {
 // BEGIN module require js
 require('./controllers.js');
 // END module require js
-}, {"../third_party/angular-translate":13,"./i18n/translations.en.json":49,"./i18n/translations.ko.json":50,"./controllers.js":51}],
-49: [function(require, module, exports) {
+}, {"../third_party/angular-translate":14,"./i18n/translations.en.json":51,"./i18n/translations.ko.json":52,"./controllers.js":53}],
+51: [function(require, module, exports) {
 module.exports = {
 
 };
 }, {}],
-50: [function(require, module, exports) {
+52: [function(require, module, exports) {
 module.exports = {
   "user": {
     "createUser": {
@@ -7830,7 +7966,7 @@ module.exports = {
 }
 ;
 }, {}],
-51: [function(require, module, exports) {
+53: [function(require, module, exports) {
 'use strict';
 
 var userModule = require('./module');
@@ -8565,13 +8701,13 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     r.readAsDataURL(changeEvent.target.files[0]);
   });
 });
-}, {"./module":14}],
-15: [function(require, module, exports) {
+}, {"./module":15}],
+16: [function(require, module, exports) {
 module.exports = {
 
 };
 }, {}],
-16: [function(require, module, exports) {
+17: [function(require, module, exports) {
 module.exports = {
   "main": {
     "mainMenu": "메인",

@@ -3,10 +3,11 @@
 const mainModule = angular.module('backoffice.main', [
     'ui.router',
     'ngCookies',
-    require('../brand/module').name,
     require('../board/module').name,
+    require('../brand/module').name,
     require('../building/module').name,
     require('../cms/module').name,
+    require('../coupon/module').name,
     require('../currency/module').name,
     require('../dashboard/module').name,
     require('../directives/module.js').name,
@@ -204,6 +205,10 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: '매장',
           sref: 'board.list({boardId:3})', // shop
         },
+        {
+          name: '이벤트',
+          sref: 'board.list({boardId:4})', // events
+        },
       ],
     },
     {
@@ -234,6 +239,11 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           ],
         },
       ],
+    },
+    {
+      key: 'coupon',
+      name: '쿠폰',
+      sref: 'coupon.main',
     },
     /*
     {

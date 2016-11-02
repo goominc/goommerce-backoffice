@@ -1,6 +1,6 @@
 // Copyright (C) 2016 Goom Inc. All rights reserved.
 
-const boardModule = angular.module('backoffice.coupon', []);
+const boardModule = angular.module('backoffice.board', []);
 
 module.exports = boardModule;
 

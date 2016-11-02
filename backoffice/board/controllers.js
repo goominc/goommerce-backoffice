@@ -117,24 +117,63 @@ boardModule.controller('BoardDetailController', ($scope, $http, $state, $rootSco
   $rootScope.initAll($scope, $state.current.name);
 
   let contentNode = null;
-  if ($scope.boardId === 3) {
-    // store
-    $scope.boardFields = [
-      { title: '이름', key: 'name', obj: _.get($scope, 'data.detail') },
-      { title: '위치', key: 'location', obj: _.get($scope, 'data.detail') },
-      { title: '전화번호', key: 'tel', obj: _.get($scope, 'data.detail') },
-      { title: '매장타입', key: 'type', obj: _.get($scope, 'data.detail') },
-      { title: '매장정보', key: 'detail', obj: _.get($scope, 'data.detail') },
-      { title: '지도URL', key: 'mapUrl', obj: _.get($scope, 'data.mapUrl') },
-    ];
-  } else {
-    // default(notice, etc)
+  const initEditor = () => {
     contentNode = $('#board-content');
     contentNode.summernote({
       width: 710,
       height: 500,
       onImageUpload: (files) => boUtils.getSummerNoteImageUpload(files, contentNode),
     });
+  };
+  const addUploadEventHandler = (node, key = 'default') => {
+    node.on('change', function (changeEvent) {
+      const file = _.get(changeEvent, 'target.files[0]');
+      console.log(file);
+      if (!file) {
+        return;
+      }
+      boUtils.startProgressBar();
+      node.attr('value', '');
+      const r = new FileReader();
+      r.onload = function(e) {
+        boUtils.uploadImage201607(e.target.result, file, '').then((res) => {
+          boUtils.stopProgressBar();
+          $scope[key] = res.data.images[0];
+          if (!$scope.$$phase) {
+            $scope.$apply();
+          }
+        }, () => {
+          window.alert('image upload fail');
+          boUtils.stopProgressBar();
+        });
+      };
+      r.readAsBinaryString(file);
+    });
+  };
+  if ($scope.boardId === 3) {
+    // store
+    $scope.boardFields = [
+      { title: '이름', key: 'name' },
+      { title: '위치', key: 'location' },
+      { title: '전화번호', key: 'tel' },
+      { title: '매장타입', key: 'type' },
+      { title: '매장정보', key: 'detail' },
+      { title: '지도URL', key: 'mapUrl' },
+    ];
+  } else if ($scope.boardId === 4) {
+    // events
+    $scope.boardFields = [
+      { title: '타이틀', key: 'title' },
+      { title: '버튼텍스트', key: 'buttonText' },
+    ];
+    initEditor();
+    setTimeout(() => {
+      addUploadEventHandler($('#thumbnail-upload-button'), 'thumbnail');
+      addUploadEventHandler($('#main-upload-button'), 'mainImage');
+    }, 500);
+  } else {
+    // default(notice, etc)
+    initEditor();
   }
 
   const boardItemId = $state.params.boardItemId;
