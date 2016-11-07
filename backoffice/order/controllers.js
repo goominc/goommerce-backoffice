@@ -600,12 +600,112 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
       $state.reload();
     });
   };
+  const shipmentProvidersMap = {
+    0: 'CJ대한통운', // TODO remove
+    1: '로젠택배', // TODO 우체국 택배
+    // 4: 'CJ대한통운',
+    5: '한진택배',
+    // 6: '로젠택배',
+    8: '현대택배',
+    10: 'KGB택배',
+    11: '일양로지스',
+    12: 'EMS',
+    13: 'DHL',
+    14: 'UPS',
+    15: 'GTX로지스',
+    16: '한의사랑택배',
+    17: '천일택배',
+    18: '건영택배',
+    21: 'Fedex',
+    22: '대신택배',
+    23: '경동택배',
+    24: 'CVSnet 편의점택배',
+    25: 'TNT Express',
+    26: 'USPS',
+    28: 'GSMNtoN(인로스)',
+    29: '에어보이익스프레스',
+    32: '합동택배',
+    33: 'DHL Global Mail',
+    34: 'i-Parcel',
+    36: '쿠팡 로켓배송',
+    37: '범한판토스',
+    38: 'APEX(ECMS Express)',
+    39: 'KG로지스택배(통합)',
+    40:  '굿투럭(신규)',
+  };
+  $scope.shipmentProviders = Object.keys(shipmentProvidersMap).map(p => ({ label: shipmentProvidersMap[p], value: p }));
   $scope.shipmentProviderText = (provider) => {
+    switch (provider) {
+      case 1:
+        return '우체국택배';
+      case 4:
+        return 'CJ대한통운';
+      case 5:
+        return '한진택배';
+      case 6:
+        return '로젠택배';
+      case 8:
+        return '현대택배';
+      case 10:
+        return 'KGB택배';
+      case 11:
+        return '일양로지스';
+      case 12:
+        return 'EMS';
+      case 13:
+        return 'DHL';
+      case 14:
+        return 'UPS';
+      case 15:
+        return 'GTX로지스';
+      case 16:
+        return '한의사랑택배';
+      case 17:
+        return '천일택배';
+      case 18:
+        return '건영택배';
+      case 21:
+        return 'Fedex';
+      case 22:
+        return '대신택배';
+      case 23:
+        return '경동택배';
+      case 24:
+        return 'CVSnet 편의점택배';
+      case 25:
+        return 'TNT Express';
+      case 26:
+        return 'USPS';
+      case 28:
+        return 'GSMNtoN(인로스)';
+      case 29:
+        return '에어보이익스프레스';
+      case 32:
+        return '합동택배';
+      case 33:
+        return 'DHL Global Mail';
+      case 34:
+        return 'i-Parcel';
+      case 36:
+        return '쿠팡 로켓배송';
+      case 37:
+        return '범한판토스';
+      case 38:
+        return 'APEX(ECMS Express)';
+      case 39:
+        return 'KG로지스택배(통합)';
+      case 40:
+        return '굿투럭(신규)';
+      default:
+        return provider;
+    }
+    /*
     if (provider === 0) return 'CJ';
-    if (provider === 1) return '로젝택배';
+    if (provider === 1) return '로젠택배';
     if (provider === 104) return '영통';
     if (provider === 105) return '판다';
     return provider;
+    */
   };
 
   $scope.exportPackingList = () => {

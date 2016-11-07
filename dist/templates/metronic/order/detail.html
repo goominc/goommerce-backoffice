@@ -54,8 +54,7 @@
                   </div>
                   <div class="col-md-2">
                     <select class="form-control" data-ng-model="newShipment.provider" convert-to-number>
-                      <option value="1" ng-if="order.address.countryCode === 'KR'">로젝택배</option>
-                      <option value="0" ng-if="order.address.countryCode === 'KR'">CJ</option>
+                      <option value="{{provider.value}}" ng-repeat="provider in shipmentProviders">{{provider.label}}</option>
                     </select>
                   </div>
                 </div>
@@ -459,10 +458,7 @@
                               </th>
                               <th>
                                 <select class="form-control" data-ng-model="newShipment.provider" convert-to-number>
-                                  <option value="1" ng-if="order.address.countryCode === 'KR'">로젝택배</option>
-                                  <option value="0" ng-if="order.address.countryCode === 'KR'">CJ</option>
-                                  <option value="104" ng-if="order.address.countryCode !== 'KR'">영통</option>
-                                  <option value="105" ng-if="order.address.countryCode !== 'KR'">판다</option>
+                                  <option value="{{provider.value}}" ng-repeat="provider in shipmentProviders">{{provider.label}}</option>
                                 </select>
                               </th>
                               <th><input class="form-control" string-to-number data-ng-model="newShipment.unitKRW"/></th>
