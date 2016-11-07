@@ -3927,9 +3927,42 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
       $state.reload();
     });
   };
-  var shipmentProviders = {
-    1: '우체국택배'
+  var shipmentProvidersMap = {
+    0: 'CJ대한통운', // TODO remove
+    1: '로젠택배', // TODO 우체국 택배
+    // 4: 'CJ대한통운',
+    5: '한진택배',
+    // 6: '로젠택배',
+    8: '현대택배',
+    10: 'KGB택배',
+    11: '일양로지스',
+    12: 'EMS',
+    13: 'DHL',
+    14: 'UPS',
+    15: 'GTX로지스',
+    16: '한의사랑택배',
+    17: '천일택배',
+    18: '건영택배',
+    21: 'Fedex',
+    22: '대신택배',
+    23: '경동택배',
+    24: 'CVSnet 편의점택배',
+    25: 'TNT Express',
+    26: 'USPS',
+    28: 'GSMNtoN(인로스)',
+    29: '에어보이익스프레스',
+    32: '합동택배',
+    33: 'DHL Global Mail',
+    34: 'i-Parcel',
+    36: '쿠팡 로켓배송',
+    37: '범한판토스',
+    38: 'APEX(ECMS Express)',
+    39: 'KG로지스택배(통합)',
+    40: '굿투럭(신규)'
   };
+  $scope.shipmentProviders = Object.keys(shipmentProvidersMap).map(function (p) {
+    return { label: shipmentProvidersMap[p], value: p };
+  });
   $scope.shipmentProviderText = function (provider) {
     switch (provider) {
       case 1:
@@ -5869,6 +5902,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     'W-PANTS': ['060', '065', '070', '075'],
     'W-PTHP': ['024', '026', '027', '028'],
     '신발': getFeetSizes(230, 5, 290),
+    'KIDS': ['상의(110)', '상의(120)', '상의(130)', '상의(140)', '상의(150)', '하의(110)', '하의(120)', '하의(130)', '하의(140)', '하의(150)'],
     '액세서리': ['S', 'M', 'L', 'Free']
   };
   $scope.variantKinds = [{ name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors }, { name: '크기', key: 'size', groups: Object.keys($scope.allSizes), groupMap: $scope.allSizes }];
