@@ -3964,70 +3964,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
     return { label: shipmentProvidersMap[p], value: p };
   });
   $scope.shipmentProviderText = function (provider) {
-    switch (provider) {
-      case 1:
-        return '우체국택배';
-      case 4:
-        return 'CJ대한통운';
-      case 5:
-        return '한진택배';
-      case 6:
-        return '로젠택배';
-      case 8:
-        return '현대택배';
-      case 10:
-        return 'KGB택배';
-      case 11:
-        return '일양로지스';
-      case 12:
-        return 'EMS';
-      case 13:
-        return 'DHL';
-      case 14:
-        return 'UPS';
-      case 15:
-        return 'GTX로지스';
-      case 16:
-        return '한의사랑택배';
-      case 17:
-        return '천일택배';
-      case 18:
-        return '건영택배';
-      case 21:
-        return 'Fedex';
-      case 22:
-        return '대신택배';
-      case 23:
-        return '경동택배';
-      case 24:
-        return 'CVSnet 편의점택배';
-      case 25:
-        return 'TNT Express';
-      case 26:
-        return 'USPS';
-      case 28:
-        return 'GSMNtoN(인로스)';
-      case 29:
-        return '에어보이익스프레스';
-      case 32:
-        return '합동택배';
-      case 33:
-        return 'DHL Global Mail';
-      case 34:
-        return 'i-Parcel';
-      case 36:
-        return '쿠팡 로켓배송';
-      case 37:
-        return '범한판토스';
-      case 38:
-        return 'APEX(ECMS Express)';
-      case 39:
-        return 'KG로지스택배(통합)';
-      case 40:
-        return '굿투럭(신규)';
-      default:
-        return provider;
-    }
+    return shipmentProvidersMap[provider] || provider;
     /*
     if (provider === 0) return 'CJ';
     if (provider === 1) return '로젠택배';
