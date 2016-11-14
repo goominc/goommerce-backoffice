@@ -6796,12 +6796,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         orderable: false
       }, {
         data: function data(_data3) {
-          return _.get(_data3, 'data.size', '');
-        },
-        orderable: false
-      }, {
-        data: function data(_data4) {
-          return _data4;
+          return _data3;
         },
         render: function render(variant) {
           return '<img width="80px" src="' + $scope.getImageUrl(variant) + '" />';
@@ -6815,23 +6810,44 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         orderable: false
       }]
     };
+    if (!$scope.$$phase) {
+      $scope.$apply();
+    }
   };
 
   var loadRecommentProducts = function loadRecommentProducts() {
     $http.get('/api/v1/products?isActive=true&limit=500').then(function (res) {
+      $scope.recommentProductVariants = [];
       var products = res.data.products || [];
       $scope.variantIdMap = {};
+
+      var getColorId = function getColorId(product, variant) {
+        return product.id + '-' + _.get(variant, 'data.color');
+      };
+      var colors = {};
+      ($scope.product.data.recommendVariants || []).forEach(function (variant) {
+        var color = getColorId(variant.product, variant);
+        colors[color] = variant;
+      });
+      console.log(Object.keys(colors));
       products.forEach(function (product) {
         if (+product.id === +$scope.product.id) {
           return;
         }
         (product.productVariants || []).forEach(function (variant) {
+          if ($scope.variantIdMap[variant.id]) {
+            return;
+          }
           variant.product = _.omit(product, 'productVariants');
-          $scope.variantIdMap[variant.id] = variant;
-          $scope.recommentProductVariants.push(variant);
+          var color = getColorId(product, variant);
+          if (!colors[color]) {
+            colors[color] = variant;
+            $scope.variantIdMap[variant.id] = variant;
+            $scope.recommentProductVariants.push(variant);
+          }
         });
-        initVariantDatatables($scope.recommentProductVariants);
       });
+      initVariantDatatables($scope.recommentProductVariants);
     });
   };
 
@@ -6853,7 +6869,6 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     if ($scope.recommentProductVariants) {
       return;
     }
-    $scope.recommentProductVariants = [];
     loadRecommentProducts();
   };
 });

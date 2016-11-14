@@ -888,10 +888,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           orderable: false,
         },
         {
-          data: (data) => _.get(data, 'data.size', ''),
-          orderable: false,
-        },
-        {
           data: (data) => data,
           render: (variant) =>
             `<img width="80px" src="${$scope.getImageUrl(variant)}" />`,
@@ -905,23 +901,42 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
         }
       ],
     };
+    if (!$scope.$$phase) {
+      $scope.$apply();
+    }
   };
 
   const loadRecommentProducts = () => {
     $http.get('/api/v1/products?isActive=true&limit=500').then((res) => {
+      $scope.recommentProductVariants = [];
       const products = res.data.products || [];
       $scope.variantIdMap = {};
+
+      const getColorId = (product, variant) => `${product.id}-${_.get(variant, 'data.color')}`;
+      const colors = {};
+      ($scope.product.data.recommendVariants || []).forEach((variant) => {
+        const color = getColorId(variant.product, variant);
+        colors[color] = variant;
+      });
+      console.log(Object.keys(colors));
       products.forEach((product) => {
         if (+product.id === +$scope.product.id) {
           return;
         }
         (product.productVariants || []).forEach((variant) => {
+          if ($scope.variantIdMap[variant.id]) {
+            return;
+          }
           variant.product = _.omit(product, 'productVariants');
-          $scope.variantIdMap[variant.id] = variant;
-          $scope.recommentProductVariants.push(variant);
+          const color = getColorId(product, variant);
+          if (!colors[color]) {
+            colors[color] = variant;
+            $scope.variantIdMap[variant.id] = variant;
+            $scope.recommentProductVariants.push(variant);
+          }
         });
-        initVariantDatatables($scope.recommentProductVariants);
       });
+      initVariantDatatables($scope.recommentProductVariants);
     })
   };
 
@@ -943,7 +958,6 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     if ($scope.recommentProductVariants) {
       return;
     }
-    $scope.recommentProductVariants = [];
     loadRecommentProducts();
   };
 });

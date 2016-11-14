@@ -312,7 +312,7 @@
                       </div>
                     </div>
                   </uib-tab>
-                  <uib-tab heading="{{'product.edit.tabRecommendProduct' | translate}}" data-ng-click="initRecommend()">
+                  <uib-tab heading="{{'product.edit.tabRecommendProduct' | translate}}" data-ng-click="initRecommend()" ng-if="product.id">
                     <div class="row">
                       <h4>추천 상품</h4>
                       <div
@@ -336,7 +336,6 @@
                               <tr>
                                 <th>상품명</th>
                                 <th>색상</th>
-                                <th>사이즈</th>
                                 <th>이미지</th>
                                 <th></th>
                               </tr>
