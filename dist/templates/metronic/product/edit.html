@@ -312,8 +312,40 @@
                       </div>
                     </div>
                   </uib-tab>
-                  <uib-tab heading="{{'product.edit.tabRecommendProduct' | translate}}">
-
+                  <uib-tab heading="{{'product.edit.tabRecommendProduct' | translate}}" data-ng-click="initRecommend()">
+                    <div class="row">
+                      <h4>추천 상품</h4>
+                      <div
+                        class="col-md-12"
+                        style="min-height: 100px;"
+                        ui-sortable
+                        data-ng-model="product.data.recommendVariants"
+                      >
+                        <div class="product-image-wrap image-inline" style="text-align: center;" data-ng-repeat="recommendVariant in product.data.recommendVariants">
+                          <img data-ng-src="{{getImageUrl(recommendVariant)}}" />
+                          <div class="delete-button" data-ng-click="deleteRecommendVariant($index)"><i class="fa fa-remove"></i></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row" style="margin-top: 20px;">
+                      <div class="col-md-12">
+                        <h4>상품 목록</h4>
+                        <div bo-datatables="variantDatatables">
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>상품명</th>
+                                <th>색상</th>
+                                <th>사이즈</th>
+                                <th>이미지</th>
+                                <th></th>
+                              </tr>
+                            </thead>
+                            <tbody></tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
                   </uib-tab>
                 </uib-tabset>
               </div>

@@ -870,4 +870,80 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     };
     descriptions.forEach(saveDesc);
   };
+
+  $scope.getImageUrl = (variant) =>
+  _.get(variant, 'appImages.default[0].thumbnails.320') ||
+  _.get(variant, 'appImages.default[0].image.url', '');
+
+  const initVariantDatatables = (productVariants) => {
+    $scope.variantDatatables = {
+      data: productVariants,
+      columns: [
+        {
+          data: (data) => _.get(data, 'product.name.ko', ''),
+          orderable: false,
+        },
+        {
+          data: (data) => _.get(data, 'data.color', ''),
+          orderable: false,
+        },
+        {
+          data: (data) => _.get(data, 'data.size', ''),
+          orderable: false,
+        },
+        {
+          data: (data) => data,
+          render: (variant) =>
+            `<img width="80px" src="${$scope.getImageUrl(variant)}" />`,
+          orderable: false,
+        },
+        {
+          data: 'id',
+          render: (id) =>
+            `<button class="btn blue" data-ng-click="addRecommendVariant(${id})"><i class="fa fa-plus"></i> 추천</button>`,
+          orderable: false,
+        }
+      ],
+    };
+  };
+
+  const loadRecommentProducts = () => {
+    $http.get('/api/v1/products?isActive=true&limit=500').then((res) => {
+      const products = res.data.products || [];
+      $scope.variantIdMap = {};
+      products.forEach((product) => {
+        if (+product.id === +$scope.product.id) {
+          return;
+        }
+        (product.productVariants || []).forEach((variant) => {
+          variant.product = _.omit(product, 'productVariants');
+          $scope.variantIdMap[variant.id] = variant;
+          $scope.recommentProductVariants.push(variant);
+        });
+        initVariantDatatables($scope.recommentProductVariants);
+      });
+    })
+  };
+
+  $scope.addRecommendVariant = (id) => {
+    if (!_.get($scope.product, 'data.recommendVariants')) {
+      _.set($scope.product, 'data.recommendVariants', []);
+    }
+    const variant = $scope.variantIdMap[id];
+    $scope.product.data.recommendVariants.push(variant);
+    loadRecommentProducts();
+  };
+
+  $scope.deleteRecommendVariant = (index) => {
+    $scope.product.data.recommendVariants.splice(index, 1);
+    loadRecommentProducts();
+  };
+
+  $scope.initRecommend = () => {
+    if ($scope.recommentProductVariants) {
+      return;
+    }
+    $scope.recommentProductVariants = [];
+    loadRecommentProducts();
+  };
 });

@@ -6776,6 +6776,86 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     };
     descriptions.forEach(saveDesc);
   };
+
+  $scope.getImageUrl = function (variant) {
+    return _.get(variant, 'appImages.default[0].thumbnails.320') || _.get(variant, 'appImages.default[0].image.url', '');
+  };
+
+  var initVariantDatatables = function initVariantDatatables(productVariants) {
+    $scope.variantDatatables = {
+      data: productVariants,
+      columns: [{
+        data: function data(_data) {
+          return _.get(_data, 'product.name.ko', '');
+        },
+        orderable: false
+      }, {
+        data: function data(_data2) {
+          return _.get(_data2, 'data.color', '');
+        },
+        orderable: false
+      }, {
+        data: function data(_data3) {
+          return _.get(_data3, 'data.size', '');
+        },
+        orderable: false
+      }, {
+        data: function data(_data4) {
+          return _data4;
+        },
+        render: function render(variant) {
+          return '<img width="80px" src="' + $scope.getImageUrl(variant) + '" />';
+        },
+        orderable: false
+      }, {
+        data: 'id',
+        render: function render(id) {
+          return '<button class="btn blue" data-ng-click="addRecommendVariant(' + id + ')"><i class="fa fa-plus"></i> 추천</button>';
+        },
+        orderable: false
+      }]
+    };
+  };
+
+  var loadRecommentProducts = function loadRecommentProducts() {
+    $http.get('/api/v1/products?isActive=true&limit=500').then(function (res) {
+      var products = res.data.products || [];
+      $scope.variantIdMap = {};
+      products.forEach(function (product) {
+        if (+product.id === +$scope.product.id) {
+          return;
+        }
+        (product.productVariants || []).forEach(function (variant) {
+          variant.product = _.omit(product, 'productVariants');
+          $scope.variantIdMap[variant.id] = variant;
+          $scope.recommentProductVariants.push(variant);
+        });
+        initVariantDatatables($scope.recommentProductVariants);
+      });
+    });
+  };
+
+  $scope.addRecommendVariant = function (id) {
+    if (!_.get($scope.product, 'data.recommendVariants')) {
+      _.set($scope.product, 'data.recommendVariants', []);
+    }
+    var variant = $scope.variantIdMap[id];
+    $scope.product.data.recommendVariants.push(variant);
+    loadRecommentProducts();
+  };
+
+  $scope.deleteRecommendVariant = function (index) {
+    $scope.product.data.recommendVariants.splice(index, 1);
+    loadRecommentProducts();
+  };
+
+  $scope.initRecommend = function () {
+    if ($scope.recommentProductVariants) {
+      return;
+    }
+    $scope.recommentProductVariants = [];
+    loadRecommentProducts();
+  };
 });
 }, {"../module.js":12}],
 44: [function(require, module, exports) {
@@ -6943,27 +7023,32 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
       columns: [{
         data: function data(_data) {
           return _.get(_data, 'product.name.ko', '');
-        }
+        },
+        orderable: false
       }, {
         data: function data(_data2) {
           return _.get(_data2, 'data.color', '');
-        }
+        },
+        orderable: false
       }, {
         data: function data(_data3) {
           return _.get(_data3, 'data.size', '');
-        }
+        },
+        orderable: false
       }, {
         data: function data(_data4) {
           return _data4;
         },
         render: function render(variant) {
           return '<img width="80px" src="' + $scope.getImageUrl(variant) + '" />';
-        }
+        },
+        orderable: false
       }, {
         data: 'id',
         render: function render(id) {
           return '<button class="btn blue" data-ng-click="addBestVariant(' + id + ')"><i class="fa fa-plus"></i> 베스트</button>';
-        }
+        },
+        orderable: false
       }]
     };
   };

@@ -158,22 +158,27 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
       columns: [
         {
           data: (data) => _.get(data, 'product.name.ko', ''),
+          orderable: false,
         },
         {
           data: (data) => _.get(data, 'data.color', ''),
+          orderable: false,
         },
         {
           data: (data) => _.get(data, 'data.size', ''),
+          orderable: false,
         },
         {
           data: (data) => data,
           render: (variant) =>
             `<img width="80px" src="${$scope.getImageUrl(variant)}" />`,
+          orderable: false,
         },
         {
           data: 'id',
           render: (id) =>
             `<button class="btn blue" data-ng-click="addBestVariant(${id})"><i class="fa fa-plus"></i> 베스트</button>`,
+          orderable: false,
         }
       ],
     };
