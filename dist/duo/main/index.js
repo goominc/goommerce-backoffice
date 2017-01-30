@@ -3333,7 +3333,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 var orderModule = require('./module');
 
 orderModule.factory('orderCommons', function ($rootScope, $compile, boUtils) {
-  var allStatus = [0, 100, 102, 200, 203, 302, 400, 300];
+  var allStatus = [0, 40, 100, 102, 200, 203, 302, 400, 300];
   var allPaymentStatus = [0, 1, 100, 200];
   var allPaymentMethods = [0, 1, 2, 3, 4, 5];
   var allSettlementStatus = [0, 100];
@@ -3545,7 +3545,9 @@ orderModule.controller('OrderMainController', function ($scope, $rootScope, $htt
       }
     }],
     fnCreatedRow: function fnCreatedRow(nRow, aData, iDataIndex) {
-      if (aData.status === 100) {} else if (aData.status === 101) {
+      if (aData.status === 40) {
+        $(nRow).css('background-color', 'rgb(255, 10, 100)');
+      } else if (aData.status === 100) {} else if (aData.status === 101) {
         $(nRow).css('background-color', 'rgb(219,219,219)');
       } else if (aData.status === 102) {
         $(nRow).css('background-color', 'rgb(126, 172, 163)');

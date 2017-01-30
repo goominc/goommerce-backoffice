@@ -5,6 +5,7 @@ const orderModule = require('./module');
 orderModule.factory('orderCommons', ($rootScope, $compile, boUtils) => {
   const allStatus = [
     0,
+    40,
     100,
     102,
     200,
@@ -233,7 +234,9 @@ orderModule.controller('OrderMainController', ($scope, $rootScope, $http, $state
       },
     ],
     fnCreatedRow(nRow, aData, iDataIndex) {
-      if (aData.status === 100) {
+      if (aData.status === 40) {
+        $(nRow).css('background-color', 'rgb(255, 10, 100)')
+      } else if (aData.status === 100) {
       } else if (aData.status === 101) {
         $(nRow).css('background-color', 'rgb(219,219,219)')
       } else if (aData.status === 102) {
