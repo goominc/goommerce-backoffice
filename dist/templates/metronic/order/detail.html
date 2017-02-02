@@ -522,7 +522,6 @@
                             <th>주문(최초) 가격</th>
                             <th>주문(최초) 수량</th>
                             <th>주문금액</th>
-                            <th>재고유무</th>
                             <th>최종수량</th>
                             <th>최종금액</th>
                           </tr>
@@ -557,12 +556,6 @@
                             </td>
                             <td>
                               {{(+row.totalKRW).format()}}
-                            </td>
-                            <td style="background-color:red" data-ng-if="row.status === 40">
-                              없음
-                            </td>
-                            <td data-ng-if="row.status !== 40">
-                              있음
                             </td>
                             <td>
                               <input type="number" data-ng-model="row.finalQuantity">
