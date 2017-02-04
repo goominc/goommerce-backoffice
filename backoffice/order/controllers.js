@@ -13,6 +13,8 @@ orderModule.factory('orderCommons', ($rootScope, $compile, boUtils) => {
     302,
     400,
     300,
+    303,
+    304,
   ];
   const allPaymentStatus = [
     0,
