@@ -607,7 +607,7 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
   const shipmentProvidersMap = {
     0: 'CJ대한통운', // TODO remove
     1: '로젠택배', // TODO 우체국 택배
-    // 4: 'CJ대한통운',
+    4: 'CJ대한통운',
     5: '한진택배',
     // 6: '로젠택배',
     8: '현대택배',
@@ -635,7 +635,9 @@ orderModule.controller('OrderDetailController', ($scope, $rootScope, $http, $sta
     37: '범한판토스',
     38: 'APEX(ECMS Express)',
     39: 'KG로지스택배(통합)',
-    40:  '굿투럭(신규)',
+    40: '굿투럭(신규)',
+    41: '롯데택배',
+    100: '미등록',
   };
   $scope.shipmentProviders = Object.keys(shipmentProvidersMap).map(p => ({ label: shipmentProvidersMap[p], value: p }));
   $scope.shipmentProviderText = (provider) => {
