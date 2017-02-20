@@ -5816,12 +5816,12 @@ var productModule = require('../module.js');
 
 productModule.controller('ProductEditController', function ($scope, $http, $state, $rootScope, $translate, product, categories, productUtil, boUtils) {
   $scope.allColors = {
-    BLUE: ['RBL', 'BLU', 'VBL', 'NVY', 'MNT', 'CBL', 'DNV', 'CBT', 'LBL', 'DBR', 'DBL', 'TBL', 'PUR'],
+    BLUE: ['RBL', 'BLU', 'VBL', 'NVY', 'MNT', 'CBL', 'DNV', 'CBT', 'LBL', 'DBR', 'DBL', 'TBL', 'PUR', 'MBL'],
     GREEN: ['GRN', 'AGN', 'KHA', 'BGN', 'DGN'],
     RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG', 'POR', 'BGD', 'DRD', 'LRD', 'BNR'],
     GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG', 'DGR'],
     WHITE: ['WHT', 'OWH', 'IVY', 'BEG', 'LBI', 'LBE'],
-    OTHERS: ['BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'PTN', 'SLM', 'NYE', 'YEL', 'AWT', 'ABL', 'BWR', 'WNB', 'BRW', 'BNW', 'BNG']
+    OTHERS: ['BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'PTN', 'SLM', 'NYE', 'YEL', 'AWT', 'ABL', 'BWR', 'WNB', 'BRW', 'BNW', 'BNG', 'BNS']
   };
   $scope.colorKeys = Object.keys($scope.allColors);
   var getFeetSizes = function getFeetSizes(start, step, end) {
