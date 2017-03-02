@@ -6817,6 +6817,16 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     }
   };
 
+  var removeCircularRecommendVariants = function removeCircularRecommendVariants(variant) {
+    var nestedRecommendVariants = _.get(variant, 'product.data.recommendVariants');
+    if (nestedRecommendVariants) {
+      var newVariant = Object.assign({}, variant);
+      _.set(newVariant, 'product.data', Object.assign({}, newVariant.product.data, { recommendVariants: null }));
+      return newVariant;
+    }
+    return variant;
+  };
+
   var loadRecommentProducts = function loadRecommentProducts() {
     $http.get('/api/v1/products?isActive=true&limit=500').then(function (res) {
       $scope.recommentProductVariants = [];
@@ -6841,6 +6851,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
             return;
           }
           variant.product = _.omit(product, 'productVariants');
+          variant = removeCircularRecommendVariants(variant);
           var color = getColorId(product, variant);
           if (!colors[color]) {
             colors[color] = variant;
@@ -6857,7 +6868,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     if (!_.get($scope.product, 'data.recommendVariants')) {
       _.set($scope.product, 'data.recommendVariants', []);
     }
-    var variant = $scope.variantIdMap[id];
+    var variant = removeCircularRecommendVariants($scope.variantIdMap[id]);
     $scope.product.data.recommendVariants.push(variant);
     loadRecommentProducts();
   };

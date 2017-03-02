@@ -906,6 +906,16 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     }
   };
 
+  const removeCircularRecommendVariants = (variant) => {
+    const nestedRecommendVariants = _.get(variant, 'product.data.recommendVariants');
+    if (nestedRecommendVariants) {
+      const newVariant = Object.assign({}, variant);
+      _.set(newVariant, 'product.data', Object.assign({}, newVariant.product.data, { recommendVariants: null }));
+      return newVariant;
+    }
+    return variant;
+  };
+
   const loadRecommentProducts = () => {
     $http.get('/api/v1/products?isActive=true&limit=500').then((res) => {
       $scope.recommentProductVariants = [];
@@ -928,6 +938,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
             return;
           }
           variant.product = _.omit(product, 'productVariants');
+          variant = removeCircularRecommendVariants(variant);
           const color = getColorId(product, variant);
           if (!colors[color]) {
             colors[color] = variant;
@@ -944,7 +955,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     if (!_.get($scope.product, 'data.recommendVariants')) {
       _.set($scope.product, 'data.recommendVariants', []);
     }
-    const variant = $scope.variantIdMap[id];
+    const variant = removeCircularRecommendVariants($scope.variantIdMap[id]);
     $scope.product.data.recommendVariants.push(variant);
     loadRecommentProducts();
   };
