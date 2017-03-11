@@ -592,6 +592,9 @@ Login page
 .product-variant-attr-candidate-button + .product-variant-attr-candidate-button {
   border-left: 1px solid #cb0102 !important;
 }
+.red-box {
+  background-color: #ff0000;
+}
 
 /* https://github.com/bassjobsen/typeahead.js-bootstrap-css/blob/master/typeaheadjs.css */
 

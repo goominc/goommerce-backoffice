@@ -95,7 +95,7 @@
 var mainModule = require('./module');
 
 mainModule.constant('boConfig', {
-  apiUrl: ''
+  apiUrl: 'http://localhost:8080'
 });
 }, {"./module":2}],
 2: [function(require, module, exports) {
@@ -3831,7 +3831,7 @@ orderModule.controller('OrderDetailController', function ($scope, $rootScope, $h
   $scope.finalize = function () {
     var data = _.pick(order, 'finalShippingCostKRW');
     data.orderProducts = order.orderProducts.map(function (o) {
-      return _.pick(o, 'id', 'finalQuantity', 'settledKRW');
+      return _.pick(o, 'id', 'finalQuantity', 'settledKRW', 'data');
     });
     return $http.put('/api/v1/orders/' + order.id + '/finalize', data).then(function (res) {
       $state.reload();

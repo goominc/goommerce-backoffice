@@ -85,3 +85,6 @@
 .product-variant-attr-candidate-button + .product-variant-attr-candidate-button {
   border-left: 1px solid #cb0102 !important;
 }
+.red-box {
+  background-color: #ff0000;
+}

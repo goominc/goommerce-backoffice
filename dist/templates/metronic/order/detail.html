@@ -522,6 +522,8 @@
                             <th>주문(최초) 가격</th>
                             <th>주문(최초) 수량</th>
                             <th>주문금액</th>
+                            <th>반품수량</th>
+                            <th>반품금액</th>
                             <th>최종수량</th>
                             <th>최종금액</th>
                           </tr>
@@ -557,8 +559,19 @@
                             <td>
                               {{(+row.totalKRW).format()}}
                             </td>
+                            <td ng-class="{'red-box': row.data.requestCancel.quantity > 0}">
+                              <input style="width:80px" type="number" data-ng-model="row.data.requestCancel.quantity">
+                            </td>
+                            <td ng-class="{'red-box': row.data.requestCancel.quantity > 0}">
+                              <div ng-show="row.data !== undefined">
+                                {{(+row.productVariant.KRW * row.data.requestCancel.quantity).format()}}
+                              </div>
+                              <div ng-show="row.data === undefined">
+                                0
+                              </div>
+                            </td>
                             <td>
-                              <input type="number" data-ng-model="row.finalQuantity">
+                              <input style="width:80px" type="number" data-ng-model="row.finalQuantity">
                             </td>
                             <td>
                               {{(+row.finalTotalKRW).format()}}
