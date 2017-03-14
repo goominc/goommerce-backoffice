@@ -95,7 +95,7 @@
 var mainModule = require('./module');
 
 mainModule.constant('boConfig', {
-  apiUrl: 'http://localhost:8080'
+  apiUrl: ''
 });
 }, {"./module":2}],
 2: [function(require, module, exports) {
