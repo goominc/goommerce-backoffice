@@ -175,6 +175,46 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
     ],
   };
 
+  $scope.registerCoupon = () => {
+    e.preventDefault();
+    console.log('test');
+  };
+
+  $scope.couponDatatables = {
+    field: 'rows',
+    storeKey: 'coupon',
+    columns: [
+      {
+        data: 'id',
+        render: (id) => {
+          return `<a ui-sref="user.info({ userId: ${id} })">${id}</a>`;
+        },
+      },
+      {
+        data: (data) => _.get(data, 'userId', ''),
+      },
+      {
+        data: (data) => _.get(data, 'total', ''),
+      },
+      {
+        data: 'createdAt',
+        render: (data) => boUtils.formatDate(data),
+      },
+      {
+        data: (data) => data,
+        render: (data) => {
+          return `<input type="text" />`;
+        },
+      },
+      {
+        data: (data) => data,
+        render: (data) => {
+          return `<button class="btn blue" data-ng-click="registerCoupon($event)">쿠폰지급</button>`;
+        },
+      },
+    ],
+  };
+
   $scope.sellerDatatables = {
     field: 'users',
     storeKey: 'userSeller',

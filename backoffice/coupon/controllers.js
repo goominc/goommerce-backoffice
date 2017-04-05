@@ -29,6 +29,12 @@ couponModule.controller('CouponMainController', ($scope, $http, $state, $rootSco
       {
         data: data => data,
         render: (coupon) =>
+          `<a ui-sref="coupon.edit({ couponId: ${coupon.id} })">${coupon.id}</a>`,
+        orderable: false,
+      },
+      {
+        data: data => data,
+        render: (coupon) =>
           `<a ui-sref="coupon.edit({ couponId: ${coupon.id} })">${coupon.name}</a>`,
         orderable: false,
       },

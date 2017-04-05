@@ -126,6 +126,29 @@
                         </table>
                       </div>
                     </uib-tab>
+                    <uib-tab heading="쿠폰지급대상자" active="tabName === 'coupon'" data-ng-click="changeTab('coupon')">
+                      <div
+                        data-ng-if="tabName === 'coupon'"
+                        bo-server-datatables="couponDatatables"
+                        url="/api/v1/users"
+                        url-params="{ coupon: 'true' }"
+                        fn-url-params="fnUrlParams(urlParams)"
+                      >
+                        <table class="table table-bordered table-hover" style="width: 100%;">
+                          <thead>
+                          <tr role="row" class="heading">
+                            <td>ID</td>
+                            <td>유저 아이디</td>
+                            <td>구매총액</td>
+                            <td>{{'main.word.createdAt' | translate}}</td>
+                            <td>쿠폰선택</td>
+                            <td>쿠폰지급</td>
+                          </tr>
+                          </thead>
+                          <tbody class="cell-center"></tbody>
+                        </table>
+                      </div>
+                    </uib-tab>
                   </uib-tabset>
                 </div>
               </div>

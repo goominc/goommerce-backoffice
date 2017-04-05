@@ -2581,27 +2581,35 @@ couponModule.controller('CouponMainController', function ($scope, $http, $state,
         return _data;
       },
       render: function render(coupon) {
-        return '<a ui-sref="coupon.edit({ couponId: ' + coupon.id + ' })">' + coupon.name + '</a>';
+        return '<a ui-sref="coupon.edit({ couponId: ' + coupon.id + ' })">' + coupon.id + '</a>';
       },
       orderable: false
     }, {
       data: function data(_data2) {
-        return boUtils.formatDate(_data2.createdAt);
+        return _data2;
+      },
+      render: function render(coupon) {
+        return '<a ui-sref="coupon.edit({ couponId: ' + coupon.id + ' })">' + coupon.name + '</a>';
       },
       orderable: false
     }, {
       data: function data(_data3) {
-        return couponType[_data3.type] || '';
+        return boUtils.formatDate(_data3.createdAt);
       },
       orderable: false
     }, {
       data: function data(_data4) {
-        return _data4.value || '';
+        return couponType[_data4.type] || '';
       },
       orderable: false
     }, {
       data: function data(_data5) {
-        return _data5.minValue || '';
+        return _data5.value || '';
+      },
+      orderable: false
+    }, {
+      data: function data(_data6) {
+        return _data6.minValue || '';
       },
       orderable: false
     }, {
@@ -8395,6 +8403,49 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }]
   };
 
+  $scope.registerCoupon = function () {
+    e.preventDefault();
+    console.log('test');
+  };
+
+  $scope.couponDatatables = {
+    field: 'rows',
+    storeKey: 'coupon',
+    columns: [{
+      data: 'id',
+      render: function render(id) {
+        return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
+      }
+    }, {
+      data: function data(_data11) {
+        return _.get(_data11, 'userId', '');
+      }
+    }, {
+      data: function data(_data12) {
+        return _.get(_data12, 'total', '');
+      }
+    }, {
+      data: 'createdAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }, {
+      data: function data(_data13) {
+        return _data13;
+      },
+      render: function render(data) {
+        return '<input type="text" />';
+      }
+    }, {
+      data: function data(_data14) {
+        return _data14;
+      },
+      render: function render(data) {
+        return '<button class="btn blue" data-ng-click="registerCoupon($event)">쿠폰지급</button>';
+      }
+    }]
+  };
+
   $scope.sellerDatatables = {
     field: 'users',
     storeKey: 'userSeller',
@@ -8405,8 +8456,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: function data(_data11) {
-        return _.get(_data11, 'roles[0].brand.id') || '';
+      data: function data(_data15) {
+        return _.get(_data15, 'roles[0].brand.id') || '';
       },
       render: function render(brandId) {
         return '<a ui-sref="brand.edit({ brandId: ' + brandId + ' })">' + brandId + '</a>';
@@ -8414,12 +8465,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data12) {
-        return _data12.name || '';
+      data: function data(_data16) {
+        return _data16.name || '';
       }
     }, {
-      data: function data(_data13) {
-        return _.get(_data13, 'data.tel') || '';
+      data: function data(_data17) {
+        return _.get(_data17, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -8441,31 +8492,31 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data14) {
-        return _data14.name || '';
-      }
-    }, {
-      data: function data(_data15) {
-        return _.get(_data15, 'data.tel') || '';
-      }
-    }, {
-      data: function data(_data16) {
-        return _.get(_data16, 'data.bizName') || '';
-      }
-    }, {
-      data: function data(_data17) {
-        return _.get(_data17, 'data.bizNumber') || '';
-      }
-    }, {
       data: function data(_data18) {
-        return _data18;
+        return _data18.name || '';
+      }
+    }, {
+      data: function data(_data19) {
+        return _.get(_data19, 'data.tel') || '';
+      }
+    }, {
+      data: function data(_data20) {
+        return _.get(_data20, 'data.bizName') || '';
+      }
+    }, {
+      data: function data(_data21) {
+        return _.get(_data21, 'data.bizNumber') || '';
+      }
+    }, {
+      data: function data(_data22) {
+        return _data22;
       },
       render: function render(user) {
         return _.get(user, 'data.bizImage') ? '<button class="btn blue" data-ng-click="openBizImage(' + user.id + ')">사업자 등록증 보기</button>' : '';
       }
     }, {
-      data: function data(_data19) {
-        return _data19;
+      data: function data(_data23) {
+        return _data23;
       },
       // render: (user) => `<button class="btn blue" data-ng-click="changeToBuyer(${user.id})">바이어 인증</button>`,
       render: function render(user) {
@@ -8490,12 +8541,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data20) {
-        return _data20.name || '';
+      data: function data(_data24) {
+        return _data24.name || '';
       }
     }, {
-      data: function data(_data21) {
-        return _.get(_data21, 'data.tel') || '';
+      data: function data(_data25) {
+        return _.get(_data25, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -8503,8 +8554,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return boUtils.formatDate(data);
       }
     }, {
-      data: function data(_data22) {
-        return _data22;
+      data: function data(_data26) {
+        return _data26;
       },
       render: function render(user) {
         $scope.userIdMap[user.id] = user;
