@@ -138,6 +138,57 @@
           </div>
         </div>
       </div>
+      <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-12">
+              <div class="portlet grey-cascade box">
+                <div class="portlet-title">
+                  <div class="caption">
+                    <i class="fa fa-cogs"></i>쿠폰 지급
+                  </div>
+                </div>
+                <div class="portlet-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th colspan="3"><input class="form-control" data-ng-model="newNote"/></th>
+                          <th width="10%">
+                            <button class="btn blue" data-ng-click="addNote(newNote)">
+                              <i class="fa fa-plus"></i> 지급
+                            </button>
+                          </th>
+                        </tr>
+                      </thead>
+                    </table>
+                    <table class="table table-hover table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th width="20%">지급 시간</th>
+                          <th width="30%">쿠폰 종류</th>
+                          <th width="50%">쿠폰 번호</th>
+                        </tr>
+                      </thead>
+                      <tbody class="cell-center">
+                      <tr data-ng-repeat="row in notes">
+                        <td>
+                          {{row.createdAt}}
+                        </td>
+                        <td>
+                          {{noteType[row.type]}}
+                        </td>
+                        <td>
+                          {{row.data.message}}
+                        </td>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
