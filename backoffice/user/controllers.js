@@ -733,6 +733,35 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     });
   };
 
+  $http.get(`/api/v1/users/${user.id}/allCoupons`).then((res) => {
+    res.data.userCoupons.forEach((l) => {
+      l.createdAt = boUtils.formatDate(l.createdAt, true);
+      if (l.status === 1) l.status = '사용가능';
+      else if (l.status === 2) l.status = '사용됨';
+      else if (l.status === 3) l.status = '만기됨';
+    });
+    $scope.coupons = res.data.userCoupons.sort((a, b) => (a.id < b.id));
+  });
+
+  $http.get('/api/v1/coupons').then((res) => {
+  });
+/*
+  $scope.addCoupon = (number) => {
+    $http.put(`/api/v1/users/${user.id}/coupons`, {
+      uid: number.toLowerCase(),
+    }).then((res) => {
+      $state.reload();
+    });
+  };
+*/
+  $scope.addCoupon = (number) => {
+    $http.post(`/api/v1/coupons/${number}/generateAndRegister`, {
+      userId: user.id,
+    }).then((res) => {
+      $state.reload();
+    });
+  };
+
   $scope.grades = Object.keys(userUtil.spyderBuyerLevel).map((level) => (
     { label: userUtil.spyderBuyerLevel[level], value: level }
   ));

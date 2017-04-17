@@ -95,7 +95,7 @@
 var mainModule = require('./module');
 
 mainModule.constant('boConfig', {
-  apiUrl: ''
+  apiUrl: 'http://localhost:8080'
 });
 }, {"./module":2}],
 2: [function(require, module, exports) {
@@ -8967,6 +8967,37 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     $http.post('/api/v1/users/' + user.id + '/logs', {
       type: 0,
       data: { message: message }
+    }).then(function (res) {
+      $state.reload();
+    });
+  };
+
+  $http.get('/api/v1/users/' + user.id + '/allCoupons').then(function (res) {
+    res.data.userCoupons.forEach(function (l) {
+      l.createdAt = boUtils.formatDate(l.createdAt, true);
+      if (l.status === 1) l.status = '사용가능';else if (l.status === 2) l.status = '사용됨';else if (l.status === 3) l.status = '만기됨';
+    });
+    $scope.coupons = res.data.userCoupons.sort(function (a, b) {
+      return a.id < b.id;
+    });
+  });
+
+  $http.get('/api/v1/coupons').then(function (res) {
+    console.log('return');
+    console.log(res.data);
+  });
+  /*
+    $scope.addCoupon = (number) => {
+      $http.put(`/api/v1/users/${user.id}/coupons`, {
+        uid: number.toLowerCase(),
+      }).then((res) => {
+        $state.reload();
+      });
+    };
+  */
+  $scope.addCoupon = function (number) {
+    $http.post('/api/v1/coupons/' + number + '/generateAndRegister', {
+      userId: user.id
     }).then(function (res) {
       $state.reload();
     });
