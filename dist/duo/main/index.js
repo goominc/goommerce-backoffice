@@ -95,7 +95,7 @@
 var mainModule = require('./module');
 
 mainModule.constant('boConfig', {
-  apiUrl: 'http://localhost:8080'
+  apiUrl: ''
 });
 }, {"./module":2}],
 2: [function(require, module, exports) {
@@ -8982,10 +8982,7 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     });
   });
 
-  $http.get('/api/v1/coupons').then(function (res) {
-    console.log('return');
-    console.log(res.data);
-  });
+  $http.get('/api/v1/coupons').then(function (res) {});
   /*
     $scope.addCoupon = (number) => {
       $http.put(`/api/v1/users/${user.id}/coupons`, {
