@@ -152,9 +152,20 @@
                     <table class="table table-hover table-bordered table-striped">
                       <thead>
                         <tr>
-                          <th colspan="3"><input class="form-control" data-ng-model="newCoupon"/></th>
+                          <th colspan="3">
+                            <!--<input class="form-control" data-ng-model="newCoupon"/> -->
+                            <select
+                              class="form-control"
+                              ng-model="selectedCouponType"
+                              convert-to-number
+                            >
+                              <option ng-repeat="type in couponTypes" value="{{type.id}}">
+                                {{type.name}}
+                              </option>
+                            </select>
+                          </th>
                           <th width="10%">
-                            <button class="btn blue" data-ng-click="addCoupon(newCoupon)">
+                            <button class="btn blue" data-ng-click="addCoupon()">
                               <i class="fa fa-plus"></i> 지급
                             </button>
                           </th>
@@ -164,7 +175,7 @@
                     <table class="table table-hover table-bordered table-striped">
                       <thead>
                         <tr>
-                          <th width="20%">지급 시간</th>
+                          <th width="20%">지급날짜</th>
                           <th width="30%">쿠폰명</th>
                           <th width="30%">쿠폰번호</th>
                           <th width="20%">쿠폰상태</th>

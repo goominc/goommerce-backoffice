@@ -8921,6 +8921,7 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     if (level) {
       $scope.levelObj = level;
     }
+    $scope.selectedCouponType = 1;
   };
   init(user);
 
@@ -8972,6 +8973,10 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     });
   };
 
+  $http.get('/api/v1/coupons').then(function (res) {
+    $scope.couponTypes = res.data.coupons;
+  });
+
   $http.get('/api/v1/users/' + user.id + '/allCoupons').then(function (res) {
     res.data.userCoupons.forEach(function (l) {
       l.createdAt = boUtils.formatDate(l.createdAt, true);
@@ -8982,7 +8987,6 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     });
   });
 
-  $http.get('/api/v1/coupons').then(function (res) {});
   /*
     $scope.addCoupon = (number) => {
       $http.put(`/api/v1/users/${user.id}/coupons`, {
@@ -8992,8 +8996,8 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
       });
     };
   */
-  $scope.addCoupon = function (number) {
-    $http.post('/api/v1/coupons/' + number + '/generateAndRegister', {
+  $scope.addCoupon = function () {
+    $http.post('/api/v1/coupons/' + $scope.selectedCouponType + '/generateAndRegister', {
       userId: user.id
     }).then(function (res) {
       $state.reload();

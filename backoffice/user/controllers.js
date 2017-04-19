@@ -684,6 +684,7 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     if (level) {
       $scope.levelObj = level;
     }
+    $scope.selectedCouponType = 1;
   };
   init(user);
 
@@ -733,6 +734,10 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     });
   };
 
+  $http.get(`/api/v1/coupons`).then((res) => {
+    $scope.couponTypes = res.data.coupons;
+  });
+
   $http.get(`/api/v1/users/${user.id}/allCoupons`).then((res) => {
     res.data.userCoupons.forEach((l) => {
       l.createdAt = boUtils.formatDate(l.createdAt, true);
@@ -743,8 +748,6 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     $scope.coupons = res.data.userCoupons.sort((a, b) => (a.id < b.id));
   });
 
-  $http.get('/api/v1/coupons').then((res) => {
-  });
 /*
   $scope.addCoupon = (number) => {
     $http.put(`/api/v1/users/${user.id}/coupons`, {
@@ -754,8 +757,8 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     });
   };
 */
-  $scope.addCoupon = (number) => {
-    $http.post(`/api/v1/coupons/${number}/generateAndRegister`, {
+  $scope.addCoupon = () => {
+    $http.post(`/api/v1/coupons/${$scope.selectedCouponType}/generateAndRegister`, {
       userId: user.id,
     }).then((res) => {
       $state.reload();
