@@ -81,6 +81,20 @@
                       {{user.lastLoginAt}}
                     </div>
                   </div>
+                  <div class="form-group">
+                    <label class="col-md-2 control-label">
+                      계좌 정보
+                    </label>
+                    <div class="col-md-10">
+                      <table border=1>
+                        <tr>
+                          <td width="100">{{user.data.refundBankName}}</td>
+                          <td width="100">{{user.data.refundAccountHolder}}</td>
+                          <td width="250">{{user.data.refundAccountNumber}}</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               </form>
             </div>
