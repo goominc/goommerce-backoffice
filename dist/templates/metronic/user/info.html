@@ -86,7 +86,10 @@
                       계좌 정보
                     </label>
                     <div class="col-md-10">
-                      <table border=1>
+                      <div data-ng-if="!user.data.refundBankName">
+                        등록된 계좌정보 없음
+                      </div>
+                      <table border=1 data-ng-if="user.data.refundBankName">
                         <tr>
                           <td width="100">{{user.data.refundBankName}}</td>
                           <td width="100">{{user.data.refundAccountHolder}}</td>
