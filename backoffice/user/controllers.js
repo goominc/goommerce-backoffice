@@ -765,6 +765,13 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     });
   };
 
+  $scope.removeCoupon = (uid) => {
+    window.alert('선택한 쿠폰을 삭제하시겠습니까?');
+    $http.delete(`/api/v1/users/${user.id}/coupons/${uid}`).then((res) => {
+      $state.reload();
+    });
+  };
+
   $scope.grades = Object.keys(userUtil.spyderBuyerLevel).map((level) => (
     { label: userUtil.spyderBuyerLevel[level], value: level }
   ));

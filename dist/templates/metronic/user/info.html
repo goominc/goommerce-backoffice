@@ -192,14 +192,19 @@
                     <table class="table table-hover table-bordered table-striped">
                       <thead>
                         <tr>
-                          <th width="20%">지급날짜</th>
+                          <th width="5%">id</th>
+                          <th width="15%">지급날짜</th>
                           <th width="30%">쿠폰명</th>
-                          <th width="30%">쿠폰번호</th>
-                          <th width="20%">쿠폰상태</th>
+                          <th width="25%">쿠폰번호</th>
+                          <th width="15%">쿠폰상태</th>
+                          <th width="15%">삭제</th>
                         </tr>
                       </thead>
                       <tbody class="cell-center">
                       <tr data-ng-repeat="row in coupons">
+                        <td>
+                          {{row.id}}
+                        </td>
                         <td>
                           {{row.createdAt}}
                         </td>
@@ -211,6 +216,11 @@
                         </td>
                         <td>
                           {{row.status}}
+                        </td>
+                        <td>
+                          <button class="btn red" data-ng-click="removeCoupon(row.id)">
+                            삭제
+                          </button>
                         </td>
                       </tbody>
                     </table>
