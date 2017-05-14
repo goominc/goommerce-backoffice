@@ -9004,6 +9004,13 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     });
   };
 
+  $scope.removeCoupon = function (uid) {
+    window.alert('선택한 쿠폰을 삭제하시겠습니까?');
+    $http['delete']('/api/v1/users/' + user.id + '/coupons/' + uid).then(function (res) {
+      $state.reload();
+    });
+  };
+
   $scope.grades = Object.keys(userUtil.spyderBuyerLevel).map(function (level) {
     return { label: userUtil.spyderBuyerLevel[level], value: level };
   });
