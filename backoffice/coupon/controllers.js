@@ -21,6 +21,7 @@ couponModule.controller('CouponMainController', ($scope, $http, $state, $rootSco
   const couponType = {
     1: '가격할인',
     2: '비율할인',
+    3: '상품증정',
   };
 
   $scope.couponDatatables = {
@@ -122,7 +123,7 @@ couponModule.controller('CouponEditController', ($scope, $http, $state, $rootSco
     { name: '쿠폰명', key: 'name' },
     { name: '시작날짜', key: 'begin', placeholder: 'YYYY-MM-DD' },
     { name: '종료날짜', key: 'end', placeholder: 'YYYY-MM-DD' },
-    { name: '할인 타입', key: 'type', enums: [{ title: '가격', value: 1 }, { title: '비율(%)', value: 2 }] },
+    { name: '할인 타입', key: 'type', enums: [{ title: '가격', value: 1 }, { title: '비율(%)', value: 2 }, { title: '상품증정', value: 3 }] },
     { name: '할인 값', key: 'value' },
     { name: '최소금액', key: 'minValue' },
     // { name: '최대값', key: '' },
@@ -153,8 +154,8 @@ couponModule.controller('CouponEditController', ($scope, $http, $state, $rootSco
   };
 
   $scope.generateCoupon = (count) => {
-    if (count > 10) {
-      count = 10;
+    if (count > 500) {
+      count = 500;
     }
     const coupon = $scope.coupon;
     if (count >= 1 && window.confirm(`${count} 개 쿠폰을 발급하시겠습니까?`)) {
