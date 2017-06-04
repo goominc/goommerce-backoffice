@@ -77,6 +77,26 @@
                   </div>
                 </form>
               </div>
+              <div class="portlet-body">
+                <div class="table-responsive">
+                  <table class="table table-hover table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th width="33%">유저번호</th>
+                        <th width="33%">쿠폰번호</th>
+                        <th width="33%">상태</th>
+                      </tr>
+                    </thead>
+                    <tbody class="cell-center">
+                      <tr data-ng-repeat="row in coupon.users">
+                        <td><a ui-sref="user.info({ userId: row.userId })">{{row.userId}}</a></td>
+                        <td>{{row.uid}}</td>
+                        <td>{{row.status}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
