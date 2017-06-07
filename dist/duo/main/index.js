@@ -95,7 +95,7 @@
 var mainModule = require('./module');
 
 mainModule.constant('boConfig', {
-  apiUrl: ''
+  apiUrl: 'http://localhost:8080'
 });
 }, {"./module":2}],
 2: [function(require, module, exports) {
@@ -238,6 +238,10 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       key: 'user.main',
       name: $translate.instant('main.mainMenu'),
       sref: 'user.manage'
+    }, {
+      key: 'user.comment',
+      name: '코멘트관리',
+      sref: 'user.comment'
     }]
   },
   /*
@@ -8111,6 +8115,10 @@ userModule.config(function ($stateProvider) {
   }).state('user.manage', {
     url: '/manage',
     templateUrl: templateRoot + '/user/manage.html',
+    controller: 'UserManageController'
+  }).state('user.comment', {
+    url: '/comment',
+    templateUrl: templateRoot + '/user/comment.html',
     controller: 'UserManageController'
   }).state('user.manage.tab', {
     url: '/:tabName',

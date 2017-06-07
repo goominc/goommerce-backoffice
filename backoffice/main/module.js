@@ -166,6 +166,11 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: $translate.instant('main.mainMenu'),
           sref: 'user.manage',
         },
+        {
+          key: 'user.comment',
+          name: '코멘트관리',
+          sref: 'user.comment',
+        },
       ],
     },
     /*

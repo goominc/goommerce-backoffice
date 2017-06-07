@@ -1,0 +1,163 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-12">
+              <div class="portlet grey-cascade box">
+                <div class="portlet-title">
+                  <div class="caption">
+                    <i class="fa fa-cogs"></i>NOTES
+                  </div>
+                </div>
+                <div class="portlet-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th colspan="3"><input class="form-control" data-ng-model="newNote"/></th>
+                          <th width="10%">
+                            <button class="btn blue" data-ng-click="addNote(newNote)">
+                              <i class="fa fa-plus"></i> 추가
+                            </button>
+                          </th>
+                        </tr>
+                        <tr>
+                          <th width="20%">시간</th>
+                          <th width="10%">종류</th>
+                          <th width="60%">메세지</th>
+                          <th width="10%">요청자</th>
+                        </tr>
+                      </thead>
+                      <tbody class="cell-center">
+                      <tr data-ng-repeat="row in notes">
+                        <td>
+                          {{row.createdAt}}
+                        </td>
+                        <td>
+                          {{noteType[row.type]}}
+                        </td>
+                        <td>
+                          {{row.data.message}}
+                        </td>
+                        <td>
+                          {{row.requester.name.ko || row.requester.userId || row.requester.email}}
+                        </td>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-12">
+              <div class="portlet grey-cascade box">
+                <div class="portlet-title">
+                  <div class="caption">
+                    <i class="fa fa-cogs"></i>쿠폰 지급
+                  </div>
+                </div>
+                <div class="portlet-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th colspan="3">
+                            <!--<input class="form-control" data-ng-model="newCoupon"/> -->
+                            <select
+                              class="form-control"
+                              ng-model="selectedCouponType"
+                              convert-to-number
+                            >
+                              <option ng-repeat="type in couponTypes" value="{{type.id}}">
+                                {{type.name}}
+                              </option>
+                            </select>
+                          </th>
+                          <th width="10%">
+                            <button class="btn blue" data-ng-click="addCoupon()">
+                              <i class="fa fa-plus"></i> 지급
+                            </button>
+                          </th>
+                        </tr>
+                      </thead>
+                    </table>
+                    <table class="table table-hover table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th width="5%">id</th>
+                          <th width="15%">지급날짜</th>
+                          <th width="30%">쿠폰명</th>
+                          <th width="25%">쿠폰번호</th>
+                          <th width="15%">쿠폰상태</th>
+                          <th width="15%">삭제</th>
+                        </tr>
+                      </thead>
+                      <tbody class="cell-center">
+                      <tr data-ng-repeat="row in coupons">
+                        <td>
+                          {{row.id}}
+                        </td>
+                        <td>
+                          {{row.createdAt}}
+                        </td>
+                        <td>
+                          {{row.coupon.name}}
+                        </td>
+                        <td>
+                          {{row.uid}}
+                        </td>
+                        <td>
+                          {{row.status}}
+                        </td>
+                        <td>
+                          <button class="btn red" data-ng-click="removeCoupon(row.id)">
+                            삭제
+                          </button>
+                        </td>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="user_biz_image">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <img width="600" data-ng-src="{{user.data.bizImage.url}}" />
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->
