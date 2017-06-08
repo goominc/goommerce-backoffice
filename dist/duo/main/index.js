@@ -8119,7 +8119,7 @@ userModule.config(function ($stateProvider) {
   }).state('user.comment', {
     url: '/comment',
     templateUrl: templateRoot + '/user/comment.html',
-    controller: 'UserManageController'
+    controller: 'UserCommentController'
   }).state('user.manage.tab', {
     url: '/:tabName',
     templateUrl: templateRoot + '/user/manage.html',
@@ -9000,15 +9000,6 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     });
   });
 
-  /*
-    $scope.addCoupon = (number) => {
-      $http.put(`/api/v1/users/${user.id}/coupons`, {
-        uid: number.toLowerCase(),
-      }).then((res) => {
-        $state.reload();
-      });
-    };
-  */
   $scope.addCoupon = function () {
     $http.post('/api/v1/coupons/' + $scope.selectedCouponType + '/generateAndRegister', {
       userId: user.id
@@ -9050,6 +9041,50 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
     };
     r.readAsDataURL(changeEvent.target.files[0]);
   });
+});
+
+userModule.controller('UserCommentController', function ($scope, $http, $state, $rootScope, $translate, $compile, boUtils) {
+  $scope.contentTitle = $translate.instant('user.info.title');
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.datatablesLoaded = function () {
+    $compile(angular.element($('table')))($scope);
+  };
+
+  $scope.deleteComment = function (id) {
+    $http['delete']('/api/v1/comments/bo/' + id).then(function (res) {
+      $state.reload();
+    });
+  };
+
+  $scope.commentDatatables = {
+    field: 'comments',
+    columns: [{
+      data: 'id'
+    }, {
+      data: 'productId'
+    }, {
+      data: 'userId',
+      render: function render(userId) {
+        return '<a ui-sref="user.info({ userId: ' + userId + ' })">' + userId + '</a>';
+      }
+    }, {
+      data: function data(_data27) {
+        return _data27.data.text || '';
+      }
+    }, {
+      data: function data(_data28) {
+        return _data28;
+      },
+      render: function render(comment) {
+        if (comment.data.hide && comment.data.hide === 1) {
+          return '<button class="btn red" data-ng-click="deleteComment(' + comment.id + ')">SHOW</button>';
+        } else {
+          return '<button class="btn blue" data-ng-click="deleteComment(' + comment.id + ')">HIDE</button>';
+        }
+      }
+    }]
+  };
 });
 }, {"./module":15}],
 16: [function(require, module, exports) {
