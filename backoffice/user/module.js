@@ -31,7 +31,7 @@ userModule.config(($stateProvider) => {
     .state('user.comment', {
       url: '/comment',
       templateUrl: templateRoot + '/user/comment.html',
-      controller: 'UserManageController',
+      controller: 'UserCommentController',
     })
     .state('user.manage.tab', {
       url: '/:tabName',

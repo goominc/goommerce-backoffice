@@ -748,15 +748,6 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     $scope.coupons = res.data.userCoupons.sort((a, b) => (a.id < b.id));
   });
 
-/*
-  $scope.addCoupon = (number) => {
-    $http.put(`/api/v1/users/${user.id}/coupons`, {
-      uid: number.toLowerCase(),
-    }).then((res) => {
-      $state.reload();
-    });
-  };
-*/
   $scope.addCoupon = () => {
     $http.post(`/api/v1/coupons/${$scope.selectedCouponType}/generateAndRegister`, {
       userId: user.id,
@@ -798,4 +789,50 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
     };
     r.readAsDataURL(changeEvent.target.files[0]);
   });
+});
+
+userModule.controller('UserCommentController', ($scope, $http, $state, $rootScope, $translate, $compile, boUtils) => {
+  $scope.contentTitle = $translate.instant('user.info.title');
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.datatablesLoaded = () => {
+    $compile(angular.element($('table')))($scope);
+  };
+
+  $scope.deleteComment = (id) => {
+    $http.delete(`/api/v1/comments/bo/${id}`).then((res) => {
+      $state.reload();
+    });
+  };
+
+  $scope.commentDatatables = {
+    field: 'comments',
+    columns: [
+      {
+        data: 'id',
+      },
+      {
+        data: 'productId',
+      },
+      {
+        data: 'userId',
+        render: (userId) => {
+          return `<a ui-sref="user.info({ userId: ${userId} })">${userId}</a>`;
+        },
+      },
+      {
+        data: (data) => data.data.text || '',
+      },
+      {
+        data: (data) => data,
+        render: (comment) => {
+          if (comment.data.hide && comment.data.hide === 1) {
+            return `<button class="btn red" data-ng-click="deleteComment(${comment.id})">SHOW</button>`;
+          } else {
+            return `<button class="btn blue" data-ng-click="deleteComment(${comment.id})">HIDE</button>`;
+          }
+        },
+      },
+    ],
+  };
 });
