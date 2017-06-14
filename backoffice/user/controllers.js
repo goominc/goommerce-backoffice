@@ -673,7 +673,7 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
       {title: '유저 아이디', key: 'userId', obj: $scope.user.userId, isReadOnly: true, isRequired: true},
       {title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true},
       // {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
-      {title: $translate.instant('user.info.firstNameLabel'), obj: _.get($scope.user, 'name'), isReadOnly: true, isRequired: true},
+      {title: $translate.instant('user.info.firstNameLabel'), obj: $scope.user.name, key: 'name', isRequired: true},
       {title: '마일리지', obj: _.get($scope.user, 'credit', 0), isReadOnly: true},
       // {title: 'SMS 마케팅 동의', obj: _.get($scope.user, 'data.isAgreeSMS'), isReadOnly: true, isRequired: false },
       {title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false},
@@ -715,7 +715,7 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
 
   $scope.save = () => {
     convertUtil.copyFieldObj($scope.userFields, $scope.user);
-    $http.put(`/api/v1/users/${$scope.user.id}`, _.pick($scope.user, 'data', 'inipay')).then((res) => {
+    $http.put(`/api/v1/users/${$scope.user.id}`, _.pick($scope.user, 'data', 'inipay', 'name')).then((res) => {
       // init(res.data);
       $state.go('user.manage');
     });
