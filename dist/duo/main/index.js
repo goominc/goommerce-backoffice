@@ -2672,8 +2672,12 @@ couponModule.controller('CouponEditController', function ($scope, $http, $state,
       }
       $scope.coupon = res.data;
       $scope.coupon.users.forEach(function (l) {
+        l.uid = formatUid(l.uid);
         l.createdAt = boUtils.formatDate(l.createdAt, true);
         if (l.status === 1) l.status = '사용가능';else if (l.status === 2) l.status = '사용됨';else if (l.status === 3) l.status = '만기됨';
+      });
+      $scope.coupon.notusedCoupons.forEach(function (c) {
+        c.uid = formatUid(c.uid);
       });
     });
   } else {

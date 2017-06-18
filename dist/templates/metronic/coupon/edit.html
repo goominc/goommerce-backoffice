@@ -77,24 +77,56 @@
                   </div>
                 </form>
               </div>
-              <div class="portlet-body">
-                <div class="table-responsive">
-                  <table class="table table-hover table-bordered table-striped">
-                    <thead>
-                      <tr>
-                        <th width="33%">유저번호</th>
-                        <th width="33%">쿠폰번호</th>
-                        <th width="33%">상태</th>
-                      </tr>
-                    </thead>
-                    <tbody class="cell-center">
-                      <tr data-ng-repeat="row in coupon.users">
-                        <td><a ui-sref="user.info({ userId: row.userId })">{{row.userId}}</a></td>
-                        <td>{{row.uid}}</td>
-                        <td>{{row.status}}</td>
-                      </tr>
-                    </tbody>
-                  </table>
+              <div class="portlet blue-hoki box">
+                <div class="portlet-title">
+                  <div class="caption">
+                    <i class="fa fa-cogs"></i>유저가 등록한 쿠폰
+                  </div>
+                </div>
+                <div class="portlet-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th width="33%">유저번호</th>
+                          <th width="33%">쿠폰번호</th>
+                          <th width="33%">상태</th>
+                        </tr>
+                      </thead>
+                      <tbody class="cell-center">
+                        <tr data-ng-repeat="row in coupon.users">
+                          <td><a ui-sref="user.info({ userId: row.userId })">{{row.userId}}</a></td>
+                          <td>{{row.uid}}</td>
+                          <td>{{row.status}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="portlet yellow-crusta box">
+                <div class="portlet-title">
+                  <div class="caption">
+                    <i class="fa fa-cogs"></i>미등록 쿠폰
+                  </div>
+                </div>
+                <div class="portlet-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th width="25%">쿠폰타입</th>
+                          <th width="75%">쿠폰번호</th>
+                        </tr>
+                      </thead>
+                      <tbody class="cell-center">
+                        <tr data-ng-repeat="row in coupon.notusedCoupons">
+                          <td>{{row.couponId}}</td>
+                          <td>{{row.uid}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
