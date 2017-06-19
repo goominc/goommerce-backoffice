@@ -254,7 +254,7 @@ cmsModule.controller('CmsMainCategoryController', ($scope, $rootScope, $http, $s
 
 cmsModule.controller('CmsMainCenterController', ($scope, $http, $rootScope, $state) => {
   $('#summernote').summernote({ height: 400 });
-  const name = 'main_page_center';
+  const name = 'desktop_main_center';
   $http.get(`/api/v1/cms/${name}`).then((res) => {
     $scope.cmsData = res.data;
     const data = res.data.data;
