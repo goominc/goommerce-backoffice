@@ -243,6 +243,10 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
             },
           ],
         },
+        {
+          name: '메인페이지 센터 편집',
+          sref: 'cms.main_page_center',
+        },
       ],
     },
     {

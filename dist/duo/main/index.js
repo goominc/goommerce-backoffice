@@ -302,6 +302,9 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
         name: $translate.instant('cms.mMdPick'),
         sref: 'cms.simple({name: "mobile_md_pick"})'
       }]
+    }, {
+      name: '메인페이지 센터 편집',
+      sref: 'cms.main_page_center'
     }]
   }, {
     key: 'coupon',
@@ -2195,6 +2198,10 @@ cmsModule.config(function ($stateProvider) {
     url: '/main_category',
     templateUrl: templateRoot + '/cms/main-category.html',
     controller: 'CmsMainCategoryController'
+  }).state('cms.main_page_center', {
+    url: '/main_page_center/:name',
+    templateUrl: templateRoot + '/cms/main-page-center.html',
+    controller: 'CmsMainCenterController'
   }).state('cms.pureHtml', {
     url: '/pure/:name',
     templateUrl: templateRoot + '/cms/pure.html',
@@ -2486,6 +2493,27 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
     $http.post('/api/v1/cms', { name: cmsName, data: jstreeDataToCmsData() }).then(function () {
       window.alert('saved successfully');
       $state.reload();
+    }, function () {
+      window.alert('fail. check your admin permission');
+    });
+  };
+});
+
+cmsModule.controller('CmsMainCenterController', function ($scope, $http, $rootScope, $state) {
+  $('#summernote').summernote({ height: 400 });
+  var name = 'main_page_center';
+  $http.get('/api/v1/cms/' + name).then(function (res) {
+    $scope.cmsData = res.data;
+    var data = res.data.data;
+    $('#summernote').code('' + data);
+  }, function () {
+    window.alert('failed to load data');
+  });
+
+  $scope.save = function () {
+    var data = $('#summernote').code();
+    $http.post('/api/v1/cms', { name: name, data: { name: name, data: data } }).then(function () {
+      window.alert('saved successfully');
     }, function () {
       window.alert('fail. check your admin permission');
     });
