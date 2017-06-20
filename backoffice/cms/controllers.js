@@ -252,19 +252,23 @@ cmsModule.controller('CmsMainCategoryController', ($scope, $rootScope, $http, $s
   };
 });
 
-cmsModule.controller('CmsMainCenterController', ($scope, $http, $rootScope, $state) => {
-  $('#summernote').summernote({ height: 400 });
+cmsModule.controller('CmsMainCenterController', ($scope, $http, $rootScope, $state, boUtils) => {
+  $('#summernote-desktop').summernote({
+    width: 1200,
+    height: 700,
+    onImageUpload: (files) => boUtils.getSummerNoteImageUpload(files, $('#summernote-desktop')),
+  });
   const name = 'desktop_main_center';
   $http.get(`/api/v1/cms/${name}`).then((res) => {
     $scope.cmsData = res.data;
     const data = res.data.data;
-    $('#summernote').code(`${data}`);
+    $('#summernote-desktop').code(`${data}`);
   }, () => {
     window.alert('failed to load data');
   });
 
   $scope.save = () => {
-    const data = $('#summernote').code();
+    const data = $('#summernote-desktop').code();
     $http.post('/api/v1/cms', { name, data: { name, data } }).then(() => {
       window.alert('saved successfully');
     }, () => {

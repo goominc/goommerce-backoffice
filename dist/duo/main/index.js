@@ -2499,19 +2499,25 @@ cmsModule.controller('CmsMainCategoryController', function ($scope, $rootScope, 
   };
 });
 
-cmsModule.controller('CmsMainCenterController', function ($scope, $http, $rootScope, $state) {
-  $('#summernote').summernote({ height: 400 });
+cmsModule.controller('CmsMainCenterController', function ($scope, $http, $rootScope, $state, boUtils) {
+  $('#summernote-desktop').summernote({
+    width: 1200,
+    height: 700,
+    onImageUpload: function onImageUpload(files) {
+      return boUtils.getSummerNoteImageUpload(files, $('#summernote-desktop'));
+    }
+  });
   var name = 'desktop_main_center';
   $http.get('/api/v1/cms/' + name).then(function (res) {
     $scope.cmsData = res.data;
     var data = res.data.data;
-    $('#summernote').code('' + data);
+    $('#summernote-desktop').code('' + data);
   }, function () {
     window.alert('failed to load data');
   });
 
   $scope.save = function () {
-    var data = $('#summernote').code();
+    var data = $('#summernote-desktop').code();
     $http.post('/api/v1/cms', { name: name, data: { name: name, data: data } }).then(function () {
       window.alert('saved successfully');
     }, function () {
