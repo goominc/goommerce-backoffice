@@ -21,7 +21,7 @@ couponModule.controller('CouponMainController', ($scope, $http, $state, $rootSco
   const couponType = {
     1: '가격할인',
     2: '비율할인',
-    3: '상품증정',
+    3: '상품증정(중복사용불가)',
   };
 
   $scope.couponDatatables = {
@@ -133,7 +133,7 @@ couponModule.controller('CouponEditController', ($scope, $http, $state, $rootSco
     { name: '쿠폰명', key: 'name' },
     { name: '시작날짜', key: 'begin', placeholder: 'YYYY-MM-DD' },
     { name: '종료날짜', key: 'end', placeholder: 'YYYY-MM-DD' },
-    { name: '할인 타입', key: 'type', enums: [{ title: '가격', value: 1 }, { title: '비율(%)', value: 2 }, { title: '상품증정', value: 3 }] },
+    { name: '할인 타입', key: 'type', enums: [{ title: '가격', value: 1 }, { title: '비율(%)', value: 2 }, { title: '상품증정(중복사용불가)', value: 3 }] },
     { name: '할인 값', key: 'value' },
     { name: '최소금액', key: 'minValue' },
     // { name: '최대값', key: '' },
