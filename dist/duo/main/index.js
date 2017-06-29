@@ -242,6 +242,10 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       key: 'user.comment',
       name: '코멘트관리',
       sref: 'user.comment'
+    }, {
+      key: 'user.review',
+      name: '메니저리뷰 관리',
+      sref: 'user.review'
     }]
   },
   /*
@@ -8158,6 +8162,10 @@ userModule.config(function ($stateProvider) {
     url: '/comment',
     templateUrl: templateRoot + '/user/comment.html',
     controller: 'UserCommentController'
+  }).state('user.review', {
+    url: '/review',
+    templateUrl: templateRoot + '/user/review.html',
+    controller: 'UserReviewController'
   }).state('user.manage.tab', {
     url: '/:tabName',
     templateUrl: templateRoot + '/user/manage.html',
@@ -9120,6 +9128,45 @@ userModule.controller('UserCommentController', function ($scope, $http, $state, 
         } else {
           return '<button class="btn blue" data-ng-click="deleteComment(' + comment.id + ')">HIDE</button>';
         }
+      }
+    }]
+  };
+});
+userModule.controller('UserReviewController', function ($scope, $http, $state, $rootScope, $translate, $compile, boUtils) {
+  $scope.contentTitle = $translate.instant('user.info.title');
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.datatablesLoaded = function () {
+    $compile(angular.element($('table')))($scope);
+  };
+
+  $scope.deleteReview = function (id, productId) {
+    $http['delete']('/api/v1/products/{productId}/' + id + '/reviews').then(function (res) {
+      $state.reload();
+    });
+  };
+
+  $scope.reviewDatatables = {
+    field: 'reviews',
+    columns: [{
+      data: 'id'
+    }, {
+      data: 'productId'
+    }, {
+      data: 'userId',
+      render: function render(userId) {
+        return '<a ui-sref="user.info({ userId: ' + userId + ' })">' + userId + '</a>';
+      }
+    }, {
+      data: function data(_data29) {
+        return _data29.data.data.title || '';
+      }
+    }, {
+      data: function data(_data30) {
+        return _data30;
+      },
+      render: function render(review) {
+        return '<button class="btn red" data-ng-click="deleteReview(' + review.id + ', ' + review.productId + ')">삭제</button>';
       }
     }]
   };

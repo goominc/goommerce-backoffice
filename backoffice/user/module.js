@@ -33,6 +33,11 @@ userModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/user/comment.html',
       controller: 'UserCommentController',
     })
+    .state('user.review', {
+      url: '/review',
+      templateUrl: templateRoot + '/user/review.html',
+      controller: 'UserReviewController',
+    })
     .state('user.manage.tab', {
       url: '/:tabName',
       templateUrl: templateRoot + '/user/manage.html',

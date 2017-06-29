@@ -1,0 +1,56 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-12">
+              <div class="portlet grey-cascade box">
+                <div class="portlet-title">
+                  <div class="caption">
+                    <i class="fa fa-cogs"></i>COMMENTS
+                  </div>
+                </div>
+                <div class="portlet-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div
+                        bo-server-datatables="reviewDatatables"
+                        url="/api/v1/reviews/list"
+                        table-render="datatablesLoaded()"
+                      >
+                        <table class="table table-bordered table-hover" style="width: 100%;">
+                        <thead>
+                        <tr role="row" class="heading">
+                          <td>No</td>
+                          <td>제품번호</td>
+                          <td>유저번호</td>
+                          <td>리뷰 타이틀</td>
+                          <td>기능</td>
+                        </tr>
+                        </thead>
+                        <tbody class="cell-center"></tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="user_biz_image">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <img width="600" data-ng-src="{{user.data.bizImage.url}}" />
+    </div>
+  </div>
+</div>

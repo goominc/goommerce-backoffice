@@ -171,6 +171,11 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           name: '코멘트관리',
           sref: 'user.comment',
         },
+        {
+          key: 'user.review',
+          name: '메니저리뷰 관리',
+          sref: 'user.review',
+        },
       ],
     },
     /*

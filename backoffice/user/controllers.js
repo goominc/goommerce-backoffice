@@ -836,3 +836,44 @@ userModule.controller('UserCommentController', ($scope, $http, $state, $rootScop
     ],
   };
 });
+userModule.controller('UserReviewController', ($scope, $http, $state, $rootScope, $translate, $compile, boUtils) => {
+  $scope.contentTitle = $translate.instant('user.info.title');
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.datatablesLoaded = () => {
+    $compile(angular.element($('table')))($scope);
+  };
+
+  $scope.deleteReview = (id, productId) => {
+    $http.delete(`/api/v1/products/{productId}/${id}/reviews`).then((res) => {
+      $state.reload();
+    });
+  };
+
+  $scope.reviewDatatables = {
+    field: 'reviews',
+    columns: [
+      {
+        data: 'id',
+      },
+      {
+        data: 'productId',
+      },
+      {
+        data: 'userId',
+        render: (userId) => {
+          return `<a ui-sref="user.info({ userId: ${userId} })">${userId}</a>`;
+        },
+      },
+      {
+        data: (data) => data.data.data.title || '',
+      },
+      {
+        data: (data) => data,
+        render: (review) => {
+          return `<button class="btn red" data-ng-click="deleteReview(${review.id}, ${review.productId})">삭제</button>`;
+        },
+      },
+    ],
+  };
+});
