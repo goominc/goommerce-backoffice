@@ -306,7 +306,8 @@ cmsModule.controller('CmsEventBannerController', ($scope, $http, $state, $rootSc
     'zh-cn': { rows: [] },
     'zh-tw': { rows: [] },
   };
-  $http.get(`/api/v1/cms/${$state.params.name}`).then((res) => {
+  $scope.name = 'event_banner';
+  $http.get(`/api/v1/cms/${$scope.name}`).then((res) => {
     if (res.data) {
       $scope.cms = res.data;
     }
@@ -314,20 +315,13 @@ cmsModule.controller('CmsEventBannerController', ($scope, $http, $state, $rootSc
     // ignore
   });
 
-  $scope.name = $state.params.name;
   $scope.contentTitle = $scope.name;
   $scope.contentSubTitle = '';
   $rootScope.initAll($scope, $state.current.name);
 
   $scope.newObject = {};
-  $scope.imageUploaded = (result, obj) => {
-    obj.image = { url: result.url.substring(5), publicId: result.public_id, version: result.version };
-  };
 
   $scope.addRow = () => {
-    if (!$scope.newObject.link) {
-      $scope.newObject.link = '';
-    }
     $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
     $scope.newObject = {};
   };
