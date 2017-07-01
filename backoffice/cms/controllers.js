@@ -298,3 +298,48 @@ cmsModule.controller('CmsPureHtmlController', ($scope, $http, $rootScope, $state
     });
   };
 });
+
+cmsModule.controller('CmsEventBannerController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
+  $scope.cms = {
+    ko: { rows: [] },
+    en: { rows: [] },
+    'zh-cn': { rows: [] },
+    'zh-tw': { rows: [] },
+  };
+  $http.get(`/api/v1/cms/${$state.params.name}`).then((res) => {
+    if (res.data) {
+      $scope.cms = res.data;
+    }
+  }).catch(() => {
+    // ignore
+  });
+
+  $scope.name = $state.params.name;
+  $scope.contentTitle = $scope.name;
+  $scope.contentSubTitle = '';
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.newObject = {};
+  $scope.imageUploaded = (result, obj) => {
+    obj.image = { url: result.url.substring(5), publicId: result.public_id, version: result.version };
+  };
+
+  $scope.addRow = () => {
+    if (!$scope.newObject.link) {
+      $scope.newObject.link = '';
+    }
+    $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
+    $scope.newObject = {};
+  };
+
+  $scope.removeRow = (index) => {
+    $scope.cms[$rootScope.state.editLocale].rows.splice(index, 1)[0];
+  };
+
+  $scope.save = () => {
+    $http.post(`/api/v1/cms`, { name: $scope.name, data: $scope.cms }).then((res) => {
+      console.log(res);
+      window.alert('Saved Successfully');
+    });
+  };
+});

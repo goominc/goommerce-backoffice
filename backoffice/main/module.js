@@ -246,6 +246,10 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
               name: $translate.instant('cms.mMdPick'),
               sref: 'cms.simple({name: "mobile_md_pick"})'
             },
+            {
+              name: '이벤트 베너',
+              sref: 'cms.event_banner',
+            }
           ],
         },
         {
