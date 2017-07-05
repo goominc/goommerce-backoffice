@@ -95,7 +95,7 @@
 var mainModule = require('./module');
 
 mainModule.constant('boConfig', {
-  apiUrl: ''
+  apiUrl: 'http://localhost:8080'
 });
 }, {"./module":2}],
 2: [function(require, module, exports) {
@@ -8978,7 +8978,7 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
       // {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
       { title: $translate.instant('user.info.firstNameLabel'), obj: $scope.user.name, key: 'name', isRequired: true }, { title: '마일리지', obj: _.get($scope.user, 'credit', 0), isReadOnly: true },
       // {title: 'SMS 마케팅 동의', obj: _.get($scope.user, 'data.isAgreeSMS'), isReadOnly: true, isRequired: false },
-      { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: '국가번호', obj: _.get($scope.address, 'countryCode'), isRequired: true, key: 'countryCode' }, { title: '우편번호', obj: _.get($scope.address, 'detail.postalCode'), isRequired: true, key: 'detail.postalCode' }, { title: '주소', obj: _.get($scope.address, 'detail.address1'), isRequired: true, key: 'detail.address1' }, { title: '상세주소', obj: _.get($scope.address, 'detail.address2'), isRequired: true, key: 'detail.address2' }];
+      { title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false }, { title: '우편번호', obj: _.get($scope.address, 'detail.postalCode'), isRequired: true }, { title: '주소', obj: _.get($scope.address, 'detail.address1'), isRequired: true }, { title: '상세주소', obj: _.get($scope.address, 'detail.address2'), isRequired: true }];
     });
 
     // {title: '생년', },
@@ -9023,7 +9023,8 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
       // init(res.data);
     });
 
-    $http.put('/api/v1/users/' + $scope.user.id + '/addresses/' + $scope.user.addressId, _.pick($scope.user, 'countryCode', 'detail')).then(function (res) {
+    var detail = $scope.address.detail;
+    $http.put('/api/v1/users/' + $scope.user.id + '/addresses/' + $scope.user.addressId, { detail: detail }).then(function (res) {
       // init(res.data);
       $state.go('user.manage');
     });
