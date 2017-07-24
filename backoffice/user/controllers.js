@@ -664,32 +664,37 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
   ];
   $rootScope.initAll($scope, $state.current.name);
 
+  const renderUserInfo = () => {
+    $scope.userFields = [
+      {title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true},
+      {title: '유저 아이디', key: 'userId', obj: $scope.user.userId, isReadOnly: true, isRequired: true},
+      {title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true},
+      // {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
+      {title: $translate.instant('user.info.firstNameLabel'), obj: $scope.user.name, key: 'name', isRequired: true},
+      {title: '마일리지', obj: _.get($scope.user, 'credit', 0), isReadOnly: true},
+      // {title: 'SMS 마케팅 동의', obj: _.get($scope.user, 'data.isAgreeSMS'), isReadOnly: true, isRequired: false },
+      {title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false},
+      {title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false},
+      {title: '국가번호', obj: _.get($scope.address, 'countryCode'), isRequired: true, key: 'countryCode'},
+      {title: '우편번호', obj: _.get($scope.address, 'detail.postalCode'), isRequired: true, key: 'detail.postalCode'},
+      {title: '주소', obj: _.get($scope.address, 'detail.address1'), isRequired: true, key: 'detail.address1'},
+      {title: '상세주소', obj: _.get($scope.address, 'detail.address2'), isRequired: true, key: 'detail.address2'},
+      // {title: '생년', },
+    ];
+  }
+
   const init = (user) => {
     user.lastLoginAt = boUtils.formatDate(user.lastLoginAt);
     $scope.user = user;
 
-    $http.get(`/api/v1/users/${$scope.user.id}/addresses/${$scope.user.addressId}`).then((res) => {
-      $scope.address = res.data;
+    if ($scope.user.addressId) {
+      $http.get(`/api/v1/users/${$scope.user.id}/addresses/${$scope.user.addressId}`).then((res) => {
+        $scope.address = res.data;
+        renderUserInfo();
+      });
+    }
 
-      console.log($scope.address);
-
-      $scope.userFields = [
-        {title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true},
-        {title: '유저 아이디', key: 'userId', obj: $scope.user.userId, isReadOnly: true, isRequired: true},
-        {title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true},
-        // {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
-        {title: $translate.instant('user.info.firstNameLabel'), obj: $scope.user.name, key: 'name', isRequired: true},
-        {title: '마일리지', obj: _.get($scope.user, 'credit', 0), isReadOnly: true},
-        // {title: 'SMS 마케팅 동의', obj: _.get($scope.user, 'data.isAgreeSMS'), isReadOnly: true, isRequired: false },
-        {title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false},
-        {title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false},
-        {title: '국가번호', obj: _.get($scope.address, 'countryCode'), isRequired: true, key: 'countryCode'},
-        {title: '우편번호', obj: _.get($scope.address, 'detail.postalCode'), isRequired: true, key: 'detail.postalCode'},
-        {title: '주소', obj: _.get($scope.address, 'detail.address1'), isRequired: true, key: 'detail.address1'},
-        {title: '상세주소', obj: _.get($scope.address, 'detail.address2'), isRequired: true, key: 'detail.address2'},
-        // {title: '생년', },
-      ];
-    });
+    renderUserInfo();
 
     const level = userUtil.getBuyerLevel($scope.user);
     if (level) {
