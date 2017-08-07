@@ -7298,6 +7298,30 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
       r.readAsBinaryString(file);
     });
   }, 500);
+  setTimeout(function () {
+    $('#mobile-banner-upload-button').on('change', function (changeEvent) {
+      var file = _.get(changeEvent, 'target.files[0]');
+      if (!file) {
+        return;
+      }
+      boUtils.startProgressBar();
+      $('#mobile-banner-upload-button').attr('value', '');
+      var r = new FileReader();
+      r.onload = function (e) {
+        boUtils.uploadImage201607(e.target.result, file, '').then(function (res) {
+          boUtils.stopProgressBar();
+          _.set($scope.category, 'data.banner.mobile', res.data.images[0]);
+          if (!$scope.$$phase) {
+            $scope.$apply();
+          }
+        }, function () {
+          window.alert('image upload fail');
+          boUtils.stopProgressBar();
+        });
+      };
+      r.readAsBinaryString(file);
+    });
+  }, 500);
 });
 }, {"../module.js":12}],
 45: [function(require, module, exports) {

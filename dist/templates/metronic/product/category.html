@@ -52,11 +52,25 @@
                           </div>
                         </div>
                         <span class="btn blue fileinput-button">
-                          <i class="fa fa-plus"></i> 배너 이미지 추가
+                          <i class="fa fa-plus"></i> PC 배너 이미지 추가
                           <input type="file" id="banner-upload-button" />
                         </span>
                         <div class="col-md-12" ng-if="category.data.banner" style="margin: 15px 0;">
                           <img width="100%" ng-src="{{category.data.banner.url}}" />
+                        </div>
+                        <div class="col-md-12">
+                          PC 배너를 모바일에서 사용
+                          <input type="checkbox" id="category_use_custom" data-ng-model="category.data.isUsePCBannerInMobile" />
+                          <label
+                            for="category_use_custom"
+                          />
+                        </div>
+                        <span class="btn blue fileinput-button">
+                          <i class="fa fa-plus"></i> 모바일 배너 이미지 추가
+                          <input type="file" id="mobile-banner-upload-button" />
+                        </span>
+                        <div class="col-md-12" ng-if="category.data.banner.mobile" style="margin: 15px 0;">
+                          <img width="100%" ng-src="{{category.data.banner.mobile.url}}" />
                         </div>
                       </form>
                       <div class="row" style="margin-top: 15px;">

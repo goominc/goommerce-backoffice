@@ -342,4 +342,29 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
       r.readAsBinaryString(file);
     });
   }, 500);
+  setTimeout(() => {
+    $('#mobile-banner-upload-button').on('change', function (changeEvent) {
+      const file = _.get(changeEvent, 'target.files[0]');
+      if (!file) {
+        return;
+      }
+      boUtils.startProgressBar();
+      $('#mobile-banner-upload-button').attr('value', '');
+      const r = new FileReader();
+      r.onload = function(e) {
+        boUtils.uploadImage201607(e.target.result, file, '').then((res) => {
+          boUtils.stopProgressBar();
+          _.set($scope.category, 'data.banner.mobile', res.data.images[0]);
+          if (!$scope.$$phase) {
+            $scope.$apply();
+          }
+        }, () => {
+          window.alert('image upload fail');
+          boUtils.stopProgressBar();
+        });
+      };
+      r.readAsBinaryString(file);
+    });
+  }, 500);
+
 });
