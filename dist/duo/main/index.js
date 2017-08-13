@@ -305,6 +305,9 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       }, {
         name: $translate.instant('cms.mMdPick'),
         sref: 'cms.simple({name: "mobile_md_pick"})'
+      }, {
+        name: '이벤트 베너',
+        sref: 'cms.event_banner'
       }]
     }, {
       name: '메인페이지 센터 편집',
@@ -2206,6 +2209,10 @@ cmsModule.config(function ($stateProvider) {
     url: '/main_page_center/:name',
     templateUrl: templateRoot + '/cms/main-page-center.html',
     controller: 'CmsMainCenterController'
+  }).state('cms.event_banner', {
+    url: '/event_banner/:name',
+    templateUrl: templateRoot + '/cms/event_banner.html',
+    controller: 'CmsEventBannerController'
   }).state('cms.pureHtml', {
     url: '/pure/:name',
     templateUrl: templateRoot + '/cms/pure.html',
@@ -2547,6 +2554,45 @@ cmsModule.controller('CmsPureHtmlController', function ($scope, $http, $rootScop
       window.alert('saved successfully');
     }, function () {
       window.alert('fail. check your admin permission');
+    });
+  };
+});
+
+cmsModule.controller('CmsEventBannerController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+  $scope.cms = {
+    ko: { rows: [] },
+    en: { rows: [] },
+    'zh-cn': { rows: [] },
+    'zh-tw': { rows: [] }
+  };
+  $scope.name = 'event_banner';
+  $http.get('/api/v1/cms/' + $scope.name).then(function (res) {
+    if (res.data) {
+      $scope.cms = res.data;
+    }
+  })['catch'](function () {
+    // ignore
+  });
+
+  $scope.contentTitle = $scope.name;
+  $scope.contentSubTitle = '';
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.newObject = {};
+
+  $scope.addRow = function () {
+    $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
+    $scope.newObject = {};
+  };
+
+  $scope.removeRow = function (index) {
+    $scope.cms[$rootScope.state.editLocale].rows.splice(index, 1)[0];
+  };
+
+  $scope.save = function () {
+    $http.post('/api/v1/cms', { name: $scope.name, data: $scope.cms }).then(function (res) {
+      console.log(res);
+      window.alert('Saved Successfully');
     });
   };
 });
