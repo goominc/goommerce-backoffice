@@ -1,0 +1,76 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="col-md-12" style="margin-bottom: 20px;">
+              <div class="actions btn-set">
+                <button class="btn blue" data-ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
+              </div>
+            </div>
+            <div class="portlet-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <table class="table table-bordered dataTable">
+                    <thead>
+                    <tr>
+                      <th>-</th>
+                      <th style="text-align: left;">
+                        백그라운드 컬러<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="newObject.data.color" /><br />
+                        이벤트 텍스트<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="newObject.data.text" /><br />
+                        링크<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="newObject.data.link" /><br />
+                      </th>
+                      <th><button class="btn blue" data-ng-click="addRow()"><i class="fa fa-plus"></i> {{'main.createButton' | translate}}</button></th>
+                    </tr>
+                    </thead>
+                    <tbody data-ng-model="cms[state.editLocale].rows">
+                    <tr class="cms-simple-item-table" data-ng-repeat="row in cms[state.editLocale].rows">
+                      <td class="cms-simple-sortable-pointer">{{$index+1}}</td>
+                      <td style="text-align: left;">
+                        백그라운드 컬러<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="row.data.color" /><br />
+                        이벤트 텍스트<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="row.data.text" /><br />
+                        링크<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="row.data.link" /><br />
+                      </td>
+                      <td><button class="btn red" data-ng-click="removeRow($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->

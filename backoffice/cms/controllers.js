@@ -298,3 +298,42 @@ cmsModule.controller('CmsPureHtmlController', ($scope, $http, $rootScope, $state
     });
   };
 });
+
+cmsModule.controller('CmsEventBannerController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
+  $scope.cms = {
+    ko: { rows: [] },
+    en: { rows: [] },
+    'zh-cn': { rows: [] },
+    'zh-tw': { rows: [] },
+  };
+  $scope.name = 'event_banner';
+  $http.get(`/api/v1/cms/${$scope.name}`).then((res) => {
+    if (res.data) {
+      $scope.cms = res.data;
+    }
+  }).catch(() => {
+    // ignore
+  });
+
+  $scope.contentTitle = $scope.name;
+  $scope.contentSubTitle = '';
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.newObject = {};
+
+  $scope.addRow = () => {
+    $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
+    $scope.newObject = {};
+  };
+
+  $scope.removeRow = (index) => {
+    $scope.cms[$rootScope.state.editLocale].rows.splice(index, 1)[0];
+  };
+
+  $scope.save = () => {
+    $http.post(`/api/v1/cms`, { name: $scope.name, data: $scope.cms }).then((res) => {
+      console.log(res);
+      window.alert('Saved Successfully');
+    });
+  };
+});
