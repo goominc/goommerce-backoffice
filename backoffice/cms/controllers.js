@@ -306,8 +306,8 @@ cmsModule.controller('CmsEventBannerController', ($scope, $http, $state, $rootSc
     'zh-cn': { rows: [] },
     'zh-tw': { rows: [] },
   };
-  $scope.name = 'event_banner';
-  $http.get(`/api/v1/cms/${$scope.name}`).then((res) => {
+  const name = 'event_banner';
+  $http.get(`/api/v1/cms/${name}`).then((res) => {
     if (res.data) {
       $scope.cms = res.data;
     }
@@ -315,7 +315,7 @@ cmsModule.controller('CmsEventBannerController', ($scope, $http, $state, $rootSc
     // ignore
   });
 
-  $scope.contentTitle = $scope.name;
+  $scope.contentTitle = name;
   $scope.contentSubTitle = '';
   $rootScope.initAll($scope, $state.current.name);
 
@@ -331,7 +331,7 @@ cmsModule.controller('CmsEventBannerController', ($scope, $http, $state, $rootSc
   };
 
   $scope.save = () => {
-    $http.post(`/api/v1/cms`, { name: $scope.name, data: $scope.cms }).then((res) => {
+    $http.post(`/api/v1/cms`, { name, data: $scope.cms }).then((res) => {
       console.log(res);
       window.alert('Saved Successfully');
     });
