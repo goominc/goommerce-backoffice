@@ -9099,10 +9099,17 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
       // init(res.data);
     });
 
-    $http.put('/api/v1/users/' + $scope.user.id + '/addresses/' + $scope.user.addressId, _.pick($scope.user, 'countryCode', 'detail')).then(function (res) {
-      // init(res.data);
-      $state.go('user.manage');
-    });
+    if ($scope.user.addressId) {
+      $http.put('/api/v1/users/' + $scope.user.id + '/addresses/' + $scope.user.addressId, _.pick($scope.user, 'countryCode', 'detail')).then(function (res) {
+        // init(res.data);
+        $state.go('user.manage');
+      });
+    } else {
+      $http.post('/api/v1/users/' + $scope.user.id + '/addresses', _.pick($scope.user, 'countryCode', 'detail')).then(function (res) {
+        // init(res.data);
+        $state.go('user.manage');
+      });
+    }
   };
 
   $scope.openBizImage = function () {

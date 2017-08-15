@@ -735,11 +735,18 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
       // init(res.data);
     });
 
+    if ($scope.user.addressId) {
+      $http.put(`/api/v1/users/${$scope.user.id}/addresses/${$scope.user.addressId}`, _.pick($scope.user, 'countryCode', 'detail')).then((res) => {
+        // init(res.data);
+        $state.go('user.manage');
+      });
+    } else {
+      $http.post(`/api/v1/users/${$scope.user.id}/addresses`, _.pick($scope.user, 'countryCode', 'detail')).then((res) => {
+        // init(res.data);
+        $state.go('user.manage');
+      });
 
-    $http.put(`/api/v1/users/${$scope.user.id}/addresses/${$scope.user.addressId}`, _.pick($scope.user, 'countryCode', 'detail')).then((res) => {
-      // init(res.data);
-      $state.go('user.manage');
-    });
+    }
 
   };
 
