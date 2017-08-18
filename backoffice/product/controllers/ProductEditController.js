@@ -31,7 +31,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     '신발': getFeetSizes(220, 5, 300),
     'KIDS': ['상의(110)', '상의(120)', '상의(130)', '상의(140)', '상의(150)',
       '하의(110)', '하의(120)', '하의(130)', '하의(140)', '하의(150)'],
-    '액세서리': ['S', 'M', 'L', 'Free'],
+    '액세서리': ['S', 'M', 'Free'],
   };
   $scope.variantKinds = [
     {name: '색상', key: 'color', groups: Object.keys($scope.allColors), groupMap: $scope.allColors},
