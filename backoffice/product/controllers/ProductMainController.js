@@ -65,6 +65,20 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
         },
       },
       {
+        data: (product) => product,
+        orderable: false,
+        render: (product) => {
+          $scope.productIdMap[product.id] = product;
+          return `
+            <input type="checkbox" id="product_main_bigDisplay_${product.id}"
+              data-ng-checked="${product.data.bigDisplay}"
+              data-ng-click="toggleBigDisplay(productIdMap[${product.id}])"
+            />
+            <label for="product_main_bigDisplay_${product.id}"></label>
+          `;
+        },
+      },
+      {
         data: 'id',
         orderable: false,
         render: (id) => {
@@ -82,6 +96,21 @@ productModule.controller('ProductMainController', ($scope, $http, $state, $rootS
       $http.put(`/api/v1/products/${product.id}/index`);
     }, () => {
       window.alert('failed to update isActive');
+    });
+  };
+  $scope.toggleBigDisplay = (product) => {
+    if (product.data.bigDisplay === undefined || !product.data.bigDisplay) {
+      product.data.bigDisplay = true;
+    } else {
+      product.data.bigDisplay = false;
+    }
+    $http.put(`/api/v1/products/${product.id}`, { data: product.data }).then(() => {
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+      $http.put(`/api/v1/products/${product.id}/index`);
+    }, () => {
+      window.alert('failed to update bigDisplay');
     });
   };
   $scope.datatablesLoaded = () => {

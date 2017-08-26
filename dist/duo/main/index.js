@@ -5862,6 +5862,15 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
         return '\n            <input type="checkbox" id="product_main_isActive_' + product.id + '"\n              data-ng-checked="' + product.isActive + '"\n              data-ng-click="toggleIsActive(productIdMap[' + product.id + '])"\n            />\n            <label for="product_main_isActive_' + product.id + '"></label>\n          ';
       }
     }, {
+      data: function data(product) {
+        return product;
+      },
+      orderable: false,
+      render: function render(product) {
+        $scope.productIdMap[product.id] = product;
+        return '\n            <input type="checkbox" id="product_main_bigDisplay_' + product.id + '"\n              data-ng-checked="' + product.data.bigDisplay + '"\n              data-ng-click="toggleBigDisplay(productIdMap[' + product.id + '])"\n            />\n            <label for="product_main_bigDisplay_' + product.id + '"></label>\n          ';
+      }
+    }, {
       data: 'id',
       orderable: false,
       render: function render(id) {
@@ -5878,6 +5887,21 @@ productModule.controller('ProductMainController', function ($scope, $http, $stat
       $http.put('/api/v1/products/' + product.id + '/index');
     }, function () {
       window.alert('failed to update isActive');
+    });
+  };
+  $scope.toggleBigDisplay = function (product) {
+    if (product.data.bigDisplay === undefined || !product.data.bigDisplay) {
+      product.data.bigDisplay = true;
+    } else {
+      product.data.bigDisplay = false;
+    }
+    $http.put('/api/v1/products/' + product.id, { data: product.data }).then(function () {
+      if (!$scope.$$phase) {
+        $scope.$apply();
+      }
+      $http.put('/api/v1/products/' + product.id + '/index');
+    }, function () {
+      window.alert('failed to update bigDisplay');
     });
   };
   $scope.datatablesLoaded = function () {
@@ -7293,7 +7317,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     $scope.category.data.bestVariants.forEach(function (v) {
       v.product = _.pick(v.product, 'name', 'KRW', 'data', 'id');
       if (v.product.data) {
-        v.product.data = _.pick(v.product.data, 'description', 'shortDescription');
+        v.product.data = _.pick(v.product.data, 'description', 'shortDescription', 'bigDisplay');
       }
     });
     $http.put('/api/v1/categories/' + $scope.category.id, _.omit($scope.category, ['id', 'children'])).then(function (res) {
