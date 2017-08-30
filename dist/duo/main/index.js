@@ -95,7 +95,7 @@
 var mainModule = require('./module');
 
 mainModule.constant('boConfig', {
-  apiUrl: ''
+  apiUrl: 'http://localhost:8080'
 });
 }, {"./module":2}],
 2: [function(require, module, exports) {
@@ -312,6 +312,9 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
     }, {
       name: '메인페이지 센터 편집',
       sref: 'cms.main_page_center'
+    }, {
+      name: '커스텀 페이지 편집',
+      sref: 'cms.custom_page'
     }]
   }, {
     key: 'coupon',
@@ -2209,6 +2212,10 @@ cmsModule.config(function ($stateProvider) {
     url: '/main_page_center/:name',
     templateUrl: templateRoot + '/cms/main-page-center.html',
     controller: 'CmsMainCenterController'
+  }).state('cms.custom_page', {
+    url: '/custom_page/:name',
+    templateUrl: templateRoot + '/cms/custom-page.html',
+    controller: 'CmsCustomPageController'
   }).state('cms.event_banner', {
     url: '/event_banner/:name',
     templateUrl: templateRoot + '/cms/event_banner.html',
@@ -2519,6 +2526,33 @@ cmsModule.controller('CmsMainCenterController', function ($scope, $http, $rootSc
     }
   });
   var name = 'desktop_main_center';
+  $http.get('/api/v1/cms/' + name).then(function (res) {
+    $scope.cmsData = res.data;
+    var data = res.data.data;
+    $('#summernote-desktop').code('' + data);
+  }, function () {
+    window.alert('failed to load data');
+  });
+
+  $scope.save = function () {
+    var data = $('#summernote-desktop').code();
+    $http.post('/api/v1/cms', { name: name, data: { name: name, data: data } }).then(function () {
+      window.alert('saved successfully');
+    }, function () {
+      window.alert('fail. check your admin permission');
+    });
+  };
+});
+
+cmsModule.controller('CmsCustomPageController', function ($scope, $http, $rootScope, $state, boUtils) {
+  $('#summernote-desktop').summernote({
+    width: 1200,
+    height: 700,
+    onImageUpload: function onImageUpload(files) {
+      return boUtils.getSummerNoteImageUpload(files, $('#summernote-desktop'));
+    }
+  });
+  var name = 'desktop_custom_page';
   $http.get('/api/v1/cms/' + name).then(function (res) {
     $scope.cmsData = res.data;
     var data = res.data.data;

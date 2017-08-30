@@ -41,6 +41,11 @@ cmsModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/cms/main-page-center.html',
       controller: 'CmsMainCenterController',
     })
+    .state('cms.custom_page', {
+      url: '/custom_page/:name',
+      templateUrl: templateRoot + '/cms/custom-page.html',
+      controller: 'CmsCustomPageController',
+    })
     .state('cms.event_banner', {
       url: '/event_banner/:name',
       templateUrl: templateRoot + '/cms/event_banner.html',
