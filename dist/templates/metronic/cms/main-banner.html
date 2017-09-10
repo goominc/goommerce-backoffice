@@ -1,0 +1,123 @@
+<div class="page-head">
+  <div class="container">
+    <div id="contentTitle"></div> <!-- commonly initialized -->
+  </div>
+</div>
+<div class="page-content">
+  <div class="container">
+    <div id="breadcrumb"></div> <!-- commonly initialized -->
+    <div class="page-content-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="portlet light">
+            <div class="col-md-12" style="margin-bottom: 20px;">
+              <div class="actions btn-set">
+                <!--
+                <button
+                  class="btn" style="margin-right: 20px;"
+                  data-ng-repeat="locale in state.locales"
+                  data-ng-class="{'red': state.editLocale === locale, 'blue': state.editLocale !== locale}"
+                  data-ng-click="state.editLocale = locale"
+                >
+                  {{locale}}
+                </button>
+                -->
+                <button class="btn blue" data-ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
+              </div>
+            </div>
+            <div class="portlet-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <table class="table table-bordered dataTable">
+                    <thead>
+                    <tr>
+                      <th width="5%">#</th>
+                      <th width="10%">링크</th>
+                      <th width="65%">콘텐츠</th>
+                      <th width="10%"></th>
+                      <th width="10%"></th>
+                    </tr>
+                    <tr>
+                      <th>-</th>
+                      <th><input type="text" data-ng-model="newObject.link" /></th>
+                      <th style="text-align: left;">
+                        타이틀<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="newObject.data.title" /><br />
+                        설명<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="newObject.data.description" /><br />
+                        버튼1 텍스트<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="newObject.data.button1Text" /><br />
+                        버튼1 링크<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="newObject.data.button1Link" /><br />
+                        버튼2 텍스트<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="newObject.data.button2Text" /><br />
+                        버튼2 링크<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="newObject.data.button2Link" /><br />
+                        영상<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="newObject.data.movieUrl" /><br />
+                        이미지<br />
+                        <img width="auto" height="150px" data-ng-if="newObject.image" data-ng-src="{{newObject.image.url}}"/>
+                      </th>
+                      <th>
+                        <span class="btn blue fileinput-button">
+                          <i class="fa fa-plus"></i> {{'main.addImageButton' | translate}}
+                          <input type="file" id="image-upload-button">
+                        </span>
+                      </th>
+                      <th><button class="btn blue" data-ng-click="addRow()"><i class="fa fa-plus"></i> {{'main.createButton' | translate}}</button></th>
+                    </tr>
+                    </thead>
+                    <tbody ui-sortable="rowSortable" data-ng-model="cms[state.editLocale].rows">
+                    <tr class="cms-simple-item-table" data-ng-repeat="row in cms[state.editLocale].rows">
+                      <td class="cms-simple-sortable-pointer">{{$index+1}}</td>
+                      <td><input data-ng-model="row.link" /></td>
+                      <td style="text-align: left;">
+                        타이틀<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="row.data.title" /><br />
+                        설명<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="row.data.description" /><br />
+                        버튼1 텍스트<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="row.data.button1Text" /><br />
+                        버튼1 링크<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="row.data.button1Link" /><br />
+                        버튼2 텍스트<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="row.data.button2Text" /><br />
+                        버튼2 링크<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="row.data.button2Link" /><br />
+                        영상<br />
+                        <input type="text" style="width: 100%; margin-bottom: 15px;" data-ng-model="row.data.movieUrl" /><br />
+                        이미지<br />
+                        <img width="auto" height="auto" style="max-width:600px;max-height:400px;" data-ng-src="{{row.image.url}}" />
+                      </td>
+                      <td>
+                      </td>
+                      <td><button class="btn red" data-ng-click="removeRow($index)"><i class="fa fa-remove"></i> {{'main.deleteButton' | translate}}</button></td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- basic modal http://www.w3schools.com/bootstrap/bootstrap_modal.asp
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+
+      </div>
+    </div>
+  </div>
+</div>
+-->

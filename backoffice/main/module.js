@@ -232,7 +232,7 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
           children: [
             {
               name: $translate.instant('cms.dMainBanner'),
-              sref: 'cms.simple({name: "desktop_main_banner"})',
+              sref: 'cms.main_banner({name: "desktop_main_banner"})',
             },
             {
               name: $translate.instant('cms.dMdPick'),
@@ -240,7 +240,7 @@ mainModule.controller('MainController', ($scope, $http, $q, $rootScope, $compile
             },
             {
               name: $translate.instant('cms.mMainBanner'),
-              sref: 'cms.simple({name: "mobile_main_banner"})',
+              sref: 'cms.main_banner({name: "mobile_main_banner"})',
             },
             {
               name: $translate.instant('cms.mMdPick'),

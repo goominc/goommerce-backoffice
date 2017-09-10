@@ -295,13 +295,13 @@ mainModule.controller('MainController', function ($scope, $http, $q, $rootScope,
       sref: '',
       children: [{
         name: $translate.instant('cms.dMainBanner'),
-        sref: 'cms.simple({name: "desktop_main_banner"})'
+        sref: 'cms.main_banner({name: "desktop_main_banner"})'
       }, {
         name: $translate.instant('cms.dMdPick'),
         sref: 'cms.simple({name: "desktop_md_pick"})'
       }, {
         name: $translate.instant('cms.mMainBanner'),
-        sref: 'cms.simple({name: "mobile_main_banner"})'
+        sref: 'cms.main_banner({name: "mobile_main_banner"})'
       }, {
         name: $translate.instant('cms.mMdPick'),
         sref: 'cms.simple({name: "mobile_md_pick"})'
@@ -2204,6 +2204,10 @@ cmsModule.config(function ($stateProvider) {
     url: '/simple/:name',
     templateUrl: templateRoot + '/cms/simple.html',
     controller: 'CmsSimpleController'
+  }).state('cms.main_banner', {
+    url: '/main_banner/:name',
+    templateUrl: templateRoot + '/cms/main-banner.html',
+    controller: 'CmsMainBannerController'
   }).state('cms.main_category', {
     url: '/main_category',
     templateUrl: templateRoot + '/cms/main-category.html',
@@ -2629,6 +2633,90 @@ cmsModule.controller('CmsEventBannerController', function ($scope, $http, $state
       window.alert('Saved Successfully');
     });
   };
+});
+
+cmsModule.controller('CmsMainBannerController', function ($scope, $http, $state, $rootScope, $translate, boUtils) {
+  $scope.cms = {
+    ko: { rows: [] },
+    en: { rows: [] },
+    'zh-cn': { rows: [] },
+    'zh-tw': { rows: [] }
+  };
+  $http.get('/api/v1/cms/' + $state.params.name).then(function (res) {
+    if (res.data) {
+      $scope.cms = res.data;
+    }
+  })['catch'](function () {
+    // ignore
+  });
+
+  $scope.name = $state.params.name;
+  $scope.contentTitle = $scope.name;
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [{
+    sref: 'dashboard',
+    name: $translate.instant('dashboard.home')
+  }, {
+    sref: 'cms.main_banner',
+    name: $scope.name
+  }];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.newObject = {};
+  $scope.imageUploaded = function (result, obj) {
+    obj.image = { url: result.url.substring(5), publicId: result.public_id, version: result.version };
+  };
+
+  $scope.addRow = function () {
+    if (!$scope.newObject.link) {
+      $scope.newObject.link = '';
+    }
+    if (!$scope.newObject.image || !$scope.newObject.image.url) {
+      window.alert('add image');
+      return;
+    }
+    $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
+    $scope.newObject = {};
+  };
+
+  $scope.removeRow = function (index) {
+    $scope.cms[$rootScope.state.editLocale].rows.splice(index, 1)[0];
+  };
+
+  $scope.save = function () {
+    $http.post('/api/v1/cms', { name: $scope.name, data: $scope.cms }).then(function (res) {
+      console.log(res);
+      window.alert('Saved Successfully');
+    });
+  };
+
+  $scope.rowSortable = {
+    handle: '.cms-simple-sortable-pointer',
+    placeholder: 'ui-state-highlight'
+  };
+
+  $('#image-upload-button').on('change', function (changeEvent) {
+    var file = _.get(changeEvent, 'target.files[0]');
+    if (!file) {
+      return;
+    }
+    boUtils.startProgressBar();
+    $('#image-upload-button').attr('value', '');
+    var r = new FileReader();
+    r.onload = function (e) {
+      boUtils.uploadImage201607(e.target.result, file, '').then(function (res) {
+        boUtils.stopProgressBar();
+        $scope.newObject.image = res.data.images[0];
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      }, function () {
+        window.alert('image upload fail');
+        boUtils.stopProgressBar();
+      });
+    };
+    r.readAsBinaryString(file);
+  });
 });
 }, {"./module":6}],
 7: [function(require, module, exports) {

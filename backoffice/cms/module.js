@@ -31,6 +31,11 @@ cmsModule.config(($stateProvider) => {
       templateUrl: templateRoot + '/cms/simple.html',
       controller: 'CmsSimpleController',
     })
+    .state('cms.main_banner', {
+      url: '/main_banner/:name',
+      templateUrl: templateRoot + '/cms/main-banner.html',
+      controller: 'CmsMainBannerController',
+    })
     .state('cms.main_category', {
       url: '/main_category',
       templateUrl: templateRoot + '/cms/main-category.html',

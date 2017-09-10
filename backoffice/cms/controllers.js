@@ -361,3 +361,90 @@ cmsModule.controller('CmsEventBannerController', ($scope, $http, $state, $rootSc
     });
   };
 });
+
+cmsModule.controller('CmsMainBannerController', ($scope, $http, $state, $rootScope, $translate, boUtils) => {
+  $scope.cms = {
+    ko: { rows: [] },
+    en: { rows: [] },
+    'zh-cn': { rows: [] },
+    'zh-tw': { rows: [] },
+  };
+  $http.get(`/api/v1/cms/${$state.params.name}`).then((res) => {
+    if (res.data) {
+      $scope.cms = res.data;
+    }
+  }).catch(() => {
+    // ignore
+  });
+
+  $scope.name = $state.params.name;
+  $scope.contentTitle = $scope.name;
+  $scope.contentSubTitle = '';
+  $scope.breadcrumb = [
+    {
+      sref: 'dashboard',
+      name: $translate.instant('dashboard.home'),
+    },
+    {
+      sref: 'cms.main_banner',
+      name: $scope.name,
+    },
+  ];
+  $rootScope.initAll($scope, $state.current.name);
+
+  $scope.newObject = {};
+  $scope.imageUploaded = (result, obj) => {
+    obj.image = { url: result.url.substring(5), publicId: result.public_id, version: result.version };
+  };
+
+  $scope.addRow = () => {
+    if (!$scope.newObject.link) {
+      $scope.newObject.link = '';
+    }
+    if (!$scope.newObject.image || !$scope.newObject.image.url) {
+      window.alert('add image'  );
+      return;
+    }
+    $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
+    $scope.newObject = {};
+  };
+
+  $scope.removeRow = (index) => {
+    $scope.cms[$rootScope.state.editLocale].rows.splice(index, 1)[0];
+  };
+
+  $scope.save = () => {
+    $http.post(`/api/v1/cms`, { name: $scope.name, data: $scope.cms }).then((res) => {
+      console.log(res);
+      window.alert('Saved Successfully');
+    });
+  };
+
+  $scope.rowSortable = {
+    handle: '.cms-simple-sortable-pointer',
+    placeholder: 'ui-state-highlight',
+  };
+
+  $('#image-upload-button').on('change', function (changeEvent) {
+    const file = _.get(changeEvent, 'target.files[0]');
+    if (!file) {
+      return;
+    }
+    boUtils.startProgressBar();
+    $('#image-upload-button').attr('value', '');
+    const r = new FileReader();
+    r.onload = function(e) {
+      boUtils.uploadImage201607(e.target.result, file, '').then((res) => {
+        boUtils.stopProgressBar();
+        $scope.newObject.image = res.data.images[0];
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
+      }, () => {
+        window.alert('image upload fail');
+        boUtils.stopProgressBar();
+      });
+    };
+    r.readAsBinaryString(file);
+  });
+});
