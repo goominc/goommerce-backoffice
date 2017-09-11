@@ -41,10 +41,10 @@ cmsModule.controller('CmsSimpleController', ($scope, $http, $state, $rootScope, 
     if (!$scope.newObject.link) {
       $scope.newObject.link = '';
     }
-    if (!$scope.newObject.image || !$scope.newObject.image.url) {
-      window.alert('add image'  );
-      return;
-    }
+    // if (!$scope.newObject.data.movieUrl || !$scope.newObject.image || !$scope.newObject.image.url) {
+    //   window.alert('add image'  );
+    //   return;
+    // }
     $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
     $scope.newObject = {};
   };
@@ -401,10 +401,10 @@ cmsModule.controller('CmsMainBannerController', ($scope, $http, $state, $rootSco
     if (!$scope.newObject.link) {
       $scope.newObject.link = '';
     }
-    if (!$scope.newObject.image || !$scope.newObject.image.url) {
-      window.alert('add image'  );
-      return;
-    }
+    // if (!$scope.newObject.data.movieUrl || !$scope.newObject.image || !$scope.newObject.image.url) {
+    //   window.alert('add image'  );
+    //   return;
+    // }
     $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
     $scope.newObject = {};
   };

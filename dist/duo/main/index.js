@@ -2300,10 +2300,10 @@ cmsModule.controller('CmsSimpleController', function ($scope, $http, $state, $ro
     if (!$scope.newObject.link) {
       $scope.newObject.link = '';
     }
-    if (!$scope.newObject.image || !$scope.newObject.image.url) {
-      window.alert('add image');
-      return;
-    }
+    // if (!$scope.newObject.data.movieUrl || !$scope.newObject.image || !$scope.newObject.image.url) {
+    //   window.alert('add image'  );
+    //   return;
+    // }
     $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
     $scope.newObject = {};
   };
@@ -2671,10 +2671,10 @@ cmsModule.controller('CmsMainBannerController', function ($scope, $http, $state,
     if (!$scope.newObject.link) {
       $scope.newObject.link = '';
     }
-    if (!$scope.newObject.image || !$scope.newObject.image.url) {
-      window.alert('add image');
-      return;
-    }
+    // if (!$scope.newObject.data.movieUrl || !$scope.newObject.image || !$scope.newObject.image.url) {
+    //   window.alert('add image'  );
+    //   return;
+    // }
     $scope.cms[$rootScope.state.editLocale].rows.push($scope.newObject);
     $scope.newObject = {};
   };
