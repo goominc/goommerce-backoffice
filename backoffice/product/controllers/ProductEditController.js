@@ -9,7 +9,7 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
     RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG', 'POR', 'BGD', 'DRD', 'LRD', 'BNR', 'HPK', 'COR', 'RNW', 'ORD'],
     GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG', 'DGR'],
     WHITE: ['WHT', 'OWH', 'IVY', 'BEG', 'LBI', 'LBE'],
-    OTHERS: ['BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'PTN', 'SLM', 'NYE', 'YEL', 'AWT', 'ABL', 'BWR', 'WNB', 'BRW', 'BNW', 'BNG', 'BNS'],
+    OTHERS: ['BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'PTN', 'SLM', 'NYE', 'YEL', 'AWT', 'ABL', 'BWR', 'WNB', 'BRW', 'BNW', 'BNG', 'BNS', 'SDB'],
   };
   $scope.colorKeys = Object.keys($scope.allColors);
   const getFeetSizes = (start, step, end) => {
