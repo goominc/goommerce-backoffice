@@ -8601,6 +8601,11 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return boUtils.formatDate(data);
       }
     }, {
+      data: 'lastLoginAt',
+      render: function render(data) {
+        return boUtils.formatDate(data);
+      }
+    }, {
       data: function data(_data3) {
         return _data3;
       },

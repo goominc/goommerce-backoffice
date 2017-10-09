@@ -103,6 +103,10 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
         render: (data) => boUtils.formatDate(data),
       },
       {
+        data: 'lastLoginAt',
+        render: (data) => boUtils.formatDate(data),
+      },
+      {
         data: (data) => data,
         render: (user) => {
           $scope.userIdMap[user.id] = user;
