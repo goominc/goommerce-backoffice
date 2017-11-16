@@ -6086,10 +6086,10 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     return res;
   };
   $scope.allSizes = {
-    'M-Top': ['095 (M)', '100 (L)', '105 (XL)', '110 (XXL)'],
+    'M-Top': ['090 (S)', '095 (M)', '100 (L)', '105 (XL)', '110 (XXL)'],
     'M-PANTS': ['085 (M)', '090 (L)', '095 (XL)', '100 (XXL)'],
     'M-PTHP': ['029', '031', '033', '035'],
-    'W-Top': ['080 (XS)', '085 (S)', '090 (S)', '090 (M)', '095 (L)'],
+    'W-Top': ['080 (XS)', '085 (S)', '090 (M)', '095 (L)'],
     'W-PANTS': ['060 (XS)', '065 (S)', '070 (M)', '075 (L)'],
     'W-PTHP': ['024', '026', '027', '028'],
     '신발': getFeetSizes(220, 5, 300),
