@@ -14,6 +14,7 @@
               <div class="portlet">
                 <div class="portlet-title">
                   <div class="actions btn-set">
+                    <button class="btn blue" data-ng-click="openCreditPopup()">마일리지수정</button>
                     <button class="btn blue" ng-click="save()"><i class="fa fa-check"></i> {{'main.saveButton' | translate}}</button>
                   </div>
                 </div>
@@ -51,28 +52,6 @@
                       </select>
                     </div>
                   </div>
-                  <!--
-                  <div class="form-group" data-ng-if="myBrand">
-                    <label class="col-md-2 control-label">
-                      브랜드 바로가기
-                    </label>
-                    <div class="col-md-10">
-                      <a ui-sref="brand.edit({ brandId: myBrand.id})">{{myBrand.id}}</a>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-md-2 control-label">사업자 등록증</label>
-                    <div class="col-md-10">
-                      <img width="200" data-ng-src="{{user.data.bizImage.url}}" data-ng-if="user.data.bizImage.url" />
-                      <button class="btn blue" data-ng-click="openBizImage()" data-ng-if="user.data.bizImage.url">사업자 등록증 보기</button>
-                      <span class="btn green fileinput-button" style="margin: 15px 0;">
-                        <i class="fa fa-plus"></i> 사업자 등록증 변경
-                        <input type="file" id="image-upload-button" />
-                      </span>
-                      <a data-ng-if="user.data.bizImage.url" href="{{user.data.bizImage.url}}" target="_blank">새 창에서 열어서 확인</a>
-                    </div>
-                  </div>
-                   -->
                   <div class="form-group">
                     <label class="col-md-2 control-label">
                       마지막 로그인 시각
@@ -258,3 +237,41 @@
   </div>
 </div>
 -->
+<div class="modal fade" id="user_credit">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        마일리지 변경
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-4">
+            변경사유
+          </div>
+          <div class="col-md-8">
+            <select class="form-control" data-ng-model="userCreditType" convert-to-number>
+              <option value="10">오프라인</option>
+              <option value="20">레거시</option>
+              <option value="30">이벤트</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            변경금액(증가(+), 감소(-))
+          </div>
+          <div class="col-md-8">
+            <input type="number" ng-model="userCreditAmount" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn blue" data-ng-click="closeCreditPopup()">{{'main.closeButton' | translate}}</button>
+        <button
+          class="btn red"
+          data-ng-click="changeCredit(userCreditAmount, userCreditType)"
+        >{{'main.saveButton' | translate}}</button>
+      </div>
+    </div>
+  </div>
+</div>

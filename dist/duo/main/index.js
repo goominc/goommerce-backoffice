@@ -8647,15 +8647,7 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       }
     }, {
       data: function data(_data8) {
-        return userUtil.spyderBuyerLevel[userUtil.getBuyerLevel(_data8)] || '';
-      }
-    }, {
-      data: function data(_data9) {
-        return _data9;
-      },
-      render: function render(user) {
-        var credit = user.credit || 0;
-        return credit + ' <button class="btn blue" data-ng-click="openCreditPopup(' + user.id + ')">변경</button>';
+        return ' ' + userUtil.spyderBuyerLevel[userUtil.getBuyerLevel(_data8)] + ' ' + (_data8.data.as_comb === 'Y' ? '(통합)' : '--') || '';
       }
     }, {
       data: 'createdAt',
@@ -8673,8 +8665,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: function data(_data10) {
-        return _.get(_data10, 'userId', '');
+      data: function data(_data9) {
+        return _.get(_data9, 'userId', '');
       }
     }, {
       data: 'createdAt',
@@ -8698,12 +8690,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: function data(_data11) {
-        return _.get(_data11, 'userId', '');
+      data: function data(_data10) {
+        return _.get(_data10, 'userId', '');
       }
     }, {
-      data: function data(_data12) {
-        return _.get(_data12, 'total', '');
+      data: function data(_data11) {
+        return _.get(_data11, 'total', '');
       }
     }, {
       data: 'createdAt',
@@ -8711,15 +8703,15 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return boUtils.formatDate(data);
       }
     }, {
-      data: function data(_data13) {
-        return _data13;
+      data: function data(_data12) {
+        return _data12;
       },
       render: function render(data) {
         return '<input type="text" />';
       }
     }, {
-      data: function data(_data14) {
-        return _data14;
+      data: function data(_data13) {
+        return _data13;
       },
       render: function render(data) {
         return '<button class="btn blue" data-ng-click="registerCoupon($event)">쿠폰지급</button>';
@@ -8737,8 +8729,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return '<a ui-sref="user.info({ userId: ' + id + ' })">' + id + '</a>';
       }
     }, {
-      data: function data(_data15) {
-        return _.get(_data15, 'roles[0].brand.id') || '';
+      data: function data(_data14) {
+        return _.get(_data14, 'roles[0].brand.id') || '';
       },
       render: function render(brandId) {
         return '<a ui-sref="brand.edit({ brandId: ' + brandId + ' })">' + brandId + '</a>';
@@ -8746,12 +8738,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data16) {
-        return _data16.name || '';
+      data: function data(_data15) {
+        return _data15.name || '';
       }
     }, {
-      data: function data(_data17) {
-        return _.get(_data17, 'data.tel') || '';
+      data: function data(_data16) {
+        return _.get(_data16, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -8773,31 +8765,31 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
+      data: function data(_data17) {
+        return _data17.name || '';
+      }
+    }, {
       data: function data(_data18) {
-        return _data18.name || '';
+        return _.get(_data18, 'data.tel') || '';
       }
     }, {
       data: function data(_data19) {
-        return _.get(_data19, 'data.tel') || '';
+        return _.get(_data19, 'data.bizName') || '';
       }
     }, {
       data: function data(_data20) {
-        return _.get(_data20, 'data.bizName') || '';
+        return _.get(_data20, 'data.bizNumber') || '';
       }
     }, {
       data: function data(_data21) {
-        return _.get(_data21, 'data.bizNumber') || '';
-      }
-    }, {
-      data: function data(_data22) {
-        return _data22;
+        return _data21;
       },
       render: function render(user) {
         return _.get(user, 'data.bizImage') ? '<button class="btn blue" data-ng-click="openBizImage(' + user.id + ')">사업자 등록증 보기</button>' : '';
       }
     }, {
-      data: function data(_data23) {
-        return _data23;
+      data: function data(_data22) {
+        return _data22;
       },
       // render: (user) => `<button class="btn blue" data-ng-click="changeToBuyer(${user.id})">바이어 인증</button>`,
       render: function render(user) {
@@ -8822,12 +8814,12 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     }, {
       data: 'email'
     }, {
-      data: function data(_data24) {
-        return _data24.name || '';
+      data: function data(_data23) {
+        return _data23.name || '';
       }
     }, {
-      data: function data(_data25) {
-        return _.get(_data25, 'data.tel') || '';
+      data: function data(_data24) {
+        return _.get(_data24, 'data.tel') || '';
       }
     }, {
       data: 'createdAt',
@@ -8835,8 +8827,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
         return boUtils.formatDate(data);
       }
     }, {
-      data: function data(_data26) {
-        return _data26;
+      data: function data(_data25) {
+        return _data25;
       },
       render: function render(user) {
         $scope.userIdMap[user.id] = user;
@@ -8947,50 +8939,6 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
       window.alert('비밀번호 저장이 실패하였습니다.');
     });
   };
-  $scope.openCreditPopup = function (userId) {
-    var user = $scope.userIdToData[userId];
-    $scope.creditUser = user;
-    $('#user_credit').modal();
-  };
-  $scope.closeCreditPopup = function () {
-    var node = $('#user_credit');
-    node.modal('hide');
-    node.removeClass('in');
-    $('.modal-backdrop').remove();
-  };
-  $scope.changeCredit = function (amount) {
-    var type = arguments.length <= 1 || arguments[1] === undefined ? 20 : arguments[1];
-
-    var user = $scope.creditUser;
-    var url = '/api/v1/users/' + user.id + '/credits';
-    if (amount > 0) {
-      if (!window.confirm('마일리지 ' + amount + '점이 추가됩니다.')) {
-        return;
-      }
-      $http.post(url, { value: amount, type: type }).then(function () {
-        $scope.closeCreditPopup();
-        $state.reload();
-      }, function (err) {
-        window.alert('마일리지 추가 요청이 실패하였습니다.');
-        throw err;
-      });
-    } else if (amount < 0) {
-      if (!window.confirm('마일리지 ' + -amount + '점을 사용합니다')) {
-        return;
-      }
-      $http['delete'](url, {
-        data: { value: -amount },
-        headers: { "Content-Type": "application/json;charset=utf-8" }
-      }).then(function () {
-        $scope.closeCreditPopup();
-        $state.reload();
-      }, function (err) {
-        window.alert('마일리지 사용 요청이 실패하였습니다.');
-        throw err;
-      });
-    }
-  };
-
   $scope.datatablesLoaded = function () {
     var datas = $('.tabbable-bordered').find('table').DataTable().rows().data();
     if (!$scope.userIdToData) {
@@ -9188,7 +9136,7 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
   $rootScope.initAll($scope, $state.current.name);
 
   var renderUserInfo = function renderUserInfo() {
-    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: '유저 아이디', key: 'userId', obj: $scope.user.userId, isReadOnly: true, isRequired: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true },
+    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: '유저 아이디', key: 'userId', obj: $scope.user.userId, isReadOnly: true, isRequired: true }, { title: '통합여부', key: 'comb', obj: $scope.user.data.as_comb ? '통합' : '--', isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true },
     // {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
     { title: $translate.instant('user.info.firstNameLabel'), obj: $scope.user.name, key: 'name', isRequired: true }, { title: '마일리지', obj: _.get($scope.user, 'credit', 0), isReadOnly: true },
     // {title: 'SMS 마케팅 동의', obj: _.get($scope.user, 'data.isAgreeSMS'), isReadOnly: true, isRequired: false },
@@ -9243,7 +9191,48 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
       window.alert('[FAIL] 회원 등급 변경 요청이 실패하였습니다');
     });
   };
+  $scope.openCreditPopup = function () {
+    $scope.creditUser = $scope.user;
+    $('#user_credit').modal();
+  };
+  $scope.closeCreditPopup = function () {
+    var node = $('#user_credit');
+    node.modal('hide');
+    node.removeClass('in');
+    $('.modal-backdrop').remove();
+  };
+  $scope.changeCredit = function (amount) {
+    var type = arguments.length <= 1 || arguments[1] === undefined ? 20 : arguments[1];
 
+    var user = $scope.creditUser;
+    var url = '/api/v1/users/' + user.id + '/credits';
+    if (amount > 0) {
+      if (!window.confirm('마일리지 ' + amount + '점이 추가됩니다.')) {
+        return;
+      }
+      $http.post(url, { value: amount, type: type }).then(function () {
+        $scope.closeCreditPopup();
+        $state.reload();
+      }, function (err) {
+        window.alert('마일리지 추가 요청이 실패하였습니다.');
+        throw err;
+      });
+    } else if (amount < 0) {
+      if (!window.confirm('마일리지 ' + -amount + '점을 사용합니다')) {
+        return;
+      }
+      $http['delete'](url, {
+        data: { value: -amount },
+        headers: { "Content-Type": "application/json;charset=utf-8" }
+      }).then(function () {
+        $scope.closeCreditPopup();
+        $state.reload();
+      }, function (err) {
+        window.alert('마일리지 사용 요청이 실패하였습니다.');
+        throw err;
+      });
+    }
+  };
   $scope.save = function () {
     convertUtil.copyFieldObj($scope.userFields, $scope.user);
     $http.put('/api/v1/users/' + $scope.user.id, _.pick($scope.user, 'data', 'inipay', 'name')).then(function (res) {
@@ -9359,12 +9348,12 @@ userModule.controller('UserCommentController', function ($scope, $http, $state, 
         return '<a ui-sref="user.info({ userId: ' + userId + ' })">' + userId + '</a>';
       }
     }, {
-      data: function data(_data27) {
-        return _data27.data.text || '';
+      data: function data(_data26) {
+        return _data26.data.text || '';
       }
     }, {
-      data: function data(_data28) {
-        return _data28;
+      data: function data(_data27) {
+        return _data27;
       },
       render: function render(comment) {
         if (comment.data.hide && comment.data.hide === 1) {
@@ -9402,12 +9391,12 @@ userModule.controller('UserReviewController', function ($scope, $http, $state, $
         return '<a ui-sref="user.info({ userId: ' + userId + ' })">' + userId + '</a>';
       }
     }, {
-      data: function data(_data29) {
-        return _data29.data.data.title || '';
+      data: function data(_data28) {
+        return _data28.data.data.title || '';
       }
     }, {
-      data: function data(_data30) {
-        return _data30;
+      data: function data(_data29) {
+        return _data29;
       },
       render: function render(review) {
         return '<button class="btn red" data-ng-click="deleteReview(' + review.id + ', ' + review.productId + ')">삭제</button>';

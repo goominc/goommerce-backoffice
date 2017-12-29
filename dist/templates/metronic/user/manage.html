@@ -75,7 +75,6 @@
                             <td>{{'main.word.name' | translate}}</td>
                             <td>{{'main.word.tel' | translate}}</td>
                             <td>{{'user.info.gradeLabel' | translate}}</td>
-                            <td>{{'user.info.creditLabel' | translate}}</td>
                             <td>{{'main.word.createdAt' | translate}}</td>
                           </tr>
                           </thead>
@@ -282,44 +281,6 @@
       <div class="modal-footer">
         <button class="btn blue" data-ng-click="approveUser(buyerApprovalUser)">{{'main.word.approval' | translate}}</button>
         <button class="btn red" data-ng-click="rejectUser(buyerApprovalUser)">{{'main.word.rejection' | translate}}</button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="modal fade" id="user_credit">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        마일리지 변경
-      </div>
-      <div class="modal-body">
-        <div class="row">
-          <div class="col-md-4">
-            변경사유
-          </div>
-          <div class="col-md-8">
-            <select class="form-control" data-ng-model="userCreditType" convert-to-number>
-              <option value="10">오프라인</option>
-              <option value="20">레거시</option>
-              <option value="30">이벤트</option>
-            </select>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-4">
-            변경금액(증가(+), 감소(-))
-          </div>
-          <div class="col-md-8">
-            <input type="number" ng-model="userCreditAmount" />
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn blue" data-ng-click="closeCreditPopup()">{{'main.closeButton' | translate}}</button>
-        <button
-          class="btn red"
-          data-ng-click="changeCredit(userCreditAmount, userCreditType)"
-        >{{'main.saveButton' | translate}}</button>
       </div>
     </div>
   </div>
