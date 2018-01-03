@@ -632,9 +632,9 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
       {title: $translate.instant('user.info.userTypeLabel'), obj: userUtil.getRoleName($scope.user), isReadOnly: true, isRequired: false},
       {title: $translate.instant('user.info.telLabel'), obj: _.get($scope.user, 'data.tel'), key: 'data.tel', isRequired: false},
       {title: '국가번호', obj: _.get($scope.address, 'countryCode'), isRequired: true, key: 'countryCode'},
-      {title: '우편번호', obj: _.get($scope.address, 'detail.postalCode'), isRequired: true, key: 'detail.postalCode'},
-      {title: '주소', obj: _.get($scope.address, 'detail.address1'), isRequired: true, key: 'detail.address1'},
-      {title: '상세주소', obj: _.get($scope.address, 'detail.address2'), isRequired: true, key: 'detail.address2'},
+      {title: '우편번호', obj: $scope.user.data.as_comb ? _.get($scope.user.erpData, 'zpc1') : _.get($scope.address, 'detail.postalCode'), isRequired: true, isReadOnly: true},
+      {title: '주소', obj: $scope.user.data.as_comb ? _.get($scope.user.erpData, 'addr') : _.get($scope.address, 'detail.address1'), isRequired: true, isReadOnly: true},
+      {title: '상세주소', obj: $scope.user.data.as_comb ? _.get($scope.user.erpData, 'adrs') : _.get($scope.address, 'detail.address2'), isRequired: true, isReadOnly: true},
       // {title: '생년', },
     ];
   }
