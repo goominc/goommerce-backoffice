@@ -522,7 +522,8 @@ userModule.controller('UserManageController', ($scope, $http, $q, $state, $rootS
     e.preventDefault();
     const user = $scope.userIdMap[userId];
     if (window.confirm(`유저 ${user.name || ''} 다시 활성화 하시겠습니까?`)) {
-      $http.put(`/api/v1/users/${user.id}`, { isActive: true }).then(() => {
+      user.data.state = '';
+      $http.put(`/api/v1/users/${user.id}`, { isActive: true, data: user.data }).then(() => {
         /*
         user.isActive = !user.isActive;
         if (!$scope.$$phase) {
@@ -624,6 +625,7 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
       {title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true},
       {title: '유저 아이디', key: 'userId', obj: $scope.user.userId, isReadOnly: true, isRequired: true},
       {title: '통합여부', key: 'comb', obj: $scope.user.data.as_comb ? '통합' : '--', isReadOnly: true, isRequired: false},
+      {title: 'state', key: 'state', obj: $scope.user.data.state, isReadOnly: true },
       {title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true},
       // {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
       {title: $translate.instant('user.info.firstNameLabel'), obj: $scope.user.name, key: 'name', isRequired: true},

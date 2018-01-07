@@ -9046,7 +9046,8 @@ userModule.controller('UserManageController', function ($scope, $http, $q, $stat
     e.preventDefault();
     var user = $scope.userIdMap[userId];
     if (window.confirm('유저 ' + (user.name || '') + ' 다시 활성화 하시겠습니까?')) {
-      $http.put('/api/v1/users/' + user.id, { isActive: true }).then(function () {
+      user.data.state = '';
+      $http.put('/api/v1/users/' + user.id, { isActive: true, data: user.data }).then(function () {
         /*
         user.isActive = !user.isActive;
         if (!$scope.$$phase) {
@@ -9136,7 +9137,7 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
   $rootScope.initAll($scope, $state.current.name);
 
   var renderUserInfo = function renderUserInfo() {
-    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: '유저 아이디', key: 'userId', obj: $scope.user.userId, isReadOnly: true, isRequired: true }, { title: '통합여부', key: 'comb', obj: $scope.user.data.as_comb ? '통합' : '--', isReadOnly: true, isRequired: false }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true },
+    $scope.userFields = [{ title: 'ID', key: 'id', obj: $scope.user.id, isReadOnly: true, isRequired: true }, { title: '유저 아이디', key: 'userId', obj: $scope.user.userId, isReadOnly: true, isRequired: true }, { title: '통합여부', key: 'comb', obj: $scope.user.data.as_comb ? '통합' : '--', isReadOnly: true, isRequired: false }, { title: 'state', key: 'state', obj: $scope.user.data.state, isReadOnly: true }, { title: $translate.instant('user.info.emailLabel'), obj: $scope.user.email, key: 'email', isReadOnly: true, isRequired: true },
     // {title: $translate.instant('user.info.lastNameLabel'), obj: _.get($scope.user, 'data.lastName'), isReadOnly: true, isRequired: true},
     { title: $translate.instant('user.info.firstNameLabel'), obj: $scope.user.name, key: 'name', isRequired: true }, { title: '마일리지', obj: _.get($scope.user, 'credit', 0), isReadOnly: true },
     // {title: 'SMS 마케팅 동의', obj: _.get($scope.user, 'data.isAgreeSMS'), isReadOnly: true, isRequired: false },
