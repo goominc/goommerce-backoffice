@@ -686,6 +686,14 @@ userModule.controller('UserInfoController', ($scope, $http, $state, $rootScope, 
       window.alert('[FAIL] 회원 등급 변경 요청이 실패하였습니다');
     });
   };
+  $scope.forceIntegrate = () => {
+    $http.post(`/api/v1/users/${$scope.user.id}/erp`).then(() => {
+      window.alert('통합되었습니다.');
+      $state.reload();
+    }).catch(() => {
+      window.alert('통합실패하였습니다.');
+    });
+  }
   $scope.openCreditPopup = () => {
     $scope.creditUser = $scope.user;
     $('#user_credit').modal();

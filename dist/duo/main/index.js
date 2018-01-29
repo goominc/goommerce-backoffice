@@ -9192,6 +9192,14 @@ userModule.controller('UserInfoController', function ($scope, $http, $state, $ro
       window.alert('[FAIL] 회원 등급 변경 요청이 실패하였습니다');
     });
   };
+  $scope.forceIntegrate = function () {
+    $http.post('/api/v1/users/' + $scope.user.id + '/erp').then(function () {
+      window.alert('통합되었습니다.');
+      $state.reload();
+    })['catch'](function () {
+      window.alert('통합실패하였습니다.');
+    });
+  };
   $scope.openCreditPopup = function () {
     $scope.creditUser = $scope.user;
     $('#user_credit').modal();
