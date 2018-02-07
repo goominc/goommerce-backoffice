@@ -161,6 +161,10 @@ productModule.controller('CategoryEditController', ($scope, $rootScope, $http, $
           orderable: false,
         },
         {
+          data: (data) => _.get(data, 'product.sku', ''),
+          orderable: false,
+        },
+        {
           data: (data) => _.get(data, 'data.color', ''),
           orderable: false,
         },

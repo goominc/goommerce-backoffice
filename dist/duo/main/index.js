@@ -7308,17 +7308,22 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
         orderable: false
       }, {
         data: function data(_data2) {
-          return _.get(_data2, 'data.color', '');
+          return _.get(_data2, 'product.sku', '');
         },
         orderable: false
       }, {
         data: function data(_data3) {
-          return _.get(_data3, 'data.size', '');
+          return _.get(_data3, 'data.color', '');
         },
         orderable: false
       }, {
         data: function data(_data4) {
-          return _data4;
+          return _.get(_data4, 'data.size', '');
+        },
+        orderable: false
+      }, {
+        data: function data(_data5) {
+          return _data5;
         },
         render: function render(variant) {
           return '<img width="80px" src="' + $scope.getImageUrl(variant) + '" />';
