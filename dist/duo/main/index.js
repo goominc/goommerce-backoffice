@@ -7046,12 +7046,17 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
         orderable: false
       }, {
         data: function data(_data2) {
-          return _.get(_data2, 'data.color', '');
+          return _.get(_data2, 'product.sku', '');
         },
         orderable: false
       }, {
         data: function data(_data3) {
-          return _data3;
+          return _.get(_data3, 'data.color', '');
+        },
+        orderable: false
+      }, {
+        data: function data(_data4) {
+          return _data4;
         },
         render: function render(variant) {
           return '<img width="80px" src="' + $scope.getImageUrl(variant) + '" />';

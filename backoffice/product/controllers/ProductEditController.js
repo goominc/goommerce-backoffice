@@ -885,6 +885,10 @@ productModule.controller('ProductEditController', ($scope, $http, $state, $rootS
           orderable: false,
         },
         {
+          data: (data) => _.get(data, 'product.sku', ''),
+          orderable: false,
+        },
+        {
           data: (data) => _.get(data, 'data.color', ''),
           orderable: false,
         },
