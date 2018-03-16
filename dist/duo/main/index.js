@@ -6072,7 +6072,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
     GREEN: ['GRN', 'AGN', 'KHA', 'BGN', 'DGN', 'LIM', 'LMT', 'LKH'],
     RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG', 'POR', 'BGD', 'DRD', 'LRD', 'BNR', 'HPK', 'COR', 'RNW', 'ORD'],
     GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG', 'DGR', 'LGY'],
-    WHITE: ['WHT', 'OWH', 'IVY', 'BEG', 'LBI', 'LBE', 'OWT'],
+    WHITE: ['WHT', 'OWH', 'IVY', 'BEG', 'LBI', 'LBE', 'OWT', 'WNH'],
     OTHERS: ['BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'PTN', 'SLM', 'NYE', 'YEL', 'AWT', 'ABL', 'BWR', 'WNB', 'BRW', 'BNW', 'BNG', 'BNS', 'SDB']
   };
   $scope.colorKeys = Object.keys($scope.allColors);
