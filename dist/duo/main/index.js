@@ -6070,7 +6070,7 @@ productModule.controller('ProductEditController', function ($scope, $http, $stat
   $scope.allColors = {
     BLUE: ['RBL', 'BLU', 'VBL', 'NVY', 'MNT', 'CBL', 'DNV', 'CBT', 'LBL', 'DBR', 'DBL', 'TBL', 'PUR', 'MBL', 'PBL', 'NNW', 'PPL'],
     GREEN: ['GRN', 'AGN', 'KHA', 'BGN', 'DGN', 'LIM', 'LMT', 'LKH'],
-    RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG', 'POR', 'BGD', 'DRD', 'LRD', 'BNR', 'HPK', 'COR', 'RNW', 'ORD'],
+    RED: ['RED', 'PNK', 'WNE', 'LOG', 'ORG', 'POR', 'BGD', 'DRD', 'LRD', 'BNR', 'HPK', 'COR', 'RNW', 'ORD', 'RNB'],
     GRAY: ['GRY', 'LGR', 'CGR', 'MGR', 'CMG', 'DGR', 'LGY'],
     WHITE: ['WHT', 'OWH', 'IVY', 'BEG', 'LBI', 'LBE', 'OWT', 'WNH'],
     OTHERS: ['BLK', 'SLV', 'CMF', 'PBK', 'PWH', 'PTN', 'SLM', 'NYE', 'YEL', 'AWT', 'ABL', 'BWR', 'WNB', 'BRW', 'BNW', 'BNG', 'BNS', 'SDB']
