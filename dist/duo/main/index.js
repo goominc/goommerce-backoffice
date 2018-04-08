@@ -7450,7 +7450,7 @@ productModule.controller('CategoryEditController', function ($scope, $rootScope,
     $scope.category.data.bestVariants.forEach(function (v) {
       v.product = _.pick(v.product, 'name', 'KRW', 'data', 'id');
       if (v.product.data) {
-        v.product.data = _.pick(v.product.data, 'description', 'shortDescription', 'bigDisplay');
+        v.product.data = _.pick(v.product.data, 'description', 'shortDescription', 'bigDisplay', 'isFreeReturn');
       }
     });
     $http.put('/api/v1/categories/' + $scope.category.id, _.omit($scope.category, ['id', 'children'])).then(function (res) {
